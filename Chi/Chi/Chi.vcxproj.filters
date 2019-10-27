@@ -114,6 +114,9 @@
     </ClInclude>
     <ClInclude Include="Donya\Constant.h" />
     <ClInclude Include="Donya\Keyboard.h" />
+    <ClInclude Include="Donya\AudioSystem.h" />
+    <ClInclude Include="Donya\Sound.h" />
+    <ClInclude Include="Donya\Useful.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp">
@@ -198,6 +201,9 @@
       <Filter>imgui</Filter>
     </ClCompile>
     <ClCompile Include="Donya\Keyboard.cpp" />
+    <ClCompile Include="Donya\AudioSystem.cpp" />
+    <ClCompile Include="Donya\Sound.cpp" />
+    <ClCompile Include="Donya\Useful.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="geometric_phong_ps.hlsl">

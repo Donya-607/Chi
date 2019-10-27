@@ -9,6 +9,8 @@
 #include "imgui.h"
 #include "audio.h"
 
+#include "Donya/Sound.h" // Insert by Donya.
+
 INT WINAPI wWinMain(HINSTANCE instance, HINSTANCE prev_instance, LPWSTR cmd_line, INT cmd_show)
 {
 	startUpLibrary
@@ -16,6 +18,9 @@ INT WINAPI wWinMain(HINSTANCE instance, HINSTANCE prev_instance, LPWSTR cmd_line
 
 	DragAcceptFiles(GameLib::getHandle(), true);
 	pSceneManager->init(new sceneTitle);
+
+	Donya::Sound::Init();
+
 	//pAudio->init();
 	//Žw’è‰¹ŠKÄ¶
 	/*{
@@ -82,6 +87,9 @@ INT WINAPI wWinMain(HINSTANCE instance, HINSTANCE prev_instance, LPWSTR cmd_line
 
 		GameLib::present(0,0);
 	}
+
+	Donya::Sound::Uninit();
+
 	pSceneManager->end();
 	shutDownLibrary();
 	//pAudio->cleanup();
