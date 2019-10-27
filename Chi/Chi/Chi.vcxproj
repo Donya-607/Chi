@@ -143,6 +143,7 @@
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Donya\AudioSystem.h" />
     <ClInclude Include="Donya\Constant.h" />
+    <ClInclude Include="Donya\FilePath.h" />
     <ClInclude Include="Donya\Keyboard.h" />
     <ClInclude Include="Donya\Quaternion.h" />
     <ClInclude Include="Donya\Serializer.h" />
@@ -190,6 +191,7 @@
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Donya\AudioSystem.cpp" />
+    <ClCompile Include="Donya\FilePath.cpp" />
     <ClCompile Include="Donya\Keyboard.cpp" />
     <ClCompile Include="Donya\Quaternion.cpp" />
     <ClCompile Include="Donya\Sound.cpp" />

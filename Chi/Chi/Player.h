@@ -28,8 +28,8 @@ private:
 		archive
 		(
 			CEREAL_NVP( scale ),
-			CEREAL_NVP( runSpeed )
-			CEREAL_NVP( runSlerpFactor )
+			CEREAL_NVP( runSpeed ),
+			CEREAL_NVP( rotSlerpFactor )
 		);
 		
 		if ( 1 <= version )
@@ -90,7 +90,7 @@ private:
 	Donya::Vector3		velocity;		// In world space.
 	Donya::Vector3		lookDirection;	// In world space.
 	Donya::Quaternion	orientation;
-	std::shared_ptr<Donya::StaticMesh>	pModel;
+	//std::shared_ptr<Donya::StaticMesh>	pModel;
 public:
 	Player();
 	~Player();

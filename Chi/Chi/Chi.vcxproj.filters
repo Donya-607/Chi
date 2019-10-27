@@ -123,6 +123,7 @@
     <ClInclude Include="Donya\Serializer.h" />
     <ClInclude Include="Donya\Template.h" />
     <ClInclude Include="Donya\Vector.h" />
+    <ClInclude Include="Donya\FilePath.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp">
@@ -215,6 +216,7 @@
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Donya\Quaternion.cpp" />
     <ClCompile Include="Donya\Vector.cpp" />
+    <ClCompile Include="Donya\FilePath.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="geometric_phong_ps.hlsl">
