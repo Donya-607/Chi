@@ -1,10 +1,11 @@
 #ifndef SCENE_H_
 #define SCENE_H_
 
+#include <Windows.h>	// Insert by Donya, must include this before "Xinput.h".
+#include <Xinput.h>
 #include "baseScene.h"
 #include "testObj.h"
 #include "floor.h"
-#include <Xinput.h>
 #include "Sprite.h"
 #include "rayPick.h"
 
@@ -29,6 +30,27 @@ public:
 	void render();
 	void uninit();
 	void imGui();
+};
+
+#include <memory>
+/// <summary>
+/// By Donya.
+/// </summary>
+class SceneGame : public baseScene
+{
+public:
+	struct Impl;
+private:
+	std::unique_ptr<Impl> pImpl;
+public:
+	SceneGame();
+	~SceneGame();
+public:
+	void init()   override;
+	void update() override;
+	void render() override;
+	void uninit() override;
+	void imGui()  override;
 };
 
 class sceneLightting : public baseScene

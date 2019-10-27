@@ -1,5 +1,7 @@
 #include "sceneManager.h"
 
+#include "Donya/Keyboard.h"
+#include "Donya/Sound.h"
 
 void sceneManager::init(baseScene* firstScene)
 {
@@ -15,6 +17,9 @@ void sceneManager::init(baseScene* firstScene)
 
 void sceneManager::update()
 {
+	Donya::Keyboard::Update();	// Insert by Donya.
+	Donya::Sound::Update();		// Insert by Donya.
+
 	if (nextScene)
 		changeScene();
 	if (delete_stack)

@@ -112,6 +112,12 @@
     <ClInclude Include="liblary\imgui\imstb_textedit.h">
       <Filter>imgui</Filter>
     </ClInclude>
+    <ClInclude Include="Donya\Constant.h" />
+    <ClInclude Include="Donya\Keyboard.h" />
+    <ClInclude Include="Donya\AudioSystem.h" />
+    <ClInclude Include="Donya\Sound.h" />
+    <ClInclude Include="Donya\Useful.h" />
+    <ClInclude Include="Donya\UseImGui.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp">
@@ -195,6 +201,12 @@
     <ClCompile Include="liblary\imgui\imgui_impl_win32.cpp">
       <Filter>imgui</Filter>
     </ClCompile>
+    <ClCompile Include="Donya\Keyboard.cpp" />
+    <ClCompile Include="Donya\AudioSystem.cpp" />
+    <ClCompile Include="Donya\Sound.cpp" />
+    <ClCompile Include="Donya\Useful.cpp" />
+    <ClCompile Include="SceneGame.cpp" />
+    <ClCompile Include="Donya\UseImGui.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="geometric_phong_ps.hlsl">

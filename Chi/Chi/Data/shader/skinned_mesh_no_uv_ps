@@ -85,7 +85,7 @@ dcl_temps 7
 //   v4.x <- pin.texcoord.x; v4.y <- pin.texcoord.y; 
 //   o0.x <- <main return value>.x; o0.y <- <main return value>.y; o0.z <- <main return value>.z; o0.w <- <main return value>.w
 //
-#line 6 "D:\Git\fps_shooting\Chi\Chi\Chi\skinned_mesh_no_uv_ps.hlsl"
+#line 6 "D:\Develop\Chi\Chi\Chi\Chi\skinned_mesh_no_uv_ps.hlsl"
 mov r0.xyz, -v0.xyzx
 add r0.xyz, r0.xyzx, cb0[8].xyzx
 dp3 r0.w, r0.xyzx, r0.xyzx

@@ -9,13 +9,18 @@
 #include "imgui.h"
 #include "audio.h"
 
+#include "Donya/Sound.h" // Insert by Donya.
+
 INT WINAPI wWinMain(HINSTANCE instance, HINSTANCE prev_instance, LPWSTR cmd_line, INT cmd_show)
 {
 	startUpLibrary
-	(L"ぐりのライブラリ", instance, 1920,1080, false, -1, 60.0f);
+	(L"コンクエスト", instance, 1920,1080, false, -1, 60.0f);
 
 	DragAcceptFiles(GameLib::getHandle(), true);
 	pSceneManager->init(new sceneTitle);
+
+	Donya::Sound::Init();
+
 	//pAudio->init();
 	//指定音階再生
 	/*{
@@ -82,6 +87,9 @@ INT WINAPI wWinMain(HINSTANCE instance, HINSTANCE prev_instance, LPWSTR cmd_line
 
 		GameLib::present(0,0);
 	}
+
+	Donya::Sound::Uninit();
+
 	pSceneManager->end();
 	shutDownLibrary();
 	//pAudio->cleanup();

@@ -121,6 +121,11 @@ void sceneTitle::imGui()
 	if (ImGui::Button("lighting"))
 		pSceneManager->setNextScene(new sceneLightting, false);
 
+	if ( ImGui::Button( "Game" ) )
+	{
+		pSceneManager->setNextScene( new SceneGame(), false );
+	}
+
 	ImGui::End();
 
 

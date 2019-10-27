@@ -1,5 +1,7 @@
 #ifndef KEYINPUT_H_
 
+#define KEYINPUT_H_ // Insert by Donya.
+
 enum KEY_INPUT
 {
 	KEY_INPUT_BACK = VK_BACK,
