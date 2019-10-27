@@ -73,7 +73,7 @@ public:
 	}
 };
 
-SceneGame::SceneGame() : pImpl( std::make_unique<Impl>() )
+SceneGame::SceneGame() : baseScene(), pImpl( std::make_unique<Impl>() )
 {}
 SceneGame::~SceneGame()
 {
