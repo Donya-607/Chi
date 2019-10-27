@@ -203,6 +203,7 @@
     <ClCompile Include="primitive.cpp" />
     <ClCompile Include="rayPick.cpp" />
     <ClCompile Include="resourceManager.cpp" />
+    <ClCompile Include="SceneGame.cpp" />
     <ClCompile Include="sceneLightting.cpp" />
     <ClCompile Include="sceneManager.cpp" />
     <ClCompile Include="scenePhysix.cpp" />

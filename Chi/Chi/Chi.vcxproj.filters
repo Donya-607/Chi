@@ -204,6 +204,7 @@
     <ClCompile Include="Donya\AudioSystem.cpp" />
     <ClCompile Include="Donya\Sound.cpp" />
     <ClCompile Include="Donya\Useful.cpp" />
+    <ClCompile Include="SceneGame.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="geometric_phong_ps.hlsl">

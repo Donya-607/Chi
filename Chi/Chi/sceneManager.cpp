@@ -17,8 +17,8 @@ void sceneManager::init(baseScene* firstScene)
 
 void sceneManager::update()
 {
-	Donya::Keyboard::Update(); // Insert by Donya.
-	Donya::Sound::Update(); // Insert by Donya.
+	Donya::Keyboard::Update();	// Insert by Donya.
+	Donya::Sound::Update();		// Insert by Donya.
 
 	if (nextScene)
 		changeScene();
