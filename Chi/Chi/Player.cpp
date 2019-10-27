@@ -5,6 +5,8 @@
 #include "Donya/FilePath.h"
 #include "Donya/Useful.h"		// Use convert character-code function.
 
+#include "GameLibFunctions.h"	// For load and render model.
+
 #define scast static_cast
 
 PlayerParam::PlayerParam() :
@@ -89,8 +91,8 @@ void PlayerParam::UseImGui()
 Player::Player() :
 	status( State::Idle ),
 	pos(), velocity(), lookDirection(),
-	orientation()
-	//, pModel( nullptr )
+	orientation(),
+	model()
 {}
 Player::~Player() = default;
 
@@ -124,16 +126,8 @@ void Player::Update( Input input )
 	ApplyVelocity();
 }
 
-void Player::Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matProjection, const Donya::Vector4 &lightDirection, const Donya::Vector4 &lightColor, const Donya::Vector4 &materialColor ) const
+void Player::Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matProjection, const Donya::Vector4 &lightDirection, const Donya::Vector4 &lightColor, const Donya::Vector4 &materialColor )
 {
-	// if ( !pModel )
-	if ( 0 )
-	{
-		_ASSERT_EXPR( 0, L"Error : The chi-player's model is not loaded !" );
-		return;
-	}
-	// else
-
 	const auto &PARAM = PlayerParam::Get();
 
 	Donya::Vector4x4 S = Donya::Vector4x4::MakeScaling( PARAM.Scale() );
@@ -142,12 +136,12 @@ void Player::Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matP
 	Donya::Vector4x4 W = S * R * T;
 	Donya::Vector4x4 WVP = W * matView * matProjection;
 
-	//pModel->Render( WVP, W, lightDirection, lightColor, materialColor );
+	FBXRender( &model, WVP, W );
 }
 
 void Player::LoadModel()
 {
-	
+	loadFBX( &model, GetModelPath( ModelAttribute::Player ) );
 }
 
 void Player::Run( Input input )

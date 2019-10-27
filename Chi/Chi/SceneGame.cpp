@@ -2,8 +2,14 @@
 #include "sceneManager.h"
 
 #include "Donya/Constant.h"	// Use DEBUG_MODE macro.
+#include "Donya/Keyboard.h"
 #include "Donya/Sound.h"
 #include "Donya/UseImGui.h"	// Use helper functions of ImGui.
+#include "Donya/Vector.h"
+
+#include "gameLib.h"
+
+#include "Player.h"
 
 #if DEBUG_MODE
 constexpr int BGM_ID = 'BGM';
@@ -13,12 +19,21 @@ constexpr int SE_ID  = 'SE';
 struct SceneGame::Impl
 {
 public:
-
-public:
-	Impl()
+	struct Light
 	{
-
-	}
+		Donya::Vector4 color{ 1.0f, 1.0f, 1.0f, 1.0f };
+		Donya::Vector4 direction{ 0.0f, 1.0f, 0.0f, 0.0f };
+	};
+public:
+	Donya::Vector3 cameraPos;
+	Light  light;
+	Player player;
+public:
+	Impl() :
+		cameraPos(),
+		light(),
+		player()
+	{}
 	~Impl() = default;
 public:
 	void Init()
@@ -27,21 +42,45 @@ public:
 		Donya::Sound::Load( BGM_ID, "./Data/Sounds/Test/BGM.wav", true  );
 		Donya::Sound::Load( SE_ID,  "./Data/Sounds/Test/SE.wav",  false );
 	#endif // DEBUG_MODE
+
+		cameraPos = Donya::Vector3{ 0.0f, 256.0f, -512.0f };
+
+		player.Init();
 	}
 	void Uninit()
 	{
-
+		player.Uninit();
 	}
 
 	void Update()
 	{
+		GameLib::camera::setPos( cameraPos );
 
+		auto MakePlayerInput = []()->Player::Input
+		{
+			Player::Input input{};
+
+			if ( Donya::Keyboard::Press( VK_UP    ) ) { input.moveVector.z = +1.0f; }
+			if ( Donya::Keyboard::Press( VK_DOWN  ) ) { input.moveVector.z = -1.0f; }
+			if ( Donya::Keyboard::Press( VK_LEFT  ) ) { input.moveVector.x = -1.0f; }
+			if ( Donya::Keyboard::Press( VK_RIGHT ) ) { input.moveVector.x = +1.0f; }
+
+			if ( Donya::Keyboard::Press( 'Z' ) ) { input.doDefend = true; }
+			if ( Donya::Keyboard::Press( 'X' ) ) { input.doAttack = true; }
+
+			return input;
+		};
+		player.Update( MakePlayerInput() );
 	}
 
-	void Draw() const
+	void Draw()
 	{
 		clearWindow( 0.5f, 0.5f, 0.5f, 1.0f );
 
+		Donya::Vector4x4 V = Donya::Vector4x4::FromMatrix( GameLib::camera::GetViewMatrix() );
+		Donya::Vector4x4 P = Donya::Vector4x4::FromMatrix( GameLib::camera::GetProjectionMatrix() );
+
+		player.Draw( V, P, light.direction, light.color );
 	}
 
 public:
@@ -62,6 +101,15 @@ public:
 				if ( ImGui::Button( u8"SE.Pause"   ) ) { Donya::Sound::Pause ( SE_ID  ); }
 				if ( ImGui::Button( u8"SE.Resume"  ) ) { Donya::Sound::Resume( SE_ID  ); }
 				if ( ImGui::Button( u8"SE.Stop"    ) ) { Donya::Sound::Stop  ( SE_ID  ); }
+
+				ImGui::TreePop();
+			}
+
+			if ( ImGui::TreeNode( "Configuration" ) )
+			{
+				ImGui::DragFloat3( "Camera.Pos", &cameraPos.x );
+				ImGui::SliderFloat3( "Light.Direction", &light.direction.x, -1.0f, 1.0f );
+				ImGui::ColorEdit4( "Light.Color", &light.color.x );
 
 				ImGui::TreePop();
 			}

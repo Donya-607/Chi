@@ -3,11 +3,13 @@
 
 #include <Windows.h>	// Insert by Donya, must include this before "Xinput.h".
 #include <Xinput.h>
+
 #include "baseScene.h"
 #include "testObj.h"
 #include "floor.h"
-#include "Sprite.h"
 #include "rayPick.h"
+
+#include "Sprite.h"
 
 using namespace DirectX;
 class sceneTitle : public baseScene

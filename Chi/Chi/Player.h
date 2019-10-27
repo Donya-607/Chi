@@ -6,6 +6,8 @@
 #include "Donya/UseImGui.h"
 #include "Donya/Vector.h"
 
+#include "skinned_mesh.h"
+
 /// <summary>
 /// Player's serialize parameter.
 /// </summary>
@@ -90,7 +92,7 @@ private:
 	Donya::Vector3		velocity;		// In world space.
 	Donya::Vector3		lookDirection;	// In world space.
 	Donya::Quaternion	orientation;
-	//std::shared_ptr<Donya::StaticMesh>	pModel;
+	skinned_mesh		model;
 public:
 	Player();
 	~Player();
@@ -107,7 +109,7 @@ public:
 		const Donya::Vector4	&lightDirection,
 		const Donya::Vector4	&lightColor,
 		const Donya::Vector4	&materialColor = { 1.0f, 1.0f, 1.0f, 1.0f }
-	) const;
+	);
 private:
 	void LoadModel();
 
