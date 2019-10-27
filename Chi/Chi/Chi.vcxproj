@@ -141,6 +141,8 @@
     <ClInclude Include="baseScene.h" />
     <ClInclude Include="blend.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="Donya\Constant.h" />
+    <ClInclude Include="Donya\Keyboard.h" />
     <ClInclude Include="dragDrop.h" />
     <ClInclude Include="floor.h" />
     <ClInclude Include="font.h" />
@@ -178,6 +180,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="Donya\Keyboard.cpp" />
     <ClCompile Include="floor.cpp" />
     <ClCompile Include="font.cpp" />
     <ClCompile Include="framework.cpp" />

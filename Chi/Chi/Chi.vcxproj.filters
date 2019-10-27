@@ -112,6 +112,8 @@
     <ClInclude Include="liblary\imgui\imstb_textedit.h">
       <Filter>imgui</Filter>
     </ClInclude>
+    <ClInclude Include="Donya\Constant.h" />
+    <ClInclude Include="Donya\Keyboard.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp">
@@ -195,6 +197,7 @@
     <ClCompile Include="liblary\imgui\imgui_impl_win32.cpp">
       <Filter>imgui</Filter>
     </ClCompile>
+    <ClCompile Include="Donya\Keyboard.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="geometric_phong_ps.hlsl">
