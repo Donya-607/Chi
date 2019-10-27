@@ -118,6 +118,11 @@
     <ClInclude Include="Donya\Sound.h" />
     <ClInclude Include="Donya\Useful.h" />
     <ClInclude Include="Donya\UseImGui.h" />
+    <ClInclude Include="Player.h" />
+    <ClInclude Include="Donya\Quaternion.h" />
+    <ClInclude Include="Donya\Serializer.h" />
+    <ClInclude Include="Donya\Template.h" />
+    <ClInclude Include="Donya\Vector.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp">
@@ -207,6 +212,9 @@
     <ClCompile Include="Donya\Useful.cpp" />
     <ClCompile Include="SceneGame.cpp" />
     <ClCompile Include="Donya\UseImGui.cpp" />
+    <ClCompile Include="Player.cpp" />
+    <ClCompile Include="Donya\Quaternion.cpp" />
+    <ClCompile Include="Donya\Vector.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="geometric_phong_ps.hlsl">
@@ -285,5 +293,8 @@
     <Filter Include="imgui">
       <UniqueIdentifier>{9b89fcc4-6b63-412e-b3c0-09f23e9aed7e}</UniqueIdentifier>
     </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="Donya\Donya.natvis" />
   </ItemGroup>
 </Project>

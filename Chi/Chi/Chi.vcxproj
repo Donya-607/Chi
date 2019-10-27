@@ -76,7 +76,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)liblary\imgui;$(projectDir)liblary\FBX SDK\2016.1.2\include;$(ProjectDir)liblary\FMOD\LowLevel\inc\;$(ProjectDir)liblary\FMOD\Studio\inc\;$(projectDir)liblary\DirectXTK-master\Inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)liblary\cereal-1.2.2\include\;$(ProjectDir)liblary\imgui;$(projectDir)liblary\FBX SDK\2016.1.2\include;$(ProjectDir)liblary\FMOD\LowLevel\inc\;$(ProjectDir)liblary\FMOD\Studio\inc\;$(projectDir)liblary\DirectXTK-master\Inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -109,7 +109,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)liblary\imgui;$(projectDir)liblary\FBX SDK\2016.1.2\include;$(ProjectDir)liblary\FMOD\LowLevel\inc\;$(ProjectDir)liblary\FMOD\Studio\inc\;$(projectDir)liblary\DirectXTK-master\Inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)liblary\cereal-1.2.2\include\;$(ProjectDir)liblary\imgui;$(projectDir)liblary\FBX SDK\2016.1.2\include;$(ProjectDir)liblary\FMOD\LowLevel\inc\;$(ProjectDir)liblary\FMOD\Studio\inc\;$(projectDir)liblary\DirectXTK-master\Inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -144,9 +144,13 @@
     <ClInclude Include="Donya\AudioSystem.h" />
     <ClInclude Include="Donya\Constant.h" />
     <ClInclude Include="Donya\Keyboard.h" />
+    <ClInclude Include="Donya\Quaternion.h" />
+    <ClInclude Include="Donya\Serializer.h" />
     <ClInclude Include="Donya\Sound.h" />
+    <ClInclude Include="Donya\Template.h" />
     <ClInclude Include="Donya\Useful.h" />
     <ClInclude Include="Donya\UseImGui.h" />
+    <ClInclude Include="Donya\Vector.h" />
     <ClInclude Include="dragDrop.h" />
     <ClInclude Include="floor.h" />
     <ClInclude Include="font.h" />
@@ -167,6 +171,7 @@
     <ClInclude Include="light.h" />
     <ClInclude Include="misc.h" />
     <ClInclude Include="physics.h" />
+    <ClInclude Include="Player.h" />
     <ClInclude Include="primitive.h" />
     <ClInclude Include="rayPick.h" />
     <ClInclude Include="resourceManager.h" />
@@ -186,9 +191,11 @@
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Donya\AudioSystem.cpp" />
     <ClCompile Include="Donya\Keyboard.cpp" />
+    <ClCompile Include="Donya\Quaternion.cpp" />
     <ClCompile Include="Donya\Sound.cpp" />
     <ClCompile Include="Donya\Useful.cpp" />
     <ClCompile Include="Donya\UseImGui.cpp" />
+    <ClCompile Include="Donya\Vector.cpp" />
     <ClCompile Include="floor.cpp" />
     <ClCompile Include="font.cpp" />
     <ClCompile Include="framework.cpp" />
@@ -202,6 +209,7 @@
     <ClCompile Include="liblary\imgui\imgui_impl_win32.cpp" />
     <ClCompile Include="liblary\imgui\imgui_widgets.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Player.cpp" />
     <ClCompile Include="primitive.cpp" />
     <ClCompile Include="rayPick.cpp" />
     <ClCompile Include="resourceManager.cpp" />
@@ -309,6 +317,9 @@
     <None Include="shadow_first.hlsli" />
     <None Include="skinned_mesh.hlsli" />
     <None Include="sprite.hlsli" />
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="Donya\Donya.natvis" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
