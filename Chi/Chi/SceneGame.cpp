@@ -51,17 +51,17 @@ public:
 
 		if ( ImGui::BeginIfAllowed() )
 		{
-			if ( ImGui::TreeNode( u8"ÉTÉEÉìÉhÉeÉXÉg" ) )
+			if ( ImGui::TreeNode( u8"Sound test" ) )
 			{
-				if ( ImGui::Button( u8"ÇaÇfÇlÅEÇ»ÇÁÇ∑"   ) ) { Donya::Sound::Play  ( BGM_ID ); }
-				if ( ImGui::Button( u8"ÇaÇfÇlÅEÇ∆ÇﬂÇÈ"   ) ) { Donya::Sound::Pause ( BGM_ID ); }
-				if ( ImGui::Button( u8"ÇaÇfÇlÅEÇ≥Ç¢Ç©Ç¢" ) ) { Donya::Sound::Resume( BGM_ID ); }
-				if ( ImGui::Button( u8"ÇaÇfÇlÅEÇ∑Ç∆Ç¡Ç’" ) ) { Donya::Sound::Stop  ( BGM_ID ); }
+				if ( ImGui::Button( u8"BGM.Play"   ) ) { Donya::Sound::Play  ( BGM_ID ); }
+				if ( ImGui::Button( u8"BGM.Pause"  ) ) { Donya::Sound::Pause ( BGM_ID ); }
+				if ( ImGui::Button( u8"BGM.Resume" ) ) { Donya::Sound::Resume( BGM_ID ); }
+				if ( ImGui::Button( u8"BGM.Stop"   ) ) { Donya::Sound::Stop  ( BGM_ID ); }
 				ImGui::Text( "" );
-				if ( ImGui::Button( u8"ÇrÇdÅEÇ»ÇÁÇ∑"     ) ) { Donya::Sound::Play  ( SE_ID  ); }
-				if ( ImGui::Button( u8"ÇrÇdÅEÇ∆ÇﬂÇÈ"     ) ) { Donya::Sound::Pause ( SE_ID  ); }
-				if ( ImGui::Button( u8"ÇrÇdÅEÇ≥Ç¢Ç©Ç¢"   ) ) { Donya::Sound::Resume( SE_ID  ); }
-				if ( ImGui::Button( u8"ÇrÇdÅEÇ∑Ç∆Ç¡Ç’"   ) ) { Donya::Sound::Stop  ( SE_ID  ); }
+				if ( ImGui::Button( u8"SE.Play"    ) ) { Donya::Sound::Play  ( SE_ID  ); }
+				if ( ImGui::Button( u8"SE.Pause"   ) ) { Donya::Sound::Pause ( SE_ID  ); }
+				if ( ImGui::Button( u8"SE.Resume"  ) ) { Donya::Sound::Resume( SE_ID  ); }
+				if ( ImGui::Button( u8"SE.Stop"    ) ) { Donya::Sound::Stop  ( SE_ID  ); }
 
 				ImGui::TreePop();
 			}
