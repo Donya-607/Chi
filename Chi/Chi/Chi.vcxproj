@@ -146,6 +146,7 @@
     <ClInclude Include="Donya\Keyboard.h" />
     <ClInclude Include="Donya\Sound.h" />
     <ClInclude Include="Donya\Useful.h" />
+    <ClInclude Include="Donya\UseImGui.h" />
     <ClInclude Include="dragDrop.h" />
     <ClInclude Include="floor.h" />
     <ClInclude Include="font.h" />
@@ -187,6 +188,7 @@
     <ClCompile Include="Donya\Keyboard.cpp" />
     <ClCompile Include="Donya\Sound.cpp" />
     <ClCompile Include="Donya\Useful.cpp" />
+    <ClCompile Include="Donya\UseImGui.cpp" />
     <ClCompile Include="floor.cpp" />
     <ClCompile Include="font.cpp" />
     <ClCompile Include="framework.cpp" />

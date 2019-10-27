@@ -117,6 +117,7 @@
     <ClInclude Include="Donya\AudioSystem.h" />
     <ClInclude Include="Donya\Sound.h" />
     <ClInclude Include="Donya\Useful.h" />
+    <ClInclude Include="Donya\UseImGui.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp">
@@ -205,6 +206,7 @@
     <ClCompile Include="Donya\Sound.cpp" />
     <ClCompile Include="Donya\Useful.cpp" />
     <ClCompile Include="SceneGame.cpp" />
+    <ClCompile Include="Donya\UseImGui.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="geometric_phong_ps.hlsl">
