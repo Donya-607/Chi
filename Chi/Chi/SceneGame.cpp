@@ -19,19 +19,11 @@ constexpr int SE_ID  = 'SE';
 struct SceneGame::Impl
 {
 public:
-	struct Light
-	{
-		Donya::Vector4 color{ 1.0f, 1.0f, 1.0f, 1.0f };
-		Donya::Vector4 direction{ 0.0f, 1.0f, 0.0f, 0.0f };
-	};
-public:
 	Donya::Vector3 cameraPos;
-	Light  light;
 	Player player;
 public:
 	Impl() :
 		cameraPos(),
-		light(),
 		player()
 	{}
 	~Impl() = default;
@@ -80,7 +72,7 @@ public:
 		Donya::Vector4x4 V = Donya::Vector4x4::FromMatrix( GameLib::camera::GetViewMatrix() );
 		Donya::Vector4x4 P = Donya::Vector4x4::FromMatrix( GameLib::camera::GetProjectionMatrix() );
 
-		player.Draw( V, P, light.direction, light.color );
+		player.Draw( V, P );
 	}
 
 public:
@@ -108,10 +100,13 @@ public:
 			if ( ImGui::TreeNode( "Configuration" ) )
 			{
 				ImGui::DragFloat3( "Camera.Pos", &cameraPos.x );
-				ImGui::SliderFloat3( "Light.Direction", &light.direction.x, -1.0f, 1.0f );
-				ImGui::ColorEdit4( "Light.Color", &light.color.x );
 
 				ImGui::TreePop();
+			}
+
+			if ( ImGui::Button( "GotoTitle" ) )
+			{
+				pSceneManager->setNextScene( new sceneTitle(), false );
 			}
 
 			ImGui::End();

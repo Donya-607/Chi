@@ -6,6 +6,7 @@
 #include "Donya/Useful.h"		// Use convert character-code function.
 
 #include "GameLibFunctions.h"	// For load and render model.
+#include "skinned_mesh.h"
 
 #define scast static_cast
 
@@ -92,7 +93,8 @@ Player::Player() :
 	status( State::Idle ),
 	pos(), velocity(), lookDirection(),
 	orientation(),
-	model()
+	// model()
+	pModel( std::make_unique<skinned_mesh>() )
 {}
 Player::~Player() = default;
 
@@ -109,7 +111,7 @@ void Player::Uninit()
 {
 	PlayerParam::Get().Uninit();
 
-	// pModel.reset();
+	pModel.reset( nullptr );
 }
 
 void Player::Update( Input input )
@@ -126,7 +128,7 @@ void Player::Update( Input input )
 	ApplyVelocity();
 }
 
-void Player::Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matProjection, const Donya::Vector4 &lightDirection, const Donya::Vector4 &lightColor, const Donya::Vector4 &materialColor )
+void Player::Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matProjection )
 {
 	const auto &PARAM = PlayerParam::Get();
 
@@ -136,12 +138,12 @@ void Player::Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matP
 	Donya::Vector4x4 W = S * R * T;
 	Donya::Vector4x4 WVP = W * matView * matProjection;
 
-	FBXRender( &model, WVP, W );
+	FBXRender( pModel.get(), WVP, W );
 }
 
 void Player::LoadModel()
 {
-	loadFBX( &model, GetModelPath( ModelAttribute::Player ) );
+	loadFBX( pModel.get(), GetModelPath( ModelAttribute::Player ) );
 }
 
 void Player::Run( Input input )
@@ -191,7 +193,7 @@ void Player::UseImGui()
 {
 	if ( ImGui::BeginIfAllowed() )
 	{
-		if ( ImGui::TreeNode( u8"PlayerÅECurrentParameter" ) )
+		if ( ImGui::TreeNode( u8"Player.CurrentParameter" ) )
 		{
 			const std::string vec3Info{ "[X:%5.3f][Y:%5.3f][Z:%5.3f]" };
 			const std::string vec4Info{ "[X:%5.3f][Y:%5.3f][Z:%5.3f][W:%5.3f]" };

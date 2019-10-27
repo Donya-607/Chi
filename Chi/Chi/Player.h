@@ -1,12 +1,12 @@
 #pragma once
 
+#include <memory>
+
 #include "Donya/Quaternion.h"
 #include "Donya/Serializer.h"
 #include "Donya/Template.h"
 #include "Donya/UseImGui.h"
 #include "Donya/Vector.h"
-
-#include "skinned_mesh.h"
 
 /// <summary>
 /// Player's serialize parameter.
@@ -60,6 +60,7 @@ public:
 };
 CEREAL_CLASS_VERSION( PlayerParam, 0 )
 
+class skinned_mesh;	// With pointer. because I'm not want include this at header.
 class Player
 {
 public:
@@ -87,12 +88,12 @@ private:
 		Run,
 	};
 private:
-	State				status;
-	Donya::Vector3		pos;			// In world space.
-	Donya::Vector3		velocity;		// In world space.
-	Donya::Vector3		lookDirection;	// In world space.
-	Donya::Quaternion	orientation;
-	skinned_mesh		model;
+	State							status;
+	Donya::Vector3					pos;			// In world space.
+	Donya::Vector3					velocity;		// In world space.
+	Donya::Vector3					lookDirection;	// In world space.
+	Donya::Quaternion				orientation;
+	std::unique_ptr<skinned_mesh>	pModel;
 public:
 	Player();
 	~Player();
@@ -102,14 +103,7 @@ public:
 
 	void Update( Input input );
 
-	void Draw
-	(
-		const Donya::Vector4x4	&matView,
-		const Donya::Vector4x4	&matProjection,
-		const Donya::Vector4	&lightDirection,
-		const Donya::Vector4	&lightColor,
-		const Donya::Vector4	&materialColor = { 1.0f, 1.0f, 1.0f, 1.0f }
-	);
+	void Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matProjection );
 private:
 	void LoadModel();
 
