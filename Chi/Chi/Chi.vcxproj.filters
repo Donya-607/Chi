@@ -1,2 +1,277 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" />
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClInclude Include="XinputPad.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="timeMeasurement.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="util.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="vector.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="testObj.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="system.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="static_mesh.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="Sprite.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="skinned_mesh.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="sceneManager.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="resourceManager.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="scene.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="rayPick.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="primitive.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="physics.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="misc.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="light.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="high_resolution_timer.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="keyInput.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="GameLibFunctions.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="gameLib.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="framework.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="frame_rate.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="font.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="floor.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="dragDrop.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="baseScene.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="blend.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="liblary\imgui\imstb_truetype.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="liblary\imgui\imconfig.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="liblary\imgui\imgui.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="liblary\imgui\imgui_impl_dx11.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="liblary\imgui\imgui_impl_win32.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="liblary\imgui\imgui_internal.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="liblary\imgui\imstb_rectpack.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="liblary\imgui\imstb_textedit.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Camera.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="floor.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="font.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="frame_rate.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="framework.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="gameLib.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="gameLibFunctions.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="primitive.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="rayPick.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="resourceManager.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="sceneLightting.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="sceneManager.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="scenePhysix.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="scenePose.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="sceneTitle.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="skinned_mesh.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="Sprite.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="static_mesh.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="testObj.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="timeMeasurement.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="liblary\imgui\imgui_widgets.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="liblary\imgui\imgui.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="liblary\imgui\imgui_demo.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="liblary\imgui\imgui_draw.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="liblary\imgui\imgui_impl_dx11.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="liblary\imgui\imgui_impl_win32.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="geometric_phong_ps.hlsl">
+      <Filter>shader</Filter>
+    </FxCompile>
+    <FxCompile Include="geometric_primitive_vs.hlsl">
+      <Filter>shader</Filter>
+    </FxCompile>
+    <FxCompile Include="geometric_rambart_ps.hlsl">
+      <Filter>shader</Filter>
+    </FxCompile>
+    <FxCompile Include="obj_ps.hlsl">
+      <Filter>shader</Filter>
+    </FxCompile>
+    <FxCompile Include="obj_vs.hlsl">
+      <Filter>shader</Filter>
+    </FxCompile>
+    <FxCompile Include="shadowPS_first.hlsl">
+      <Filter>shader</Filter>
+    </FxCompile>
+    <FxCompile Include="shadowPS_second.hlsl">
+      <Filter>shader</Filter>
+    </FxCompile>
+    <FxCompile Include="shadowVS_first.hlsl">
+      <Filter>shader</Filter>
+    </FxCompile>
+    <FxCompile Include="shadowVS_second.hlsl">
+      <Filter>shader</Filter>
+    </FxCompile>
+    <FxCompile Include="skinned_mesh_has_born_vs.hlsl">
+      <Filter>shader</Filter>
+    </FxCompile>
+    <FxCompile Include="skinned_mesh_no_uv_ps.hlsl">
+      <Filter>shader</Filter>
+    </FxCompile>
+    <FxCompile Include="skinned_mesh_ps.hlsl">
+      <Filter>shader</Filter>
+    </FxCompile>
+    <FxCompile Include="skinned_mesh_vs.hlsl">
+      <Filter>shader</Filter>
+    </FxCompile>
+    <FxCompile Include="sprite_ps.hlsl">
+      <Filter>shader</Filter>
+    </FxCompile>
+    <FxCompile Include="sprite_vs.hlsl">
+      <Filter>shader</Filter>
+    </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="geometric_primitive.hlsli">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="obj.hlsli">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="shadow_first.hlsli">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="skinned_mesh.hlsli">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="sprite.hlsli">
+      <Filter>shader</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="source">
+      <UniqueIdentifier>{f5b9a292-4b62-4005-9dc8-4269b3c95e2e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="header">
+      <UniqueIdentifier>{aae29550-79aa-4de2-ad6f-597b86c35977}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="shader">
+      <UniqueIdentifier>{35313779-6737-4c01-ac7b-a29ea26fa2c3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="imgui">
+      <UniqueIdentifier>{9b89fcc4-6b63-412e-b3c0-09f23e9aed7e}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

@@ -1,0 +1,192 @@
+#ifndef KEYINPUT_H_
+
+enum KEY_INPUT
+{
+	KEY_INPUT_BACK = VK_BACK,
+	KEY_INPUT_TAB,
+
+	KEY_INPUT_CLEAR = VK_CLEAR,
+	KEY_INPUT_RETURN,
+
+	KEY_INPUT_SHIFT = VK_SHIFT,
+	KEY_INPUT_CONTROL,
+	KEY_INPUT_MENU,
+	KEY_INPUT_PAUSE,
+	KEY_INPUT_CAITAL,
+
+	KEY_INPUT_KANA = VK_KANA,
+	KEY_INPUT_JUNJA = VK_JUNJA,
+	KEY_INPUT_FINAL,
+	KEY_INPUT_HANJA = VK_HANJA,
+
+	KEY_INPUT_ESCAPE = VK_ESCAPE,
+	KEY_INPUT_CONVERT,
+	KEY_INPUT_NONCONVERT,
+	KEY_INPUT_ACCEPT,
+	KEY_INPUT_MODECHANGE,
+
+	KEY_INPUT_SPACE = VK_SPACE,
+	KEY_INPUT_PRIOR,
+	KEY_INPUT_NEXT,
+	KEY_INPUT_END,
+	KEY_INPUT_HOME,
+	KEY_INPUT_LEFT,
+	KEY_INPUT_UP,
+	KEY_INPUT_RIGHT,
+	KEY_INPUT_DOWN,
+	KEY_INPUT_SELECT,
+	KEY_INPUT_PRINT,
+	KEY_INPUT_EXECUTE,
+	KEY_INPUT_SNAPSHOT,
+	KEY_INPUT_INSERT,
+	KEY_INPUT_DELETE,
+	KEY_INPUT_HELP,
+
+	KEY_INPUT_0 = '0',
+	KEY_INPUT_1,
+	KEY_INPUT_2,
+	KEY_INPUT_3,
+	KEY_INPUT_4,
+	KEY_INPUT_5,
+	KEY_INPUT_6,
+	KEY_INPUT_7,
+	KEY_INPUT_8,
+	KEY_INPUT_9,
+
+	KEY_INPUT_A = 'A',
+	KEY_INPUT_B,
+	KEY_INPUT_C,
+	KEY_INPUT_D,
+	KEY_INPUT_E,
+	KEY_INPUT_F,
+	KEY_INPUT_G,
+	KEY_INPUT_H,
+	KEY_INPUT_I,
+	KEY_INPUT_J,
+	KEY_INPUT_K,
+	KEY_INPUT_L,
+	KEY_INPUT_M,
+	KEY_INPUT_N,
+	KEY_INPUT_O,
+	KEY_INPUT_P,
+	KEY_INPUT_Q,
+	KEY_INPUT_R,
+	KEY_INPUT_S,
+	KEY_INPUT_T,
+	KEY_INPUT_U,
+	KEY_INPUT_V,
+	KEY_INPUT_W,
+	KEY_INPUT_X,
+	KEY_INPUT_Y,
+	KEY_INPUT_Z,
+	KEY_INPUT_LWIN,
+	KEY_INPUT_RWIN,
+	KEY_INPUT_APPS,
+
+	KEY_INPUT_SLEEP = VK_SLEEP,
+	KEY_INPUT_NUMPAD_0,
+	KEY_INPUT_NUMPAD_1,
+	KEY_INPUT_NUMPAD_2,
+	KEY_INPUT_NUMPAD_3,
+	KEY_INPUT_NUMPAD_4,
+	KEY_INPUT_NUMPAD_5,
+	KEY_INPUT_NUMPAD_6,
+	KEY_INPUT_NUMPAD_7,
+	KEY_INPUT_NUMPAD_8,
+	KEY_INPUT_NUMPAD_9,
+	KEY_INPUT_MULTIPLY,
+	KEY_INPUT_ADD,
+	KEY_INPUT_SEPARATOR,
+	KEY_INPUT_SUBTRACT,
+	KEY_INPUT_DECIMAL,
+	KEY_INPUT_DIVIDE,
+	KEY_INPUT_F1,
+	KEY_INPUT_F2,
+	KEY_INPUT_F3,
+	KEY_INPUT_F4,
+	KEY_INPUT_F5,
+	KEY_INPUT_F6,
+	KEY_INPUT_F7,
+	KEY_INPUT_F8,
+	KEY_INPUT_F9,
+	KEY_INPUT_F10,
+	KEY_INPUT_F11,
+	KEY_INPUT_F12,
+	KEY_INPUT_F13,
+	KEY_INPUT_F14,
+	KEY_INPUT_F15,
+	KEY_INPUT_F16,
+	KEY_INPUT_F17,
+	KEY_INPUT_F18,
+	KEY_INPUT_F19,
+	KEY_INPUT_F20,
+	KEY_INPUT_F21,
+	KEY_INPUT_F22,
+	KEY_INPUT_F23,
+	KEY_INPUT_F24,
+
+	KEY_INPUT_NUMLOCK = VK_NUMLOCK,
+	KEY_INPUT_SCROLL,
+
+	KEY_INPUT_LSHIFT = VK_LSHIFT,
+	KEY_INPUT_RSHIFT,
+	KEY_INPUT_LCONTROL,
+	KEY_INPUT_RCONTROL,
+	KEY_INPUT_LMENU,
+	KEY_INPUT_RMENU,
+
+
+};
+
+class keyInput
+{
+public:
+	char nowState[256] = { 0 };
+	char prevState[256] = { 0 };
+
+	void update()
+	{
+		for (int i = 0; i < 256; i++)
+		{
+			prevState[i] = nowState[i];
+		}
+
+		for (int i = 0; i < 256; i++)
+		{
+			if (GetAsyncKeyState(i) < 0)
+				nowState[i] = 1;
+			else
+				nowState[i] = 0;
+		}
+	}
+
+	int getState(const int _keyNumber)const
+	{
+		if (!prevState[_keyNumber])
+		{
+			if (!nowState[_keyNumber])
+				return 0;	//‰Ÿ‚µ‚Ä‚È‚¢
+			else return 1;	//‰Ÿ‚µ‚½uŠÔ
+		}
+		else
+		{
+			if (!nowState[_keyNumber])
+				return -1;	//—£‚µ‚½uŠÔ
+			else return 2;	//‰Ÿ‚µ‚Á‚Ï‚È‚µ
+		}
+	}
+
+	static keyInput* getInstance()
+	{
+		static keyInput instance;
+		return &instance;
+	}
+private:
+	keyInput() {}
+	keyInput(const keyInput& _copy) {}
+	~keyInput() {}
+};
+
+#define pKEY keyInput::getInstance()
+
+#endif // !KEYINPUT_H_
