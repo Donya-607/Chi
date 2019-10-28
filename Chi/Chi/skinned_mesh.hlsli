@@ -1,4 +1,4 @@
-#define MAX_BONES 32
+#define MAX_BONES 64 // Changed by Donya.
 
 struct VS_OUT
 {

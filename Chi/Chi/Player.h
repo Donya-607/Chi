@@ -16,11 +16,14 @@ class PlayerParam final : public Donya::Singleton<PlayerParam>
 {
 	friend Donya::Singleton<PlayerParam>;
 private:
-	float scale;				// Usually 1.0f.
-	float runSpeed;				// Scalar.
-	float rotSlerpFactor;		// Use player's rotation.
-	Donya::AABB   hitBoxBody;	// HitBox that collide to boss attacks.
-	Donya::Sphere hitBoxPhysic;	// HitBox that collide to stage.
+	int		frameUnfoldableDefence;	// 1 ~ N. Use when State::Defend.
+	int		frameCancelableAttack;	// 1 ~ "frameWholeAttacking". Use when State::Attack.
+	int		frameWholeAttacking;	// 1 ~ N. Use when State::Attack.
+	float	scale;					// Usually 1.0f.
+	float	runSpeed;				// Scalar.
+	float	rotSlerpFactor;			// Use player's rotation.
+	Donya::AABB   hitBoxBody;		// HitBox that collide to boss attacks.
+	Donya::Sphere hitBoxPhysic;		// HitBox that collide to stage.
 private:
 	PlayerParam();
 public:
@@ -47,6 +50,15 @@ private:
 		}
 		if ( 2 <= version )
 		{
+			archive
+			(
+				CEREAL_NVP( frameUnfoldableDefence ),
+				CEREAL_NVP( frameCancelableAttack ),
+				CEREAL_NVP( frameWholeAttacking )
+			);
+		}
+		if ( 3 <= version )
+		{
 			// archive( CEREAL_NVP( x ) );
 		}
 	}
@@ -58,8 +70,8 @@ public:
 	float Scale()		const { return scale; }
 	float RunSpeed()	const { return runSpeed; }
 	float SlerpFactor()	const { return rotSlerpFactor; }
-	Donya::AABB   HitBoxBody()   const { return hitBoxBody;   }
-	Donya::Sphere HitBoxPhysic() const { return hitBoxPhysic; }
+	Donya::AABB   HitBoxBody()		const { return hitBoxBody;   }
+	Donya::Sphere HitBoxPhysic()	const { return hitBoxPhysic; }
 public:
 	void LoadParameter( bool isBinary = true );
 
@@ -71,7 +83,7 @@ public:
 
 #endif // USE_IMGUI
 };
-CEREAL_CLASS_VERSION( PlayerParam, 1 )
+CEREAL_CLASS_VERSION( PlayerParam, 2 )
 
 class skinned_mesh;	// With pointer. because I'm not want include this at header.
 class Player
@@ -109,6 +121,7 @@ private:
 	};
 private:
 	State							status;
+	int								timer;			// Recycle between each state.
 	Donya::Vector3					pos;			// In world space.
 	Donya::Vector3					velocity;		// In world space.
 	Donya::Vector3					lookDirection;	// In world space.

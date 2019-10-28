@@ -44,7 +44,10 @@ float4 main(VS_OUT pin) : SV_TARGET
 	float3 L ,D, specularColor, ambientColor, diffuseColor;
 	float A;
 
-	ambientColor = diffuse_map.Sample(diffuse_map_sample_state, pin.texcoord).xyz;
+	// tmpSampleColor is insert by Donya, for apply texture's alpha.
+	float4 tmpSampleColor = diffuse_map.Sample(diffuse_map_sample_state, pin.texcoord);
+	ambientColor = tmpSampleColor.xyz;
+	// ambientColor = diffuse_map.Sample(diffuse_map_sample_state, pin.texcoord).xyz;
 	float4 _L = normalize(-line_light.direction);
 
 	color = ambientColor.xyz *(line_light.color.xyz* max(0, dot(-_L, pin.normal)));
@@ -71,5 +74,6 @@ float4 main(VS_OUT pin) : SV_TARGET
 		_color += (diffuseColor + specularColor);
 	}
 	color += _color;
-	return float4(saturate(color) ,pin.color.w);
+	// return float4(saturate(color) ,pin.color.w);
+	return float4(saturate(color) ,pin.color.w * tmpSampleColor.a);
 }

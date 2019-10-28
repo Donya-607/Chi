@@ -16,7 +16,7 @@
 #include "light.h"
 
 #define MAX_BONE_INFLUENCES 4
-#define MAX_BONES 32
+#define MAX_BONES 64 // Changed by Donya.
 
 class skinned_mesh
 {

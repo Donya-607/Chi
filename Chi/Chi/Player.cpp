@@ -17,6 +17,7 @@
 #define scast static_cast
 
 PlayerParam::PlayerParam() :
+	frameUnfoldableDefence( 1 ), frameCancelableAttack( 1 ), frameWholeAttacking( 1 ),
 	scale( 1.0f ), runSpeed( 1.0f ), rotSlerpFactor( 0.3f ),
 	hitBoxBody(), hitBoxPhysic()
 {
@@ -65,6 +66,11 @@ void PlayerParam::UseImGui()
 	{
 		if ( ImGui::TreeNode( "Player.AdjustData" ) )
 		{
+			ImGui::SliderInt( "Defence.WholeExpandingFrame", &frameUnfoldableDefence, 1, 120 );
+			ImGui::SliderInt( "Attack.CancelableFrame", &frameCancelableAttack, 1, frameWholeAttacking );
+			ImGui::SliderInt( "Attack.WholeAttackingFrame", &frameWholeAttacking, 1, 300 );
+			ImGui::Text( "" );
+
 			ImGui::SliderFloat( "Scale", &scale, 0.0f, 8.0f );
 			ImGui::DragFloat( "Running Speed", &runSpeed );
 			ImGui::SliderFloat( "SlerpPercent of Rotation", &rotSlerpFactor, 0.05f, 1.0f );
@@ -122,9 +128,9 @@ void PlayerParam::UseImGui()
 
 Player::Player() :
 	status( State::Idle ),
+	timer( 0 ),
 	pos(), velocity(), lookDirection(),
 	orientation(),
-	// model()
 	pModel( std::make_unique<skinned_mesh>() )
 {}
 Player::~Player() = default;
@@ -338,19 +344,15 @@ void Player::DefendInit( Input input )
 {
 	status = State::Defend;
 
-#if DEBUG_MODE
-	orientation.RotateBy( Donya::Quaternion::Make( orientation.LocalUp(), ToRadian( 180.0f ) ) );
-#endif // DEBUG_MODE
+
 }
 void Player::DefendUpdate( Input input )
 {
-	AssignInputVelocity( input );
+	
 }
 void Player::DefendUninit()
 {
-#if DEBUG_MODE
-	orientation.RotateBy( Donya::Quaternion::Make( -orientation.LocalUp(), ToRadian( 180.0f ) ) );
-#endif // DEBUG_MODE
+
 }
 
 void Player::ChangeStatusFromAttack( Input input )
@@ -368,10 +370,6 @@ void Player::ChangeStatusFromAttack( Input input )
 void Player::AttackInit( Input input )
 {
 	status = State::Attack;
-
-#if DEBUG_MODE
-	orientation.RotateBy( Donya::Quaternion::Make( orientation.LocalRight(), ToRadian( 180.0f ) ) );
-#endif // DEBUG_MODE
 }
 void Player::AttackUpdate( Input input )
 {
@@ -379,9 +377,7 @@ void Player::AttackUpdate( Input input )
 }
 void Player::AttackUninit()
 {
-#if DEBUG_MODE
-	orientation.RotateBy( Donya::Quaternion::Make( -orientation.LocalRight(), ToRadian( 180.0f ) ) );
-#endif // DEBUG_MODE
+
 }
 
 void Player::AssignInputVelocity( Input input )
