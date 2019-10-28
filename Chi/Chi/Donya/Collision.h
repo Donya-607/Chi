@@ -177,8 +177,8 @@ namespace Donya
 
 	/// <summary>
 	/// Hit-Box of AABB.<para></para>
-	/// Vector2 pos : Center-position. the belong space is world-space when checking collision method.<para></para>
-	/// Vector2 size : Half-size(like radius). the left is pos.x - size.x. please set to only positive value.<para></para>
+	/// Vector3 pos : Center-position. the belong space is world-space when checking collision method.<para></para>
+	/// Vector3 size : Half-size(like radius). the left is pos.x - size.x. please set to only positive value.<para></para>
 	/// bool exist : Is enable collision ?
 	/// </summary>
 	class AABB
@@ -233,7 +233,7 @@ namespace Donya
 
 	/// <summary>
 	/// Hit-Box of Sphere.<para></para>
-	/// Vector2 pos : Center-position. the belong space is world-space when checking collision method.<para></para>
+	/// Vector3 pos : Center-position. the belong space is world-space when checking collision method.<para></para>
 	/// float radius : Radius of sphere in world-space. please set to only positive value.<para></para>
 	/// bool exist : Is enable collision ?
 	/// </summary>

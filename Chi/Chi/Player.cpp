@@ -155,10 +155,22 @@ void Player::Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matP
 
 	if ( Donya::IsShowCollision() )
 	{
-		auto GenerateCube = []()
+		auto GenerateCube = []()->std::shared_ptr<static_mesh>
 		{
-
+			std::shared_ptr<static_mesh> tmpCube = std::make_shared<static_mesh>();
+			createCube( tmpCube.get() );
+			return tmpCube;
 		};
+		auto GenerateSphere = []()->std::shared_ptr<static_mesh>
+		{
+			std::shared_ptr<static_mesh> tmpSphere = std::make_shared<static_mesh>();
+			createSphere( tmpSphere.get(), 6, 12 );
+			return tmpSphere;
+		};
+		static std::shared_ptr<static_mesh> pCube	= GenerateCube();
+		static std::shared_ptr<static_mesh> pSphere	= GenerateSphere();
+
+
 	}
 
 #endif // DEBUG_MODE

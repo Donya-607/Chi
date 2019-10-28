@@ -2,6 +2,7 @@
 
 #include <memory>
 
+#include "Donya/Collision.h"
 #include "Donya/Quaternion.h"
 #include "Donya/Serializer.h"
 #include "Donya/Template.h"
@@ -15,9 +16,11 @@ class PlayerParam final : public Donya::Singleton<PlayerParam>
 {
 	friend Donya::Singleton<PlayerParam>;
 private:
-	float scale;			// Usually 1.0f.
-	float runSpeed;			// Scalar.
-	float rotSlerpFactor;	// Use player's rotation.
+	float scale;				// Usually 1.0f.
+	float runSpeed;				// Scalar.
+	float rotSlerpFactor;		// Use player's rotation.
+	Donya::AABB   hitBoxBody;	// HitBox that collide to boss attacks.
+	Donya::Sphere hitBoxPhysic;	// HitBox that collide to stage.
 private:
 	PlayerParam();
 public:
@@ -35,6 +38,14 @@ private:
 		);
 		
 		if ( 1 <= version )
+		{
+			archive
+			(
+				CEREAL_NVP( hitBoxBody ),
+				CEREAL_NVP( hitBoxPhysic )
+			);
+		}
+		if ( 2 <= version )
 		{
 			// archive( CEREAL_NVP( x ) );
 		}
@@ -58,7 +69,7 @@ public:
 
 #endif // USE_IMGUI
 };
-CEREAL_CLASS_VERSION( PlayerParam, 0 )
+CEREAL_CLASS_VERSION( PlayerParam, 1 )
 
 class skinned_mesh;	// With pointer. because I'm not want include this at header.
 class Player
