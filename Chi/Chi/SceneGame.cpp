@@ -82,7 +82,7 @@ public:
 		{
 			char breakPoint = 0;
 		}
-		if ( Donya::Keyboard::Trigger( 'H' ) )
+		if ( Donya::Keyboard::Trigger( 'I' ) )
 		{
 			Donya::ToggleShowStateOfImGui();
 		}
@@ -165,6 +165,10 @@ public:
 
 			if ( ImGui::TreeNode( "Game" ) )
 			{
+				ImGui::Text( "Show.\'I\'key : Toggle ImGui ON/OFF" );
+				ImGui::Text( "Show.\'T\'key : Toggle Collision ON/OFF" );
+				ImGui::Text( "" );
+
 				if ( ImGui::TreeNode( u8"Sound test" ) )
 				{
 					if ( ImGui::Button( u8"BGM.Play"   ) ) { Donya::Sound::Play  ( BGM_ID ); }
