@@ -135,6 +135,7 @@ private:
 private:
 	State				status;
 	int					timer;				// Recycle between each state.
+	float				fieldRadius;		// For collision to wall. the field is perfect-circle, so I can detect collide to wall by distance.
 	Donya::Vector3		pos;				// In world space.
 	Donya::Vector3		velocity;			// In world space.
 	Donya::Vector3		lookDirection;		// In world space.
@@ -151,6 +152,8 @@ public:
 	void Update( Input input );
 
 	void Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matProjection );
+public:
+	void SetFieldRadius( float fieldRadius );
 private:
 	void LoadModel();
 private:
@@ -180,9 +183,13 @@ private:
 	void AssignInputVelocity( Input input );
 
 	/// <summary>
-	/// The position("pos") is only changed by this method.
+	/// The position("pos") is only changed by this method(or CollideToWall method).
 	/// </summary>
 	void ApplyVelocity();
+	/// <summary>
+	/// If the position("pos") without to field range, clamp to field range.
+	/// </summary>
+	void CollideToWall();
 private:
 #if USE_IMGUI
 

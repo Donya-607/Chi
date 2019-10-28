@@ -14,6 +14,9 @@
 
 #endif // DEBUG_MODE
 
+#undef max
+#undef min
+
 #define scast static_cast
 
 PlayerParam::PlayerParam() :
@@ -130,6 +133,7 @@ void PlayerParam::UseImGui()
 Player::Player() :
 	status( State::Idle ),
 	timer( 0 ),
+	fieldRadius( 0 ),
 	pos(), velocity(), lookDirection(),
 	orientation(),
 	models(),
@@ -144,6 +148,7 @@ Player::~Player() = default;
 void Player::Init()
 {
 	PlayerParam::Get().Init();
+	SetFieldRadius( 0.0f ); // Set to body's radius.
 
 	LoadModel();
 
@@ -174,6 +179,7 @@ void Player::Update( Input input )
 	UpdateCurrentStatus( input );
 
 	ApplyVelocity();
+	CollideToWall();
 }
 
 void Player::Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matProjection )
@@ -289,6 +295,12 @@ void Player::Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matP
 	}
 
 #endif // DEBUG_MODE
+}
+
+void Player::SetFieldRadius( float newFieldRadius )
+{
+	const float bodyRadius = PlayerParam::Get().HitBoxPhysic().radius;
+	fieldRadius = std::max( newFieldRadius, bodyRadius );
 }
 
 void Player::LoadModel()
@@ -542,6 +554,21 @@ void Player::ApplyVelocity()
 	}
 }
 
+void Player::CollideToWall()
+{
+	const float bodyRadius = PlayerParam::Get().HitBoxPhysic().radius;
+	const float trueFieldRadius = fieldRadius + bodyRadius;
+
+	constexpr Donya::Vector3 ORIGIN = Donya::Vector3::Zero();
+	const Donya::Vector3 currentDistance = pos - ORIGIN;
+
+	if ( trueFieldRadius < currentDistance.Length() )
+	{
+		const Donya::Vector3 direction = currentDistance.Normalized();
+		pos = ORIGIN + ( direction * fieldRadius );
+	}
+}
+
 #if USE_IMGUI
 
 void Player::UseImGui()
@@ -566,6 +593,8 @@ void Player::UseImGui()
 			std::string statusCaption = "Status : " + GetStatusName( status );
 			ImGui::Text( statusCaption.c_str() );
 			ImGui::Text( "Timer : %d", timer );
+			ImGui::Text( "FieldRadius : %f", fieldRadius );
+			ImGui::Text( "HoldDefence : %d", isHoldingDefence ? 1 : 0 );
 			ImGui::Text( "" );
 
 			const std::string vec3Info{ "[X:%5.3f][Y:%5.3f][Z:%5.3f]" };
