@@ -8,6 +8,12 @@
 #include "GameLibFunctions.h"	// For load and render model.
 #include "skinned_mesh.h"
 
+#if DEBUG_MODE
+
+#include "static_mesh.h"		// For drawing collision.
+
+#endif // DEBUG_MODE
+
 #define scast static_cast
 
 PlayerParam::PlayerParam() :
@@ -144,6 +150,18 @@ void Player::Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matP
 	Donya::Vector4x4 WVP = W * matView * matProjection;
 
 	FBXRender( pModel.get(), WVP, W );
+
+#if DEBUG_MODE
+
+	if ( Donya::IsShowCollision() )
+	{
+		auto GenerateCube = []()
+		{
+
+		};
+	}
+
+#endif // DEBUG_MODE
 }
 
 void Player::LoadModel()

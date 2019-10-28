@@ -12,10 +12,36 @@
 
 #pragma comment( lib, "shlwapi.lib" ) // Use PathRemoveFileSpecA(), PathAddBackslashA(), In AcquireDirectoryFromFullPath().
 
+#include "Constant.h"	// Use DEBUG_MODE macro.
+
 #define scast static_cast
 
 namespace Donya
 {
+#if DEBUG_MODE
+	static bool showCollision = false;
+#endif // DEBUG_MODE
+	void SetShowCollision( bool newState )
+	{
+	#if DEBUG_MODE
+		showCollision = newState;
+	#endif // DEBUG_MODE
+	}
+	void ToggleShowCollision()
+	{
+	#if DEBUG_MODE
+		showCollision = !showCollision;
+	#endif // DEBUG_MODE
+	}
+	bool IsShowCollision()
+	{
+	#if DEBUG_MODE
+		return showCollision;
+	#else
+		return false;
+	#endif // DEBUG_MODE
+	}
+
 	float NormalizeRadian( float radian )
 	{
 		// http://hima-tubusi.blogspot.com/2016/12/blog-post_12.html
