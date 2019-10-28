@@ -28,13 +28,7 @@
     <ClInclude Include="skinned_mesh.h">
       <Filter>header</Filter>
     </ClInclude>
-    <ClInclude Include="sceneManager.h">
-      <Filter>header</Filter>
-    </ClInclude>
     <ClInclude Include="resourceManager.h">
-      <Filter>header</Filter>
-    </ClInclude>
-    <ClInclude Include="scene.h">
       <Filter>header</Filter>
     </ClInclude>
     <ClInclude Include="rayPick.h">
@@ -82,9 +76,6 @@
     <ClInclude Include="Camera.h">
       <Filter>header</Filter>
     </ClInclude>
-    <ClInclude Include="baseScene.h">
-      <Filter>header</Filter>
-    </ClInclude>
     <ClInclude Include="blend.h">
       <Filter>header</Filter>
     </ClInclude>
@@ -112,18 +103,57 @@
     <ClInclude Include="liblary\imgui\imstb_textedit.h">
       <Filter>imgui</Filter>
     </ClInclude>
-    <ClInclude Include="Donya\Constant.h" />
-    <ClInclude Include="Donya\Keyboard.h" />
-    <ClInclude Include="Donya\AudioSystem.h" />
-    <ClInclude Include="Donya\Sound.h" />
-    <ClInclude Include="Donya\Useful.h" />
-    <ClInclude Include="Donya\UseImGui.h" />
-    <ClInclude Include="Player.h" />
-    <ClInclude Include="Donya\Quaternion.h" />
-    <ClInclude Include="Donya\Serializer.h" />
-    <ClInclude Include="Donya\Template.h" />
-    <ClInclude Include="Donya\Vector.h" />
-    <ClInclude Include="Donya\FilePath.h" />
+    <ClInclude Include="scene.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="sceneManager.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="baseScene.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Donya\AudioSystem.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="Donya\Constant.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="Donya\FilePath.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="Donya\Keyboard.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="Player.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="Donya\Quaternion.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="Donya\Serializer.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="Donya\Sound.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="Donya\Template.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="Donya\Useful.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="Donya\UseImGui.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="Donya\Vector.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="Particle.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="BossAI.h">
+      <Filter>header</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp">
@@ -159,21 +189,6 @@
     <ClCompile Include="resourceManager.cpp">
       <Filter>source</Filter>
     </ClCompile>
-    <ClCompile Include="sceneLightting.cpp">
-      <Filter>source</Filter>
-    </ClCompile>
-    <ClCompile Include="sceneManager.cpp">
-      <Filter>source</Filter>
-    </ClCompile>
-    <ClCompile Include="scenePhysix.cpp">
-      <Filter>source</Filter>
-    </ClCompile>
-    <ClCompile Include="scenePose.cpp">
-      <Filter>source</Filter>
-    </ClCompile>
-    <ClCompile Include="sceneTitle.cpp">
-      <Filter>source</Filter>
-    </ClCompile>
     <ClCompile Include="skinned_mesh.cpp">
       <Filter>source</Filter>
     </ClCompile>
@@ -207,16 +222,60 @@
     <ClCompile Include="liblary\imgui\imgui_impl_win32.cpp">
       <Filter>imgui</Filter>
     </ClCompile>
-    <ClCompile Include="Donya\Keyboard.cpp" />
-    <ClCompile Include="Donya\AudioSystem.cpp" />
-    <ClCompile Include="Donya\Sound.cpp" />
-    <ClCompile Include="Donya\Useful.cpp" />
-    <ClCompile Include="SceneGame.cpp" />
-    <ClCompile Include="Donya\UseImGui.cpp" />
-    <ClCompile Include="Player.cpp" />
-    <ClCompile Include="Donya\Quaternion.cpp" />
-    <ClCompile Include="Donya\Vector.cpp" />
-    <ClCompile Include="Donya\FilePath.cpp" />
+    <ClCompile Include="SceneGame.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="sceneLightting.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="sceneManager.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="scenePhysix.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="scenePose.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="sceneTitle.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Donya\AudioSystem.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="Donya\FilePath.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="Donya\Keyboard.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="Player.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="Donya\Quaternion.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="Donya\Sound.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="Donya\Useful.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="Donya\UseImGui.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="Donya\Vector.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="SceneEffect.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Particle.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="BossAI.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="geometric_phong_ps.hlsl">
@@ -294,6 +353,9 @@
     </Filter>
     <Filter Include="imgui">
       <UniqueIdentifier>{9b89fcc4-6b63-412e-b3c0-09f23e9aed7e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scene">
+      <UniqueIdentifier>{cf7c057a-8c85-4c68-8210-273aa1959857}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

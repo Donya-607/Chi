@@ -140,6 +140,7 @@
   <ItemGroup>
     <ClInclude Include="baseScene.h" />
     <ClInclude Include="blend.h" />
+    <ClInclude Include="BossAI.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Donya\AudioSystem.h" />
     <ClInclude Include="Donya\Constant.h" />
@@ -171,6 +172,7 @@
     <ClInclude Include="liblary\imgui\imstb_truetype.h" />
     <ClInclude Include="light.h" />
     <ClInclude Include="misc.h" />
+    <ClInclude Include="Particle.h" />
     <ClInclude Include="physics.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="primitive.h" />
@@ -189,6 +191,7 @@
     <ClInclude Include="XinputPad.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="BossAI.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Donya\AudioSystem.cpp" />
     <ClCompile Include="Donya\FilePath.cpp" />
@@ -211,10 +214,12 @@
     <ClCompile Include="liblary\imgui\imgui_impl_win32.cpp" />
     <ClCompile Include="liblary\imgui\imgui_widgets.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Particle.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="primitive.cpp" />
     <ClCompile Include="rayPick.cpp" />
     <ClCompile Include="resourceManager.cpp" />
+    <ClCompile Include="SceneEffect.cpp" />
     <ClCompile Include="SceneGame.cpp" />
     <ClCompile Include="sceneLightting.cpp" />
     <ClCompile Include="sceneManager.cpp" />
