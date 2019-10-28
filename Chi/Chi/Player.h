@@ -58,6 +58,8 @@ public:
 	float Scale()		const { return scale; }
 	float RunSpeed()	const { return runSpeed; }
 	float SlerpFactor()	const { return rotSlerpFactor; }
+	Donya::AABB   HitBoxBody()   const { return hitBoxBody;   }
+	Donya::Sphere HitBoxPhysic() const { return hitBoxPhysic; }
 public:
 	void LoadParameter( bool isBinary = true );
 

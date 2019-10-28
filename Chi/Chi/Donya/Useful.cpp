@@ -19,7 +19,7 @@
 namespace Donya
 {
 #if DEBUG_MODE
-	static bool showCollision = false;
+	static bool showCollision = true;
 #endif // DEBUG_MODE
 	void SetShowCollision( bool newState )
 	{

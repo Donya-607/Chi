@@ -17,8 +17,12 @@
 #define scast static_cast
 
 PlayerParam::PlayerParam() :
-	scale( 1.0f ), runSpeed( 1.0f ), rotSlerpFactor( 0.3f )
-{}
+	scale( 1.0f ), runSpeed( 1.0f ), rotSlerpFactor( 0.3f ),
+	hitBoxBody(), hitBoxPhysic()
+{
+	hitBoxBody.size		= 1.0f;
+	hitBoxPhysic.radius	= 1.0f;
+}
 PlayerParam::~PlayerParam() = default;
 
 void PlayerParam::Init()
@@ -64,6 +68,27 @@ void PlayerParam::UseImGui()
 			ImGui::SliderFloat( "Scale", &scale, 0.0f, 8.0f );
 			ImGui::DragFloat( "Running Speed", &runSpeed );
 			ImGui::SliderFloat( "SlerpPercent of Rotation", &rotSlerpFactor, 0.05f, 1.0f );
+
+			if ( ImGui::TreeNode( "Collisions" ) )
+			{
+				auto ShowAABB   = []( const std::string &prefix, Donya::AABB   *pAABB   )
+				{
+					ImGui::DragFloat3( ( prefix + ".Offset" ).c_str(), &pAABB->pos.x  );
+					ImGui::DragFloat3( ( prefix + ".Scale" ).c_str(),  &pAABB->size.x );
+					ImGui::Checkbox  ( ( prefix + ".ExistCollision" ).c_str(), &pAABB->exist );
+				};
+				auto ShowSphere = []( const std::string &prefix, Donya::Sphere *pSphere )
+				{
+					ImGui::DragFloat3( ( prefix + ".Offset" ).c_str(), &pSphere->pos.x  );
+					ImGui::DragFloat ( ( prefix + ".Scale" ).c_str(),  &pSphere->radius );
+					ImGui::Checkbox  ( ( prefix + ".ExistCollision" ).c_str(), &pSphere->exist );
+				};
+
+				ShowAABB  ( "VS_BossAttacks", &hitBoxBody );
+				ShowSphere( "VS_StageWall", &hitBoxPhysic );
+
+				ImGui::TreePop();
+			}
 
 			if ( ImGui::TreeNode( "File.I/O" ) )
 			{
@@ -155,7 +180,7 @@ void Player::Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matP
 
 	if ( Donya::IsShowCollision() )
 	{
-		auto GenerateCube = []()->std::shared_ptr<static_mesh>
+		auto GenerateCube   = []()->std::shared_ptr<static_mesh>
 		{
 			std::shared_ptr<static_mesh> tmpCube = std::make_shared<static_mesh>();
 			createCube( tmpCube.get() );
@@ -170,7 +195,31 @@ void Player::Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matP
 		static std::shared_ptr<static_mesh> pCube	= GenerateCube();
 		static std::shared_ptr<static_mesh> pSphere	= GenerateSphere();
 
+		auto DrawCube   = [&]( const Donya::Vector3 &cubeOffset, const Donya::Vector3 &cubeScale, const Donya::Vector4 &color )
+		{
+			Donya::Vector4x4 CS = Donya::Vector4x4::MakeScaling( cubeScale );
+			Donya::Vector4x4 CT = Donya::Vector4x4::MakeTranslation( cubeOffset );
+			Donya::Vector4x4 CW = ( CS * CT ) * W;
+			Donya::Vector4x4 CWVP = CW * matView * matProjection;
 
+			OBJRender( pCube.get(), CWVP, CW, color );
+		};
+		auto DrawSphere = [&]( const Donya::Vector3 &sphereOffset, float sphereScale, const Donya::Vector4 &color )
+		{
+			Donya::Vector4x4 CS = Donya::Vector4x4::MakeScaling( sphereScale );
+			Donya::Vector4x4 CT = Donya::Vector4x4::MakeTranslation( sphereOffset );
+			Donya::Vector4x4 CW = ( CS * CT ) * W;
+			Donya::Vector4x4 CWVP = CW * matView * matProjection;
+
+			OBJRender( pSphere.get(), CWVP, CW, color );
+		};
+
+		constexpr Donya::Vector4 BODY_COLOR  { 1.0f, 1.0f, 1.0f, 0.2f };
+		constexpr Donya::Vector4 PHYSIC_COLOR{ 0.0f, 0.3f, 0.8f, 0.2f };
+		const auto BODY   = PARAM.HitBoxBody();
+		const auto PHYSIC = PARAM.HitBoxPhysic();
+		if( BODY.exist   ) { DrawCube  ( BODY.pos,   BODY.size,     BODY_COLOR   ); }
+		if( PHYSIC.exist ) { DrawSphere( PARAM.HitBoxPhysic().pos, PARAM.HitBoxPhysic().radius, PHYSIC_COLOR );}
 	}
 
 #endif // DEBUG_MODE
