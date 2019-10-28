@@ -106,6 +106,8 @@ void Player::Init()
 
 	lookDirection = Donya::Vector3::Front();
 	orientation   = Donya::Quaternion::Identity();
+
+	IdleInit( Input::NoOperation() );
 }
 void Player::Uninit()
 {
@@ -123,7 +125,10 @@ void Player::Update( Input input )
 
 #endif // USE_IMGUI
 
-	Run( input );
+	ChangeStatus( input );
+	UpdateCurrentStatus( input );
+
+	RunUpdate( input );
 
 	ApplyVelocity();
 }
@@ -146,19 +151,162 @@ void Player::LoadModel()
 	loadFBX( pModel.get(), GetModelPath( ModelAttribute::Player ) );
 }
 
-void Player::Run( Input input )
+void Player::ChangeStatus( Input input )
+{
+	// These method is change my status if needs.
+
+	switch ( status )
+	{
+	case Player::State::Idle:	ChangeStatusFromIdle  ( input );	break;
+	case Player::State::Run:	ChangeStatusFromRun   ( input );	break;
+	case Player::State::Defend:	ChangeStatusFromDefend( input );	break;
+	case Player::State::Attack:	ChangeStatusFromAttack( input );	break;
+	default: break;
+	}
+}
+void Player::UpdateCurrentStatus( Input input )
+{
+	switch ( status )
+	{
+	case Player::State::Idle:	IdleUpdate  ( input );	break;
+	case Player::State::Run:	RunUpdate   ( input );	break;
+	case Player::State::Defend:	DefendUpdate( input );	break;
+	case Player::State::Attack:	AttackUpdate( input );	break;
+	default: break;
+	}
+}
+
+void Player::ChangeStatusFromIdle( Input input )
+{
+	if ( !input.moveVector.IsZero() )
+	{
+		IdleUninit();
+		RunInit( input );
+	}
+
+	if ( input.doDefend )
+	{
+		IdleUninit();
+		DefendInit( input );
+	}
+
+	if ( input.doAttack )
+	{
+		IdleUninit();
+		AttackInit( input );
+	}
+}
+void Player::IdleInit( Input input )
+{
+	status   = State::Idle;
+	velocity = 0.0f; // Each member set to zero.
+}
+void Player::IdleUpdate( Input input )
+{
+	// No op.
+}
+void Player::IdleUninit()
+{
+	// No op.
+}
+
+void Player::ChangeStatusFromRun( Input input )
 {
 	if ( input.moveVector.IsZero() )
 	{
-		status = State::Idle;
-
-		velocity = 0.0f; // Each member set to zero.
-		return;
+		RunUninit();
+		IdleInit( input );
 	}
-	// else
 
+	if ( input.doDefend )
+	{
+		RunUninit();
+		DefendInit( input );
+	}
+
+	if ( input.doAttack )
+	{
+		RunUninit();
+		AttackInit( input );
+	}
+}
+void Player::RunInit( Input input )
+{
 	status = State::Run;
+}
+void Player::RunUpdate( Input input )
+{
+	AssignInputVelocity( input );
+}
+void Player::RunUninit()
+{
+	// No op.
+}
 
+void Player::ChangeStatusFromDefend( Input input )
+{
+#if DEBUG_MODE
+
+	if ( !input.doDefend )
+	{
+		DefendUninit();
+		IdleInit( input );
+	}
+
+#endif // DEBUG_MODE
+}
+void Player::DefendInit( Input input )
+{
+	status = State::Defend;
+
+#if DEBUG_MODE
+	orientation.RotateBy( Donya::Quaternion::Make( orientation.LocalUp(), ToRadian( 180.0f ) ) );
+#endif // DEBUG_MODE
+}
+void Player::DefendUpdate( Input input )
+{
+	AssignInputVelocity( input );
+}
+void Player::DefendUninit()
+{
+#if DEBUG_MODE
+	orientation.RotateBy( Donya::Quaternion::Make( -orientation.LocalUp(), ToRadian( 180.0f ) ) );
+#endif // DEBUG_MODE
+}
+
+void Player::ChangeStatusFromAttack( Input input )
+{
+#if DEBUG_MODE
+
+	if ( !input.doAttack )
+	{
+		AttackUninit();
+		IdleInit( input );
+	}
+
+#endif // DEBUG_MODE
+}
+void Player::AttackInit( Input input )
+{
+	status = State::Attack;
+
+#if DEBUG_MODE
+	orientation.RotateBy( Donya::Quaternion::Make( orientation.LocalRight(), ToRadian( 180.0f ) ) );
+#endif // DEBUG_MODE
+}
+void Player::AttackUpdate( Input input )
+{
+	AssignInputVelocity( input );
+}
+void Player::AttackUninit()
+{
+#if DEBUG_MODE
+	orientation.RotateBy( Donya::Quaternion::Make( -orientation.LocalRight(), ToRadian( 180.0f ) ) );
+#endif // DEBUG_MODE
+}
+
+void Player::AssignInputVelocity( Input input )
+{
 	velocity = input.moveVector;
 	velocity *= PlayerParam::Get().RunSpeed();
 }
@@ -195,6 +343,22 @@ void Player::UseImGui()
 	{
 		if ( ImGui::TreeNode( u8"Player.CurrentParameter" ) )
 		{
+			auto GetStatusName = []( Player::State status )->std::string
+			{
+				switch ( status )
+				{
+				case Player::State::Idle:	return { "Idle" };		break;
+				case Player::State::Run:	return { "Run" };		break;
+				case Player::State::Defend:	return { "Defend" };	break;
+				case Player::State::Attack:	return { "Attack" };	break;
+				default: break;
+				}
+
+				return { "Unsupported status" };
+			};
+			std::string statusCaption = "Status : " + GetStatusName( status );
+			ImGui::Text( statusCaption.c_str() );
+
 			const std::string vec3Info{ "[X:%5.3f][Y:%5.3f][Z:%5.3f]" };
 			const std::string vec4Info{ "[X:%5.3f][Y:%5.3f][Z:%5.3f][W:%5.3f]" };
 			auto ShowVec3 = [&vec3Info]( std::string name, const Donya::Vector3 &param )

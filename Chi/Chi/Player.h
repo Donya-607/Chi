@@ -80,12 +80,19 @@ public:
 			doDefend( doDefend ),
 			doAttack( doAttack )
 		{}
+	public:
+		static Input NoOperation()
+		{
+			return Input{ Donya::Vector3::Zero(), false, false };
+		}
 	};
 private:
 	enum class State
 	{
 		Idle,
 		Run,
+		Defend,
+		Attack,
 	};
 private:
 	State							status;
@@ -106,8 +113,31 @@ public:
 	void Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matProjection );
 private:
 	void LoadModel();
+private:
+	void ChangeStatus( Input input );
+	void UpdateCurrentStatus( Input input );
 
-	void Run( Input input );
+	void ChangeStatusFromIdle( Input input );
+	void IdleInit( Input input );
+	void IdleUpdate( Input input );
+	void IdleUninit();
+
+	void ChangeStatusFromRun( Input input );
+	void RunInit( Input input );
+	void RunUpdate( Input input );
+	void RunUninit();
+
+	void ChangeStatusFromDefend( Input input );
+	void DefendInit( Input input );
+	void DefendUpdate( Input input );
+	void DefendUninit();
+
+	void ChangeStatusFromAttack( Input input );
+	void AttackInit( Input input );
+	void AttackUpdate( Input input );
+	void AttackUninit();
+private:
+	void AssignInputVelocity( Input input );
 
 	/// <summary>
 	/// The position("pos") is only changed by this method.
