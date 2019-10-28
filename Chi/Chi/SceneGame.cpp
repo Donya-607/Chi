@@ -77,13 +77,15 @@ public:
 		{
 			Player::Input input{};
 
+		#if DEBUG_MODE
 			if ( Donya::Keyboard::Press( VK_UP    ) ) { input.moveVector.z = +1.0f; }
 			if ( Donya::Keyboard::Press( VK_DOWN  ) ) { input.moveVector.z = -1.0f; }
 			if ( Donya::Keyboard::Press( VK_LEFT  ) ) { input.moveVector.x = -1.0f; }
 			if ( Donya::Keyboard::Press( VK_RIGHT ) ) { input.moveVector.x = +1.0f; }
 
-			if ( Donya::Keyboard::Press( 'Z' ) ) { input.doDefend = true; }
-			if ( Donya::Keyboard::Press( 'X' ) ) { input.doAttack = true; }
+			if ( Donya::Keyboard::Press  ( 'Z' ) ) { input.doDefend = true; }
+			if ( Donya::Keyboard::Trigger( 'X' ) ) { input.doAttack = true; }
+		#endif // DEBUG_MODE
 
 			return input;
 		};

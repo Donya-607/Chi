@@ -18,12 +18,14 @@ class PlayerParam final : public Donya::Singleton<PlayerParam>
 private:
 	int		frameUnfoldableDefence;	// 1 ~ N. Use when State::Defend.
 	int		frameCancelableAttack;	// 1 ~ "frameWholeAttacking". Use when State::Attack.
-	int		frameWholeAttacking;	// 1 ~ N. Use when State::Attack.
+	int		frameWholeAttacking;	// 1 ~ N. this whole frame is irrelevant by "frameCancelableAttack". Use when State::Attack.
 	float	scale;					// Usually 1.0f.
 	float	runSpeed;				// Scalar.
 	float	rotSlerpFactor;			// Use player's rotation.
-	Donya::AABB   hitBoxBody;		// HitBox that collide to boss attacks.
-	Donya::Sphere hitBoxPhysic;		// HitBox that collide to stage.
+	Donya::AABB		hitBoxBody;		// HitBox that collide to boss attacks.
+	Donya::Sphere	hitBoxPhysic;	// HitBox that collide to stage.
+	Donya::AABB		hitBoxShield;	// HitBox of shield.
+	// Donya::AABB		hitBoxLance;	// HitBox of lance.
 private:
 	PlayerParam();
 public:
@@ -54,7 +56,8 @@ private:
 			(
 				CEREAL_NVP( frameUnfoldableDefence ),
 				CEREAL_NVP( frameCancelableAttack ),
-				CEREAL_NVP( frameWholeAttacking )
+				CEREAL_NVP( frameWholeAttacking ),
+				CEREAL_NVP( hitBoxShield )
 			);
 		}
 		if ( 3 <= version )
@@ -67,11 +70,15 @@ public:
 	void Init();
 	void Uninit();
 public:
-	float Scale()		const { return scale; }
-	float RunSpeed()	const { return runSpeed; }
-	float SlerpFactor()	const { return rotSlerpFactor; }
+	int		FrameWholeDefence()		const { return frameUnfoldableDefence; }
+	int		FrameCancelableAttack()	const { return frameCancelableAttack; }
+	int		FrameWholeAttacking()	const { return frameWholeAttacking; }
+	float	Scale()					const { return scale; }
+	float	RunSpeed()				const { return runSpeed; }
+	float	SlerpFactor()			const { return rotSlerpFactor; }
 	Donya::AABB   HitBoxBody()		const { return hitBoxBody;   }
 	Donya::Sphere HitBoxPhysic()	const { return hitBoxPhysic; }
+	Donya::AABB   HitBoxShield()	const { return hitBoxShield; }
 public:
 	void LoadParameter( bool isBinary = true );
 
@@ -112,6 +119,12 @@ public:
 		}
 	};
 private:
+	struct Models
+	{
+		std::unique_ptr<skinned_mesh> pHuman{ nullptr };
+		std::unique_ptr<skinned_mesh> pShield{ nullptr };
+		std::unique_ptr<skinned_mesh> pLance{ nullptr };
+	};
 	enum class State
 	{
 		Idle,
@@ -120,13 +133,14 @@ private:
 		Attack,
 	};
 private:
-	State							status;
-	int								timer;			// Recycle between each state.
-	Donya::Vector3					pos;			// In world space.
-	Donya::Vector3					velocity;		// In world space.
-	Donya::Vector3					lookDirection;	// In world space.
-	Donya::Quaternion				orientation;
-	std::unique_ptr<skinned_mesh>	pModel;
+	State				status;
+	int					timer;				// Recycle between each state.
+	Donya::Vector3		pos;				// In world space.
+	Donya::Vector3		velocity;			// In world space.
+	Donya::Vector3		lookDirection;		// In world space.
+	Donya::Quaternion	orientation;
+	Models				models;
+	bool				isHoldingDefence;	// Prevent user keeped holded defence button. true when hold defence button, false when detected release the button.
 public:
 	Player();
 	~Player();

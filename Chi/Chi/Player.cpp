@@ -90,8 +90,9 @@ void PlayerParam::UseImGui()
 					ImGui::Checkbox  ( ( prefix + ".ExistCollision" ).c_str(), &pSphere->exist );
 				};
 
-				ShowAABB  ( "VS_BossAttacks", &hitBoxBody );
-				ShowSphere( "VS_StageWall", &hitBoxPhysic );
+				ShowAABB  ( "VS_BossAttacks",	&hitBoxBody   );
+				ShowSphere( "VS_StageWall",		&hitBoxPhysic );
+				ShowAABB  ( "Shield",			&hitBoxShield );
 
 				ImGui::TreePop();
 			}
@@ -131,8 +132,13 @@ Player::Player() :
 	timer( 0 ),
 	pos(), velocity(), lookDirection(),
 	orientation(),
-	pModel( std::make_unique<skinned_mesh>() )
-{}
+	models(),
+	isHoldingDefence( false )
+{
+	models.pHuman	= std::make_unique<skinned_mesh>();
+	models.pShield	= std::make_unique<skinned_mesh>();
+	models.pLance	= std::make_unique<skinned_mesh>();
+}
 Player::~Player() = default;
 
 void Player::Init()
@@ -150,7 +156,9 @@ void Player::Uninit()
 {
 	PlayerParam::Get().Uninit();
 
-	pModel.reset( nullptr );
+	models.pHuman.reset( nullptr );
+	models.pShield.reset( nullptr );
+	models.pLance.reset( nullptr );
 }
 
 void Player::Update( Input input )
@@ -165,8 +173,6 @@ void Player::Update( Input input )
 	ChangeStatus( input );
 	UpdateCurrentStatus( input );
 
-	RunUpdate( input );
-
 	ApplyVelocity();
 }
 
@@ -180,52 +186,106 @@ void Player::Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matP
 	Donya::Vector4x4 W = S * R * T;
 	Donya::Vector4x4 WVP = W * matView * matProjection;
 
-	FBXRender( pModel.get(), WVP, W );
+	switch ( status )
+	{
+	case Player::State::Idle:
+		{
+			FBXRender( models.pHuman.get(), WVP, W );
+		}
+		break;
+	case Player::State::Run:
+		{
+			FBXRender( models.pHuman.get(), WVP, W );
+		}
+		break;
+	case Player::State::Defend:
+		{
+			FBXRender( models.pHuman.get(), WVP, W );
 
+			// Matrix of shield-space -> player-space.
+			Donya::Vector4x4 SW{};
+			{
+				const auto SHIELD = PARAM.HitBoxShield();
+				// Donya::Vector4x4 SS = Donya::Vector4x4::Identity();
+				// Donya::Vector4x4 SR = Donya::Vector4x4::Identity();
+				// Donya::Vector4x4 ST = Donya::Vector4x4::MakeTranslation( SHIELD.pos );
+				// SW = ( SS * SR * ST );
+				SW = Donya::Vector4x4::MakeTranslation( SHIELD.pos );
+			}
+			Donya::Vector4x4 SWVP = SW * WVP;
+			FBXRender( models.pShield.get(), SWVP, ( SW * W ) );
+		}
+		break;
+	case Player::State::Attack:
+		{
+			FBXRender( models.pHuman.get(), WVP, W );
+
+			// Matrix of lance-space -> player-space.
+			Donya::Vector4x4 LW{};
+			{
+				// const auto LANCE = PARAM.HitBoxLance();
+				// Donya::Vector4x4 LS = Donya::Vector4x4::Identity();
+				// Donya::Vector4x4 LR = Donya::Vector4x4::Identity();
+				// Donya::Vector4x4 LT = Donya::Vector4x4::MakeTranslation( LANCE.pos );
+				// LW = ( LS * LR * LT );
+				// LW = Donya::Vector4x4::MakeTranslation( LANCE.pos );
+			}
+			Donya::Vector4x4 LWVP = LW * WVP;
+			FBXRender( models.pLance.get(), LWVP, ( LW * W ) );
+		}
+		break;
+	default: break;
+	}
+
+	// For debug, helpers of drawing primitive. and drawing collisions.
 #if DEBUG_MODE
+
+	auto GenerateCube   = []()->std::shared_ptr<static_mesh>
+	{
+		std::shared_ptr<static_mesh> tmpCube = std::make_shared<static_mesh>();
+		createCube( tmpCube.get() );
+		return tmpCube;
+	};
+	auto GenerateSphere = []()->std::shared_ptr<static_mesh>
+	{
+		std::shared_ptr<static_mesh> tmpSphere = std::make_shared<static_mesh>();
+		createSphere( tmpSphere.get(), 6, 12 );
+		return tmpSphere;
+	};
+	static std::shared_ptr<static_mesh> pCube	= GenerateCube();
+	static std::shared_ptr<static_mesh> pSphere	= GenerateSphere();
+
+	auto DrawCube   = [&]( const Donya::Vector3 &cubeOffset, const Donya::Vector3 &cubeScale, const Donya::Vector4 &color )
+	{
+		Donya::Vector4x4 CS = Donya::Vector4x4::MakeScaling( cubeScale );
+		Donya::Vector4x4 CT = Donya::Vector4x4::MakeTranslation( cubeOffset );
+		Donya::Vector4x4 CW = ( CS * CT ) * W;
+		Donya::Vector4x4 CWVP = CW * matView * matProjection;
+
+		OBJRender( pCube.get(), CWVP, CW, color );
+	};
+	auto DrawSphere = [&]( const Donya::Vector3 &sphereOffset, float sphereScale, const Donya::Vector4 &color )
+	{
+		Donya::Vector4x4 CS = Donya::Vector4x4::MakeScaling( sphereScale );
+		Donya::Vector4x4 CT = Donya::Vector4x4::MakeTranslation( sphereOffset );
+		Donya::Vector4x4 CW = ( CS * CT ) * W;
+		Donya::Vector4x4 CWVP = CW * matView * matProjection;
+
+		OBJRender( pSphere.get(), CWVP, CW, color );
+	};
 
 	if ( Donya::IsShowCollision() )
 	{
-		auto GenerateCube   = []()->std::shared_ptr<static_mesh>
-		{
-			std::shared_ptr<static_mesh> tmpCube = std::make_shared<static_mesh>();
-			createCube( tmpCube.get() );
-			return tmpCube;
-		};
-		auto GenerateSphere = []()->std::shared_ptr<static_mesh>
-		{
-			std::shared_ptr<static_mesh> tmpSphere = std::make_shared<static_mesh>();
-			createSphere( tmpSphere.get(), 6, 12 );
-			return tmpSphere;
-		};
-		static std::shared_ptr<static_mesh> pCube	= GenerateCube();
-		static std::shared_ptr<static_mesh> pSphere	= GenerateSphere();
-
-		auto DrawCube   = [&]( const Donya::Vector3 &cubeOffset, const Donya::Vector3 &cubeScale, const Donya::Vector4 &color )
-		{
-			Donya::Vector4x4 CS = Donya::Vector4x4::MakeScaling( cubeScale );
-			Donya::Vector4x4 CT = Donya::Vector4x4::MakeTranslation( cubeOffset );
-			Donya::Vector4x4 CW = ( CS * CT ) * W;
-			Donya::Vector4x4 CWVP = CW * matView * matProjection;
-
-			OBJRender( pCube.get(), CWVP, CW, color );
-		};
-		auto DrawSphere = [&]( const Donya::Vector3 &sphereOffset, float sphereScale, const Donya::Vector4 &color )
-		{
-			Donya::Vector4x4 CS = Donya::Vector4x4::MakeScaling( sphereScale );
-			Donya::Vector4x4 CT = Donya::Vector4x4::MakeTranslation( sphereOffset );
-			Donya::Vector4x4 CW = ( CS * CT ) * W;
-			Donya::Vector4x4 CWVP = CW * matView * matProjection;
-
-			OBJRender( pSphere.get(), CWVP, CW, color );
-		};
-
-		constexpr Donya::Vector4 BODY_COLOR  { 1.0f, 1.0f, 1.0f, 0.2f };
-		constexpr Donya::Vector4 PHYSIC_COLOR{ 0.0f, 0.3f, 0.8f, 0.2f };
+		constexpr Donya::Vector4 BODY_COLOR  { 1.0f, 1.0f, 1.0f, 0.5f };
+		constexpr Donya::Vector4 PHYSIC_COLOR{ 0.0f, 0.3f, 0.8f, 0.5f };
 		const auto BODY   = PARAM.HitBoxBody();
 		const auto PHYSIC = PARAM.HitBoxPhysic();
 		if( BODY.exist   ) { DrawCube  ( BODY.pos,   BODY.size,     BODY_COLOR   ); }
-		if( PHYSIC.exist ) { DrawSphere( PARAM.HitBoxPhysic().pos, PARAM.HitBoxPhysic().radius, PHYSIC_COLOR );}
+		if( PHYSIC.exist ) { DrawSphere( PHYSIC.pos, PHYSIC.radius, PHYSIC_COLOR ); }
+
+		constexpr Donya::Vector4 SHIELD_COLOR{ 0.2f, 1.0f, 0.2f, 0.5f };
+		const auto SHIELD = PARAM.HitBoxShield();
+		if( status == State::Defend ){ DrawCube( SHIELD.pos, SHIELD.size, SHIELD_COLOR ); }
 	}
 
 #endif // DEBUG_MODE
@@ -233,11 +293,19 @@ void Player::Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matP
 
 void Player::LoadModel()
 {
-	loadFBX( pModel.get(), GetModelPath( ModelAttribute::Player ) );
+	loadFBX( models.pHuman.get(),	GetModelPath( ModelAttribute::Player ) );
+	loadFBX( models.pShield.get(),	GetModelPath( ModelAttribute::Shield ) );
+	loadFBX( models.pLance.get(),	GetModelPath( ModelAttribute::Lance  ) );
 }
 
 void Player::ChangeStatus( Input input )
 {
+	if ( !input.doDefend )
+	{
+		// This flag not want to false if timer lower than 0.
+		isHoldingDefence = false;
+	}
+
 	// These method is change my status if needs.
 
 	switch ( status )
@@ -261,25 +329,38 @@ void Player::UpdateCurrentStatus( Input input )
 	}
 }
 
+/*
+ChangeStatusXXX : call before update, changing status if necessary.
+XXXInit : call by ChangeStatusXXX when changing status. after XXXUninit.
+XXXUpdate : call by UpdateCurrentStatus.
+XXXUninit : call by ChangeStatusXXX when changing status. before YYYInit.
+*/
+
 void Player::ChangeStatusFromIdle( Input input )
 {
-	if ( !input.moveVector.IsZero() )
-	{
-		IdleUninit();
-		RunInit( input );
-	}
-
-	if ( input.doDefend )
+	if ( input.doDefend && !isHoldingDefence )
 	{
 		IdleUninit();
 		DefendInit( input );
+		return;
 	}
+	// else
 
 	if ( input.doAttack )
 	{
 		IdleUninit();
 		AttackInit( input );
+		return;
 	}
+	// else
+
+	if ( !input.moveVector.IsZero() )
+	{
+		IdleUninit();
+		RunInit( input );
+		return;
+	}
+	// else
 }
 void Player::IdleInit( Input input )
 {
@@ -297,23 +378,29 @@ void Player::IdleUninit()
 
 void Player::ChangeStatusFromRun( Input input )
 {
-	if ( input.moveVector.IsZero() )
-	{
-		RunUninit();
-		IdleInit( input );
-	}
-
-	if ( input.doDefend )
+	if ( input.doDefend && !isHoldingDefence )
 	{
 		RunUninit();
 		DefendInit( input );
+		return;
 	}
+	// else
 
 	if ( input.doAttack )
 	{
 		RunUninit();
 		AttackInit( input );
+		return;
 	}
+	// else
+
+	if ( input.moveVector.IsZero() )
+	{
+		RunUninit();
+		IdleInit( input );
+		return;
+	}
+	// else
 }
 void Player::RunInit( Input input )
 {
@@ -330,54 +417,99 @@ void Player::RunUninit()
 
 void Player::ChangeStatusFromDefend( Input input )
 {
-#if DEBUG_MODE
-
-	if ( !input.doDefend )
+	if ( !input.doDefend || timer <= 0 )
 	{
 		DefendUninit();
-		IdleInit( input );
-	}
 
-#endif // DEBUG_MODE
+		if ( input.moveVector.IsZero() )
+		{
+			IdleInit( input );
+		}
+		else
+		{
+			RunInit( input );
+		}
+	}
 }
 void Player::DefendInit( Input input )
 {
-	status = State::Defend;
+	status   = State::Defend;
+	velocity = 0.0f; // Each member set to zero.
 
+	isHoldingDefence  = true;
 
+	const auto &PARAM = PlayerParam::Get();
+	timer = PARAM.FrameWholeDefence();
 }
 void Player::DefendUpdate( Input input )
 {
-	
+	timer--;
+
+	if ( !input.moveVector.IsZero() )
+	{
+		lookDirection = input.moveVector.Normalized();
+	}
 }
 void Player::DefendUninit()
 {
-
+	timer = 0;
 }
 
 void Player::ChangeStatusFromAttack( Input input )
 {
-#if DEBUG_MODE
+	const auto &PARAM = PlayerParam::Get();
+	const int WHOLE_FRAME = PARAM.FrameWholeAttacking();
+	const int CANCELABLE  = PARAM.FrameCancelableAttack();
 
-	if ( !input.doAttack )
+	if ( timer <= 0 )
 	{
 		AttackUninit();
-		IdleInit( input );
-	}
 
-#endif // DEBUG_MODE
+		if ( input.moveVector.IsZero() )
+		{
+			IdleInit( input );
+		}
+		else
+		{
+			RunInit( input );
+		}
+
+		return;
+	}
+	// else
+
+	if ( input.doDefend && !isHoldingDefence && ( WHOLE_FRAME - CANCELABLE ) <= timer )
+	{
+		AttackUninit();
+		DefendInit( input );
+
+		return;
+	}
+	// else
 }
 void Player::AttackInit( Input input )
 {
-	status = State::Attack;
+	status   = State::Attack;
+	velocity = 0.0f; // Each member set to zero.
+
+	const auto &PARAM = PlayerParam::Get();
+	timer = PARAM.FrameWholeAttacking();
 }
 void Player::AttackUpdate( Input input )
 {
-	AssignInputVelocity( input );
+	timer--;
+
+	const auto &PARAM = PlayerParam::Get();
+	const int WHOLE_FRAME = PARAM.FrameWholeAttacking();
+	const int CANCELABLE  = PARAM.FrameCancelableAttack();
+	if ( !input.moveVector.IsZero() && ( WHOLE_FRAME - CANCELABLE ) <= timer )
+	{
+		lookDirection = input.moveVector;
+	}
 }
 void Player::AttackUninit()
 {
-
+	timer = 0;
 }
 
 void Player::AssignInputVelocity( Input input )
@@ -433,6 +565,8 @@ void Player::UseImGui()
 			};
 			std::string statusCaption = "Status : " + GetStatusName( status );
 			ImGui::Text( statusCaption.c_str() );
+			ImGui::Text( "Timer : %d", timer );
+			ImGui::Text( "" );
 
 			const std::string vec3Info{ "[X:%5.3f][Y:%5.3f][Z:%5.3f]" };
 			const std::string vec4Info{ "[X:%5.3f][Y:%5.3f][Z:%5.3f][W:%5.3f]" };
