@@ -181,6 +181,7 @@
     <ClInclude Include="sceneManager.h" />
     <ClInclude Include="skinned_mesh.h" />
     <ClInclude Include="Sprite.h" />
+    <ClInclude Include="Stage.h" />
     <ClInclude Include="static_mesh.h" />
     <ClInclude Include="system.h" />
     <ClInclude Include="testObj.h" />
@@ -225,6 +226,7 @@
     <ClCompile Include="sceneTitle.cpp" />
     <ClCompile Include="skinned_mesh.cpp" />
     <ClCompile Include="Sprite.cpp" />
+    <ClCompile Include="Stage.cpp" />
     <ClCompile Include="static_mesh.cpp" />
     <ClCompile Include="testObj.cpp" />
     <ClCompile Include="timeMeasurement.cpp" />

@@ -38,7 +38,8 @@ std::string GetModelPath( ModelAttribute modelAttribute )
 	{
 	case ModelAttribute::Player:
 		return "./Data/model/Player/Player.fbx"; // break;
-		break;
+	case ModelAttribute::Stage:
+		return "./Data/model/Stage/Stage01.fbx"; // break;
 	default:
 		assert( !"Error : Specified unexpect model type." ); break;
 		break;

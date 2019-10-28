@@ -11,6 +11,7 @@
 #include "gameLib.h"
 
 #include "Player.h"
+#include "Stage.h"
 
 #if DEBUG_MODE
 constexpr int BGM_ID = 'BGM';
@@ -22,10 +23,12 @@ struct SceneGame::Impl
 public:
 	Donya::Vector3 cameraPos;
 	Player player;
+	Stage  stage;
 public:
 	Impl() :
 		cameraPos(),
-		player()
+		player(),
+		stage()
 	{}
 	~Impl() = default;
 public:
@@ -38,10 +41,12 @@ public:
 
 		cameraPos = Donya::Vector3{ 0.0f, 256.0f, -512.0f };
 
+		stage.Init( NULL );
 		player.Init();
 	}
 	void Uninit()
 	{
+		stage.Uninit();
 		player.Uninit();
 	}
 
@@ -66,6 +71,8 @@ public:
 
 		GameLib::camera::setPos( cameraPos );
 
+		stage.Update();
+
 		auto MakePlayerInput = []()->Player::Input
 		{
 			Player::Input input{};
@@ -89,6 +96,8 @@ public:
 
 		Donya::Vector4x4 V = Donya::Vector4x4::FromMatrix( GameLib::camera::GetViewMatrix() );
 		Donya::Vector4x4 P = Donya::Vector4x4::FromMatrix( GameLib::camera::GetProjectionMatrix() );
+
+		stage.Draw( V, P );
 
 		player.Draw( V, P );
 	}

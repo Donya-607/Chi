@@ -124,6 +124,8 @@
     <ClInclude Include="Donya\Template.h" />
     <ClInclude Include="Donya\Vector.h" />
     <ClInclude Include="Donya\FilePath.h" />
+    <ClInclude Include="Donya\Collision.h" />
+    <ClInclude Include="Stage.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp">
@@ -217,6 +219,8 @@
     <ClCompile Include="Donya\Quaternion.cpp" />
     <ClCompile Include="Donya\Vector.cpp" />
     <ClCompile Include="Donya\FilePath.cpp" />
+    <ClCompile Include="Donya\Collision.cpp" />
+    <ClCompile Include="Stage.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="geometric_phong_ps.hlsl">
