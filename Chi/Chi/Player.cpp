@@ -263,7 +263,7 @@ void Player::Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matP
 
 	auto DrawCube   = [&]( const Donya::Vector3 &cubeOffset, const Donya::Vector3 &cubeScale, const Donya::Vector4 &color )
 	{
-		Donya::Vector4x4 CS = Donya::Vector4x4::MakeScaling( cubeScale );
+		Donya::Vector4x4 CS = Donya::Vector4x4::MakeScaling( cubeScale * 2.0f ); // Half size->Whole size.
 		Donya::Vector4x4 CT = Donya::Vector4x4::MakeTranslation( cubeOffset );
 		Donya::Vector4x4 CW = ( CS * CT ) * W;
 		Donya::Vector4x4 CWVP = CW * matView * matProjection;
@@ -272,7 +272,7 @@ void Player::Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matP
 	};
 	auto DrawSphere = [&]( const Donya::Vector3 &sphereOffset, float sphereScale, const Donya::Vector4 &color )
 	{
-		Donya::Vector4x4 CS = Donya::Vector4x4::MakeScaling( sphereScale );
+		Donya::Vector4x4 CS = Donya::Vector4x4::MakeScaling( sphereScale * 2.0f ); // Half size->Whole size.
 		Donya::Vector4x4 CT = Donya::Vector4x4::MakeTranslation( sphereOffset );
 		Donya::Vector4x4 CW = ( CS * CT ) * W;
 		Donya::Vector4x4 CWVP = CW * matView * matProjection;
@@ -561,11 +561,13 @@ void Player::CollideToWall()
 
 	constexpr Donya::Vector3 ORIGIN = Donya::Vector3::Zero();
 	const Donya::Vector3 currentDistance = pos - ORIGIN;
+	const float currentLength = currentDistance.Length();
 
-	if ( trueFieldRadius < currentDistance.Length() )
+	if ( trueFieldRadius < currentLength )
 	{
+		float diff = currentLength - trueFieldRadius;
 		const Donya::Vector3 direction = currentDistance.Normalized();
-		pos = ORIGIN + ( direction * fieldRadius );
+		pos = ORIGIN + ( direction * ( currentLength - diff ) );
 	}
 }
 

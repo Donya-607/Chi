@@ -2,7 +2,9 @@
 #include "sceneManager.h"
 
 #include "Donya/Constant.h"	// Use DEBUG_MODE macro.
+#include "Donya/FilePath.h"
 #include "Donya/Keyboard.h"
+#include "Donya/Serializer.h"
 #include "Donya/Sound.h"
 #include "Donya/Useful.h"	// Use show collision state.
 #include "Donya/UseImGui.h"	// Use helper functions of ImGui.
@@ -21,16 +23,34 @@ constexpr int SE_ID  = 'SE';
 struct SceneGame::Impl
 {
 public:
+	float  fieldRadius;
 	Donya::Vector3 cameraPos;
 	Player player;
 	Stage  stage;
 public:
 	Impl() :
+		fieldRadius(),
 		cameraPos(),
 		player(),
 		stage()
 	{}
 	~Impl() = default;
+private:
+	friend class cereal::access;
+	template<class Archive>
+	void serialize( Archive &archive, std::uint32_t version )
+	{
+		archive
+		(
+			CEREAL_NVP( fieldRadius )
+		);
+
+		if ( 1 <= version )
+		{
+			// archive( CEREAL_NVP( x ) );
+		}
+	}
+	static constexpr const char *SERIAL_ID = "Game";
 public:
 	void Init()
 	{
@@ -39,10 +59,14 @@ public:
 		Donya::Sound::Load( SE_ID,  "./Data/Sounds/Test/SE.wav",  false );
 	#endif // DEBUG_MODE
 
+		LoadParameter();
+
 		cameraPos = Donya::Vector3{ 0.0f, 256.0f, -512.0f };
 
 		stage.Init( NULL );
+
 		player.Init();
+		player.SetFieldRadius( fieldRadius );
 	}
 	void Uninit()
 	{
@@ -105,37 +129,87 @@ public:
 	}
 
 public:
+	void LoadParameter( bool isBinary = true )
+	{
+		Donya::Serializer::Extension ext = ( isBinary )
+		? Donya::Serializer::Extension::BINARY
+		: Donya::Serializer::Extension::JSON;
+		std::string filePath = GenerateSerializePath( SERIAL_ID, ext );
+
+		Donya::Serializer seria;
+		seria.Load( ext, filePath.c_str(), SERIAL_ID, *this );
+	}
+
+	void SaveParameter()
+	{
+		Donya::Serializer::Extension bin  = Donya::Serializer::Extension::BINARY;
+		Donya::Serializer::Extension json = Donya::Serializer::Extension::JSON;
+		std::string binPath  = GenerateSerializePath( SERIAL_ID, bin  );
+		std::string jsonPath = GenerateSerializePath( SERIAL_ID, json );
+
+		Donya::Serializer seria;
+		seria.Save( bin,  binPath.c_str(),  SERIAL_ID, *this );
+		seria.Save( json, jsonPath.c_str(), SERIAL_ID, *this );
+	}
+
 	void UseImGui()
 	{
 	#if USE_IMGUI
 
 		if ( ImGui::BeginIfAllowed() )
 		{
-			if ( ImGui::TreeNode( u8"Sound test" ) )
-			{
-				if ( ImGui::Button( u8"BGM.Play"   ) ) { Donya::Sound::Play  ( BGM_ID ); }
-				if ( ImGui::Button( u8"BGM.Pause"  ) ) { Donya::Sound::Pause ( BGM_ID ); }
-				if ( ImGui::Button( u8"BGM.Resume" ) ) { Donya::Sound::Resume( BGM_ID ); }
-				if ( ImGui::Button( u8"BGM.Stop"   ) ) { Donya::Sound::Stop  ( BGM_ID ); }
-				ImGui::Text( "" );
-				if ( ImGui::Button( u8"SE.Play"    ) ) { Donya::Sound::Play  ( SE_ID  ); }
-				if ( ImGui::Button( u8"SE.Pause"   ) ) { Donya::Sound::Pause ( SE_ID  ); }
-				if ( ImGui::Button( u8"SE.Resume"  ) ) { Donya::Sound::Resume( SE_ID  ); }
-				if ( ImGui::Button( u8"SE.Stop"    ) ) { Donya::Sound::Stop  ( SE_ID  ); }
-
-				ImGui::TreePop();
-			}
-
-			if ( ImGui::TreeNode( "Configuration" ) )
-			{
-				ImGui::DragFloat3( "Camera.Pos", &cameraPos.x );
-
-				ImGui::TreePop();
-			}
-
 			if ( ImGui::Button( "GotoTitle" ) )
 			{
 				pSceneManager->setNextScene( new sceneTitle(), false );
+			}
+
+			if ( ImGui::TreeNode( "Game" ) )
+			{
+				if ( ImGui::TreeNode( u8"Sound test" ) )
+				{
+					if ( ImGui::Button( u8"BGM.Play"   ) ) { Donya::Sound::Play  ( BGM_ID ); }
+					if ( ImGui::Button( u8"BGM.Pause"  ) ) { Donya::Sound::Pause ( BGM_ID ); }
+					if ( ImGui::Button( u8"BGM.Resume" ) ) { Donya::Sound::Resume( BGM_ID ); }
+					if ( ImGui::Button( u8"BGM.Stop"   ) ) { Donya::Sound::Stop  ( BGM_ID ); }
+					ImGui::Text( "" );
+					if ( ImGui::Button( u8"SE.Play"    ) ) { Donya::Sound::Play  ( SE_ID  ); }
+					if ( ImGui::Button( u8"SE.Pause"   ) ) { Donya::Sound::Pause ( SE_ID  ); }
+					if ( ImGui::Button( u8"SE.Resume"  ) ) { Donya::Sound::Resume( SE_ID  ); }
+					if ( ImGui::Button( u8"SE.Stop"    ) ) { Donya::Sound::Stop  ( SE_ID  ); }
+
+					ImGui::TreePop();
+				}
+
+				if ( ImGui::TreeNode( "Configuration" ) )
+				{
+					ImGui::DragFloat( "Field.Radius", &fieldRadius ); player.SetFieldRadius( fieldRadius );
+					ImGui::DragFloat3( "Camera.Pos", &cameraPos.x );
+
+					ImGui::TreePop();
+				}
+
+				if ( ImGui::TreeNode( "File.I/O" ) )
+			{
+				static bool isBinary = true;
+				if ( ImGui::RadioButton( "Binary", isBinary ) ) { isBinary = true; }
+				if ( ImGui::RadioButton( "JSON", !isBinary ) ) { isBinary = false; }
+				std::string loadStr{ "Load " };
+				loadStr += ( isBinary ) ? "Binary" : "JSON";
+
+				if ( ImGui::Button( "Save" ) )
+				{
+					SaveParameter();
+				}
+				// if ( ImGui::Button( Donya::MultiToUTF8( loadStr ).c_str() ) )
+				if ( ImGui::Button( loadStr.c_str() ) )
+				{
+					LoadParameter( isBinary );
+				}
+
+				ImGui::TreePop();
+			}
+
+				ImGui::TreePop();
 			}
 
 			ImGui::End();
@@ -144,6 +218,7 @@ public:
 	#endif // USE_IMGUI
 	}
 };
+CEREAL_CLASS_VERSION( SceneGame::Impl, 0 )
 
 SceneGame::SceneGame() : baseScene(), pImpl( std::make_unique<Impl>() )
 {}

@@ -2,7 +2,7 @@
     "Player": {
         "cereal_class_version": 2,
         "scale": 1.0,
-        "runSpeed": 1.0,
+        "runSpeed": 1.5,
         "rotSlerpFactor": 0.20000000298023225,
         "hitBoxBody": {
             "cereal_class_version": 0,
