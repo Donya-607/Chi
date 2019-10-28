@@ -3,6 +3,8 @@
 #include "sceneManager.h"
 #include "keyInput.h"
 
+#include "Donya/Keyboard.h" // Insert by Donya.
+
 void sceneTitle::init()
 {
 	isStack = false;
@@ -122,6 +124,10 @@ void sceneTitle::imGui()
 		pSceneManager->setNextScene(new sceneLightting, false);
 
 	if ( ImGui::Button( "Game" ) )
+	{
+		pSceneManager->setNextScene( new SceneGame(), false );
+	}
+	else if ( Donya::Keyboard::Press( VK_LCONTROL ) && Donya::Keyboard::Trigger( 'G' ) )
 	{
 		pSceneManager->setNextScene( new SceneGame(), false );
 	}

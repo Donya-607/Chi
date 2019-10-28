@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -142,6 +142,7 @@
     <ClInclude Include="blend.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Donya\AudioSystem.h" />
+    <ClInclude Include="Donya\Collision.h" />
     <ClInclude Include="Donya\Constant.h" />
     <ClInclude Include="Donya\FilePath.h" />
     <ClInclude Include="Donya\Keyboard.h" />
@@ -191,6 +192,7 @@
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Donya\AudioSystem.cpp" />
+    <ClCompile Include="Donya\Collision.cpp" />
     <ClCompile Include="Donya\FilePath.cpp" />
     <ClCompile Include="Donya\Keyboard.cpp" />
     <ClCompile Include="Donya\Quaternion.cpp" />

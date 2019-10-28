@@ -4,6 +4,7 @@
 #include "Donya/Constant.h"	// Use DEBUG_MODE macro.
 #include "Donya/Keyboard.h"
 #include "Donya/Sound.h"
+#include "Donya/Useful.h"	// Use show collision state.
 #include "Donya/UseImGui.h"	// Use helper functions of ImGui.
 #include "Donya/Vector.h"
 
@@ -46,6 +47,23 @@ public:
 
 	void Update()
 	{
+	#if DEBUG_MODE
+
+		if ( Donya::Keyboard::Press( 'D' ) && Donya::Keyboard::Trigger( 'C' ) )
+		{
+			char breakPoint = 0;
+		}
+		if ( Donya::Keyboard::Trigger( 'H' ) )
+		{
+			Donya::ToggleShowStateOfImGui();
+		}
+		if ( Donya::Keyboard::Trigger( 'T' ) )
+		{
+			Donya::ToggleShowCollision();
+		}
+
+	#endif // DEBUG_MODE
+
 		GameLib::camera::setPos( cameraPos );
 
 		auto MakePlayerInput = []()->Player::Input
