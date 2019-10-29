@@ -4,6 +4,9 @@
 #include <vector>
 #include <DirectXMath.h>
 
+#include "Donya/Serializer.h"
+#include "Donya/UseImGui.h"
+
 
 class Particle
 {
@@ -55,7 +58,7 @@ private:
 	struct ParticleImGuiData
 	{
 		int speed[3];
-		int accel[3];
+		//int accel[3];
 		int accelStart[3];
 		int accelStage[3];
 	};
@@ -67,6 +70,35 @@ private:
 	Particle data[MAX_SIZE];
 	ParticleImGuiData imguiData;
 	int cnt;
+private:
+	friend class cereal::access;
+	template<class Archive>
+	void serialize(Archive& archive, std::uint32_t version)
+	{
+		archive
+		(
+			CEREAL_NVP(imguiData.speed),
+			CEREAL_NVP(imguiData.accelStart),
+			CEREAL_NVP(imguiData.accelStage)
+		);
+
+		if (1 <= version)
+		{
+			// archive( CEREAL_NVP( x ) );
+		}
+	}
+	static constexpr const char* SERIAL_ID = "Flash";
+
+	void LoadParameter(bool isBinary = true);
+
+#if USE_IMGUI
+
+	void SaveParameter();
+
+public:
+	void UseImGui();
+
+#endif // USE_IMGUI
 
 public:
 	void Set();
@@ -74,6 +106,7 @@ public:
 	void ImGuiDataInit();
 	void ImGui();
 };
+CEREAL_CLASS_VERSION(FlashParticle, 0)
 
 class BubbleParticle
 {
