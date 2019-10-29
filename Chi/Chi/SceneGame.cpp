@@ -179,19 +179,21 @@ public:
 
 		player.Draw( V, P );
 
-		XMFLOAT4X4 World, world_view_projection;
-		DirectX::XMMATRIX worldM;
-		DirectX::XMMATRIX S, R, Rx, Ry, Rz, T;
-		worldM = DirectX::XMMatrixIdentity();
+		{
+			XMFLOAT4X4 World, world_view_projection;
+			DirectX::XMMATRIX worldM;
+			DirectX::XMMATRIX S;
+			worldM = DirectX::XMMatrixIdentity();
 
-		//	Šg‘åEk¬
-		S = DirectX::XMMatrixScaling(0.5f,0.5f,0.5f);
+			//	Šg‘åEk¬
+			S = DirectX::XMMatrixScaling(0.5f,0.5f,0.5f);
 
-		//	Matrix -> Float4x4 •ÏŠ·
-		DirectX::XMStoreFloat4x4( &world_view_projection, worldM * getViewMatrix() * getProjectionMatrix() );
-		DirectX::XMStoreFloat4x4( &World, worldM );
-		setBlendMode_ALPHA( 125 );
-		FBXRender( &animTest, world_view_projection, World );
+			//	Matrix -> Float4x4 •ÏŠ·
+			DirectX::XMStoreFloat4x4( &world_view_projection, worldM * getViewMatrix() * getProjectionMatrix() );
+			DirectX::XMStoreFloat4x4( &World, worldM );
+			setBlendMode_ALPHA( 125 );
+			FBXRender( &animTest, world_view_projection, World );
+		}
 
 		boss.Draw( V, P );
 	}
