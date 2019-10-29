@@ -34,13 +34,14 @@ struct SceneGame::Impl
 public:
 	float  fieldRadius;
 	Donya::Vector3 cameraPos;
+	Donya::Vector3 cameraFocusOffset;
 	Player player;
 	Stage  stage;
 	Lights lights;
 public:
 	Impl() :
 		fieldRadius(),
-		cameraPos(),
+		cameraPos(), cameraFocusOffset(),
 		player(),
 		stage(),
 		lights()
@@ -61,6 +62,10 @@ private:
 			archive( CEREAL_NVP( lights ) );
 		}
 		if ( 2 <= version )
+		{
+			archive( CEREAL_NVP( cameraFocusOffset ) );
+		}
+		if ( 3 <= version )
 		{
 			// archive( CEREAL_NVP( x ) );
 		}
@@ -137,7 +142,7 @@ public:
 		player.Update( MakePlayerInput() );
 
 		GameLib::camera::setPos( cameraPos );
-		GameLib::camera::setTarget( player.GetPosition() );
+		GameLib::camera::setTarget( player.GetPosition() + cameraFocusOffset );
 	}
 
 	void Draw()
@@ -211,7 +216,9 @@ public:
 				if ( ImGui::TreeNode( "Configuration" ) )
 				{
 					ImGui::DragFloat( "Field.Radius", &fieldRadius ); player.SetFieldRadius( fieldRadius );
+					ImGui::Text( "" );
 					ImGui::DragFloat3( "Camera.Pos", &cameraPos.x );
+					ImGui::DragFloat3( "Camera.FocusOffset", &cameraFocusOffset.x );
 
 					ImGui::TreePop();
 				}
@@ -294,7 +301,7 @@ public:
 	#endif // USE_IMGUI
 	}
 };
-CEREAL_CLASS_VERSION( SceneGame::Impl, 1 )
+CEREAL_CLASS_VERSION( SceneGame::Impl, 2 )
 
 SceneGame::SceneGame() : baseScene(), pImpl( std::make_unique<Impl>() )
 {}

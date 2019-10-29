@@ -1,7 +1,7 @@
 {
     "Game": {
-        "cereal_class_version": 1,
-        "fieldRadius": 256.0,
+        "cereal_class_version": 2,
+        "fieldRadius": 1360.0,
         "lights": {
             "cereal_class_version": 0,
             "direction": {
@@ -20,6 +20,12 @@
                 }
             },
             "points": []
+        },
+        "cameraFocusOffset": {
+            "cereal_class_version": 0,
+            "x": 137.0,
+            "y": 196.0,
+            "z": -14.0
         }
     }
 }
