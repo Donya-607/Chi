@@ -282,6 +282,8 @@ void Player::Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matP
 
 	if ( Donya::IsShowCollision() )
 	{
+		setBlendMode_ALPHA( 0.5f );
+
 		constexpr Donya::Vector4 BODY_COLOR  { 1.0f, 1.0f, 1.0f, 0.5f };
 		constexpr Donya::Vector4 PHYSIC_COLOR{ 0.0f, 0.3f, 0.8f, 0.5f };
 		const auto BODY   = PARAM.HitBoxBody();

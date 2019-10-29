@@ -37,11 +37,6 @@ public:
 	Player player;
 	Stage  stage;
 	Lights lights;
-
-
-	static_mesh testCube;
-
-
 public:
 	Impl() :
 		fieldRadius(),
@@ -90,7 +85,6 @@ public:
 		}
 
 		cameraPos = Donya::Vector3{ 0.0f, 256.0f, -512.0f };
-		createCube(&testCube);
 
 		stage.Init( NULL );
 
@@ -155,32 +149,6 @@ public:
 		stage.Draw( V, P );
 
 		player.Draw( V, P );
-
-		XMFLOAT4X4 World, world_view_projection;
-		DirectX::XMMATRIX worldM;
-		DirectX::XMMATRIX S, R, Rx, Ry, Rz, T;
-		worldM = DirectX::XMMatrixIdentity();
-
-		//	Šg‘åEk¬
-		S = DirectX::XMMatrixScaling(100,100,100);
-
-		//	‰ñ“]
-		Rx = DirectX::XMMatrixRotationX(0);				//	XŽ²‚ðŠî€‚Æ‚µ‚½‰ñ“]s—ñ
-		Ry = DirectX::XMMatrixRotationY(0);				//	YŽ²‚ðŠî€‚Æ‚µ‚½‰ñ“]s—ñ
-		Rz = DirectX::XMMatrixRotationZ(0);				//	ZŽ²‚ðŠî€‚Æ‚µ‚½‰ñ“]s—ñ
-		R = Rz * Rx * Ry;
-
-		//	•½sˆÚ“®
-		T = DirectX::XMMatrixTranslation(0, 0, 0);
-
-		//	ƒ[ƒ‹ƒh•ÏŠ·s—ñ
-		worldM = S * R * T;
-
-		//	Matrix -> Float4x4 •ÏŠ·
-		DirectX::XMStoreFloat4x4(&world_view_projection, worldM * getViewMatrix() * getProjectionMatrix());
-		DirectX::XMStoreFloat4x4(&World, worldM);
-		setBlendMode_ALPHA(125);
-		OBJRender(&testCube,world_view_projection, World, { 1,0,0,0.5 });
 	}
 
 public:
@@ -253,7 +221,9 @@ public:
 					{
 						ImGui::ColorEdit4( "Color", &lights.direction.color.x );
 						ImGui::SliderFloat3( "Direction", &lights.direction.direction.x, -8.0f, 8.0f );
-						
+
+						getLineLight().setLineLight( lights.direction.direction, lights.direction.color );
+
 						ImGui::TreePop();
 					}
 					
