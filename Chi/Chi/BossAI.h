@@ -33,4 +33,5 @@ public:
 	void Init();
 	void Update();
 	void ImGui();
+	int GetState() { return state; }
 };
