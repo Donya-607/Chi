@@ -120,7 +120,7 @@ public:
 		{
 			char breakPoint = 0;
 		}
-		if ( Donya::Keyboard::Trigger( 'I' ) )
+		if ( Donya::Keyboard::Trigger( 'H' ) || Donya::Keyboard::Trigger( 'I' ) )
 		{
 			Donya::ToggleShowStateOfImGui();
 		}
@@ -208,7 +208,7 @@ public:
 
 			if ( ImGui::TreeNode( "Game" ) )
 			{
-				ImGui::Text( "Show.\'I\'key : Toggle ImGui ON/OFF" );
+				ImGui::Text( "Show.\'I\' or \H'\'key : Toggle ImGui ON/OFF" );
 				ImGui::Text( "Show.\'T\'key : Toggle Collision ON/OFF" );
 				ImGui::Text( "" );
 
@@ -274,7 +274,7 @@ public:
 							auto &point = lights.points[i];
 							ImGui::DragFloat3( std::string( "Position"  + std::to_string( i ) ).c_str(), &point.pos.x		); point.pos.w = 1.0f;
 							ImGui::ColorEdit4( std::string( "Color"     + std::to_string( i ) ).c_str(), &point.color.x		);
-							ImGui::DragFloat4( std::string( "Attenuate" + std::to_string( i ) ).c_str(), &point.attenuate.x	);
+							ImGui::SliderFloat4( std::string( "Attenuate" + std::to_string( i ) ).c_str(), &point.attenuate.x, 0.0f, 1.0f );
 
 							setPointlightInfo( scast<int>( i ), point );
 						}
