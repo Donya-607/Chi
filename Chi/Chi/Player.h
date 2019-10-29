@@ -153,6 +153,11 @@ public:
 
 	void Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matProjection );
 public:
+	/// <summary>
+	/// Returns world-space position.
+	/// </summary>
+	Donya::Vector3 GetPosition() const { return pos; }
+
 	void SetFieldRadius( float fieldRadius );
 private:
 	void LoadModel();

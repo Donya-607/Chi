@@ -140,6 +140,7 @@
   <ItemGroup>
     <ClInclude Include="baseScene.h" />
     <ClInclude Include="blend.h" />
+    <ClInclude Include="Boss.h" />
     <ClInclude Include="BossAI.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Donya\AudioSystem.h" />
@@ -191,6 +192,7 @@
     <ClInclude Include="XinputPad.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Boss.cpp" />
     <ClCompile Include="BossAI.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Donya\AudioSystem.cpp" />

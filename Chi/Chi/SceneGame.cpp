@@ -116,8 +116,6 @@ public:
 
 	#endif // DEBUG_MODE
 
-		GameLib::camera::setPos( cameraPos );
-
 		stage.Update();
 
 		auto MakePlayerInput = []()->Player::Input
@@ -137,6 +135,9 @@ public:
 			return input;
 		};
 		player.Update( MakePlayerInput() );
+
+		GameLib::camera::setPos( cameraPos );
+		GameLib::camera::setTarget( player.GetPosition() );
 	}
 
 	void Draw()

@@ -28,6 +28,10 @@ public:
 	void TPSCam();
 	void FPSCam();
 	void setPosition(DirectX::XMFLOAT3 _pos);
+	void setTarget(DirectX::XMFLOAT3 _target)
+	{
+		target = _target;
+	}
 	DirectX::XMFLOAT4 getCameraPos() { return{ position.x,position.y,position.z,1.0 }; }
 	DirectX::XMMATRIX SetOrthographicMatrix(float _w, float _h, float _zNear, float _zFar);
 	DirectX::XMMATRIX SetPerspectiveMatrix(float _fov, float _aspect, float _zNear, float _zFar);
