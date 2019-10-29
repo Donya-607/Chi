@@ -92,20 +92,16 @@ protected:
 	ID3D11RasterizerState*		rasterizeFillOut;	//塗りつぶし描画
 	ID3D11DepthStencilState*	depthStencilState;	//depthStencilState
 
-	ID3D11VertexShader*			shadowVS[2];		//VertexShader
-	ID3D11PixelShader*			shadowPS[2];		//PixelShader
 
 	int							numIndices;
 
 	ID3D11VertexShader*			noTexVS;		//VertexShader
-	ID3D11PixelShader*			noTexPS[shaderNumber::END];		//PixelShader
+	ID3D11PixelShader*			noTexPS;		//PixelShader
 	ID3D11InputLayout*			noTexLayout;	//inputLayout
 
 	std::vector<material> materials;//マテリアル情報のコンテナ
 	primitive_material primitiveMaterial;
 	ID3D11SamplerState* sampleState;
-	ID3D11PixelShader*	usePs;
-	int usePsNumber;
 
 	void objInit(ID3D11Device* _device, const wchar_t* _objFileName, const std::wstring& _mtlFileNmae);
 	void TextureInit(ID3D11Device* _device);
@@ -118,7 +114,7 @@ public:
 		vertex* vertices, int numV,
 		unsigned int* indices, int numI);
 
-	static_mesh() {}
+	static_mesh() : constant_buffer(nullptr),depthStencilState(nullptr),index_buffer(nullptr),layout(nullptr),noTexLayout(nullptr),noTexPS(nullptr),noTexVS(nullptr),numIndices(0),pixelShader(nullptr),vertexShader(nullptr),rasterizeFillOut(nullptr),rasterizeLine(nullptr),vertex_buffer(nullptr),sampleState(nullptr) {}
 	~static_mesh();
 	void loadStaticMesh(ID3D11Device* _device, const wchar_t* _objFileName);
 	void loadStaticMeshMTL(ID3D11Device* _device, const wchar_t* _objFileName, const std::wstring& _mtlFileNmae);
@@ -126,7 +122,7 @@ public:
 	void createCube(ID3D11Device* _device);
 	void createPlane(ID3D11Device* _device, u_int _vertical = 1, u_int _side = 1);
 	void createSphere(ID3D11Device* _device, u_int slices, u_int stacks);
-	void setPsNumber(const int _number) { usePsNumber = _number; }
+	void createBillboard(ID3D11Device* _device, const wchar_t* _textureName);
 	primitive_material& getPrimitiveMaterial()
 	{
 		return primitiveMaterial;
@@ -141,6 +137,15 @@ public:
 		std::vector<point_light>& _point_light,	//ポイントライト
 		const DirectX::XMFLOAT4&,	//材質色
 		bool						//線・塗りつぶし描画フラグ
+	);
+
+	void billboardRender(
+		ID3D11DeviceContext*,		//デバイスコンテキスト
+		const DirectX::XMFLOAT4X4&,	//ワールドビュープロジェクション合成行列
+		const DirectX::XMFLOAT4X4&,	//ワールド変換行列
+		const DirectX::XMFLOAT4&,	//カメラ座標
+		const DirectX::XMINT2& texpos,
+		const DirectX::XMINT2& texsize
 	);
 
 	void renderFirst(

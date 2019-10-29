@@ -23,7 +23,7 @@
 #include "Camera.h"
 
 #include "XinputPad.h"
-
+#include "keyInput.h"
 namespace GameLib
 {
 
@@ -104,7 +104,7 @@ namespace GameLib
 	}
 
 
-	DirectX::XMFLOAT2 getWindowSize();
+	DirectX::XMINT2 getWindowSize();
 
 	//-------------------------------------------------------------------//
 	//
@@ -350,7 +350,15 @@ namespace GameLib
 			DirectX::XMINT2 getThumbR(int _padNum);
 
 		}
+
+		namespace keyboard
+		{
+			int getState(int _keyNum);
+
+			void update();
+		}
 	}
+
 }
 
 #endif // !GAMELIB_H_

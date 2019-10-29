@@ -3,14 +3,13 @@ struct VS_OUT
 	float4 position : SV_POSITION;
 	float4 posw : POSITION;
 	float4 normal : NORMAL;
+	float2 texcoord : TEXCOORD;
 };
 
 struct Light
 {
 	float4 pos;
 	float4 color;
-	float4 diffuse;
-	float4 specular;
 	float4 attenuate;
 };
 

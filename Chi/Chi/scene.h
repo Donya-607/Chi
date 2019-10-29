@@ -5,8 +5,6 @@
 #include <Xinput.h>
 
 #include "baseScene.h"
-#include "testObj.h"
-#include "floor.h"
 
 #include "rayPick.h"
 
@@ -21,7 +19,6 @@ private:
 	float camPos[3] = { 0,6,-10 };
 	bool flg;
 	XMFLOAT3 pos;
-	skinned_mesh test;
 public:
 	sceneTitle() {}
 	~sceneTitle()
@@ -45,6 +42,7 @@ public:
 	struct Impl;
 private:
 	std::unique_ptr<Impl> pImpl;
+
 public:
 	SceneGame();
 	~SceneGame();
@@ -56,63 +54,6 @@ public:
 	void imGui()  override;
 };
 
-class sceneLightting : public baseScene
-{
-private:
-	ID3D11RenderTargetView* renderTarget;
-	ID3D11ShaderResourceView* shaderResource;
-	Sprite texture;
-	testOBJ model;
-	Floor ground;
-	Sprite test;
-	skinned_mesh test2;
-	bool enable = true;
-	float camPos[3] = { 0,6,-10 };
-	float lightAmbient[3];
-	float lightColor[3];
-	PointLight pointLight[5];
-	int light_index;
-public:
-	sceneLightting() {}
-	~sceneLightting()
-	{
-		uninit();
-	}
-	void init();
-	void update();
-	void render();
-	void uninit();
-	void imGui();
-	void testOBJImGui();
-	bool saveLightInfo();
-	void loadLightInfo();
-};
-
-class sceneShadow : public baseScene
-{
-private:
-	ID3D11RenderTargetView* renderTarget;
-	ID3D11ShaderResourceView* shaderResource;
-	testOBJ2 model;
-	Floor2 ground;
-	bool enable = false;
-	float camPos[3] = { 0,6,-10 };
-	float lightDirection[3] = { 0,-6,10 };
-	float lightPos[3] = { 0,6,-10 };
-public:
-	sceneShadow() {}
-	~sceneShadow()
-	{
-		uninit();
-	}
-	void init();
-	void update();
-	void render();
-	void uninit();
-	void imGui();
-	bool saveLightInfo();
-	void loadLightInfo();
-};
 
 class scenePose : public baseScene
 {

@@ -37,12 +37,12 @@ SamplerState diffuse_map_sample_state : register(s0);
 
 float4 main(VS_OUT pin) : SV_TARGET
 {
-	float3 color = (0,0,0);
-	float3 _color = (0, 0, 0);
+	float3 color = float3(0,0,0);
+	float3 _color = float3(0, 0, 0);
 	float3 N = pin.normal.xyz;
 	float3 V = normalize(camPos.xyz - pin.posw.xyz);
-	float3 L ,D, specularColor, ambientColor, diffuseColor;
-	float A;
+	float3 L , specularColor, ambientColor, diffuseColor;
+	float A ,D;
 
 	// tmpSampleColor is insert by Donya, for apply texture's alpha.
 	float4 tmpSampleColor = diffuse_map.Sample(diffuse_map_sample_state, pin.texcoord);
@@ -65,7 +65,7 @@ float4 main(VS_OUT pin) : SV_TARGET
 		L = normalize(L);
 		A = saturate(1.0f / (pntLight[i].attenuate.x + pntLight[i].attenuate.y*D + pntLight[i].attenuate.z*D*D));
 
-		diffuseColor = Diffuse(N, L, pntLight[i].color,
+		diffuseColor = Diffuse(N, L, pntLight[i].color.xyz,
 			material.diffuse.xyz, A);//ÇΩÇ‘ÇÒOK
 
 		specularColor = BlinnPhong(N, L, pntLight[i].color.xyz,

@@ -1,4 +1,4 @@
-#define MAX_BONES 64 // Changed by Donya.
+#define MAX_BONES 64
 
 struct VS_OUT
 {
@@ -13,8 +13,6 @@ struct Light
 {
 	float4 pos;
 	float4 color;
-	float4 diffuse;
-	float4 specular;
 	float4 attenuate;
 };
 

@@ -18,7 +18,7 @@ void shutDownLibrary()
 	GameLib::uninit();
 }
 
-DirectX::XMFLOAT2 getWindowSize()
+DirectX::XMINT2 getWindowSize()
 {
 	return GameLib::getWindowSize();
 }
@@ -526,3 +526,7 @@ DirectX::XMINT2 getThumbR(int _padNum)
 
 
 
+int getKeyState(int _keyNum)
+{
+	return GameLib::input::keyboard::getState(_keyNum);
+}

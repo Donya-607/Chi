@@ -6,8 +6,8 @@ Camera::Camera()
 	position = DirectX::XMFLOAT3(0.0f, 500.0f, -500.0f);
 	target = DirectX::XMFLOAT3(.0f, .0f, .0f);
 	state = cameraNumber::MONITORING;
-	float fov = DirectX::XMConvertToRadians(30.0f);
-	float aspect = pSystem->SCREEN_WIDTH / pSystem->SCREEN_HEIGHT;
+	constexpr float fov = DirectX::XMConvertToRadians(30.0f);
+	float aspect = pSystem->SCREEN_WIDTH / pSystem->SCREEN_HEIGHT*1.0f;
 	SetPerspectiveMatrix(fov, aspect, 0.1f, 1000.0f);
 }
 
@@ -96,5 +96,5 @@ DirectX::XMMATRIX Camera::GetLightViewMatrix(DirectX::XMFLOAT3 _pos, DirectX::XM
 
 DirectX::XMMATRIX Camera::GetLightProjectionMatrix()
 {
-	return DirectX::XMMatrixOrthographicLH(pSystem->SCREEN_WIDTH/15, pSystem->SCREEN_HEIGHT/15, 0.1f, 1000.0f);
+	return DirectX::XMMatrixOrthographicLH(pSystem->SCREEN_WIDTH/15.0f, pSystem->SCREEN_HEIGHT/15.0f, 0.1f, 1000.0f);
 }

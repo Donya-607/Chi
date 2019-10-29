@@ -15,24 +15,25 @@ namespace GameLib
 		HWND hwnd;  // ウインドウハンドル
 
 					// DirectX11関連
-		ID3D11Device*           device;
-		ID3D11DeviceContext*    context;
-		IDXGISwapChain*         swapChain;
-		ID3D11RenderTargetView* renderTargetView;
-		ID3D11DepthStencilView* depthStencilView;
-		ID3D11BlendState*       blendState;
+		ID3D11Device*           device = nullptr;
+		ID3D11DeviceContext*    context = nullptr;
+		IDXGISwapChain*         swapChain = nullptr;
+		ID3D11RenderTargetView* renderTargetView = nullptr;
+		ID3D11DepthStencilView* depthStencilView = nullptr;
+		ID3D11BlendState*       blendState = nullptr;
 
 		std::wstring projectName;
 
 		//// その他
-		blender*                 Blender;
-		Primitive*               primitive;
+		blender*                 Blender = nullptr;
+		Primitive*               primitive = nullptr;
 		//PrimitiveBatch*        primitiveBatch;
 		high_resolution_timer    hrTimer;
 		Camera					 cam;
 		line_light				 LineLight;
 		std::vector<point_light> pointLights;
 		XboxPad					 pad[4];
+		keyInput				 keyboard;
 		dragDrop				drag_drop;
 	};
 
@@ -89,8 +90,8 @@ namespace GameLib
 		ID3D11Texture2D* back_buffer = nullptr;
 		D3D11_TEXTURE2D_DESC renderTextureDesc;
 		ZeroMemory(&renderTextureDesc, sizeof(D3D11_TEXTURE2D_DESC));
-		renderTextureDesc.Width = pSystem->SCREEN_WIDTH;
-		renderTextureDesc.Height = pSystem->SCREEN_HEIGHT;
+		renderTextureDesc.Width = (UINT)pSystem->SCREEN_WIDTH;
+		renderTextureDesc.Height = (UINT)pSystem->SCREEN_HEIGHT;
 		renderTextureDesc.MipLevels = 1;
 		renderTextureDesc.ArraySize = 1;
 		renderTextureDesc.Format = DXGI_FORMAT::DXGI_FORMAT_R32_FLOAT;
@@ -121,8 +122,8 @@ namespace GameLib
 		ID3D11Texture2D* back_buffer = nullptr;
 		D3D11_TEXTURE2D_DESC renderTextureDesc;
 		ZeroMemory(&renderTextureDesc, sizeof(D3D11_TEXTURE2D_DESC));
-		renderTextureDesc.Width = pSystem->SCREEN_WIDTH;
-		renderTextureDesc.Height = pSystem->SCREEN_HEIGHT;
+		renderTextureDesc.Width = (UINT)pSystem->SCREEN_WIDTH;
+		renderTextureDesc.Height = (UINT)pSystem->SCREEN_HEIGHT;
 		renderTextureDesc.MipLevels = 1;
 		renderTextureDesc.ArraySize = 1;
 		renderTextureDesc.Format = DXGI_FORMAT::DXGI_FORMAT_R32_FLOAT;
@@ -149,7 +150,7 @@ namespace GameLib
 		return m.hrTimer.time_interval();
 	}
 
-	DirectX::XMFLOAT2 getWindowSize()
+	DirectX::XMINT2 getWindowSize()
 	{
 		return{ pSystem->SCREEN_WIDTH ,pSystem->SCREEN_HEIGHT };
 	}
@@ -210,6 +211,7 @@ namespace GameLib
 		ImGui::NewFrame();
 		m.cam.update();
 		input::xInput::getState();
+		input::keyboard::update();
 		float ClearColor[4] = { 0.5f, .0f, .0f, 1.0f }; //red,green,blue,alpha
 
 		m.context->ClearRenderTargetView(m.renderTargetView, ClearColor);
@@ -860,5 +862,12 @@ namespace GameLib
 	}
 }
 
+int GameLib::input::keyboard::getState(int _keyNum)
+{
+	return m.keyboard.getState(_keyNum);
+}
 
-
+void GameLib::input::keyboard::update()
+{
+	m.keyboard.update();
+}
