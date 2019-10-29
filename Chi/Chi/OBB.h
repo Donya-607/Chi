@@ -11,7 +11,6 @@ public:
 	Donya::Vector3 pos;
 	Donya::Vector3 scale;
 	Donya::Quaternion orientation;
-	Donya::Vector3 angle;
 	// bool judge;
 
 public:

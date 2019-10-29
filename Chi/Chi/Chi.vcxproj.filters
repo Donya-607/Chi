@@ -121,6 +121,7 @@
     <ClInclude Include="BossAI.h" />
     <ClInclude Include="Particle.h" />
     <ClInclude Include="Boss.h" />
+    <ClInclude Include="OBB.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp">
@@ -207,6 +208,7 @@
     <ClCompile Include="BossAI.cpp" />
     <ClCompile Include="Particle.cpp" />
     <ClCompile Include="Boss.cpp" />
+    <ClCompile Include="OBB.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="geometric_phong_ps.hlsl">

@@ -235,7 +235,7 @@ public:
 
 			if ( ImGui::TreeNode( "Game" ) )
 			{
-				ImGui::Text( "Show.\'I\' or \H'\'key : Toggle ImGui ON/OFF" );
+				ImGui::Text( "Show.\'I\' or \'H'\'key : Toggle ImGui ON/OFF" );
 				ImGui::Text( "Show.\'T\'key : Toggle Collision ON/OFF" );
 				ImGui::Text( "" );
 

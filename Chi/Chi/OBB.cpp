@@ -22,30 +22,10 @@ bool OBB::JudgeOBB(const OBB* obb)
 
 
 	//	‰ñ“]
-	DirectX::XMMATRIX R, Rx, Ry, Rz;
 	DirectX::XMFLOAT4X4 rota, rota2;
-
-/*
-	DirectX::XMFLOAT4 orientationFloat4;
-	orientationFloat4.x = orientation.x;
-	orientationFloat4.y = orientation.y;
-	orientationFloat4.z = orientation.z;
-	orientationFloat4.w = orientation.w;
-	R = DirectX::XMMatrixRotationQuaternion(DirectX::XMLoadFloat4(&orientationFloat4));
-	DirectX::XMStoreFloat4x4(&rota, R);
-*/
-/*
-	Rx = DirectX::XMMatrixRotationX(angle.x);				//	XŽ²‚ðŠî€‚Æ‚µ‚½‰ñ“]s—ñ
-	Ry = DirectX::XMMatrixRotationY(angle.y);				//	YŽ²‚ðŠî€‚Æ‚µ‚½‰ñ“]s—ñ
-	Rz = DirectX::XMMatrixRotationZ(angle.z);				//	ZŽ²‚ðŠî€‚Æ‚µ‚½‰ñ“]s—ñ
-	R = DirectX::XMMatrixRotationRollPitchYaw(0, 0, 0);
-	R = Rz * Ry * Rx;
-	DirectX::XMStoreFloat4x4(&rota, R);
-*/
 
 	rota = orientation.RequireRotationMatrix();
 
-	// TODO : ‰ñ“]s—ñ‚©‚çƒf[ƒ^Š“¾
 	Nv1_1.x = rota._11;
 	Nv1_1.y = rota._12;
 	Nv1_1.z = rota._13;
@@ -57,23 +37,6 @@ bool OBB::JudgeOBB(const OBB* obb)
 	Nv3_1.x = rota._31;
 	Nv3_1.y = rota._32;
 	Nv3_1.z = rota._33;
-
-/*
-	orientationFloat4.x = obb->orientation.x;
-	orientationFloat4.y = obb->orientation.y;
-	orientationFloat4.z = obb->orientation.z;
-	orientationFloat4.w = obb->orientation.w;
-	R = DirectX::XMMatrixRotationQuaternion(DirectX::XMLoadFloat4(&orientationFloat4));
-	DirectX::XMStoreFloat4x4(&rota2, R);
-*/
-/*
-	Rx = DirectX::XMMatrixRotationX(obb->angle.x);				//	XŽ²‚ðŠî€‚Æ‚µ‚½‰ñ“]s—ñ
-	Ry = DirectX::XMMatrixRotationY(obb->angle.y);				//	YŽ²‚ðŠî€‚Æ‚µ‚½‰ñ“]s—ñ
-	Rz = DirectX::XMMatrixRotationZ(obb->angle.z);				//	ZŽ²‚ðŠî€‚Æ‚µ‚½‰ñ“]s—ñ
-	R = DirectX::XMMatrixRotationRollPitchYaw(0, 0, 0);
-	R = Rz * Ry * Rx;
-	DirectX::XMStoreFloat4x4(&rota2, R);
-*/
 
 	rota2 = obb->orientation.RequireRotationMatrix();
 
@@ -89,7 +52,6 @@ bool OBB::JudgeOBB(const OBB* obb)
 	Nv3_2.y = rota2._32;
 	Nv3_2.z = rota2._33;
 
-	// TODO : cube‚Ìscale
 	v1_1.x = Nv1_1.x * scale.x / 2.0f;
 	v1_1.y = Nv1_1.y * scale.x / 2.0f;
 	v1_1.z = Nv1_1.z * scale.x / 2.0f;
@@ -120,11 +82,6 @@ bool OBB::JudgeOBB(const OBB* obb)
 	interval.x = pos.x - obb->pos.x;
 	interval.y = pos.y - obb->pos.y;
 	interval.z = pos.z - obb->pos.z;
-
-	// interval.x = obj1->pos.x - obj2->pos.x;
-	// interval.y = obj1->pos.y - obj2->pos.y;
-	// interval.z = obj1->pos.z - obj2->pos.z;
-
 
 	float r1 = 0.0f;
 	float r2 = 0.0f;

@@ -173,6 +173,7 @@
     <ClInclude Include="liblary\imgui\imstb_truetype.h" />
     <ClInclude Include="light.h" />
     <ClInclude Include="misc.h" />
+    <ClInclude Include="OBB.h" />
     <ClInclude Include="Particle.h" />
     <ClInclude Include="physics.h" />
     <ClInclude Include="Player.h" />
@@ -217,6 +218,7 @@
     <ClCompile Include="liblary\imgui\imgui_impl_win32.cpp" />
     <ClCompile Include="liblary\imgui\imgui_widgets.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="OBB.cpp" />
     <ClCompile Include="Particle.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="primitive.cpp" />
