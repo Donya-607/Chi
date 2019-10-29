@@ -118,6 +118,8 @@
     <ClInclude Include="Donya\Collision.h" />
     <ClInclude Include="Stage.h" />
     <ClInclude Include="Donya\ChiUtility.h" />
+    <ClInclude Include="BossAI.h" />
+    <ClInclude Include="Particle.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp">
@@ -199,6 +201,10 @@
     <ClCompile Include="Donya\Collision.cpp" />
     <ClCompile Include="Stage.cpp" />
     <ClCompile Include="Donya\ChiUtility.cpp" />
+    <ClCompile Include="DragDrop.cpp" />
+    <ClCompile Include="SceneEffect.cpp" />
+    <ClCompile Include="BossAI.cpp" />
+    <ClCompile Include="Particle.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="geometric_phong_ps.hlsl">
