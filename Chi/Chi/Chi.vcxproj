@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -80,14 +80,14 @@
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
-      <AdditionalLibraryDirectories>$(ProjectDir)liblary\FMOD\LowLevel\lib\;$(ProjectDir)liblary\FMOD\Studio\lib\;$(ProjectDir)liblary\DirectXTK-master\Bin\Desktop_2015\Win32\Debug;$(ProjectDir)liblary\FBX SDK\2016.1.2\lib\vs2015\x86\debug;$(ProjectDir)liblary\DirectXTex-master\DirectXTex\Bin\Desktop_2019\Win32\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)liblary\FMOD\LowLevel\lib;$(ProjectDir)liblary\FMOD\Studio\lib;$(ProjectDir)liblary\DirectXTK-master\Bin\Desktop_2015\Win32\Debug;$(ProjectDir)liblary\FBX SDK\2016.1.2\lib\vs2015\x86\debug;$(ProjectDir)liblary\DirectXTex-master\DirectXTex\Bin\Desktop_2019\Win32\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>d3d11.lib;dxgi.lib;DirectXTK.lib;DirectXTex.lib;fmodL_vc.lib;fmodstudioL_vc.lib;libfbxsdk-md.lib;winmm.lib;xaudio2.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <FxCompile>
       <ShaderModel>5.0</ShaderModel>
       <ObjectFileOutput>$(projectDir)Data/shader/%(Filename).cso</ObjectFileOutput>
       <AssemblerOutput>AssemblyCode</AssemblerOutput>
-      <AssemblerOutputFile>$(projectDir)Data/shader/%(Filename).</AssemblerOutputFile>
+      <AssemblerOutputFile>$(projectDir)Data/shader/%(Filename).cod</AssemblerOutputFile>
     </FxCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -115,7 +115,7 @@
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>$(ProjectDir)liblary\FMOD\LowLevel\lib\;$(ProjectDir)liblary\FMOD\Studio\lib\;$(ProjectDir)liblary\FBX SDK\2016.1.2\lib\vs2015\x86\release;$(ProjectDir)liblary\DirectXTK-master\Bin\Desktop_2015\Win32\Release;$(ProjectDir)liblary\DirectXTex-master\DirectXTex\Bin\Desktop_2019\Win32\Relese;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)liblary\FMOD\LowLevel\lib;$(ProjectDir)liblary\FMOD\Studio\lib;$(ProjectDir)liblary\FBX SDK\2016.1.2\lib\vs2015\x86\release;$(ProjectDir)liblary\DirectXTK-master\Bin\Desktop_2015\Win32\Release;$(ProjectDir)liblary\DirectXTex-master\DirectXTex\Bin\Desktop_2019\Win32\Relese;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>d3d11.lib;dxgi.lib;DirectXTK.lib;DirectXTex.lib;fmod_vc.lib;fmodstudio_vc.lib;libfbxsdk-md.lib;winmm.lib;xaudio2.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <FxCompile>
@@ -153,9 +153,7 @@
     <ClInclude Include="Donya\UseImGui.h" />
     <ClInclude Include="Donya\Vector.h" />
     <ClInclude Include="dragDrop.h" />
-    <ClInclude Include="floor.h" />
     <ClInclude Include="font.h" />
-    <ClInclude Include="framework.h" />
     <ClInclude Include="frame_rate.h" />
     <ClInclude Include="gameLib.h" />
     <ClInclude Include="GameLibFunctions.h" />
@@ -182,7 +180,6 @@
     <ClInclude Include="Sprite.h" />
     <ClInclude Include="static_mesh.h" />
     <ClInclude Include="system.h" />
-    <ClInclude Include="testObj.h" />
     <ClInclude Include="timeMeasurement.h" />
     <ClInclude Include="util.h" />
     <ClInclude Include="vector.h" />
@@ -198,9 +195,8 @@
     <ClCompile Include="Donya\Useful.cpp" />
     <ClCompile Include="Donya\UseImGui.cpp" />
     <ClCompile Include="Donya\Vector.cpp" />
-    <ClCompile Include="floor.cpp" />
+    <ClCompile Include="DragDrop.cpp" />
     <ClCompile Include="font.cpp" />
-    <ClCompile Include="framework.cpp" />
     <ClCompile Include="frame_rate.cpp" />
     <ClCompile Include="gameLib.cpp" />
     <ClCompile Include="gameLibFunctions.cpp" />
@@ -216,15 +212,12 @@
     <ClCompile Include="rayPick.cpp" />
     <ClCompile Include="resourceManager.cpp" />
     <ClCompile Include="SceneGame.cpp" />
-    <ClCompile Include="sceneLightting.cpp" />
     <ClCompile Include="sceneManager.cpp" />
-    <ClCompile Include="scenePhysix.cpp" />
     <ClCompile Include="scenePose.cpp" />
     <ClCompile Include="sceneTitle.cpp" />
     <ClCompile Include="skinned_mesh.cpp" />
     <ClCompile Include="Sprite.cpp" />
     <ClCompile Include="static_mesh.cpp" />
-    <ClCompile Include="testObj.cpp" />
     <ClCompile Include="timeMeasurement.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -235,6 +228,7 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <AssemblerOutputFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(projectDir)Data/shader/%(Filename).cod</AssemblerOutputFile>
     </FxCompile>
     <FxCompile Include="geometric_primitive_vs.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>

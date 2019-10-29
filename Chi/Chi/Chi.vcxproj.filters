@@ -13,9 +13,6 @@
     <ClInclude Include="vector.h">
       <Filter>header</Filter>
     </ClInclude>
-    <ClInclude Include="testObj.h">
-      <Filter>header</Filter>
-    </ClInclude>
     <ClInclude Include="system.h">
       <Filter>header</Filter>
     </ClInclude>
@@ -64,16 +61,10 @@
     <ClInclude Include="gameLib.h">
       <Filter>header</Filter>
     </ClInclude>
-    <ClInclude Include="framework.h">
-      <Filter>header</Filter>
-    </ClInclude>
     <ClInclude Include="frame_rate.h">
       <Filter>header</Filter>
     </ClInclude>
     <ClInclude Include="font.h">
-      <Filter>header</Filter>
-    </ClInclude>
-    <ClInclude Include="floor.h">
       <Filter>header</Filter>
     </ClInclude>
     <ClInclude Include="dragDrop.h">
@@ -129,16 +120,10 @@
     <ClCompile Include="Camera.cpp">
       <Filter>source</Filter>
     </ClCompile>
-    <ClCompile Include="floor.cpp">
-      <Filter>source</Filter>
-    </ClCompile>
     <ClCompile Include="font.cpp">
       <Filter>source</Filter>
     </ClCompile>
     <ClCompile Include="frame_rate.cpp">
-      <Filter>source</Filter>
-    </ClCompile>
-    <ClCompile Include="framework.cpp">
       <Filter>source</Filter>
     </ClCompile>
     <ClCompile Include="gameLib.cpp">
@@ -159,13 +144,7 @@
     <ClCompile Include="resourceManager.cpp">
       <Filter>source</Filter>
     </ClCompile>
-    <ClCompile Include="sceneLightting.cpp">
-      <Filter>source</Filter>
-    </ClCompile>
     <ClCompile Include="sceneManager.cpp">
-      <Filter>source</Filter>
-    </ClCompile>
-    <ClCompile Include="scenePhysix.cpp">
       <Filter>source</Filter>
     </ClCompile>
     <ClCompile Include="scenePose.cpp">
@@ -181,9 +160,6 @@
       <Filter>source</Filter>
     </ClCompile>
     <ClCompile Include="static_mesh.cpp">
-      <Filter>source</Filter>
-    </ClCompile>
-    <ClCompile Include="testObj.cpp">
       <Filter>source</Filter>
     </ClCompile>
     <ClCompile Include="timeMeasurement.cpp">
@@ -217,6 +193,7 @@
     <ClCompile Include="Donya\Quaternion.cpp" />
     <ClCompile Include="Donya\Vector.cpp" />
     <ClCompile Include="Donya\FilePath.cpp" />
+    <ClCompile Include="DragDrop.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="geometric_phong_ps.hlsl">

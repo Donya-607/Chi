@@ -14,7 +14,6 @@ XMFLOAT3 convertModelSpace(const XMFLOAT3& _wm, const XMMATRIX& _worldMatrix)
 {
 	XMFLOAT4 _pos = { _wm.x, _wm.y, _wm.z ,1.0f };
 	XMFLOAT4 _result = { 0,0,0,0 };
-	XMVECTOR test;
 
 	XMMATRIX _inverse_world = XMMatrixInverse(nullptr, _worldMatrix);
 	XMFLOAT4X4 _inverse;

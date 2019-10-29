@@ -8,8 +8,6 @@ struct PointLight
 {
 	DirectX::XMFLOAT4 pos;
 	DirectX::XMFLOAT4 color;
-	DirectX::XMFLOAT4 diffuse;
-	DirectX::XMFLOAT4 specular;
 	DirectX::XMFLOAT4 attenuate;
 };
 
@@ -27,7 +25,7 @@ private:
 public:
 	line_light()
 	{
-		_line_light.direction = { 1,1,1,1 };
+		_line_light.direction = { 1,1,-1,1 };
 		_line_light.color = { 1,1,1,1 };
 	}
 	void setLineLight(const DirectX::XMFLOAT4& _lightDirection, const DirectX::XMFLOAT4& _lightColor)
@@ -58,9 +56,8 @@ private:
 public:
 	point_light()
 	{
+		index = 0;
 		pointLight.pos = { .0f,.0f,.0f,.0f };
-		pointLight.diffuse = { 0.5f,0.5f,0.5f,1.0f };
-		pointLight.specular = { 0.2f,0.2f,0.2f,1.0f };
 		pointLight.attenuate = { 0.5f,0.5f,0.5f,1.0f };
 	}
 	void setPointLight(const PointLight& info)

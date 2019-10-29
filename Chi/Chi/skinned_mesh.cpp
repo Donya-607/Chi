@@ -226,11 +226,6 @@ void skinned_mesh::fbxInit(ID3D11Device * _device, const std::string& _fbxFileNa
 			}
 		}
 
-		//FbxTime::EMode time_mode = fbx_mesh->GetScene()->GetGlobalSettings().GetTimeMode();
-		//FbxTime frame_time;
-		//frame_time.SetTime(0, 0, 0, 1, 0, time_mode);
-		//fetch_bone_matrices(fbx_mesh, mesh.skeletal, frame_time * 20);
-		// pose at frame 20  
 
 		fetch_animations(fbx_mesh, mesh.skeletal_animation);
 
@@ -529,7 +524,7 @@ void skinned_mesh::render(
 				{
 					if (size <= i)
 					{
-						cb.pntLight[i].pos.w = -1;
+						cb.pntLight[i].pos.w = 0;
 						continue;
 					}
 					cb.pntLight[i] = _point_light[i].getInfo();
@@ -615,7 +610,7 @@ void skinned_mesh::render(
 			{
 				if (size <= i)
 				{
-					cb.pntLight[i].pos.w = -1;
+					cb.pntLight[i].pos.w = 0;
 					continue;
 				}
 				cb.pntLight[i] = _point_light[i].getInfo();
@@ -770,7 +765,7 @@ void skinned_mesh::fetch_animations(FbxMesh * fbx_mesh, skinned_mesh::skeletal_a
 		FbxTime::EMode time_mode = fbx_mesh->GetScene()->GetGlobalSettings().GetTimeMode();
 		FbxTime frame_time;    frame_time.SetTime(0, 0, 0, 1, 0, time_mode);
 
-		sampling_rate = sampling_rate > 0 ? sampling_rate : frame_time.GetFrameRate(time_mode);
+		sampling_rate = sampling_rate > 0 ? sampling_rate : (u_int)frame_time.GetFrameRate(time_mode);
 		float sampling_time = 1.0f / sampling_rate;
 		skeletal_animation.sampling_time = sampling_time;
 		skeletal_animation.animation_tick = 0.0f;

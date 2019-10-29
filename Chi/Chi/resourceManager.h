@@ -96,6 +96,5 @@ public:
 
 };
 
-#define pResource ResourceManager::getInstance()
 
 #endif // !RESOURCEMANAGER_H_
