@@ -1,5 +1,8 @@
 #include "Particle.h"
 #include "imgui.h"
+#include "Donya/FilePath.h"
+#include "Donya/Useful.h"
+
 
 void Particle::Init( DirectX::XMFLOAT3 _originPos, DirectX::XMFLOAT3 _speed, DirectX::XMFLOAT3 _accel, float _scale )
 {
@@ -114,12 +117,14 @@ void FlashParticle::Set()
 
 void FlashParticle::ImGuiDataInit()
 {
+	LoadParameter();
+
 	imguiData.speed[0] = 0.0f;
 	imguiData.speed[1] = 0.0f;
 	imguiData.speed[2] = 0.0f;
-	imguiData.accel[0] = 0.0f;
-	imguiData.accel[1] = 0.0f;
-	imguiData.accel[2] = 0.0f;
+	//imguiData.accel[0] = 0.0f;
+	//imguiData.accel[1] = 0.0f;
+	//imguiData.accel[2] = 0.0f;
 	imguiData.accelStart[0] = 0.0f;
 	imguiData.accelStart[1] = 0.0f;
 	imguiData.accelStart[2] = 0.0f;
@@ -154,15 +159,88 @@ void FlashParticle::Emit()
 
 void FlashParticle::ImGui()
 {
-	if (ImGui::TreeNode(u8"Bubble"))
+	if (ImGui::TreeNode(u8"Flash"))
 	{
+#if 0
 		ImGui::InputInt3("speed", imguiData.speed);
-		ImGui::InputInt3("accel", imguiData.accel);
+		//ImGui::InputInt3("accel", imguiData.accel);
 		ImGui::InputInt3("accelStart", imguiData.accelStart);
 		ImGui::InputInt3("accelStage", imguiData.accelStage);
+#else
+		ImGui::DragInt3("speed", imguiData.speed);
+		ImGui::DragInt3("accelStart", imguiData.accelStart);
+		ImGui::DragInt3("accelStage", imguiData.accelStage);
+#endif
 		ImGui::TreePop();
 	}
 }
+
+void FlashParticle::LoadParameter(bool isBinary)
+{
+	Donya::Serializer::Extension ext = (isBinary)
+		? Donya::Serializer::Extension::BINARY
+		: Donya::Serializer::Extension::JSON;
+	std::string filePath = GenerateSerializePath(SERIAL_ID, ext);
+
+	Donya::Serializer seria;
+	seria.Load(ext, filePath.c_str(), SERIAL_ID, *this);
+}
+
+
+#if USE_IMGUI
+
+void FlashParticle::SaveParameter()
+{
+	Donya::Serializer::Extension bin = Donya::Serializer::Extension::BINARY;
+	Donya::Serializer::Extension json = Donya::Serializer::Extension::JSON;
+	std::string binPath = GenerateSerializePath(SERIAL_ID, bin);
+	std::string jsonPath = GenerateSerializePath(SERIAL_ID, json);
+
+	Donya::Serializer seria;
+	seria.Save(bin, binPath.c_str(), SERIAL_ID, *this);
+	seria.Save(json, jsonPath.c_str(), SERIAL_ID, *this);
+}
+
+void FlashParticle::UseImGui()
+{
+	if (ImGui::BeginIfAllowed())
+	{
+		if (ImGui::TreeNode("FlashParticle.AdjustData"))
+		{
+			/*ImGui::SliderFloat("Scale", &scale, 0.0f, 8.0f);
+			ImGui::DragFloat("Running Speed", &runSpeed);
+			ImGui::SliderFloat("SlerpPercent of Rotation", &rotSlerpFactor, 0.05f, 1.0f);*/
+
+			if (ImGui::TreeNode("File.I/O"))
+			{
+				static bool isBinary = true;
+				if (ImGui::RadioButton("Binary", isBinary)) { isBinary = true; }
+				if (ImGui::RadioButton("JSON", !isBinary)) { isBinary = false; }
+				std::string loadStr{ "Load " };
+				loadStr += (isBinary) ? "Binary" : "JSON";
+
+				if (ImGui::Button("Save"))
+				{
+					SaveParameter();
+				}
+				// if ( ImGui::Button( Donya::MultiToUTF8( loadStr ).c_str() ) )
+				if (ImGui::Button(loadStr.c_str()))
+				{
+					LoadParameter(isBinary);
+				}
+
+				ImGui::TreePop();
+			}
+
+			ImGui::TreePop();
+		}
+
+		ImGui::End();
+	}
+}
+
+#endif // USE_IMGUI
+
 
 void BubbleParticle::Set()
 {
@@ -214,12 +292,17 @@ void BubbleParticle::Emit()
 
 void BubbleParticle::ImGui()
 {
-	if (ImGui::TreeNode(u8"Flash"))
+	if (ImGui::TreeNode(u8"Bubble"))
 	{
+#if 0
 		ImGui::InputInt3("speed", imguiData.speed);
 		ImGui::InputInt3("accel", imguiData.accel);
-		ImGui::InputInt3("accelStart", imguiData.accelStart);
-		ImGui::InputInt3("accelStage", imguiData.accelStage);
+		//ImGui::InputInt3("accelStart", imguiData.accelStart);
+		//ImGui::InputInt3("accelStage", imguiData.accelStage);
+#else
+		ImGui::DragInt3("speed", imguiData.speed);
+		ImGui::DragInt3("accel", imguiData.accel);
+#endif
 		ImGui::TreePop();
 	}
 }
