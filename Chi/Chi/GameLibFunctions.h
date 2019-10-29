@@ -123,6 +123,10 @@ void setCamPos(const DirectX::XMFLOAT3& pos);
 
 void setCamPos(const float x, const float y, const float z);
 
+void setTarget(const DirectX::XMFLOAT3& _target);
+
+void setTarget(const float x, const float y, const float z);
+
 DirectX::XMFLOAT4 getCamPos();
 
 //light//
@@ -158,13 +162,22 @@ void OBJRender(static_mesh* staticMesh, const DirectX::XMFLOAT4X4& SynthesisMatr
 //skinned_mesh//
 void loadFBX(skinned_mesh* skinnedMesh, const std::string& FBXName);
 
+void setLoopFlg(skinned_mesh* _mesh, const bool _is_loop);
+
+void setStopAnimation(skinned_mesh* _mesh, const bool _is_stop);
+
+void setStopTime(skinned_mesh* _mesh, const int _stop_time);
+
 void FBXRender(skinned_mesh* skinnedMesh, const DirectX::XMFLOAT4X4& SynthesisMatrix, const DirectX::XMFLOAT4X4& worldMatrix, const DirectX::XMFLOAT4& materialColor = { 1.0f,1.0f,1.0f,1.0f }, bool wireFlg = false);
 
 
 //Xinput_Pad
 int getState();
 
-bool pressedButtons(int _padNum, int _button);
+/// <summary>
+/// -1 : ó£ÇµÇΩèuä‘Å@0 : âüÇµÇƒÇ»Ç¢Å@1 : âüÇµÇΩèuä‘ Å@2 : âüÇµÇ¡ÇœÇ»Çµ
+/// </summary>
+int pressedButtons(int _padNum, int _button);
 
 DirectX::XMINT2 getThumbL(int _padNum);
 DirectX::XMINT2 getThumbR(int _padNum);

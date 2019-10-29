@@ -139,11 +139,14 @@ protected:
 	ID3D11DepthStencilState* depthStencilState = nullptr;	//depthStencilState
 
 	int							numIndices;
-
+	bool	loop_flg;
+	bool	stop_animation;
+	float	stop_time;
+	int	animation_flame;
 	void fbxInit(ID3D11Device* _device, const std::string& _objFileName);
 
 public:
-	skinned_mesh() : sampleState(nullptr),vertexShader(nullptr),pixelShader(nullptr),layout(nullptr),noTexVS(nullptr),noTexPS(nullptr),noTexLayout(nullptr),constant_buffer(nullptr),rasterizeFillOut(nullptr),rasterizeLine(nullptr),depthStencilState(nullptr),have_born(false),have_material(false),have_uv(false),numIndices(0),tex2dDesc() {}
+	skinned_mesh() : sampleState(nullptr),vertexShader(nullptr),pixelShader(nullptr),layout(nullptr),noTexVS(nullptr),noTexPS(nullptr),noTexLayout(nullptr),constant_buffer(nullptr),rasterizeFillOut(nullptr),rasterizeLine(nullptr),depthStencilState(nullptr),have_born(false),have_material(false),have_uv(false),numIndices(0),tex2dDesc() ,loop_flg(true),stop_animation(false),stop_time(0),animation_flame(0){}
 	~skinned_mesh() {}
 	void setInfo(ID3D11Device* _device, const std::string& _objFileName);
 
@@ -172,6 +175,10 @@ public:
 	void fetch_bone_matrices(FbxMesh* fbx_mesh, std::vector<skinned_mesh::bone>& skeletal, FbxTime time);
 	void fbxamatrix_to_xmfloat4x4(const FbxAMatrix& fbxamatrix, DirectX::XMFLOAT4X4& xmfloat4x4);
 	void fetch_animations(FbxMesh* fbx_mesh, skinned_mesh::skeletal_animation& skeletal_animation, u_int sampling_rate = 0);
+	
+	void setLoopFlg(const bool _is_loop) { loop_flg = _is_loop; }
+	void setStopAnimation(const bool _is_stop) { stop_animation = _is_stop; }
+	void setStoptimer(const int _stop_timer) { stop_time = _stop_timer; }
 
 private:
 	//template <class Archive>

@@ -8,7 +8,7 @@
 //#include <cereal\types\unordered_map.hpp>
 //#include <cereal\types\string.hpp>
 
-void skinned_mesh::fbxInit(ID3D11Device * _device, const std::string& _fbxFileName)
+void skinned_mesh::fbxInit(ID3D11Device* _device, const std::string& _fbxFileName)
 {
 
 	// Create the FBX SDK manager 
@@ -46,7 +46,7 @@ void skinned_mesh::fbxInit(ID3D11Device * _device, const std::string& _fbxFileNa
 	std::vector<FbxNode*> fetched_meshes;
 	std::function<void(FbxNode*)> traverse = [&](FbxNode* node) {
 		if (node) {
-			FbxNodeAttribute *fbx_node_attribute = node->GetNodeAttribute();
+			FbxNodeAttribute* fbx_node_attribute = node->GetNodeAttribute();
 			if (fbx_node_attribute) {
 				switch (fbx_node_attribute->GetAttributeType()) {
 				case FbxNodeAttribute::eMesh:
@@ -66,7 +66,7 @@ void skinned_mesh::fbxInit(ID3D11Device * _device, const std::string& _fbxFileNa
 	for (size_t i = 0; i < fetched_meshes.size(); i++, index_mesh++)
 	{
 
-		FbxMesh *fbx_mesh = fetched_meshes.at(i)->GetMesh();
+		FbxMesh* fbx_mesh = fetched_meshes.at(i)->GetMesh();
 		mesh& mesh = meshes.at(i);
 
 
@@ -80,9 +80,9 @@ void skinned_mesh::fbxInit(ID3D11Device * _device, const std::string& _fbxFileNa
 		{
 			have_material = true;
 			subset& subset = mesh.subsets.at(index_of_material);
-			const FbxSurfaceMaterial *surface_material = fbx_mesh->GetNode()->GetMaterial(index_of_material);
+			const FbxSurfaceMaterial* surface_material = fbx_mesh->GetNode()->GetMaterial(index_of_material);
 
-			std::function<void(property &, const char *, const char *)> fetch_material_property = [&](property &material, const char *property_name, const char *factor_name)
+			std::function<void(property&, const char*, const char*)> fetch_material_property = [&](property& material, const char* property_name, const char* factor_name)
 			{
 				const FbxProperty property = surface_material->FindProperty(property_name);
 				const FbxProperty factor = surface_material->FindProperty(factor_name);
@@ -137,7 +137,7 @@ void skinned_mesh::fbxInit(ID3D11Device * _device, const std::string& _fbxFileNa
 		u_int vertex_count = 0;
 
 
-		const FbxVector4 *array_of_control_points = fbx_mesh->GetControlPoints();
+		const FbxVector4* array_of_control_points = fbx_mesh->GetControlPoints();
 		const int number_of_polygons = fbx_mesh->GetPolygonCount();
 		indices.resize(number_of_polygons * 3);
 
@@ -151,7 +151,7 @@ void skinned_mesh::fbxInit(ID3D11Device * _device, const std::string& _fbxFileNa
 			}
 
 			int offset = 0;
-			for (subset &subset : mesh.subsets)
+			for (subset& subset : mesh.subsets)
 			{
 				subset.index_start = offset;
 				offset += subset.index_count;
@@ -211,14 +211,15 @@ void skinned_mesh::fbxInit(ID3D11Device * _device, const std::string& _fbxFileNa
 					}
 					else
 					{
-						for (int i = 0; i < 4; i++)
+						FLOAT weight = vertex.bone_weights[1];
+						int _index = 0;
+						for (int i = 1; i < 4; i++)
 						{
-							if (vertex.bone_weights[i] > bone_point.at(index_of_influence).weight)
+							if (vertex.bone_weights[i] < weight)
 								continue;
-							vertex.bone_weights[i] = bone_point.at(index_of_influence).weight;
-							vertex.bone_indices[i] = bone_point.at(index_of_influence).index;
-
+							_index = i;
 						}
+						vertex.bone_weights[_index] += bone_point.at(index_of_influence).weight;
 					}
 				}
 				vertices.push_back(vertex);
@@ -255,7 +256,7 @@ void skinned_mesh::fbxInit(ID3D11Device * _device, const std::string& _fbxFileNa
 
 
 
-void skinned_mesh::setInfo(ID3D11Device * _device, const std::string & _fbxFileName)
+void skinned_mesh::setInfo(ID3D11Device* _device, const std::string& _fbxFileName)
 {
 
 	//std::wstring json_file_name;
@@ -351,7 +352,7 @@ void skinned_mesh::setInfo(ID3D11Device * _device, const std::string & _fbxFileN
 
 }
 
-void skinned_mesh::init(ID3D11Device * device, std::string vsName, D3D11_INPUT_ELEMENT_DESC * inputElementDescs, int numElement, std::string psName)
+void skinned_mesh::init(ID3D11Device* device, std::string vsName, D3D11_INPUT_ELEMENT_DESC* inputElementDescs, int numElement, std::string psName)
 {
 	HRESULT hr = S_OK;
 	//vertexShader
@@ -418,7 +419,7 @@ void skinned_mesh::init(ID3D11Device * device, std::string vsName, D3D11_INPUT_E
 }
 
 
-bool skinned_mesh::createBuffer(int index_mesh, ID3D11Device * device, vertex * vertices, int numV, unsigned int * indices, int numI)
+bool skinned_mesh::createBuffer(int index_mesh, ID3D11Device* device, vertex* vertices, int numV, unsigned int* indices, int numI)
 {
 	HRESULT hr;
 	D3D11_BUFFER_DESC vertexBuffer_desc;
@@ -474,22 +475,23 @@ bool skinned_mesh::createBuffer(int index_mesh, ID3D11Device * device, vertex * 
 
 
 void skinned_mesh::render(
-	ID3D11DeviceContext *context,
-	const DirectX::XMFLOAT4X4&SynthesisMatrix,
-	const DirectX::XMFLOAT4X4&worldMatrix,
-	const DirectX::XMFLOAT4&camPos,
+	ID3D11DeviceContext* context,
+	const DirectX::XMFLOAT4X4& SynthesisMatrix,
+	const DirectX::XMFLOAT4X4& worldMatrix,
+	const DirectX::XMFLOAT4& camPos,
 	line_light& _lightAmbient,
 	std::vector<point_light>& _point_light,
-	const DirectX::XMFLOAT4&materialColor,
+	const DirectX::XMFLOAT4& materialColor,
 	bool wireFlg,
 	float elapsed_time
 )
 
 {
-
+	if (stop_time > 0)
+		stop_time -= elapsed_time;
 	if (have_material)
 	{
-		for (auto&it : meshes)
+		for (auto& it : meshes)
 		{
 			for (auto& p : it.subsets)
 			{
@@ -511,20 +513,44 @@ void skinned_mesh::render(
 				//アニメーション行列の取得
 				if (it.skeletal_animation.size() > 0)
 				{
-					size_t frame = static_cast<size_t>(it.skeletal_animation.animation_tick / it.skeletal_animation.sampling_time);
-					if (frame > it.skeletal_animation.size() - 1)
+
+					//現在のアニメーションフレームの算出
+					animation_flame = (it.skeletal_animation.animation_tick / it.skeletal_animation.sampling_time);
+
+					//ループ用
+					if (loop_flg)
 					{
-						frame = 0;
-						it.skeletal_animation.animation_tick = 0;
+						if (static_cast<size_t>(animation_flame) > it.skeletal_animation.size() - 1)
+						{
+							animation_flame = 0;
+							it.skeletal_animation.animation_tick = 0;
+						}
+						//アニメーションタイマーのインクリメント
+						if (!stop_animation && stop_time <=0)
+							it.skeletal_animation.animation_tick += elapsed_time;
 					}
-					std::vector<bone> &skeletal = it.skeletal_animation.at(frame);
+					//ループ無し
+					else
+					{
+						if (static_cast<size_t>(animation_flame) > it.skeletal_animation.size() - 1)
+						{
+							animation_flame = it.skeletal_animation.size() - 1;
+							it.skeletal_animation.animation_tick = 0;
+						}
+
+						if (static_cast<size_t>(animation_flame) < it.skeletal_animation.size() - 1)
+							if (!stop_animation && stop_time <= 0)
+								it.skeletal_animation.animation_tick += elapsed_time;
+					}
+					//現在のフレームでの変換行列の算出
+					std::vector<bone>& skeletal = it.skeletal_animation.at(animation_flame);
 					size_t number_of_bones = skeletal.size();
 					_ASSERT_EXPR(number_of_bones < MAX_BONES, L"'the number_of_bones' exceeds MAX_BONES.");
 					for (size_t i = 0; i < number_of_bones; i++)
 					{
 						DirectX::XMStoreFloat4x4(&cb.bone_transforms[i], DirectX::XMLoadFloat4x4(&skeletal.at(i).transform));
 					}
-					it.skeletal_animation.animation_tick += elapsed_time;
+					//TODO skinme
 				}
 
 
@@ -599,7 +625,7 @@ void skinned_mesh::render(
 	}
 	else
 	{
-		for (auto & it : meshes)
+		for (auto& it : meshes)
 		{
 			//	定数バッファの作成
 			cbuffer cb;
@@ -683,7 +709,7 @@ void skinned_mesh::release()
 
 }
 
-void skinned_mesh::fetch_bone_influences(const FbxMesh * fbx_mesh, std::vector<bone_influences_per_control_point>& influences)
+void skinned_mesh::fetch_bone_influences(const FbxMesh* fbx_mesh, std::vector<bone_influences_per_control_point>& influences)
 {
 	const int number_of_control_points = fbx_mesh->GetControlPointsCount();
 	influences.resize(number_of_control_points);
@@ -691,7 +717,7 @@ void skinned_mesh::fetch_bone_influences(const FbxMesh * fbx_mesh, std::vector<b
 	const int number_of_deformers = fbx_mesh->GetDeformerCount(FbxDeformer::eSkin);
 	for (int index_of_deformer = 0; index_of_deformer < number_of_deformers; ++index_of_deformer)
 	{
-		FbxSkin *skin = static_cast<FbxSkin *>(fbx_mesh->GetDeformer(index_of_deformer, FbxDeformer::eSkin));
+		FbxSkin* skin = static_cast<FbxSkin*>(fbx_mesh->GetDeformer(index_of_deformer, FbxDeformer::eSkin));
 
 		const int number_of_clusters = skin->GetClusterCount();
 		for (int index_of_cluster = 0; index_of_cluster < number_of_clusters; ++index_of_cluster)
@@ -699,12 +725,12 @@ void skinned_mesh::fetch_bone_influences(const FbxMesh * fbx_mesh, std::vector<b
 			FbxCluster* cluster = skin->GetCluster(index_of_cluster);
 
 			const int number_of_control_point_indices = cluster->GetControlPointIndicesCount();
-			const int *array_of_control_point_indices = cluster->GetControlPointIndices();
-			const double *array_of_control_point_weights = cluster->GetControlPointWeights();
+			const int* array_of_control_point_indices = cluster->GetControlPointIndices();
+			const double* array_of_control_point_weights = cluster->GetControlPointWeights();
 
 			for (int i = 0; i < number_of_control_point_indices; ++i)
 			{
-				bone_influences_per_control_point &influences_per_control_point = influences.at(array_of_control_point_indices[i]);
+				bone_influences_per_control_point& influences_per_control_point = influences.at(array_of_control_point_indices[i]);
 				bone_influence influence;
 				influence.index = index_of_cluster;
 				influence.weight = static_cast<float>(array_of_control_point_weights[i]);
@@ -715,20 +741,20 @@ void skinned_mesh::fetch_bone_influences(const FbxMesh * fbx_mesh, std::vector<b
 	}
 }
 
-void skinned_mesh::fetch_bone_matrices(FbxMesh * fbx_mesh, std::vector<skinned_mesh::bone>& skeletal, FbxTime time)
+void skinned_mesh::fetch_bone_matrices(FbxMesh* fbx_mesh, std::vector<skinned_mesh::bone>& skeletal, FbxTime time)
 {
 	const int number_of_deformers = fbx_mesh->GetDeformerCount(FbxDeformer::eSkin);
 	for (int index_of_deformer = 0; index_of_deformer < number_of_deformers; ++index_of_deformer)
 	{
-		FbxSkin *skin = static_cast<FbxSkin *>(fbx_mesh->GetDeformer(index_of_deformer, FbxDeformer::eSkin));
+		FbxSkin* skin = static_cast<FbxSkin*>(fbx_mesh->GetDeformer(index_of_deformer, FbxDeformer::eSkin));
 
 		const int number_of_clusters = skin->GetClusterCount();
 		skeletal.resize(number_of_clusters);
 		for (int index_of_cluster = 0; index_of_cluster < number_of_clusters; ++index_of_cluster)
 		{
-			skinned_mesh::bone &bone = skeletal.at(index_of_cluster);
+			skinned_mesh::bone& bone = skeletal.at(index_of_cluster);
 
-			FbxCluster *cluster = skin->GetCluster(index_of_cluster);
+			FbxCluster* cluster = skin->GetCluster(index_of_cluster);
 
 			FbxAMatrix reference_global_init_position;
 			cluster->GetTransformMatrix(reference_global_init_position);
@@ -750,7 +776,7 @@ void skinned_mesh::fetch_bone_matrices(FbxMesh * fbx_mesh, std::vector<skinned_m
 	}
 }
 
-void skinned_mesh::fbxamatrix_to_xmfloat4x4(const FbxAMatrix &fbxamatrix, DirectX::XMFLOAT4X4 &xmfloat4x4)
+void skinned_mesh::fbxamatrix_to_xmfloat4x4(const FbxAMatrix& fbxamatrix, DirectX::XMFLOAT4X4& xmfloat4x4)
 {
 	for (int row = 0; row < 4; row++)
 	{
@@ -761,10 +787,10 @@ void skinned_mesh::fbxamatrix_to_xmfloat4x4(const FbxAMatrix &fbxamatrix, Direct
 	}
 }
 
-void skinned_mesh::fetch_animations(FbxMesh * fbx_mesh, skinned_mesh::skeletal_animation & skeletal_animation, u_int sampling_rate)
+void skinned_mesh::fetch_animations(FbxMesh* fbx_mesh, skinned_mesh::skeletal_animation& skeletal_animation, u_int sampling_rate)
 {
 	// Get the list of all the animation stack.   
-	FbxArray<FbxString *> array_of_animation_stack_names;
+	FbxArray<FbxString*> array_of_animation_stack_names;
 	fbx_mesh->GetScene()->FillAnimStackNameArray(array_of_animation_stack_names);
 
 	// Get the number of animations.   
@@ -781,11 +807,11 @@ void skinned_mesh::fetch_animations(FbxMesh * fbx_mesh, skinned_mesh::skeletal_a
 		skeletal_animation.sampling_time = sampling_time;
 		skeletal_animation.animation_tick = 0.0f;
 
-		FbxString *animation_stack_name = array_of_animation_stack_names.GetAt(0);
-		FbxAnimStack * current_animation_stack = fbx_mesh->GetScene()->FindMember<FbxAnimStack>(animation_stack_name->Buffer());
+		FbxString* animation_stack_name = array_of_animation_stack_names.GetAt(0);
+		FbxAnimStack* current_animation_stack = fbx_mesh->GetScene()->FindMember<FbxAnimStack>(animation_stack_name->Buffer());
 		fbx_mesh->GetScene()->SetCurrentAnimationStack(current_animation_stack);
 
-		FbxTakeInfo *take_info = fbx_mesh->GetScene()->GetTakeInfo(animation_stack_name->Buffer());
+		FbxTakeInfo* take_info = fbx_mesh->GetScene()->GetTakeInfo(animation_stack_name->Buffer());
 		FbxTime start_time = take_info->mLocalTimeSpan.GetStart();
 		FbxTime end_time = take_info->mLocalTimeSpan.GetStop();
 

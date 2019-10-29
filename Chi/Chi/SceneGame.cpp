@@ -22,7 +22,7 @@ public:
 	Donya::Vector3 cameraPos;
 	Player player;
 	static_mesh testCube;
-
+	skinned_mesh animTest;
 public:
 	Impl() :
 		cameraPos(),
@@ -39,7 +39,7 @@ public:
 
 		cameraPos = Donya::Vector3{ 0.0f, 256.0f, -512.0f };
 		createCube(&testCube);
-
+		loadFBX(&animTest, "./Data/TestMove.fbx");
 		player.Init();
 	}
 	void Uninit()
@@ -65,7 +65,15 @@ public:
 
 			return input;
 		};
-		player.Update( MakePlayerInput() );
+		player.Update(MakePlayerInput());
+
+		if(getKeyState(KEY_INPUT_SPACE))
+		{
+			//setStopTime(&animTest,1);
+			setStopAnimation(&animTest,true);
+		}
+		else
+		setStopAnimation(&animTest,false);
 	}
 
 	void Draw()
@@ -75,7 +83,7 @@ public:
 		Donya::Vector4x4 V = Donya::Vector4x4::FromMatrix( GameLib::camera::GetViewMatrix() );
 		Donya::Vector4x4 P = Donya::Vector4x4::FromMatrix( GameLib::camera::GetProjectionMatrix() );
 
-		player.Draw( V, P );
+		//player.Draw( V, P );
 
 		XMFLOAT4X4 World, world_view_projection;
 		DirectX::XMMATRIX worldM;
@@ -83,7 +91,7 @@ public:
 		worldM = DirectX::XMMatrixIdentity();
 
 		//	ägëÂÅEèkè¨
-		S = DirectX::XMMatrixScaling(100,100,100);
+		S = DirectX::XMMatrixScaling(0.5f,0.5f,0.5f);
 
 		//	âÒì]
 		Rx = DirectX::XMMatrixRotationX(0);				//	Xé≤ÇäÓèÄÇ∆ÇµÇΩâÒì]çsóÒ
@@ -101,7 +109,7 @@ public:
 		DirectX::XMStoreFloat4x4(&world_view_projection, worldM * getViewMatrix() * getProjectionMatrix());
 		DirectX::XMStoreFloat4x4(&World, worldM);
 		setBlendMode_ALPHA(125);
-		OBJRender(&testCube,world_view_projection, World, { 1,0,0,0.5 });
+		FBXRender(&animTest,world_view_projection, World);
 	}
 
 public:
