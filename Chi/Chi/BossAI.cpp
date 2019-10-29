@@ -60,7 +60,7 @@ void BossAI::StateRand()
 #if 0
 	state = rand() % ActionStateNum::END;
 #else
-	int percentRand = rand() % 101;
+	int percentRand = rand() % (percent[0] + percent[1] + percent[2]);
 	if (percentRand <= percent[0])
 	{
 		state = ActionStateNum::WAIT;
