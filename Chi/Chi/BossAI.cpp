@@ -25,6 +25,7 @@ void BossAI::Init()
 
 void BossAI::Update()
 {
+#if 0
 	if (cnt[state] <= maxCnt[state]) // 行動中
 	{
 		switch (state)
@@ -47,6 +48,7 @@ void BossAI::Update()
 	{
 
 	}
+#endif
 
 	if (maxCnt[state] + coolTimeMaxCnt[state] < cnt[state]++) // クールタイム後
 	{
