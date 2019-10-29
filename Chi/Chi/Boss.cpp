@@ -107,17 +107,24 @@ void BossParam::UseImGui()
 Boss::Boss() :
 	status( BossAI::ActionStateNum::WAIT ),
 	AI(),
+	stageNo( 1 ),
 	pos(), velocity(),
 	orientation(),
 	models()
-{}
+{
+	models.pIdle		= std::make_unique<skinned_mesh>();
+	models.pAtkFast		= std::make_unique<skinned_mesh>();
+	models.pAtkSwing	= std::make_unique<skinned_mesh>();
+}
 Boss::~Boss() = default;
 
-void Boss::Init()
+void Boss::Init( int stageNumber )
 {
 	BossParam::Get().Init();
 
 	LoadModel();
+
+	stageNo = stageNumber;
 
 	AI.Init();
 }

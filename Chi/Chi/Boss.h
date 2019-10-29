@@ -63,13 +63,14 @@ class Boss
 private:
 	struct Models
 	{
-		std::unique_ptr<skinned_mesh> pIdle;
-		std::unique_ptr<skinned_mesh> pAtkFast;
-		std::unique_ptr<skinned_mesh> pAtkSwing;
+		std::unique_ptr<skinned_mesh> pIdle{ nullptr };
+		std::unique_ptr<skinned_mesh> pAtkFast{ nullptr };
+		std::unique_ptr<skinned_mesh> pAtkSwing{ nullptr };
 	};
 private:
 	BossAI::ActionStateNum	status;
 	BossAI					AI;
+	int						stageNo; // 1-based.
 	Donya::Vector3			pos;
 	Donya::Vector3			velocity;
 	Donya::Quaternion		orientation;
@@ -78,7 +79,7 @@ public:
 	Boss();
 	~Boss();
 public:
-	void Init();
+	void Init( int stageNo );
 	void Uninit();
 
 	void Update();

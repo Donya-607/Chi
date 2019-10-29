@@ -19,6 +19,7 @@
 #include "gameLib.h"
 #include "light.h"
 
+#include "Boss.h"
 #include "Player.h"
 #include "Stage.h"
 
@@ -32,18 +33,20 @@ constexpr int SE_ID  = 'SE';
 struct SceneGame::Impl
 {
 public:
-	float  fieldRadius;
+	float	fieldRadius;
 	Donya::Vector3 cameraPos;
 	Donya::Vector3 cameraFocusOffset;
-	Player player;
-	Stage  stage;
-	Lights lights;
+	Player	player;
+	Stage	stage;
+	Boss	boss;
+	Lights	lights;
 public:
 	Impl() :
 		fieldRadius(),
 		cameraPos(), cameraFocusOffset(),
 		player(),
 		stage(),
+		boss(),
 		lights()
 	{}
 	~Impl() = default;
@@ -91,15 +94,22 @@ public:
 
 		cameraPos = Donya::Vector3{ 0.0f, 256.0f, -512.0f };
 
-		stage.Init( NULL );
+	#if DEBUG_MODE
+		constexpr int STAGE_NO = NULL;
+	#endif // DEBUG_MODE
+
+		stage.Init( STAGE_NO );
 
 		player.Init();
 		player.SetFieldRadius( fieldRadius );
+
+		boss.Init( STAGE_NO );
 	}
 	void Uninit()
 	{
 		stage.Uninit();
 		player.Uninit();
+		boss.Uninit();
 	}
 
 	void Update()
@@ -141,6 +151,8 @@ public:
 		};
 		player.Update( MakePlayerInput() );
 
+		boss.Update();
+
 		GameLib::camera::setPos( cameraPos );
 		GameLib::camera::setTarget( player.GetPosition() + cameraFocusOffset );
 	}
@@ -155,6 +167,8 @@ public:
 		stage.Draw( V, P );
 
 		player.Draw( V, P );
+
+		boss.Draw( V, P );
 	}
 
 public:
