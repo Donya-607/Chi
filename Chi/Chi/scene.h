@@ -11,6 +11,8 @@
 #include "Sprite.h"
 #include "Particle.h"
 #include "BossAI.h"
+#include "OBB.h"
+
 
 using namespace DirectX;
 class sceneTitle : public baseScene
@@ -82,6 +84,15 @@ private:
 	BubbleParticle bubbleParticle;
 	BossAI bossAI;
 	int keyCnt;
+
+	std::shared_ptr<static_mesh> pCube1;
+	std::shared_ptr<static_mesh> pCube2;
+	OBB obb1;
+	OBB obb2;
+	DirectX::XMFLOAT4 color1;
+	DirectX::XMFLOAT4 color2;
+	float angle1[3];
+	float angle2[3];
 
 public:
 	SceneEffect() {}
