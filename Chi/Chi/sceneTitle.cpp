@@ -125,10 +125,6 @@ void sceneTitle::imGui()
 	{
 		pSceneManager->setNextScene( new SceneGame(), false );
 	}
-	if (ImGui::Button( "Effect" ) )
-	{
-		pSceneManager->setNextScene( new SceneEffect, false );
-	}
 
 	ImGui::End();
 

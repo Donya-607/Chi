@@ -11,8 +11,6 @@
 #include "rayPick.h"
 
 #include "Sprite.h"
-#include "Particle.h"
-#include "BossAI.h"
 
 using namespace DirectX;
 class sceneTitle : public baseScene
@@ -132,27 +130,6 @@ public:
 	void uninit();
 	void imGui();
 
-};
-
-class SceneEffect : public baseScene
-{
-private:
-	FlashParticle flashParticle;
-	BubbleParticle bubbleParticle;
-	BossAI bossAI;
-	int keyCnt;
-
-public:
-	SceneEffect() {}
-	~SceneEffect()
-	{
-		uninit();
-	}
-	void init();
-	void update();
-	void render();
-	void uninit();
-	void imGui();
 };
 
 #endif // !SCENE_H_
