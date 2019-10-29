@@ -209,6 +209,17 @@ void skinned_mesh::fbxInit(ID3D11Device * _device, const std::string& _fbxFileNa
 						vertex.bone_weights[index_of_influence] = bone_point.at(index_of_influence).weight;
 						vertex.bone_indices[index_of_influence] = bone_point.at(index_of_influence).index;
 					}
+					else
+					{
+						for (int i = 0; i < 4; i++)
+						{
+							if (vertex.bone_weights[i] > bone_point.at(index_of_influence).weight)
+								continue;
+							vertex.bone_weights[i] = bone_point.at(index_of_influence).weight;
+							vertex.bone_indices[i] = bone_point.at(index_of_influence).index;
+
+						}
+					}
 				}
 				vertices.push_back(vertex);
 				indices.at(index_offset + index_of_vertex) = static_cast<u_int>(vertex_count);
