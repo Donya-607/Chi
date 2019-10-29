@@ -275,6 +275,10 @@ namespace GameLib
 	{
 		void loadFBX(skinned_mesh*, const std::string& _fbxName);
 
+		void setLoopFlg(skinned_mesh* _mesh, const bool _is_loop);
+		void setStopAnimation(skinned_mesh* _mesh, const bool _is_stop);
+		void setStopTime(skinned_mesh* _mesh, const int _stop_time);
+
 		void skinnedMeshRender(
 			skinned_mesh* _mesh,
 			const DirectX::XMFLOAT4X4&SynthesisMatrix,
@@ -344,8 +348,10 @@ namespace GameLib
 		namespace xInput
 		{
 			int getState();
-
-			bool pressedButtons(int _padNum, int _button);
+			///<summary>
+			///0 : ‰Ÿ‚µ‚Ä‚È‚¢ 1 : ‰Ÿ‚µ‚½uŠÔ 2 : ‰Ÿ‚µ‚Á‚Ï‚È‚µ -1 : —£‚µ‚½uŠÔ
+			///</summary>
+			int pressedButtons(int _padNum, int _button);
 
 			DirectX::XMINT2 getThumbL(int _padNum);
 			DirectX::XMINT2 getThumbR(int _padNum);

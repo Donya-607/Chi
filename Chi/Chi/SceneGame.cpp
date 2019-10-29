@@ -40,6 +40,7 @@ public:
 	Stage	stage;
 	Boss	boss;
 	Lights	lights;
+	skinned_mesh animTest;
 public:
 	Impl() :
 		fieldRadius(),
@@ -100,6 +101,8 @@ public:
 
 		stage.Init( STAGE_NO );
 
+		loadFBX(&animTest, "./Data/TestMove.fbx");
+
 		player.Init();
 		player.SetFieldRadius( fieldRadius );
 
@@ -155,6 +158,15 @@ public:
 
 		GameLib::camera::setPos( cameraPos );
 		GameLib::camera::setTarget( player.GetPosition() + cameraFocusOffset );
+		player.Update(MakePlayerInput());
+
+		if(getKeyState(KEY_INPUT_SPACE))
+		{
+			//setStopTime(&animTest,1);
+			setStopAnimation(&animTest,true);
+		}
+		else
+		setStopAnimation(&animTest,false);
 	}
 
 	void Draw()
@@ -167,6 +179,20 @@ public:
 		stage.Draw( V, P );
 
 		player.Draw( V, P );
+
+		XMFLOAT4X4 World, world_view_projection;
+		DirectX::XMMATRIX worldM;
+		DirectX::XMMATRIX S, R, Rx, Ry, Rz, T;
+		worldM = DirectX::XMMatrixIdentity();
+
+		//	Šg‘åEk¬
+		S = DirectX::XMMatrixScaling(0.5f,0.5f,0.5f);
+
+		//	Matrix -> Float4x4 •ÏŠ·
+		DirectX::XMStoreFloat4x4( &world_view_projection, worldM * getViewMatrix() * getProjectionMatrix() );
+		DirectX::XMStoreFloat4x4( &World, worldM );
+		setBlendMode_ALPHA( 125 );
+		FBXRender( &animTest, world_view_projection, World );
 
 		boss.Draw( V, P );
 	}

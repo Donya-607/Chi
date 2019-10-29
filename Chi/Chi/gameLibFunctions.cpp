@@ -406,6 +406,16 @@ void setCamPos(const float x, const float y, const float z)
 	GameLib::camera::setPos({ x,y,z });
 }
 
+void setTarget(const DirectX::XMFLOAT3& _target)
+{
+	GameLib::camera::setTarget(_target);
+}
+
+void setTarget(const float x, const float y, const float z)
+{
+	GameLib::camera::setTarget({x,y,z});
+}
+
 DirectX::XMFLOAT4 getCamPos()
 {
 	return GameLib::camera::getPos();
@@ -497,6 +507,21 @@ void loadFBX(skinned_mesh* skinnedMesh, const std::string& FBXName)
 	GameLib::skinnedMesh::loadFBX(skinnedMesh, FBXName);
 }
 
+void setLoopFlg(skinned_mesh* _mesh, const bool _is_loop)
+{
+	GameLib::skinnedMesh::setLoopFlg(_mesh, _is_loop);
+}
+void setStopAnimation(skinned_mesh* _mesh, const bool _is_stop)
+{
+	GameLib::skinnedMesh::setStopAnimation(_mesh, _is_stop);
+}
+
+void setStopTime(skinned_mesh* _mesh, const int _stop_time)
+{
+	GameLib::skinnedMesh::setStopTime(_mesh, _stop_time);
+}
+
+
 void FBXRender(skinned_mesh* skinnedMesh, const DirectX::XMFLOAT4X4&SynthesisMatrix, const DirectX::XMFLOAT4X4&worldMatrix, const DirectX::XMFLOAT4&materialColor, bool wireFlg)
 {
 	GameLib::skinnedMesh::skinnedMeshRender(skinnedMesh, SynthesisMatrix, worldMatrix,getCamPos(),getLineLight(),getPointLight(), materialColor, wireFlg);
@@ -510,7 +535,7 @@ int getState()
 	return GameLib::input::xInput::getState();
 }
 
-bool pressedButtons(int _padNum, int _button)
+int pressedButtons(int _padNum, int _button)
 {
 	return GameLib::input::xInput::pressedButtons(_padNum, _button);
 }

@@ -25,7 +25,7 @@ void sceneTitle::update()
 
 void sceneTitle::render()
 {
-	clearWindow(1.0f, 0.5f, 0.5f, 1.0f);
+	clearWindow(0.5f,0.5f,0.5f, 1.0f);
 	setString({ 0,0 }, L"sceneTitle %d : %f", 1, 20.2f);
 	//textOut(L"TITLE", .0f, 0.f);
 

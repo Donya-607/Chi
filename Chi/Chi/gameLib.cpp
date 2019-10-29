@@ -33,6 +33,7 @@ namespace GameLib
 		line_light				 LineLight;
 		std::vector<point_light> pointLights;
 		XboxPad					 pad[4];
+		XboxPad					 prevPad[4];
 		keyInput				 keyboard;
 		dragDrop				drag_drop;
 	};
@@ -752,6 +753,21 @@ namespace GameLib
 			_mesh->setInfo(m.device, _fbxName);
 		}
 
+		void setLoopFlg(skinned_mesh* _mesh, const bool _is_loop)
+		{
+			_mesh->setLoopFlg(_is_loop);
+		}
+		void setStopAnimation(skinned_mesh* _mesh, const bool _is_stop)
+		{
+			_mesh->setStopAnimation(_is_stop);
+		}
+
+		void setStopTime(skinned_mesh* _mesh, const int _stop_time)
+		{
+			_mesh->setStoptimer(_stop_time);
+		}
+
+
 		void skinnedMeshRender(
 			skinned_mesh* _mesh,
 			const DirectX::XMFLOAT4X4&SynthesisMatrix,
@@ -841,6 +857,8 @@ namespace GameLib
 				int index = 0;
 				for (int i = 0; i < 4; i++)
 				{
+					m.prevPad[i].pad = m.pad[i].pad;
+
 					if (XInputGetState(i, &m.pad[index].pad) == ERROR_SUCCESS)
 						index++;
 				}
@@ -848,9 +866,21 @@ namespace GameLib
 				return index + 1;//pad‚ÌŒÂ”
 			}
 
-			bool pressedButtons(int _padNum, int _button)
+			int pressedButtons(int _padNum, int _button)
 			{
-				return m.pad[_padNum].pressedButton(_button);
+				if (!m.prevPad[_padNum].pressedButton(_button))
+				{
+					if (!m.pad[_padNum].pressedButton(_button))
+						return 0;	//‰Ÿ‚µ‚Ä‚È‚¢
+					else return 1;	//‰Ÿ‚µ‚½uŠÔ
+				}
+				else
+				{
+					if (!m.pad[_padNum].pressedButton(_button))
+						return -1;	//—£‚µ‚½uŠÔ
+					else return 2;	//‰Ÿ‚µ‚Á‚Ï‚È‚µ
+				}
+
 			}
 
 			DirectX::XMINT2 getThumbL(int _padNum)
