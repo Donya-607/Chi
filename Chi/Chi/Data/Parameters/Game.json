@@ -23,9 +23,9 @@
         },
         "cameraFocusOffset": {
             "cereal_class_version": 0,
-            "x": 137.0,
-            "y": 196.0,
-            "z": -14.0
+            "x": 0.0,
+            "y": 64.0,
+            "z": 0.0
         }
     }
 }

@@ -20,6 +20,9 @@ enum class ModelAttribute
 	Shield,
 	Lance,
 	Stage,
+	BossIdle,
+	BossAtkFast,
+	BossAtkSwing,
 };
 
 std::string GetModelPath( ModelAttribute modelAttribute );
