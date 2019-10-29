@@ -1,19 +1,28 @@
 #include "scene.h"
 #include "sceneManager.h"
 
-#include "Donya/Constant.h"	// Use DEBUG_MODE macro.
+#include <vector>
+
+#include <cereal/cereal.hpp>
+#include <cereal/types/vector.hpp>
+
+#include "Donya/ChiUtility.h"
+#include "Donya/Constant.h"		// Use DEBUG_MODE macro.
 #include "Donya/FilePath.h"
 #include "Donya/Keyboard.h"
 #include "Donya/Serializer.h"
 #include "Donya/Sound.h"
-#include "Donya/Useful.h"	// Use show collision state.
-#include "Donya/UseImGui.h"	// Use helper functions of ImGui.
+#include "Donya/Useful.h"		// Use show collision state.
+#include "Donya/UseImGui.h"		// Use helper functions of ImGui.
 #include "Donya/Vector.h"
 
 #include "gameLib.h"
+#include "light.h"
 
 #include "Player.h"
 #include "Stage.h"
+
+#define scast static_cast
 
 #if DEBUG_MODE
 constexpr int BGM_ID = 'BGM';
@@ -27,12 +36,14 @@ public:
 	Donya::Vector3 cameraPos;
 	Player player;
 	Stage  stage;
+	Lights lights;
 public:
 	Impl() :
 		fieldRadius(),
 		cameraPos(),
 		player(),
-		stage()
+		stage(),
+		lights()
 	{}
 	~Impl() = default;
 private:
@@ -47,6 +58,10 @@ private:
 
 		if ( 1 <= version )
 		{
+			archive( CEREAL_NVP( lights ) );
+		}
+		if ( 2 <= version )
+		{
 			// archive( CEREAL_NVP( x ) );
 		}
 	}
@@ -59,7 +74,15 @@ public:
 		Donya::Sound::Load( SE_ID,  "./Data/Sounds/Test/SE.wav",  false );
 	#endif // DEBUG_MODE
 
+		resetPointLight();
+
 		LoadParameter();
+
+		getLineLight().setLineLight( lights.direction.direction, lights.direction.color );
+		for ( const auto i : lights.points )
+		{
+			setPointLight( i );
+		}
 
 		cameraPos = Donya::Vector3{ 0.0f, 256.0f, -512.0f };
 
@@ -192,6 +215,52 @@ public:
 					ImGui::TreePop();
 				}
 
+				if ( ImGui::TreeNode( "Light" ) )
+				{
+					if ( ImGui::TreeNode( "DirectionalLight" ) )
+					{
+						ImGui::ColorEdit4( "Color", &lights.direction.color.x );
+						ImGui::SliderFloat3( "Direction", &lights.direction.direction.x, -8.0f, 8.0f );
+						
+						ImGui::TreePop();
+					}
+					
+					if ( ImGui::TreeNode( "PointLight" ) )
+					{
+						constexpr size_t MAX_COUNT = 4U;
+						bool canAppend  = ( lights.points.size() < MAX_COUNT ) ? true : false;
+						bool canPopBack = ( 1U <= lights.points.size() ) ? true : false;
+						if ( canAppend && ImGui::Button( "Append" ) )
+						{
+							PointLight add{};
+							add.pos   = { 0.0f, 0.0f, 0.0f, 1.0f };
+							add.color = { 1.0f, 1.0f, 1.0f, 1.0f };
+							lights.points.push_back( add );
+							setPointLight( add );
+						}
+						if ( canPopBack && ImGui::Button( "PopBack" ) )
+						{
+							lights.points.pop_back();
+							removePointLight( scast<int>( lights.points.size() ) );
+						}
+
+						const size_t COUNT = lights.points.size();
+						for ( size_t i = 0; i < COUNT; ++i )
+						{
+							auto &point = lights.points[i];
+							ImGui::DragFloat3( std::string( "Position"  + std::to_string( i ) ).c_str(), &point.pos.x		); point.pos.w = 1.0f;
+							ImGui::ColorEdit4( std::string( "Color"     + std::to_string( i ) ).c_str(), &point.color.x		);
+							ImGui::DragFloat4( std::string( "Attenuate" + std::to_string( i ) ).c_str(), &point.attenuate.x	);
+
+							setPointlightInfo( scast<int>( i ), point );
+						}
+						
+						ImGui::TreePop();
+					}
+
+					ImGui::TreePop();
+				}
+
 				if ( ImGui::TreeNode( "File.I/O" ) )
 			{
 				static bool isBinary = true;
@@ -222,7 +291,7 @@ public:
 	#endif // USE_IMGUI
 	}
 };
-CEREAL_CLASS_VERSION( SceneGame::Impl, 0 )
+CEREAL_CLASS_VERSION( SceneGame::Impl, 1 )
 
 SceneGame::SceneGame() : baseScene(), pImpl( std::make_unique<Impl>() )
 {}

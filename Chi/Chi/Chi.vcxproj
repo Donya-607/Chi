@@ -142,6 +142,7 @@
     <ClInclude Include="blend.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Donya\AudioSystem.h" />
+    <ClInclude Include="Donya\ChiUtility.h" />
     <ClInclude Include="Donya\Collision.h" />
     <ClInclude Include="Donya\Constant.h" />
     <ClInclude Include="Donya\FilePath.h" />
@@ -193,6 +194,7 @@
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Donya\AudioSystem.cpp" />
+    <ClCompile Include="Donya\ChiUtility.cpp" />
     <ClCompile Include="Donya\Collision.cpp" />
     <ClCompile Include="Donya\FilePath.cpp" />
     <ClCompile Include="Donya\Keyboard.cpp" />

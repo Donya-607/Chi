@@ -28,7 +28,7 @@ void Stage::Update()
 void Stage::Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matProjection )
 {
 #if DEBUG_MODE
-	Donya::Vector4x4 S = Donya::Vector4x4::MakeScaling( 0.2f );
+	Donya::Vector4x4 S = Donya::Vector4x4::MakeScaling( 1.0f );
 	Donya::Vector4x4 R = Donya::Vector4x4::Identity();
 	Donya::Vector4x4 T = Donya::Vector4x4::MakeTranslation( { 0.0f, 0.0f, 0.0f } );
 	Donya::Vector4x4 W = S * R * T;

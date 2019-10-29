@@ -14,41 +14,7 @@ void sceneTitle::init()
 	flg = false;
 	pos = { 0,0,0 };
 	setLightAmbient({ .1f,-1,0,1 } ,{1,1,1,1});
-	FILE* f;
-	float lightAmbient[3];
-	PointLight pointLight[5];
-
-	fopen_s(&f, "./Data/LightingInfo/sceneLighting.txt", "r");
-	for (int i = 0; i < 3; i++)
-	{
-		fscanf_s(f, "%f", &lightAmbient[i]);
-	}
-	setLightAmbient({ lightAmbient[0],lightAmbient[1],lightAmbient[2],1.0 }, {1,1,1,1});
-	for (auto& p : pointLight)
-	{
-		fscanf_s(f, "%f", &p.pos.x);
-		fscanf_s(f, "%f", &p.pos.y);
-		fscanf_s(f, "%f", &p.pos.z);
-		p.pos.w = 1;
-		fscanf_s(f, "%f", &p.diffuse.x);
-		fscanf_s(f, "%f", &p.diffuse.y);
-		fscanf_s(f, "%f", &p.diffuse.z);
-		fscanf_s(f, "%f", &p.diffuse.w);
-
-		fscanf_s(f, "%f", &p.specular.x);
-		fscanf_s(f, "%f", &p.specular.y);
-		fscanf_s(f, "%f", &p.specular.z);
-		fscanf_s(f, "%f", &p.specular.w);
-
-		fscanf_s(f, "%f", &p.attenuate.x);
-		fscanf_s(f, "%f", &p.attenuate.y);
-		fscanf_s(f, "%f", &p.attenuate.z);
-		fscanf_s(f, "%f", &p.attenuate.w);
-
-		setPointLight(p);
-	}
-
-	fclose(f);
+	
 	loadFBX(&test, "./Data/FBX_Tree.fbx");
 }
 
