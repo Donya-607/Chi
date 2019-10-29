@@ -158,8 +158,7 @@ public:
 
 		GameLib::camera::setPos( cameraPos );
 		GameLib::camera::setTarget( player.GetPosition() + cameraFocusOffset );
-		player.Update(MakePlayerInput());
-
+		
 		if(getKeyState(KEY_INPUT_SPACE))
 		{
 			//setStopTime(&animTest,1);
