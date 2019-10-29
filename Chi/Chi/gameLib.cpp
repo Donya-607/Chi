@@ -788,9 +788,14 @@ namespace GameLib
 			return m.cam.GetLightViewMatrix(_pos, _direct);
 		}
 
-		void setPos(DirectX::XMFLOAT3 _pos)
+		void setPos(const DirectX::XMFLOAT3& _pos)
 		{
 			m.cam.setPosition(_pos);
+		}
+
+		void setTarget(const DirectX::XMFLOAT3& _target)
+		{
+			m.cam.setTarget(_target);
 		}
 
 		DirectX::XMFLOAT4 getPos()

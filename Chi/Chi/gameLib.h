@@ -313,7 +313,8 @@ namespace GameLib
 		DirectX::XMMATRIX GetViewMatrix();
 		DirectX::XMMATRIX GetLightProjectionMatrix();
 		DirectX::XMMATRIX GetLightViewMatrix(DirectX::XMFLOAT3 _pos, DirectX::XMFLOAT3 _direct);
-		void setPos(DirectX::XMFLOAT3 _pos);
+		void setPos(const DirectX::XMFLOAT3& _pos);
+		void setTarget(const DirectX::XMFLOAT3& _target);
 		DirectX::XMFLOAT4 getPos();
 	}
 
