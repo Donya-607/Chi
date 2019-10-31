@@ -382,7 +382,7 @@ Donya::OBB Player::GetAttackHitBox() const
 		bool succeeded = calcTransformedPosBySpecifyMesh( models.pAttack.get(), outputPos, meshName );
 		if ( !succeeded )
 		{
-			_ASSERT_EXPR( 0, L"Error : Player.Specified mesh name was not found !" );
+			_ASSERT_EXPR( 0, L"Error : specified mesh name was not found !" );
 			return Donya::OBB::Nil();
 		}
 		Donya::Vector4x4 T = Donya::Vector4x4::MakeTranslation( outputPos );
@@ -395,6 +395,7 @@ Donya::OBB Player::GetAttackHitBox() const
 	resultOBB.pos.y = lanceMatrix._42;
 	resultOBB.pos.z = lanceMatrix._43;
 	resultOBB.orientation.RotateBy( orientation );
+	// Should I also apply parent's scale ?
 	return resultOBB;
 }
 
