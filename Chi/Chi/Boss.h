@@ -3,8 +3,12 @@
 #include <memory>
 #include <vector>
 
+#include <cereal/cereal.hpp>
+#include <cereal/types/vector.hpp>
+
 #include "Donya/Collision.h"
 #include "Donya/Quaternion.h"
+#include "Donya/Serializer.h"
 #include "Donya/Template.h"
 #include "Donya/UseImGui.h"
 #include "Donya/Vector.h"
@@ -17,8 +21,47 @@
 class BossParam final : public Donya::Singleton<BossParam>
 {
 	friend Donya::Singleton<BossParam>;
+public:
+	struct OBBFrame
+	{
+		int frame{};
+		int enableFrameStart{};	// WIll be serialize. Contain start frame.
+		int enableFrameLast{};	// WIll be serialize. Contain last frame.
+		Donya::OBB OBB{};
+	private:
+		friend class cereal::access;
+		template<class Archive>
+		void serialize( Archive &archive, std::uint32_t version )
+		{
+			archive
+			(
+				CEREAL_NVP( enableFrameStart ),
+				CEREAL_NVP( enableFrameLast ),
+				CEREAL_NVP( OBB )
+			);
+
+			if ( 1 <= version )
+			{
+				// archive( CEREAL_NVP( x ) );
+			}
+		}
+	public:
+		void Update( int elapsedTime = 1 )
+		{
+			frame += elapsedTime;
+
+			OBB.exist = WithinEnableFrame() ? true : false;
+		}
+
+		bool WithinEnableFrame() const
+		{
+			return ( enableFrameStart <= frame && frame <= enableFrameLast ) ? true : false;
+		}
+	};
 private:
 	float	scale;	// Usually 1.0f.
+	std::vector<OBBFrame> OBBAttacksFast;
+	std::vector<OBBFrame> OBBAttacksSwing;
 private:
 	BossParam();
 public:
@@ -33,6 +76,15 @@ private:
 			CEREAL_NVP( scale )
 		);
 
+		if ( 1 == version )
+		{
+			archive
+			( 
+				CEREAL_NVP( OBBAttacksFast ),
+				CEREAL_NVP( OBBAttacksSwing )
+			);
+		}
+		
 		if ( 1 <= version )
 		{
 			// archive( CEREAL_NVP( x ) );
@@ -43,7 +95,11 @@ public:
 	void Init();
 	void Uninit();
 public:
-	float	Scale()					const { return scale; }
+	float					Scale()			const { return scale; }
+	std::vector<OBBFrame>	*OBBAtksFast()  { return &OBBAttacksFast; }
+	std::vector<OBBFrame>	*OBBAtksSwing() { return &OBBAttacksSwing; }
+	const std::vector<OBBFrame>	*OBBAtksFast()	const { return &OBBAttacksFast; }
+	const std::vector<OBBFrame>	*OBBAtksSwing()	const { return &OBBAttacksSwing; }
 public:
 	void LoadParameter( bool isBinary = true );
 
@@ -55,7 +111,8 @@ public:
 
 #endif // USE_IMGUI
 };
-CEREAL_CLASS_VERSION( BossParam, 0 )
+CEREAL_CLASS_VERSION( BossParam, 1 )
+CEREAL_CLASS_VERSION( BossParam::OBBFrame, 0 )
 
 class skinned_mesh;	// With pointer. because I'm not want include this at header.
 class Boss
@@ -85,6 +142,8 @@ public:
 	void Update();
 
 	void Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matProjection );
+public:
+	std::vector<Donya::OBB> GetAttackHitBoxes() const;
 private:
 	void LoadModel();
 private:

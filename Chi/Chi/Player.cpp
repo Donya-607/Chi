@@ -299,6 +299,30 @@ void Player::Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matP
 #endif // DEBUG_MODE
 }
 
+Donya::OBB MakeOBB( const Donya::AABB &AABB, const Donya::Quaternion &orientation )
+{
+	Donya::OBB OBB{};
+	OBB.pos		= AABB.pos;
+	OBB.size	= AABB.size;
+	OBB.orientation = orientation;
+	OBB.exist	= AABB.exist;
+	return OBB;
+}
+Donya::OBB Player::GetHurtBox() const
+{
+	const auto &HITBOX = PlayerParam::Get().HitBoxBody();
+
+	Donya::OBB wsOBB = MakeOBB( HITBOX, orientation );
+	return wsOBB;
+}
+Donya::OBB Player::GetShieldHitBox() const
+{
+	const auto &HITBOX = PlayerParam::Get().HitBoxShield();
+
+	Donya::OBB wsOBB = MakeOBB( HITBOX, orientation );
+	return wsOBB;
+}
+
 void Player::SetFieldRadius( float newFieldRadius )
 {
 	const float bodyRadius = PlayerParam::Get().HitBoxPhysic().radius;

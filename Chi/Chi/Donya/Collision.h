@@ -284,12 +284,29 @@ namespace Donya
 	class OBB
 	{
 	public:
-		Donya::Vector3 pos;
-		Donya::Vector3 scale;
-		Donya::Quaternion orientation;
+		Donya::Vector3		pos;
+		Donya::Vector3		size;		// Half-size.
+		Donya::Quaternion	orientation;
 		bool exist{ true };
+	private:
+		friend class cereal::access;
+		template<class Archive>
+		void serialize( Archive &archive, std::uint32_t version )
+		{
+			archive
+			(
+				CEREAL_NVP( pos ),
+				CEREAL_NVP( size ),
+				CEREAL_NVP( orientation ),
+				CEREAL_NVP( exist )
+			);
+			if ( 1 <= version )
+			{
+				// archive();
+			}
+		}
 	public:
-		bool JudgeOBB( const OBB *obb ) const;
+		bool JudgeOBB( const OBB *obb, bool ignoreExistFlag = false ) const;
 	private:
 		float LenSegOnSepAxis( DirectX::XMFLOAT3 *sep, DirectX::XMFLOAT3 *v1, DirectX::XMFLOAT3 *v2, DirectX::XMFLOAT3 *v3 = 0 ) const
 		{
@@ -319,9 +336,9 @@ namespace Donya
 			return OBB{ {}, {}, {}, false };
 		}
 	public:
-		static bool IsHitOBB( const OBB &L, const OBB &R )
+		static bool IsHitOBB( const OBB &L, const OBB &R, bool ignoreExistFlag = false )
 		{
-			return L.JudgeOBB( &R );
+			return L.JudgeOBB( &R, ignoreExistFlag );
 		}
 	};
 
@@ -346,6 +363,7 @@ CEREAL_CLASS_VERSION( Donya::Box,		0 );
 CEREAL_CLASS_VERSION( Donya::Circle,	0 );
 CEREAL_CLASS_VERSION( Donya::AABB,		0 );
 CEREAL_CLASS_VERSION( Donya::Sphere,	0 );
+CEREAL_CLASS_VERSION( Donya::OBB,		0 );
 
 
 #endif // INCLUDED_COLLISION_H_

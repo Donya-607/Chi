@@ -1,5 +1,8 @@
 #pragma once
 
+#include <cstdint> // Use for std::uint32_t
+#include <cereal/cereal.hpp>
+
 #include "Vector.h"
 
 namespace Donya
@@ -18,6 +21,13 @@ namespace Donya
 		constexpr Quaternion() : x( 0.0f ), y( 0.0f ), z( 0.0f ), w( 1.0f ) {}
 		constexpr Quaternion( float x, float y, float z, float w ) : x( x ), y( y ), z( z ), w( w ) {}
 		// Copy, operator = are defaulted.
+	private:
+		friend class cereal::access;
+		template<class Archive>
+		void serialize( Archive &archive, std::uint32_t version )
+		{
+			archive( CEREAL_NVP( x ), CEREAL_NVP( y ), CEREAL_NVP( z ), CEREAL_NVP( w ) );
+		}
 	public:
 	#pragma region Arithmetic
 		constexpr Quaternion Add( const Quaternion &R ) const
@@ -388,3 +398,5 @@ namespace Donya
 	bool operator == ( const Quaternion &L, const Quaternion &R );
 	static bool operator != ( const Quaternion &L, const Quaternion &R ) { return !( L == R ); }
 }
+
+CEREAL_CLASS_VERSION( Donya::Quaternion, 0 )

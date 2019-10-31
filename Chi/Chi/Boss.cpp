@@ -58,18 +58,66 @@ void BossParam::UseImGui()
 			
 			if ( ImGui::TreeNode( "Collisions" ) )
 			{
-				auto ShowAABB = []( const std::string &prefix, Donya::AABB *pAABB )
+				auto ShowAABB	= []( const std::string &prefix, Donya::AABB		*pAABB	)
 				{
 					ImGui::DragFloat3( ( prefix + ".Offset" ).c_str(), &pAABB->pos.x );
 					ImGui::DragFloat3( ( prefix + ".Scale" ).c_str(), &pAABB->size.x );
 					ImGui::Checkbox( ( prefix + ".ExistCollision" ).c_str(), &pAABB->exist );
 				};
-				auto ShowSphere = []( const std::string &prefix, Donya::Sphere *pSphere )
+				auto ShowSphere	= []( const std::string &prefix, Donya::Sphere		*pSphere)
 				{
 					ImGui::DragFloat3( ( prefix + ".Offset" ).c_str(), &pSphere->pos.x );
 					ImGui::DragFloat( ( prefix + ".Scale" ).c_str(), &pSphere->radius );
 					ImGui::Checkbox( ( prefix + ".ExistCollision" ).c_str(), &pSphere->exist );
 				};
+
+				auto ShowOBB	= []( const std::string &prefix, Donya::OBB			*pOBB	)
+				{
+					ImGui::DragFloat3( ( prefix + ".Offset" ).c_str(), &pOBB->pos.x );
+					ImGui::DragFloat3( ( prefix + ".Scale" ).c_str(), &pOBB->size.x );
+
+					Donya::Vector3 euler = pOBB->orientation.GetEulerAngles();
+					ImGui::SliderFloat3( ( prefix + ".EulerAngle(Radian)" ).c_str(), &euler.x, ToRadian( -360.0f ), ToRadian( 360.0f ) );
+					pOBB->orientation = Donya::Quaternion::Make( euler.x, euler.y, euler.z );
+
+					ImGui::Checkbox( ( prefix + ".ExistCollision" ).c_str(), &pOBB->exist );
+				};
+				auto ShowOBBF	= [&ShowOBB]( const std::string &prefix, OBBFrame	*pOBBF	)
+				{
+					ImGui::DragInt( ( prefix + ".EnableFrame.Start" ).c_str(), &pOBBF->enableFrameStart );
+					ImGui::DragInt( ( prefix + ".EnableFrame.Last"  ).c_str(), &pOBBF->enableFrameLast  );
+
+					bool oldExistFlag = pOBBF->OBB.exist;
+					ShowOBB( prefix, &pOBBF->OBB );
+					pOBBF->OBB.exist = oldExistFlag;
+				};
+				auto ShowOBBFs	= [&ShowOBBF]( const std::string &prefix, std::vector<OBBFrame> *pOBBFs )
+				{
+					if ( ImGui::TreeNode( prefix.c_str() ) )
+					{
+
+						if ( ImGui::Button( "Append" ) )
+						{
+							pOBBFs->push_back( {} );
+						}
+						if ( 1 <= pOBBFs->size() && ImGui::Button( "PopBack" ) )
+						{
+							pOBBFs->pop_back();
+						}
+
+						const size_t COUNT = pOBBFs->size();
+						for ( size_t i = 0; i < COUNT; ++i )
+						{
+							auto &OBBF = pOBBFs->at( i );
+							ShowOBBF( "[" + std::to_string( i ) + "]", &OBBF );
+						}
+
+						ImGui::TreePop();
+					}
+				};
+
+				ShowOBBFs( "Attack.Fast",  &OBBAttacksFast  );
+				ShowOBBFs( "Attack.Swing", &OBBAttacksSwing );
 
 				ImGui::TreePop();
 			}
@@ -171,8 +219,11 @@ void Boss::Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matPro
 		break;
 	case BossAI::ActionStateNum::MOVE:
 		{
-			// FBXRender( models.pIdle.get(), WVP, W );
+		#if DEBUG_MODE
 			FBXRender( models.pAtkSwing.get(), WVP, W );
+		#else
+			FBXRender( models.pIdle.get(), WVP, W );
+		#endif // DEBUG_MODE
 		}
 		break;
 	case BossAI::ActionStateNum::ATTACK:
@@ -201,7 +252,7 @@ void Boss::Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matPro
 	static std::shared_ptr<static_mesh> pCube	= GenerateCube();
 	static std::shared_ptr<static_mesh> pSphere	= GenerateSphere();
 
-	auto DrawCube   = [&]( const Donya::Vector3 &cubeOffset, const Donya::Vector3 &cubeScale, const Donya::Vector4 &color )
+	auto DrawCube	= [&]( const Donya::Vector3 &cubeOffset, const Donya::Vector3 &cubeScale, const Donya::Vector4 &color )
 	{
 		Donya::Vector4x4 CS = Donya::Vector4x4::MakeScaling( cubeScale * 2.0f ); // Half size->Whole size.
 		Donya::Vector4x4 CT = Donya::Vector4x4::MakeTranslation( cubeOffset );
@@ -210,7 +261,7 @@ void Boss::Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matPro
 
 		OBJRender( pCube.get(), CWVP, CW, color );
 	};
-	auto DrawSphere = [&]( const Donya::Vector3 &sphereOffset, float sphereScale, const Donya::Vector4 &color )
+	auto DrawSphere	= [&]( const Donya::Vector3 &sphereOffset, float sphereScale, const Donya::Vector4 &color )
 	{
 		Donya::Vector4x4 CS = Donya::Vector4x4::MakeScaling( sphereScale * 2.0f ); // Half size->Whole size.
 		Donya::Vector4x4 CT = Donya::Vector4x4::MakeTranslation( sphereOffset );
@@ -219,13 +270,108 @@ void Boss::Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matPro
 
 		OBJRender( pSphere.get(), CWVP, CW, color );
 	};
+	auto DrawOBB	= [&]( const Donya::OBB &OBB, const Donya::Vector4 &color )
+	{
+		Donya::Vector4x4 CS = Donya::Vector4x4::MakeScaling( OBB.size * 2.0f ); // Half size->Whole size.
+		Donya::Vector4x4 CR = OBB.orientation.RequireRotationMatrix();
+		Donya::Vector4x4 CT = Donya::Vector4x4::MakeTranslation( OBB.pos );
+		Donya::Vector4x4 CW = ( CS * CR * CT ) * W;
+		Donya::Vector4x4 CWVP = CW * matView * matProjection;
+
+		OBJRender( pCube.get(), CWVP, CW, color );
+	};
 
 	if ( Donya::IsShowCollision() )
 	{
-		// setBlendMode_ALPHA( 0.5f );
+		setBlendMode_ALPHA( 0.5f );
+
+		constexpr Donya::Vector4 COLOR_VALID  { 1.0f, 0.8f, 0.4f, 0.5f };
+		constexpr Donya::Vector4 COLOR_INVALID{ 0.4f, 0.4f, 1.0f, 0.5f };
+
+		switch ( status )
+		{
+		case BossAI::ActionStateNum::WAIT:
+			break;
+		case BossAI::ActionStateNum::MOVE:
+			{
+			#if DEBUG_MODE
+				const auto  *pOBBs = BossParam::Get().OBBAtksSwing();
+				const size_t COUNT = pOBBs->size();
+				Donya::Vector4 color{};
+				for ( size_t i = 0; i < COUNT; ++i )
+				{
+					const auto &OBB = pOBBs->at( i );
+					color = ( OBB.OBB.exist ) ? COLOR_VALID : COLOR_INVALID;
+
+					DrawOBB( OBB.OBB, color );
+				}
+			#endif // DEBUG_MODE
+			}
+			break;
+		case BossAI::ActionStateNum::ATTACK:
+			{
+				const auto  *pOBBs = BossParam::Get().OBBAtksFast();
+				const size_t COUNT = pOBBs->size();
+				Donya::Vector4 color{};
+				for ( size_t i = 0; i < COUNT; ++i )
+				{
+					const auto &OBB = pOBBs->at( i );
+					color = ( OBB.OBB.exist ) ? COLOR_VALID : COLOR_INVALID;
+
+					DrawOBB( OBB.OBB, color );
+				}
+			}
+			break;
+		default: break;
+		}
 	}
 
 #endif // DEBUG_MODE
+}
+
+std::vector<Donya::OBB> Boss::GetAttackHitBoxes() const
+{
+	const auto &PARAM = BossParam::Get();
+	std::vector<Donya::OBB> collisions{};
+
+	switch ( status )
+	{
+	case BossAI::ActionStateNum::WAIT:
+		break;
+	case BossAI::ActionStateNum::MOVE:
+		{
+		#if DEBUG_MODE
+			const auto  *pOBBs = PARAM.OBBAtksSwing();
+			const size_t COUNT = pOBBs->size();
+			for ( size_t i = 0; i < COUNT; ++i )
+			{
+				auto &OBB = pOBBs->at( i );
+				if (  OBB.OBB.exist )
+				{
+					collisions.emplace_back( OBB.OBB );
+				}
+			}
+		#endif // DEBUG_MODE
+		}
+		break;
+	case BossAI::ActionStateNum::ATTACK:
+		{
+			const auto  *pOBBs = PARAM.OBBAtksFast();
+			const size_t COUNT = pOBBs->size();
+			for ( size_t i = 0; i < COUNT; ++i )
+			{
+				auto &OBB = pOBBs->at( i );
+				if (  OBB.OBB.exist )
+				{
+					collisions.emplace_back( OBB.OBB );
+				}
+			}
+		}
+		break;
+	default: break;
+	}
+
+	return collisions;
 }
 
 void Boss::LoadModel()
@@ -291,27 +437,79 @@ void Boss::WaitUninit()
 void Boss::MoveInit()
 {
 	status = BossAI::ActionStateNum::MOVE;
+
+#if DEBUG_MODE
+	auto *pOBBs = BossParam::Get().OBBAtksSwing();
+	const size_t COUNT = pOBBs->size();
+	for ( size_t i = 0; i < COUNT; ++i )
+	{
+		auto &OBB = pOBBs->at( i );
+		OBB.frame = 0;
+	}
+#endif // DEBUG_MODE
 }
 void Boss::MoveUpdate()
 {
-
+#if DEBUG_MODE
+	auto *pOBBs = BossParam::Get().OBBAtksSwing();
+	const size_t COUNT = pOBBs->size();
+	for ( size_t i = 0; i < COUNT; ++i )
+	{
+		auto &OBB = pOBBs->at( i );
+		OBB.Update();
+	}
+#endif // DEBUG_MODE
 }
 void Boss::MoveUninit()
 {
-
+#if DEBUG_MODE
+	auto *pOBBs = BossParam::Get().OBBAtksSwing();
+	const size_t COUNT = pOBBs->size();
+	for ( size_t i = 0; i < COUNT; ++i )
+	{
+		auto &OBB = pOBBs->at( i );
+		OBB.frame = 0;
+	}
+#endif // DEBUG_MODE
 }
 
 void Boss::AttackInit()
 {
 	status = BossAI::ActionStateNum::ATTACK;
+
+#if DEBUG_MODE
+	auto *pOBBs = BossParam::Get().OBBAtksFast();
+	const size_t COUNT = pOBBs->size();
+	for ( size_t i = 0; i < COUNT; ++i )
+	{
+		auto &OBB = pOBBs->at( i );
+		OBB.frame = 0;
+	}
+#endif // DEBUG_MODE
 }
 void Boss::AttackUpdate()
 {
-
+#if DEBUG_MODE
+	auto *pOBBs = BossParam::Get().OBBAtksFast();
+	const size_t COUNT = pOBBs->size();
+	for ( size_t i = 0; i < COUNT; ++i )
+	{
+		auto &OBB = pOBBs->at( i );
+		OBB.Update();
+	}
+#endif // DEBUG_MODE
 }
 void Boss::AttackUninit()
 {
-
+#if DEBUG_MODE
+	auto *pOBBs = BossParam::Get().OBBAtksFast();
+	const size_t COUNT = pOBBs->size();
+	for ( size_t i = 0; i < COUNT; ++i )
+	{
+		auto &OBB = pOBBs->at( i );
+		OBB.frame = 0;
+	}
+#endif // DEBUG_MODE
 }
 
 void Boss::AssignInputVelocity()

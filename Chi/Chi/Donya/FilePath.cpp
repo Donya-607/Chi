@@ -47,7 +47,7 @@ std::string GetModelPath( ModelAttribute modelAttribute )
 	case ModelAttribute::Stage:
 		return "./Data/model/Stage/MDL_Stage01.fbx";					// break
 	;case ModelAttribute::BossIdle:
-		return "./Data/model/Boss/MDL_Boss03_Attack_Wait.fbx";			// break;
+		return "./Data/model/Boss/MDL_Boss03_Wait.fbx";					// break;
 	;case ModelAttribute::BossAtkFast:
 		return "./Data/model/Boss/MDL_Boss03_Attack_Continuous.fbx";	// break;
 	;case ModelAttribute::BossAtkSwing:

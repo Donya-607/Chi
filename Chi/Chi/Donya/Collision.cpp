@@ -378,8 +378,11 @@ namespace Donya
 		return AABB::IsHitSphere( R, L );
 	}
 
-	bool OBB::JudgeOBB( const OBB *obb ) const
+	bool OBB::JudgeOBB( const OBB *obb, bool ignoreExistFlag ) const
 	{
+		if ( !ignoreExistFlag && ( !exist || !obb->exist ) ) { return false; }
+		// else
+
 		DirectX::XMFLOAT3 Nv1_1;
 		DirectX::XMFLOAT3 Nv2_1;
 		DirectX::XMFLOAT3 Nv3_1;
@@ -429,29 +432,29 @@ namespace Donya
 		Nv3_2.y = rota2._32;
 		Nv3_2.z = rota2._33;
 
-		v1_1.x = Nv1_1.x * scale.x / 2.0f;
-		v1_1.y = Nv1_1.y * scale.x / 2.0f;
-		v1_1.z = Nv1_1.z * scale.x / 2.0f;
+		v1_1.x = Nv1_1.x * size.x;
+		v1_1.y = Nv1_1.y * size.x;
+		v1_1.z = Nv1_1.z * size.x;
+								
+		v2_1.x = Nv2_1.x * size.y;
+		v2_1.y = Nv2_1.y * size.y;
+		v2_1.z = Nv2_1.z * size.y;
+								
+		v3_1.x = Nv3_1.x * size.z;
+		v3_1.y = Nv3_1.y * size.z;
+		v3_1.z = Nv3_1.z * size.z;
 
-		v2_1.x = Nv2_1.x * scale.y / 2.0f;
-		v2_1.y = Nv2_1.y * scale.y / 2.0f;
-		v2_1.z = Nv2_1.z * scale.y / 2.0f;
+		v1_2.x = Nv1_2.x * obb->size.x;
+		v1_2.y = Nv1_2.y * obb->size.x;
+		v1_2.z = Nv1_2.z * obb->size.x;
 
-		v3_1.x = Nv3_1.x * scale.z / 2.0f;
-		v3_1.y = Nv3_1.y * scale.z / 2.0f;
-		v3_1.z = Nv3_1.z * scale.z / 2.0f;
+		v2_2.x = Nv2_2.x * obb->size.y;
+		v2_2.y = Nv2_2.y * obb->size.y;
+		v2_2.z = Nv2_2.z * obb->size.y;
 
-		v1_2.x = Nv1_2.x * obb->scale.x / 2.0f;
-		v1_2.y = Nv1_2.y * obb->scale.x / 2.0f;
-		v1_2.z = Nv1_2.z * obb->scale.x / 2.0f;
-
-		v2_2.x = Nv2_2.x * obb->scale.y / 2.0f;
-		v2_2.y = Nv2_2.y * obb->scale.y / 2.0f;
-		v2_2.z = Nv2_2.z * obb->scale.y / 2.0f;
-
-		v3_2.x = Nv3_2.x * obb->scale.z / 2.0f;
-		v3_2.y = Nv3_2.y * obb->scale.z / 2.0f;
-		v3_2.z = Nv3_2.z * obb->scale.z / 2.0f;
+		v3_2.x = Nv3_2.x * obb->size.z;
+		v3_2.y = Nv3_2.y * obb->size.z;
+		v3_2.z = Nv3_2.z * obb->size.z;
 
 
 		DirectX::XMFLOAT3 interval;
@@ -698,7 +701,7 @@ namespace Donya
 	bool operator == ( const OBB	&L, const OBB		&R )
 	{
 		if ( !( L.pos   - R.pos   ).IsZero() ) { return false; }
-		if ( !( L.scale - R.scale ).IsZero() ) { return false; }
+		if ( !( L.size - R.size ).IsZero() ) { return false; }
 		if ( !L.orientation.IsSameRotation( R.orientation ) ) { return false; }
 		if ( L.exist != R.exist ) { return false; }
 		// else

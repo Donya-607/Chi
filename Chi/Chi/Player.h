@@ -158,6 +158,15 @@ public:
 	/// </summary>
 	Donya::Vector3 GetPosition() const { return pos; }
 
+	/// <summary>
+	/// Returns world space hurt-box.
+	/// </summary>
+	Donya::OBB GetHurtBox() const;
+	/// /// <summary>
+	/// Returns world space hit-box of shield.
+	/// </summary>
+	Donya::OBB GetShieldHitBox() const;
+
 	void SetFieldRadius( float fieldRadius );
 private:
 	void LoadModel();
