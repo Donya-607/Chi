@@ -394,7 +394,7 @@ Donya::OBB Player::GetAttackHitBox() const
 	resultOBB.pos.x = lanceMatrix._41;
 	resultOBB.pos.y = lanceMatrix._42;
 	resultOBB.pos.z = lanceMatrix._43;
-
+	resultOBB.orientation.RotateBy( orientation );
 	return resultOBB;
 }
 
