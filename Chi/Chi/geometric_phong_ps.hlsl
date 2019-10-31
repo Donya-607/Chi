@@ -69,5 +69,5 @@ float4 main(VS_OUT pin) : SV_TARGET
 		_color += (diffuseColor + specularColor);
 	}
 	color += _color;
-	return float4(saturate(color) ,material.ambient.w);
+	return float4(color ,material.ambient.w);
 }

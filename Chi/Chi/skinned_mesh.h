@@ -98,9 +98,12 @@ public:
 		ID3D11Buffer* vertex_buffer;
 		ID3D11Buffer* index_buffer;
 		std::vector<subset> subsets;
-
+		std::string node_name;
 		DirectX::XMFLOAT4X4 global_transform = { 1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1 };
 		skeletal_animation skeletal_animation;
+		FLOAT bone_weights[MAX_BONE_INFLUENCES] = { 1,0,0,0 };
+		INT bone_indices[MAX_BONE_INFLUENCES] = {};
+		DirectX::XMFLOAT4 pos;
 	};
 
 	struct bone_influence
@@ -175,10 +178,21 @@ public:
 	void fbxamatrix_to_xmfloat4x4(const FbxAMatrix& fbxamatrix, DirectX::XMFLOAT4X4& xmfloat4x4);
 	void fetch_animations(FbxMesh* fbx_mesh, skinned_mesh::skeletal_animation& skeletal_animation, u_int sampling_rate = 0);
 	
+	bool calcTransformedPosBySpecifyMesh(DirectX::XMFLOAT3& _local_pos, std::string _mesh_name);
 	void setLoopFlg(const bool _is_loop) { loop_flg = _is_loop; }
 	void setStopAnimation(const bool _is_stop) { stop_animation = _is_stop; }
-	// void setStoptimer(const int _stop_timer) { stop_time = _stop_timer; }
-	void setStoptimer(const int _stop_timer) { stop_time = static_cast<float>( _stop_timer ); }
+	void setStoptimer(const int _stop_timer) { stop_time = _stop_timer; }
+	void setAnimFlame(const int _animFlame)
+	{
+		for (auto& it : meshes)
+		{
+			it.skeletal_animation.animation_tick = _animFlame * it.skeletal_animation.sampling_time;
+		}
+	}
+	const int getAnimFlame()
+	{
+		return animation_flame;
+	}
 
 private:
 	//template <class Archive>

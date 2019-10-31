@@ -27,7 +27,7 @@
 
 #if DEBUG_MODE
 constexpr int BGM_ID = 'BGM';
-constexpr int SE_ID  = 'SE';
+constexpr int SE_ID = 'SE';
 #endif // DEBUG_MODE
 
 struct SceneGame::Impl
@@ -78,10 +78,10 @@ private:
 public:
 	void Init()
 	{
-	#if DEBUG_MODE
-		Donya::Sound::Load( BGM_ID, "./Data/Sounds/Test/BGM.wav", true  );
-		Donya::Sound::Load( SE_ID,  "./Data/Sounds/Test/SE.wav",  false );
-	#endif // DEBUG_MODE
+#if DEBUG_MODE
+		Donya::Sound::Load(BGM_ID, "./Data/Sounds/Test/BGM.wav", true);
+		Donya::Sound::Load(SE_ID, "./Data/Sounds/Test/SE.wav", false);
+#endif // DEBUG_MODE
 
 		resetPointLight();
 
@@ -101,7 +101,7 @@ public:
 
 		stage.Init( STAGE_NO );
 
-		loadFBX(&animTest, "./Data/TestMove.fbx");
+		loadFBX(&animTest, "./Data/MDL_Player_Attack.fbx");
 
 		player.Init();
 		player.SetFieldRadius( fieldRadius );
@@ -159,23 +159,33 @@ public:
 		GameLib::camera::setPos( cameraPos );
 		GameLib::camera::setTarget( player.GetPosition() + cameraFocusOffset );
 		
-		if(getKeyState(KEY_INPUT_SPACE))
+		if (getKeyState(KEY_INPUT_1) == 1)
+		{
+			setAnimFlame(&animTest, 0);
+		}
+		if (getKeyState(KEY_INPUT_2) == 1)
+		{
+			setAnimFlame(&animTest, 20);
+		}
+		if (getKeyState(KEY_INPUT_SPACE))
 		{
 			//setStopTime(&animTest,1);
-			setStopAnimation(&animTest,true);
+			setStopAnimation(&animTest, true);
 		}
 		else
-		setStopAnimation(&animTest,false);
+		{
+			setStopAnimation( &animTest, false );
+		}
 
 		ProcessCollision();
 	}
 
 	void Draw()
 	{
-		clearWindow( 0.5f, 0.5f, 0.5f, 1.0f );
+		clearWindow(0.1f, 0.1f, 0.1f, 1.0f);
 
-		Donya::Vector4x4 V = Donya::Vector4x4::FromMatrix( GameLib::camera::GetViewMatrix() );
-		Donya::Vector4x4 P = Donya::Vector4x4::FromMatrix( GameLib::camera::GetProjectionMatrix() );
+		Donya::Vector4x4 V = Donya::Vector4x4::FromMatrix(GameLib::camera::GetViewMatrix());
+		Donya::Vector4x4 P = Donya::Vector4x4::FromMatrix(GameLib::camera::GetProjectionMatrix());
 
 		stage.Draw( V, P );
 
@@ -184,17 +194,41 @@ public:
 		{
 			XMFLOAT4X4 World, world_view_projection;
 			DirectX::XMMATRIX worldM;
-			DirectX::XMMATRIX S;
+			DirectX::XMMATRIX worldcubeM;
+			DirectX::XMMATRIX S, R, Rx, Ry, Rz, T;
 			worldM = DirectX::XMMatrixIdentity();
 
 			//	Šg‘åEk¬
-			S = DirectX::XMMatrixScaling(0.5f,0.5f,0.5f);
-
+			S = DirectX::XMMatrixScaling( 0.5f, 0.5f, 0.5f );
 			//	Matrix -> Float4x4 •ÏŠ·
 			DirectX::XMStoreFloat4x4( &world_view_projection, worldM * getViewMatrix() * getProjectionMatrix() );
 			DirectX::XMStoreFloat4x4( &World, worldM );
-			setBlendMode_ALPHA( 125 );
+			setBlendMode_ALPHA( 255 );
 			FBXRender( &animTest, world_view_projection, World );
+			DirectX::XMFLOAT3 pos = { -10,10,100 };
+			worldcubeM = DirectX::XMMatrixIdentity();
+
+			//	Šg‘åEk¬
+			S = DirectX::XMMatrixScaling( 10, 10, 10 );
+
+			//	‰ñ“]
+			Rx = DirectX::XMMatrixRotationX( 0 );				//	XŽ²‚ðŠî€‚Æ‚µ‚½‰ñ“]s—ñ
+			Ry = DirectX::XMMatrixRotationY( 0 );				//	YŽ²‚ðŠî€‚Æ‚µ‚½‰ñ“]s—ñ
+			Rz = DirectX::XMMatrixRotationZ( 0 );				//	ZŽ²‚ðŠî€‚Æ‚µ‚½‰ñ“]s—ñ
+			R = Rz * Rx * Ry;
+
+			//	•½sˆÚ“®
+			calcTransformedPosBySpecifyMesh( &animTest, pos, "_04_MDL_yoroi1:_02_MDL_yoroi:spear" );
+			T = DirectX::XMMatrixTranslation( pos.x, pos.y, pos.z );
+
+			//	ƒ[ƒ‹ƒh•ÏŠ·s—ñ
+			worldcubeM = S * R * T * worldM;
+
+			//	Matrix -> Float4x4 •ÏŠ·
+			DirectX::XMStoreFloat4x4( &world_view_projection, worldcubeM * getViewMatrix() * getProjectionMatrix() );
+			DirectX::XMStoreFloat4x4( &World, worldcubeM );
+
+			OBJRender( &testCube, world_view_projection, World );
 		}
 
 		boss.Draw( V, P );
@@ -252,9 +286,9 @@ public:
 
 	void UseImGui()
 	{
-	#if USE_IMGUI
+#if USE_IMGUI
 
-		if ( ImGui::BeginIfAllowed() )
+		if (ImGui::BeginIfAllowed())
 		{
 			if ( ImGui::Button( "GotoTitle" ) )
 			{
@@ -341,25 +375,25 @@ public:
 				}
 
 				if ( ImGui::TreeNode( "File.I/O" ) )
-			{
-				static bool isBinary = true;
-				if ( ImGui::RadioButton( "Binary", isBinary ) ) { isBinary = true; }
-				if ( ImGui::RadioButton( "JSON", !isBinary ) ) { isBinary = false; }
-				std::string loadStr{ "Load " };
-				loadStr += ( isBinary ) ? "Binary" : "JSON";
-
-				if ( ImGui::Button( "Save" ) )
 				{
-					SaveParameter();
-				}
-				// if ( ImGui::Button( Donya::MultiToUTF8( loadStr ).c_str() ) )
-				if ( ImGui::Button( loadStr.c_str() ) )
-				{
-					LoadParameter( isBinary );
-				}
+					static bool isBinary = true;
+					if ( ImGui::RadioButton( "Binary", isBinary ) ) { isBinary = true; }
+					if ( ImGui::RadioButton( "JSON", !isBinary ) ) { isBinary = false; }
+					std::string loadStr{ "Load " };
+					loadStr += ( isBinary ) ? "Binary" : "JSON";
 
-				ImGui::TreePop();
-			}
+					if ( ImGui::Button( "Save" ) )
+					{
+						SaveParameter();
+					}
+					// if ( ImGui::Button( Donya::MultiToUTF8( loadStr ).c_str() ) )
+					if ( ImGui::Button( loadStr.c_str() ) )
+					{
+						LoadParameter( isBinary );
+					}
+
+					ImGui::TreePop();
+				}
 
 				ImGui::TreePop();
 			}
@@ -367,16 +401,16 @@ public:
 			ImGui::End();
 		}
 
-	#endif // USE_IMGUI
+#endif // USE_IMGUI
 	}
 };
 CEREAL_CLASS_VERSION( SceneGame::Impl, 2 )
 
-SceneGame::SceneGame() : baseScene(), pImpl( std::make_unique<Impl>() )
+SceneGame::SceneGame() : baseScene(), pImpl(std::make_unique<Impl>())
 {}
 SceneGame::~SceneGame()
 {
-	pImpl.reset( nullptr );
+	pImpl.reset(nullptr);
 }
 
 void SceneGame::init()

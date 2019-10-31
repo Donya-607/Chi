@@ -94,7 +94,7 @@ rsq r0.w, r0.w
 mul r1.xyz, r0.wwww, r1.xyzx  // r1.x <- V.x; r1.y <- V.y; r1.z <- V.z
 
 #line 44
-mov r2.xyz, cb0[26].xyzx  // r2.x <- ambientColor.x; r2.y <- ambientColor.y; r2.z <- ambientColor.z
+mov r2.xyz, cb0[27].xyzx  // r2.x <- ambientColor.x; r2.y <- ambientColor.y; r2.z <- ambientColor.z
 
 #line 45
 mov r3.xyzw, -cb0[9].xyzw
