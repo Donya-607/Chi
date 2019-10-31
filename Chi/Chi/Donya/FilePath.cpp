@@ -36,7 +36,7 @@ std::string GetModelPath( ModelAttribute modelAttribute )
 {
 	switch ( modelAttribute )
 	{
-	case ModelAttribute::Player:
+	case ModelAttribute::PlayerIdle:
 		return "./Data/model/Player/MDL_Player.fbx";					// break;
 	case ModelAttribute::PlayerAtk:
 		return "./Data/model/Player/MDL_Player_Attack.fbx";				// break;

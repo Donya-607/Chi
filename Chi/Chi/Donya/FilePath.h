@@ -16,7 +16,7 @@ std::wstring GetSpritePath( SpriteAttribute spriteAttribute );
 
 enum class ModelAttribute
 {
-	Player,
+	PlayerIdle,
 	PlayerAtk,
 	Stage,
 	BossIdle,

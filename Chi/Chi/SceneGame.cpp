@@ -123,13 +123,13 @@ public:
 		{
 			char breakPoint = 0;
 		}
-		if ( Donya::Keyboard::Trigger( 'H' ) || Donya::Keyboard::Trigger( 'I' ) )
-		{
-			Donya::ToggleShowStateOfImGui();
-		}
-		if ( Donya::Keyboard::Trigger( 'T' ) )
+		if ( Donya::Keyboard::Trigger( 'H' ) )
 		{
 			Donya::ToggleShowCollision();
+		}
+		if ( Donya::Keyboard::Trigger( 'T' ) || Donya::Keyboard::Trigger( 'I' ) )
+		{
+			Donya::ToggleShowStateOfImGui();
 		}
 
 	#endif // DEBUG_MODE
@@ -166,6 +166,8 @@ public:
 		}
 		else
 		setStopAnimation(&animTest,false);
+
+		ProcessCollision();
 	}
 
 	void Draw()
@@ -198,6 +200,32 @@ public:
 		boss.Draw( V, P );
 	}
 
+public:
+	void ProcessCollision()
+	{
+		Donya::OBB playerBodyBox   = player.GetHurtBox();
+		Donya::OBB playerShieldBox = player.GetShieldHitBox();
+
+		// Player VS BossAttacks
+		{
+			bool wasHitToShield = false;
+			const auto attackBoxes = boss.GetAttackHitBoxes();
+			for ( const auto &it : attackBoxes )
+			{
+				if ( Donya::OBB::IsHitOBB( playerShieldBox, it ) )
+				{
+					wasHitToShield = true;
+					player.SucceededDefence();
+				}
+				if ( !wasHitToShield && Donya::OBB::IsHitOBB( playerShieldBox, it ) )
+				{
+					// TODO:Do
+				}
+
+				wasHitToShield = false;
+			}
+		}
+	}
 public:
 	void LoadParameter( bool isBinary = true )
 	{
@@ -235,8 +263,8 @@ public:
 
 			if ( ImGui::TreeNode( "Game" ) )
 			{
-				ImGui::Text( "Show.\'I\' or \'H'\'key : Toggle ImGui ON/OFF" );
-				ImGui::Text( "Show.\'T\'key : Toggle Collision ON/OFF" );
+				ImGui::Text( "Show.\'I\' or \'T'\'key : Toggle ImGui ON/OFF" );
+				ImGui::Text( "Show.\'H\'key : Toggle Collision ON/OFF" );
 				ImGui::Text( "" );
 
 				if ( ImGui::TreeNode( u8"Sound test" ) )

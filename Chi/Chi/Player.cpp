@@ -137,11 +137,10 @@ Player::Player() :
 	pos(), velocity(), lookDirection(),
 	orientation(),
 	models(),
-	isHoldingDefence( false )
+	isHoldingDefence( false ), wasSucceededDefence( false )
 {
-	models.pHuman	= std::make_unique<skinned_mesh>();
-	models.pShield	= std::make_unique<skinned_mesh>();
-	models.pLance	= std::make_unique<skinned_mesh>();
+	models.pIdle	= std::make_unique<skinned_mesh>();
+	models.pAttack	= std::make_unique<skinned_mesh>();
 }
 Player::~Player() = default;
 
@@ -161,9 +160,8 @@ void Player::Uninit()
 {
 	PlayerParam::Get().Uninit();
 
-	models.pHuman.reset( nullptr );
-	models.pShield.reset( nullptr );
-	models.pLance.reset( nullptr );
+	models.pIdle.reset( nullptr );
+	models.pAttack.reset( nullptr );
 }
 
 void Player::Update( Input input )
@@ -196,48 +194,22 @@ void Player::Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matP
 	{
 	case Player::State::Idle:
 		{
-			FBXRender( models.pHuman.get(), WVP, W );
+			FBXRender( models.pIdle.get(), WVP, W );
 		}
 		break;
 	case Player::State::Run:
 		{
-			FBXRender( models.pHuman.get(), WVP, W );
+			FBXRender( models.pIdle.get(), WVP, W );
 		}
 		break;
 	case Player::State::Defend:
 		{
-			FBXRender( models.pHuman.get(), WVP, W );
-
-			// Matrix of shield-space -> player-space.
-			Donya::Vector4x4 SW{};
-			{
-				const auto SHIELD = PARAM.HitBoxShield();
-				// Donya::Vector4x4 SS = Donya::Vector4x4::Identity();
-				// Donya::Vector4x4 SR = Donya::Vector4x4::Identity();
-				// Donya::Vector4x4 ST = Donya::Vector4x4::MakeTranslation( SHIELD.pos );
-				// SW = ( SS * SR * ST );
-				SW = Donya::Vector4x4::MakeTranslation( SHIELD.pos );
-			}
-			Donya::Vector4x4 SWVP = SW * WVP;
-			FBXRender( models.pShield.get(), SWVP, ( SW * W ) );
+			FBXRender( models.pIdle.get(), WVP, W );
 		}
 		break;
 	case Player::State::Attack:
 		{
-			FBXRender( models.pHuman.get(), WVP, W );
-
-			// Matrix of lance-space -> player-space.
-			Donya::Vector4x4 LW{};
-			{
-				// const auto LANCE = PARAM.HitBoxLance();
-				// Donya::Vector4x4 LS = Donya::Vector4x4::Identity();
-				// Donya::Vector4x4 LR = Donya::Vector4x4::Identity();
-				// Donya::Vector4x4 LT = Donya::Vector4x4::MakeTranslation( LANCE.pos );
-				// LW = ( LS * LR * LT );
-				// LW = Donya::Vector4x4::MakeTranslation( LANCE.pos );
-			}
-			Donya::Vector4x4 LWVP = LW * WVP;
-			FBXRender( models.pLance.get(), LWVP, ( LW * W ) );
+			FBXRender( models.pAttack.get(), WVP, W );
 		}
 		break;
 	default: break;
@@ -291,9 +263,11 @@ void Player::Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matP
 		if( BODY.exist   ) { DrawCube  ( BODY.pos,   BODY.size,     BODY_COLOR   ); }
 		if( PHYSIC.exist ) { DrawSphere( PHYSIC.pos, PHYSIC.radius, PHYSIC_COLOR ); }
 
-		constexpr Donya::Vector4 SHIELD_COLOR{ 0.2f, 1.0f, 0.2f, 0.5f };
+		constexpr Donya::Vector4 SHIELD_COLOR{ 0.2f, 0.8f, 0.2f, 0.5f };
+		constexpr Donya::Vector4 SHIELD_COLOR_SUCCEEDED{ 0.6f, 1.0f, 0.6f, 0.5f };
 		const auto SHIELD = PARAM.HitBoxShield();
-		if( status == State::Defend ){ DrawCube( SHIELD.pos, SHIELD.size, SHIELD_COLOR ); }
+		Donya::Vector4 shieldColor = ( wasSucceededDefence ) ? SHIELD_COLOR_SUCCEEDED : SHIELD_COLOR;
+		if( status == State::Defend ){ DrawCube( SHIELD.pos, SHIELD.size, shieldColor ); }
 	}
 
 #endif // DEBUG_MODE
@@ -320,7 +294,13 @@ Donya::OBB Player::GetShieldHitBox() const
 	const auto &HITBOX = PlayerParam::Get().HitBoxShield();
 
 	Donya::OBB wsOBB = MakeOBB( HITBOX, orientation );
+	if ( status != State::Defend ) { wsOBB.exist = false; }
 	return wsOBB;
+}
+
+void Player::SucceededDefence()
+{
+	wasSucceededDefence = true;
 }
 
 void Player::SetFieldRadius( float newFieldRadius )
@@ -331,9 +311,8 @@ void Player::SetFieldRadius( float newFieldRadius )
 
 void Player::LoadModel()
 {
-	loadFBX( models.pHuman.get(),	GetModelPath( ModelAttribute::Player ) );
-	loadFBX( models.pShield.get(),	GetModelPath( ModelAttribute::Shield ) );
-	loadFBX( models.pLance.get(),	GetModelPath( ModelAttribute::Lance  ) );
+	loadFBX( models.pIdle.get(),	GetModelPath( ModelAttribute::PlayerIdle ) );
+	loadFBX( models.pAttack.get(),	GetModelPath( ModelAttribute::PlayerAtk ) );
 }
 
 void Player::ChangeStatus( Input input )
@@ -474,7 +453,8 @@ void Player::DefendInit( Input input )
 	status   = State::Defend;
 	velocity = 0.0f; // Each member set to zero.
 
-	isHoldingDefence  = true;
+	isHoldingDefence    = true;
+	wasSucceededDefence = false;
 
 	const auto &PARAM = PlayerParam::Get();
 	timer = PARAM.FrameWholeDefence();
@@ -491,6 +471,7 @@ void Player::DefendUpdate( Input input )
 void Player::DefendUninit()
 {
 	timer = 0;
+	wasSucceededDefence = false;
 }
 
 void Player::ChangeStatusFromAttack( Input input )

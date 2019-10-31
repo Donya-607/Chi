@@ -121,9 +121,8 @@ public:
 private:
 	struct Models
 	{
-		std::unique_ptr<skinned_mesh> pHuman{ nullptr };
-		std::unique_ptr<skinned_mesh> pShield{ nullptr };
-		std::unique_ptr<skinned_mesh> pLance{ nullptr };
+		std::unique_ptr<skinned_mesh> pIdle{ nullptr };
+		std::unique_ptr<skinned_mesh> pAttack{ nullptr };
 	};
 	enum class State
 	{
@@ -142,6 +141,7 @@ private:
 	Donya::Quaternion	orientation;
 	Models				models;
 	bool				isHoldingDefence;	// Prevent user keeped holded defence button. true when hold defence button, false when detected release the button.
+	bool				wasSucceededDefence;
 public:
 	Player();
 	~Player();
@@ -166,6 +166,11 @@ public:
 	/// Returns world space hit-box of shield.
 	/// </summary>
 	Donya::OBB GetShieldHitBox() const;
+
+	/// <summary>
+	/// Please call when succeeded defence by enemy's attack.
+	/// </summary>
+	void SucceededDefence();
 
 	void SetFieldRadius( float fieldRadius );
 private:
