@@ -123,17 +123,20 @@ public:
 	{
 	#if DEBUG_MODE
 
-		if ( Donya::Keyboard::Press( 'D' ) && Donya::Keyboard::Trigger( 'C' ) )
+		if ( Donya::Keyboard::Press( VK_MENU ) )
 		{
-			char breakPoint = 0;
-		}
-		if ( Donya::Keyboard::Trigger( 'H' ) )
-		{
-			Donya::ToggleShowCollision();
-		}
-		if ( Donya::Keyboard::Trigger( 'T' ) || Donya::Keyboard::Trigger( 'I' ) )
-		{
-			Donya::ToggleShowStateOfImGui();
+			if ( Donya::Keyboard::Trigger( 'C' ) )
+			{
+				char breakPoint = 0;
+			}
+			if ( Donya::Keyboard::Trigger( 'H' ) )
+			{
+				Donya::ToggleShowCollision();
+			}
+			if ( Donya::Keyboard::Trigger( 'T' ) || Donya::Keyboard::Trigger( 'I' ) )
+			{
+				Donya::ToggleShowStateOfImGui();
+			}
 		}
 
 	#endif // DEBUG_MODE
@@ -162,7 +165,11 @@ public:
 
 		GameLib::camera::setPos( cameraPos );
 		GameLib::camera::setTarget( player.GetPosition() + cameraFocusOffset );
+
+		ProcessCollision();
 		
+	#if DEBUG_MODE
+
 		if (getKeyState(KEY_INPUT_1) == 1)
 		{
 			setAnimFlame(&animTest, 0);
@@ -181,34 +188,41 @@ public:
 			setStopAnimation( &animTest, false );
 		}
 
-		ProcessCollision();
+	#endif // DEBUG_MODE
 	}
 
 	void Draw()
 	{
-		clearWindow(0.1f, 0.1f, 0.1f, 1.0f);
+		clearWindow( 0.1f, 0.1f, 0.1f, 1.0f );
+		setBlendMode_ALPHA( 1.0f );
 
-		Donya::Vector4x4 V = Donya::Vector4x4::FromMatrix(GameLib::camera::GetViewMatrix());
-		Donya::Vector4x4 P = Donya::Vector4x4::FromMatrix(GameLib::camera::GetProjectionMatrix());
+		Donya::Vector4x4 V = Donya::Vector4x4::FromMatrix( getViewMatrix() );
+		Donya::Vector4x4 P = Donya::Vector4x4::FromMatrix( getProjectionMatrix() );
 
 		stage.Draw( V, P );
 
 		player.Draw( V, P );
 
+		boss.Draw( V, P );
+
+	#if DEBUG_MODE
+
+		if ( 0 )
 		{
 			XMFLOAT4X4 World, world_view_projection;
 			DirectX::XMMATRIX worldM;
 			DirectX::XMMATRIX worldcubeM;
 			DirectX::XMMATRIX S, R, Rx, Ry, Rz, T;
-			worldM = DirectX::XMMatrixIdentity();
+			auto plPos = player.GetPosition();
+			T = DirectX::XMMatrixTranslation( plPos.x, plPos.y, plPos.z );
+			worldM = T;
 
-			//	Šg‘åEk¬
-			S = DirectX::XMMatrixScaling( 0.5f, 0.5f, 0.5f );
 			//	Matrix -> Float4x4 •ÏŠ·
 			DirectX::XMStoreFloat4x4( &world_view_projection, worldM * getViewMatrix() * getProjectionMatrix() );
 			DirectX::XMStoreFloat4x4( &World, worldM );
-			setBlendMode_ALPHA( 255 );
+			
 			FBXRender( &animTest, world_view_projection, World );
+
 			DirectX::XMFLOAT3 pos = { -10,10,100 };
 			worldcubeM = DirectX::XMMatrixIdentity();
 
@@ -235,7 +249,7 @@ public:
 			OBJRender( &testCube, world_view_projection, World );
 		}
 
-		boss.Draw( V, P );
+	#endif // DEBUG_MODE
 	}
 
 public:
@@ -301,8 +315,8 @@ public:
 
 			if ( ImGui::TreeNode( "Game" ) )
 			{
-				ImGui::Text( "Show.\'I\' or \'T'\'key : Toggle ImGui ON/OFF" );
-				ImGui::Text( "Show.\'H\'key : Toggle Collision ON/OFF" );
+				ImGui::Text( "Show.Press \'ALT\' and \'I\' or \'T'\'key : Toggle ImGui ON/OFF" );
+				ImGui::Text( "Show.Press \'ALT\' and \'H\'key : Toggle Collision ON/OFF" );
 				ImGui::Text( "" );
 
 				if ( ImGui::TreeNode( u8"Sound test" ) )

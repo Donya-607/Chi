@@ -2,6 +2,10 @@
 
 #include <memory>
 
+// For serialize "std::string".
+#include <cereal/cereal.hpp>
+#include <cereal/types/string.hpp>
+
 #include "Donya/Collision.h"
 #include "Donya/Quaternion.h"
 #include "Donya/Serializer.h"
@@ -26,6 +30,7 @@ private:
 	Donya::Sphere	hitBoxPhysic;	// HitBox that collide to stage.
 	Donya::AABB		hitBoxShield;	// HitBox of shield.
 	Donya::OBBFrame	hitBoxLance;	// HitBox of lance.
+	std::string		lanceMeshName;	// Use for find a mesh that transform the OBB of lance.
 private:
 	PlayerParam();
 public:
@@ -66,6 +71,10 @@ private:
 		}
 		if ( 4 <= version )
 		{
+			archive( CEREAL_NVP( lanceMeshName ) );
+		}
+		if ( 5 <= version )
+		{
 			// archive( CEREAL_NVP( x ) );
 		}
 	}
@@ -85,6 +94,7 @@ public:
 	Donya::AABB		HitBoxShield()	const { return hitBoxShield; }
 	Donya::OBBFrame	*HitBoxAttackF()				{ return &hitBoxLance;  }
 	const Donya::OBBFrame	*HitBoxAttackF() const	{ return &hitBoxLance;  }
+	std::string LanceMeshName()		const { return lanceMeshName; }
 public:
 	void LoadParameter( bool isBinary = true );
 
@@ -96,7 +106,7 @@ public:
 
 #endif // USE_IMGUI
 };
-CEREAL_CLASS_VERSION( PlayerParam, 3 )
+CEREAL_CLASS_VERSION( PlayerParam, 4 )
 
 class skinned_mesh;	// With pointer. because I'm not want include this at header.
 class Player
@@ -185,6 +195,11 @@ public:
 	void SetFieldRadius( float fieldRadius );
 private:
 	void LoadModel();
+
+	/// <summary>
+	/// Returns matrix transform to world space from local space.
+	/// </summary>
+	Donya::Vector4x4 CalcWorldMatrix() const;
 private:
 	void ChangeStatus( Input input );
 	void UpdateCurrentStatus( Input input );

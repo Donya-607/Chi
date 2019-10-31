@@ -1,6 +1,6 @@
 {
     "Player": {
-        "cereal_class_version": 3,
+        "cereal_class_version": 4,
         "scale": 1.0,
         "runSpeed": 4.5,
         "rotSlerpFactor": 0.20000000298023225,
@@ -30,8 +30,8 @@
             "exist": true
         },
         "frameUnfoldableDefence": 45,
-        "frameCancelableAttack": 45,
-        "frameWholeAttacking": 165,
+        "frameCancelableAttack": 20,
+        "frameWholeAttacking": 158,
         "hitBoxShield": {
             "pos": {
                 "x": 0.0,
@@ -47,8 +47,8 @@
         },
         "hitBoxLance": {
             "cereal_class_version": 0,
-            "enableFrameStart": 60,
-            "enableFrameLast": 70,
+            "enableFrameStart": 55,
+            "enableFrameLast": 75,
             "OBB": {
                 "cereal_class_version": 0,
                 "pos": {
@@ -70,6 +70,7 @@
                 },
                 "exist": false
             }
-        }
+        },
+        "lanceMeshName": "_04_MDL_yoroi1:_02_MDL_yoroi:spear"
     }
 }
