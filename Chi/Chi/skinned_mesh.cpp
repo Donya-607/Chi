@@ -60,20 +60,19 @@ void skinned_mesh::fbxInit(ID3D11Device* _device, const std::string& _fbxFileNam
 	};
 	traverse(scene->GetRootNode());
 
-
 	meshes.resize(fetched_meshes.size());
 	int index_mesh = 0;
 	for (size_t i = 0; i < fetched_meshes.size(); i++, index_mesh++)
 	{
-
+		if (i == 12)
+			int a = 0;
 		FbxMesh* fbx_mesh = fetched_meshes.at(i)->GetMesh();
 		mesh& mesh = meshes.at(i);
-
+		mesh.node_name = fetched_meshes.at(i)->GetNameOnly();
 
 		const int number_of_materials = fbx_mesh->GetNode()->GetMaterialCount();
 
 		mesh.subsets.resize(number_of_materials);
-		
 
 
 		for (int index_of_material = 0; index_of_material < number_of_materials; ++index_of_material)
@@ -167,6 +166,7 @@ void skinned_mesh::fbxInit(ID3D11Device* _device, const std::string& _fbxFileNam
 		bool unmapped_uv;
 
 		std::vector<bone_influences_per_control_point> bone_influences;
+		//ボーン情報の読み込み
 		fetch_bone_influences(fbx_mesh, bone_influences);
 
 		for (int index_of_polygon = 0; index_of_polygon < number_of_polygons; index_of_polygon++)
@@ -177,6 +177,7 @@ void skinned_mesh::fbxInit(ID3D11Device* _device, const std::string& _fbxFileNam
 				index_of_material = fbx_mesh->GetElementMaterial()->GetIndexArray().GetAt(index_of_polygon);
 			}
 			subset& subset = mesh.subsets.at(index_of_material);
+
 			const int index_offset = subset.index_start + subset.index_count;
 
 			for (int index_of_vertex = 0; index_of_vertex < 3; index_of_vertex++)
@@ -202,25 +203,66 @@ void skinned_mesh::fbxInit(ID3D11Device* _device, const std::string& _fbxFileNam
 				}
 
 				bone_influences_per_control_point bone_point = bone_influences[index_of_control_point];
+				float strong_weight = 0;
+				int index = 0;
+				int indexies[4];
+
+				//上位4つを保存
 				for (size_t index_of_influence = 0; index_of_influence < bone_point.size(); index_of_influence++)
 				{
+
 					if (index_of_influence < MAX_BONE_INFLUENCES)
 					{
 						vertex.bone_weights[index_of_influence] = bone_point.at(index_of_influence).weight;
 						vertex.bone_indices[index_of_influence] = bone_point.at(index_of_influence).index;
+						indexies[index_of_influence] = vertex.bone_indices[index_of_influence];
 					}
 					else
 					{
-						FLOAT weight = vertex.bone_weights[1];
+						float weight = vertex.bone_weights[0];
 						int _index = 0;
 						for (int i = 1; i < 4; i++)
 						{
-							if (vertex.bone_weights[i] < weight)
+							if (vertex.bone_weights[i] > weight)
 								continue;
 							_index = i;
 						}
-						vertex.bone_weights[_index] += bone_point.at(index_of_influence).weight;
+						if (vertex.bone_weights[_index] < bone_point.at(index_of_influence).weight)
+						{
+							vertex.bone_weights[_index] = bone_point.at(index_of_influence).weight;
+							vertex.bone_indices[_index] = bone_point.at(index_of_influence).index;
+							indexies[_index] = vertex.bone_indices[_index];
+						}
 					}
+
+				}
+
+				//4つの中から一番強いウェイトを見つける
+				for (int i = 0; i < 4; i++)
+				{
+					if (strong_weight < vertex.bone_weights[i])
+					{
+						strong_weight = vertex.bone_weights[i];
+						index = i;
+					}
+				}
+
+				//余りを1番強いウェイトに加算
+				for (size_t index_of_influence = 0; index_of_influence < bone_point.size(); index_of_influence++)
+				{
+					int _index = bone_point.at(index_of_influence).index;
+					if (_index == indexies[0] || _index == indexies[1] || _index == indexies[2] || _index == indexies[3])
+						continue;
+					else
+					{
+						vertex.bone_weights[index] += bone_point.at(index_of_influence).weight;
+					}
+				}
+				for (int i = 0; i < 4; i++)
+				{
+					mesh.bone_weights[i] = vertex.bone_weights[i];
+					mesh.bone_indices[i] = vertex.bone_indices[i];
+					mesh.pos = { vertex.position.x,vertex.position.y,vertex.position.z,1.0f };
 				}
 				vertices.push_back(vertex);
 				indices.at(index_offset + index_of_vertex) = static_cast<u_int>(vertex_count);
@@ -326,7 +368,7 @@ void skinned_mesh::setInfo(ID3D11Device* _device, const std::string& _fbxFileNam
 		}
 		init(_device, vsName, elements, numElements, psName);
 		vsName = "./Data/shader/geometric_primitive_vs.cso";
-		psName = "./Data/shader/geometric_primitive_ps.cso";
+		psName = "./Data/shader/skinned_mesh_no_uv_ps.cso";
 
 		ResourceManager::LoadVertexShader(_device, vsName, elements, numElements, &noTexVS, &noTexLayout);
 		ResourceManager::LoadPixelShader(_device, psName, &noTexPS);
@@ -526,7 +568,7 @@ void skinned_mesh::render(
 							it.skeletal_animation.animation_tick = 0;
 						}
 						//アニメーションタイマーのインクリメント
-						if (!stop_animation && stop_time <=0)
+						if (!stop_animation && stop_time <= 0)
 							it.skeletal_animation.animation_tick += elapsed_time;
 					}
 					//ループ無し
@@ -591,20 +633,17 @@ void skinned_mesh::render(
 				if (!wireFlg)	context->RSSetState(rasterizeFillOut);
 				else		context->RSSetState(rasterizeLine);
 
+				//	入力レイアウトのバインド
+				context->IASetInputLayout(layout);
+				//	シェーダー(2種)の設定
+				context->VSSetShader(vertexShader, nullptr, 0);
+
 				if (p.diffuse.shader_resource_view)
 				{
-					//	入力レイアウトのバインド
-					context->IASetInputLayout(layout);
-					//	シェーダー(2種)の設定
-					context->VSSetShader(vertexShader, nullptr, 0);
 					context->PSSetShader(pixelShader, nullptr, 0);
 				}
 				else
 				{
-					//	入力レイアウトのバインド
-					context->IASetInputLayout(noTexLayout);
-					//	シェーダー(2種)の設定
-					context->VSSetShader(noTexVS, nullptr, 0);
 					context->PSSetShader(noTexPS, nullptr, 0);
 				}
 
@@ -828,6 +867,41 @@ void skinned_mesh::fetch_animations(FbxMesh* fbx_mesh, skinned_mesh::skeletal_an
 	{
 		delete array_of_animation_stack_names[i];
 	}
+}
+
+bool skinned_mesh::calcTransformedPosBySpecifyMesh(DirectX::XMFLOAT3& _local_pos, std::string _mesh_name)
+{
+	mesh* _mesh = nullptr;
+	for (mesh* p = meshes.data(); p < meshes.data() + meshes.size(); p++)
+	{
+		if (p->node_name != _mesh_name)
+			continue;
+		_mesh = p;
+		break;
+	}
+	if (_mesh == nullptr)
+		return false;
+	std::vector<bone>& skeletal = _mesh->skeletal_animation.at(animation_flame);
+	size_t number_of_bones = skeletal.size();
+	_ASSERT_EXPR(number_of_bones < MAX_BONES, L"'the number_of_bones' exceeds MAX_BONES.");
+	DirectX::XMFLOAT4 pos = { _mesh->pos.x+_local_pos.x,_mesh->pos.y + _local_pos.y,_mesh->pos.z + _local_pos.z,_mesh->pos.w };
+	DirectX::XMFLOAT3 _p = { 0,0,0 };
+
+	for (size_t i = 0; i < 4; i++)
+	{
+
+		DirectX::XMFLOAT4X4 transform = skeletal.at(_mesh->bone_indices[i]).transform;
+
+		float w = pos.x * transform._14 + pos.y * transform._24 + pos.z * transform._34 + pos.w * transform._44;
+
+		_p.x += (pos.x * transform._11 + pos.y * transform._21 + pos.z * transform._31 + pos.w * transform._41) / w * _mesh->bone_weights[i];
+		_p.y += (pos.x * transform._12 + pos.y * transform._22 + pos.z * transform._32 + pos.w * transform._42) / w * _mesh->bone_weights[i];
+		_p.z += (pos.x * transform._13 + pos.y * transform._23 + pos.z * transform._33 + pos.w * transform._43) / w * _mesh->bone_weights[i];
+
+	}
+	_local_pos = { _p.x,_p.y,_p.z };
+
+	return true;
 }
 
 

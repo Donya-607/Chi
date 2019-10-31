@@ -767,6 +767,21 @@ namespace GameLib
 			_mesh->setStoptimer(_stop_time);
 		}
 
+		void setAnimFlame(skinned_mesh* _mesh, const int _anim_flame)
+		{
+			_mesh->setAnimFlame(_anim_flame);
+		}
+
+		bool calcTransformedPosBySpecifyMesh(skinned_mesh* _mesh, DirectX::XMFLOAT3& _pos, std::string _mesh_name)
+		{
+			return _mesh->calcTransformedPosBySpecifyMesh(_pos, _mesh_name);
+		}
+
+		const int getAnimFlame(skinned_mesh* _mesh)
+		{
+			return _mesh->getAnimFlame();
+		}
+
 
 		void skinnedMeshRender(
 			skinned_mesh* _mesh,

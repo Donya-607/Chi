@@ -168,6 +168,12 @@ void setStopAnimation(skinned_mesh* _mesh, const bool _is_stop);
 
 void setStopTime(skinned_mesh* _mesh, const int _stop_time);
 
+void setAnimFlame(skinned_mesh* _mesh, const int _anim_flame);
+
+const int getAnimFlame(skinned_mesh*);
+
+bool calcTransformedPosBySpecifyMesh(skinned_mesh* _mesh, DirectX::XMFLOAT3& _pos, std::string _mesh_name);
+
 void FBXRender(skinned_mesh* skinnedMesh, const DirectX::XMFLOAT4X4& SynthesisMatrix, const DirectX::XMFLOAT4X4& worldMatrix, const DirectX::XMFLOAT4& materialColor = { 1.0f,1.0f,1.0f,1.0f }, bool wireFlg = false);
 
 

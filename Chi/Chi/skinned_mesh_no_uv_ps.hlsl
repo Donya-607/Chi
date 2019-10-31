@@ -41,7 +41,7 @@ float4 main(VS_OUT pin) : SV_TARGET
 	float3 L , specularColor, ambientColor, diffuseColor;
 	float A ,D;
 
-	ambientColor = material.ambient.xyz;
+	ambientColor = material.diffuse.xyz;
 	float4 _L = normalize(-line_light.direction);
 
 	color = ambientColor.xyz * (line_light.color.xyz * max(0, dot(-_L, pin.normal)));

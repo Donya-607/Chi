@@ -521,6 +521,20 @@ void setStopTime(skinned_mesh* _mesh, const int _stop_time)
 	GameLib::skinnedMesh::setStopTime(_mesh, _stop_time);
 }
 
+void setAnimFlame(skinned_mesh* _mesh, const int _anim_flame)
+{
+	GameLib::skinnedMesh::setAnimFlame(_mesh, _anim_flame);
+}
+
+const int getAnimFlame(skinned_mesh* _mesh)
+{
+	return GameLib::skinnedMesh::getAnimFlame(_mesh);
+}
+
+bool calcTransformedPosBySpecifyMesh(skinned_mesh* _mesh, DirectX::XMFLOAT3& _pos, std::string _mesh_name)
+{
+	return GameLib::skinnedMesh::calcTransformedPosBySpecifyMesh(_mesh, _pos, _mesh_name);
+}
 
 void FBXRender(skinned_mesh* skinnedMesh, const DirectX::XMFLOAT4X4&SynthesisMatrix, const DirectX::XMFLOAT4X4&worldMatrix, const DirectX::XMFLOAT4&materialColor, bool wireFlg)
 {

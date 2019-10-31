@@ -72,7 +72,7 @@
 //
 vs_5_0
 dcl_globalFlags refactoringAllowed | skipOptimization
-dcl_constantbuffer CB0[27], immediateIndexed
+dcl_constantbuffer CB0[28], immediateIndexed
 dcl_input v0.xyzw
 dcl_input v1.xyz
 dcl_input v2.xy
@@ -129,7 +129,7 @@ rsq r3.x, r3.x
 mul r2.xyzw, r2.xyzw, r3.xxxx  // r2.x <- vout.normal.x; r2.y <- vout.normal.y; r2.z <- vout.normal.z; r2.w <- vout.normal.w
 
 #line 11
-mov r3.xyzw, cb0[26].xyzw  // r3.x <- vout.color.x; r3.y <- vout.color.y; r3.z <- vout.color.z; r3.w <- vout.color.w
+mov r3.xyzw, cb0[27].xyzw  // r3.x <- vout.color.x; r3.y <- vout.color.y; r3.z <- vout.color.z; r3.w <- vout.color.w
 
 #line 12
 mov r4.xy, v2.xyxx  // r4.x <- vout.texcoord.x; r4.y <- vout.texcoord.y

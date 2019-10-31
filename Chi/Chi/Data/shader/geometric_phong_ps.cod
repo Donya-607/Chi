@@ -231,8 +231,7 @@ endloop
 add r0.xyz, r3.xyzx, r4.xyzx  // r0.x <- color.x; r0.y <- color.y; r0.z <- color.z
 
 #line 72
-max r0.xyz, r0.xyzx, l(0.000000, 0.000000, 0.000000, 0.000000)
-min o0.xyz, r0.xyzx, l(1.000000, 1.000000, 1.000000, 0.000000)
+mov o0.xyz, r0.xyzx
 mov o0.w, cb0[26].w
 ret 
-// Approximately 97 instruction slots used
+// Approximately 96 instruction slots used
