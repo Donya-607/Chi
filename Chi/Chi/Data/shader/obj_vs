@@ -76,7 +76,7 @@ dcl_temps 2
 //   o2.x <- <main return value>.texcoord.x; o2.y <- <main return value>.texcoord.y; 
 //   o0.x <- <main return value>.position.x; o0.y <- <main return value>.position.y; o0.z <- <main return value>.position.z; o0.w <- <main return value>.position.w
 //
-#line 21 "D:\Develop\Chi\Chi\Chi\Chi\obj_vs.hlsl"
+#line 21 "D:\Git\fps_shooting\Chi\Chi\Chi\obj_vs.hlsl"
 mul r0.xyzw, v0.xxxx, cb0[0].xyzw
 mul r1.xyzw, v0.yyyy, cb0[1].xyzw
 add r0.xyzw, r0.xyzw, r1.xyzw
