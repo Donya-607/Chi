@@ -181,7 +181,7 @@ public:
 	bool calcTransformedPosBySpecifyMesh(DirectX::XMFLOAT3& _local_pos, std::string _mesh_name);
 	void setLoopFlg(const bool _is_loop) { loop_flg = _is_loop; }
 	void setStopAnimation(const bool _is_stop) { stop_animation = _is_stop; }
-	void setStoptimer(const int _stop_timer) { stop_time = _stop_timer; }
+	void setStoptimer(const int _stop_timer) { stop_time = static_cast<float>( _stop_timer ); }
 	void setAnimFlame(const int _animFlame)
 	{
 		for (auto& it : meshes)
