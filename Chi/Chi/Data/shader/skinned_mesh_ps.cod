@@ -98,49 +98,26 @@ dp3 r0.w, r1.xyzx, r1.xyzx
 rsq r0.w, r0.w
 mul r1.xyz, r0.wwww, r1.xyzx  // r1.x <- V.x; r1.y <- V.y; r1.z <- V.z
 
-<<<<<<< HEAD
-#line 48
-sample_indexable(texture2d)(float,float,float,float) r2.xyzw, v4.xyxx, t0.xyzw, s0  // r2.x <- tmpSampleColor.x; r2.y <- tmpSampleColor.y; r2.z <- tmpSampleColor.z; r2.w <- tmpSampleColor.w
-
-#line 49
-mov r2.xyz, r2.xyzx  // r2.x <- ambientColor.x; r2.y <- ambientColor.y; r2.z <- ambientColor.z
-
-#line 51
-=======
 #line 46
 sample_indexable(texture2d)(float,float,float,float) r2.xyzw, v4.xyxx, t0.xyzw, s0  // r2.x <- sampleColor.x; r2.y <- sampleColor.y; r2.z <- sampleColor.z; r2.w <- sampleColor.w
 
 #line 47
->>>>>>> origin/kai
 mov r3.xyzw, -cb0[9].xyzw
 dp4 r0.w, r3.xyzw, r3.xyzw
 rsq r0.w, r0.w
 mul r3.xyzw, r0.wwww, r3.xyzw  // r3.x <- _L.x; r3.y <- _L.y; r3.z <- _L.z; r3.w <- _L.w
 
-<<<<<<< HEAD
-#line 53
-=======
 #line 49
 mov r2.xyz, r2.xyzx  // r2.x <- color.x; r2.y <- color.y; r2.z <- color.z
 
 #line 51
->>>>>>> origin/kai
 itof r0.w, l(0)
 dp4 r1.w, r3.xyzw, v3.xyzw
 max r0.w, r0.w, r1.w
 mul r3.xyz, r0.wwww, cb0[10].xyzx
-<<<<<<< HEAD
-mul r3.xyz, r2.xyzx, r3.xyzx  // r3.x <- color.x; r3.y <- color.y; r3.z <- color.z
-
-#line 55
-mov r2.xyz, r2.xyzx  // r2.x <- _color.x; r2.y <- _color.y; r2.z <- _color.z
-
-#line 58
-=======
 mul r3.xyz, r2.xyzx, r3.xyzx  // r3.x <- _color.x; r3.y <- _color.y; r3.z <- _color.z
 
 #line 54
->>>>>>> origin/kai
 mov r0.w, l(0)  // r0.w <- i
 mov r4.xyz, r3.xyzx  // r4.x <- _color.x; r4.y <- _color.y; r4.z <- _color.z
 mov r1.w, r0.w  // r1.w <- i
@@ -148,42 +125,17 @@ loop
   ilt r3.w, r1.w, l(5)
   breakc_z r3.w
 
-<<<<<<< HEAD
-#line 60
-=======
 #line 56
->>>>>>> origin/kai
   imul null, r3.w, r1.w, l(3)
   itof r4.w, l(0)
   eq r3.w, r4.w, cb0[r3.w + 11].w
   if_nz r3.w
 
-<<<<<<< HEAD
-#line 61
-=======
 #line 57
->>>>>>> origin/kai
     iadd r1.w, r1.w, l(1)
     continue 
   endif 
 
-<<<<<<< HEAD
-#line 63
-  imul null, r3.w, r1.w, l(3)
-  mov r5.xyz, -v1.xyzx
-  add r5.xyz, r5.xyzx, cb0[r3.w + 11].xyzx  // r5.x <- L.x; r5.y <- L.y; r5.z <- L.z
-
-#line 64
-  dp3 r3.w, r5.xyzx, r5.xyzx
-  sqrt r3.w, r3.w  // r3.w <- D
-
-#line 65
-  dp3 r4.w, r5.xyzx, r5.xyzx
-  rsq r4.w, r4.w
-  mul r5.xyz, r4.wwww, r5.xyzx
-
-#line 66
-=======
 #line 59
   imul null, r3.w, r1.w, l(3)
   mov r5.xyz, -v1.xyzx
@@ -199,7 +151,6 @@ loop
   mul r5.xyz, r4.wwww, r5.xyzx
 
 #line 62
->>>>>>> origin/kai
   imul null, r4.w, r1.w, l(3)
   imul null, r5.w, r1.w, l(3)
   mul r5.w, r3.w, cb0[r5.w + 13].y
@@ -212,11 +163,7 @@ loop
   max r3.w, r3.w, l(0.000000)
   min r3.w, r3.w, l(1.000000)  // r3.w <- A
 
-<<<<<<< HEAD
-#line 68
-=======
 #line 64
->>>>>>> origin/kai
   nop 
   mov r6.xyz, r0.xyzx
   mov r5.xyz, r5.xyzx
@@ -237,17 +184,10 @@ loop
   mul r4.w, r3.w, r4.w
   mul r6.xyz, r4.wwww, r6.xyzx  // r6.x <- <Diffuse return value>.x; r6.y <- <Diffuse return value>.y; r6.z <- <Diffuse return value>.z
 
-<<<<<<< HEAD
-#line 68
-  mov r6.xyz, r6.xyzx  // r6.x <- diffuseColor.x; r6.y <- diffuseColor.y; r6.z <- diffuseColor.z
-
-#line 71
-=======
 #line 64
   mov r6.xyz, r6.xyzx  // r6.x <- diffuseColor.x; r6.y <- diffuseColor.y; r6.z <- diffuseColor.z
 
 #line 67
->>>>>>> origin/kai
   nop 
   mov r7.xyz, r0.xyzx
   mov r5.xyz, r5.xyzx
@@ -286,30 +226,6 @@ loop
 #line 19
   mov r5.xyz, r5.xyzx  // r5.x <- <BlinnPhong return value>.x; r5.y <- <BlinnPhong return value>.y; r5.z <- <BlinnPhong return value>.z
 
-<<<<<<< HEAD
-#line 71
-  mov r5.xyz, r5.xyzx  // r5.x <- specularColor.x; r5.y <- specularColor.y; r5.z <- specularColor.z
-
-#line 74
-  add r5.xyz, r5.xyzx, r6.xyzx
-  add r4.xyz, r4.xyzx, r5.xyzx
-
-#line 58
-  iadd r1.w, r1.w, l(1)
-
-#line 75
-endloop 
-
-#line 76
-add r0.xyz, r3.xyzx, r4.xyzx  // r0.x <- color.x; r0.y <- color.y; r0.z <- color.z
-
-#line 78
-max r0.xyz, r0.xyzx, l(0.000000, 0.000000, 0.000000, 0.000000)
-min o0.xyz, r0.xyzx, l(1.000000, 1.000000, 1.000000, 0.000000)
-mul o0.w, r2.w, v2.w
-ret 
-// Approximately 100 instruction slots used
-=======
 #line 67
   mov r5.xyz, r5.xyzx  // r5.x <- specularColor.x; r5.y <- specularColor.y; r5.z <- specularColor.z
 
@@ -331,4 +247,3 @@ mul o0.w, r2.w, v2.w
 mov o0.xyz, r0.xyzx
 ret 
 // Approximately 97 instruction slots used
->>>>>>> origin/kai

@@ -40,7 +40,9 @@ public:
 	Stage	stage;
 	Boss	boss;
 	Lights	lights;
-	skinned_mesh animTest;
+
+	static_mesh testCube{};
+	skinned_mesh animTest{};
 public:
 	Impl() :
 		fieldRadius(),
@@ -96,6 +98,8 @@ public:
 		cameraPos = Donya::Vector3{ 0.0f, 256.0f, -512.0f };
 
 	#if DEBUG_MODE
+		createCube( &testCube );
+
 		constexpr int STAGE_NO = NULL;
 	#endif // DEBUG_MODE
 
