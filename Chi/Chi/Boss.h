@@ -21,47 +21,10 @@
 class BossParam final : public Donya::Singleton<BossParam>
 {
 	friend Donya::Singleton<BossParam>;
-public:
-	struct OBBFrame
-	{
-		int frame{};
-		int enableFrameStart{};	// WIll be serialize. Contain start frame.
-		int enableFrameLast{};	// WIll be serialize. Contain last frame.
-		Donya::OBB OBB{};
-	private:
-		friend class cereal::access;
-		template<class Archive>
-		void serialize( Archive &archive, std::uint32_t version )
-		{
-			archive
-			(
-				CEREAL_NVP( enableFrameStart ),
-				CEREAL_NVP( enableFrameLast ),
-				CEREAL_NVP( OBB )
-			);
-
-			if ( 1 <= version )
-			{
-				// archive( CEREAL_NVP( x ) );
-			}
-		}
-	public:
-		void Update( int elapsedTime = 1 )
-		{
-			frame += elapsedTime;
-
-			OBB.exist = WithinEnableFrame() ? true : false;
-		}
-
-		bool WithinEnableFrame() const
-		{
-			return ( enableFrameStart <= frame && frame <= enableFrameLast ) ? true : false;
-		}
-	};
 private:
 	float	scale;	// Usually 1.0f.
-	std::vector<OBBFrame> OBBAttacksFast;
-	std::vector<OBBFrame> OBBAttacksSwing;
+	std::vector<Donya::OBBFrame> OBBAttacksFast;
+	std::vector<Donya::OBBFrame> OBBAttacksSwing;
 private:
 	BossParam();
 public:
@@ -95,11 +58,11 @@ public:
 	void Init();
 	void Uninit();
 public:
-	float					Scale()			const { return scale; }
-	std::vector<OBBFrame>	*OBBAtksFast()  { return &OBBAttacksFast; }
-	std::vector<OBBFrame>	*OBBAtksSwing() { return &OBBAttacksSwing; }
-	const std::vector<OBBFrame>	*OBBAtksFast()	const { return &OBBAttacksFast; }
-	const std::vector<OBBFrame>	*OBBAtksSwing()	const { return &OBBAttacksSwing; }
+	float								Scale()			const { return scale; }
+	std::vector<Donya::OBBFrame>		*OBBAtksFast()  { return &OBBAttacksFast; }
+	std::vector<Donya::OBBFrame>		*OBBAtksSwing() { return &OBBAttacksSwing; }
+	const std::vector<Donya::OBBFrame>	*OBBAtksFast()	const { return &OBBAttacksFast; }
+	const std::vector<Donya::OBBFrame>	*OBBAtksSwing()	const { return &OBBAttacksSwing; }
 public:
 	void LoadParameter( bool isBinary = true );
 
@@ -112,7 +75,6 @@ public:
 #endif // USE_IMGUI
 };
 CEREAL_CLASS_VERSION( BossParam, 1 )
-CEREAL_CLASS_VERSION( BossParam::OBBFrame, 0 )
 
 class skinned_mesh;	// With pointer. because I'm not want include this at header.
 class Boss

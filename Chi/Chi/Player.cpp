@@ -22,10 +22,12 @@
 PlayerParam::PlayerParam() :
 	frameUnfoldableDefence( 1 ), frameCancelableAttack( 1 ), frameWholeAttacking( 1 ),
 	scale( 1.0f ), runSpeed( 1.0f ), rotSlerpFactor( 0.3f ),
-	hitBoxBody(), hitBoxPhysic()
+	hitBoxBody(), hitBoxPhysic(), hitBoxShield(), hitBoxLance()
 {
-	hitBoxBody.size		= 1.0f;
-	hitBoxPhysic.radius	= 1.0f;
+	hitBoxBody.size			= 1.0f;
+	hitBoxPhysic.radius		= 1.0f;
+	hitBoxShield.size		= 1.0f;
+	hitBoxLance.OBB.size	= 1.0f;
 }
 PlayerParam::~PlayerParam() = default;
 
@@ -93,9 +95,31 @@ void PlayerParam::UseImGui()
 					ImGui::Checkbox  ( ( prefix + ".ExistCollision" ).c_str(), &pSphere->exist );
 				};
 
+				auto ShowOBB	= []( const std::string &prefix, Donya::OBB			*pOBB	)
+				{
+					ImGui::DragFloat3( ( prefix + ".Offset" ).c_str(), &pOBB->pos.x );
+					ImGui::DragFloat3( ( prefix + ".Scale" ).c_str(), &pOBB->size.x );
+
+					Donya::Vector3 euler = pOBB->orientation.GetEulerAngles();
+					ImGui::SliderFloat3( ( prefix + ".EulerAngle(Radian)" ).c_str(), &euler.x, ToRadian( -360.0f ), ToRadian( 360.0f ) );
+					pOBB->orientation = Donya::Quaternion::Make( euler.x, euler.y, euler.z );
+
+					ImGui::Checkbox( ( prefix + ".ExistCollision" ).c_str(), &pOBB->exist );
+				};
+				auto ShowOBBF	= [&ShowOBB]( const std::string &prefix, Donya::OBBFrame	*pOBBF	)
+				{
+					ImGui::DragInt( ( prefix + ".EnableFrame.Start" ).c_str(), &pOBBF->enableFrameStart );
+					ImGui::DragInt( ( prefix + ".EnableFrame.Last"  ).c_str(), &pOBBF->enableFrameLast  );
+
+					bool oldExistFlag = pOBBF->OBB.exist;
+					ShowOBB( prefix, &pOBBF->OBB );
+					pOBBF->OBB.exist = oldExistFlag;
+				};
+				
 				ShowAABB  ( "VS_BossAttacks",	&hitBoxBody   );
 				ShowSphere( "VS_StageWall",		&hitBoxPhysic );
 				ShowAABB  ( "Shield",			&hitBoxShield );
+				ShowOBBF  ( "Lance",			&hitBoxLance  );
 
 				ImGui::TreePop();
 			}
@@ -233,7 +257,7 @@ void Player::Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matP
 	static std::shared_ptr<static_mesh> pCube	= GenerateCube();
 	static std::shared_ptr<static_mesh> pSphere	= GenerateSphere();
 
-	auto DrawCube   = [&]( const Donya::Vector3 &cubeOffset, const Donya::Vector3 &cubeScale, const Donya::Vector4 &color )
+	auto DrawCube	= [&]( const Donya::Vector3 &cubeOffset, const Donya::Vector3 &cubeScale, const Donya::Vector4 &color )
 	{
 		Donya::Vector4x4 CS = Donya::Vector4x4::MakeScaling( cubeScale * 2.0f ); // Half size->Whole size.
 		Donya::Vector4x4 CT = Donya::Vector4x4::MakeTranslation( cubeOffset );
@@ -242,7 +266,7 @@ void Player::Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matP
 
 		OBJRender( pCube.get(), CWVP, CW, color );
 	};
-	auto DrawSphere = [&]( const Donya::Vector3 &sphereOffset, float sphereScale, const Donya::Vector4 &color )
+	auto DrawSphere	= [&]( const Donya::Vector3 &sphereOffset, float sphereScale, const Donya::Vector4 &color )
 	{
 		Donya::Vector4x4 CS = Donya::Vector4x4::MakeScaling( sphereScale * 2.0f ); // Half size->Whole size.
 		Donya::Vector4x4 CT = Donya::Vector4x4::MakeTranslation( sphereOffset );
@@ -250,6 +274,16 @@ void Player::Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matP
 		Donya::Vector4x4 CWVP = CW * matView * matProjection;
 
 		OBJRender( pSphere.get(), CWVP, CW, color );
+	};
+	auto DrawOBB	= [&]( const Donya::OBB &OBB, const Donya::Vector4 &color )
+	{
+		Donya::Vector4x4 CS = Donya::Vector4x4::MakeScaling( OBB.size * 2.0f ); // Half size->Whole size.
+		Donya::Vector4x4 CR = OBB.orientation.RequireRotationMatrix();
+		Donya::Vector4x4 CT = Donya::Vector4x4::MakeTranslation( OBB.pos );
+		Donya::Vector4x4 CW = ( CS * CR * CT ) * W;
+		Donya::Vector4x4 CWVP = CW * matView * matProjection;
+
+		OBJRender( pCube.get(), CWVP, CW, color );
 	};
 
 	if ( Donya::IsShowCollision() )
@@ -263,11 +297,22 @@ void Player::Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matP
 		if( BODY.exist   ) { DrawCube  ( BODY.pos,   BODY.size,     BODY_COLOR   ); }
 		if( PHYSIC.exist ) { DrawSphere( PHYSIC.pos, PHYSIC.radius, PHYSIC_COLOR ); }
 
-		constexpr Donya::Vector4 SHIELD_COLOR{ 0.2f, 0.8f, 0.2f, 0.5f };
-		constexpr Donya::Vector4 SHIELD_COLOR_SUCCEEDED{ 0.6f, 1.0f, 0.6f, 0.5f };
-		const auto SHIELD = PARAM.HitBoxShield();
-		Donya::Vector4 shieldColor = ( wasSucceededDefence ) ? SHIELD_COLOR_SUCCEEDED : SHIELD_COLOR;
-		if( status == State::Defend ){ DrawCube( SHIELD.pos, SHIELD.size, shieldColor ); }
+		if ( status == State::Defend )
+		{
+			constexpr Donya::Vector4 SHIELD_COLOR{ 0.2f, 0.8f, 0.2f, 0.5f };
+			constexpr Donya::Vector4 SHIELD_COLOR_SUCCEEDED{ 0.6f, 1.0f, 0.6f, 0.5f };
+			const auto SHIELD = PARAM.HitBoxShield();
+			Donya::Vector4 color = ( wasSucceededDefence ) ? SHIELD_COLOR_SUCCEEDED : SHIELD_COLOR;
+			DrawCube( SHIELD.pos, SHIELD.size, color );
+		}
+		if ( status == State::Attack )
+		{
+			constexpr Donya::Vector4 LANCE_COLOR_VALID{ 1.0f, 0.8f, 0.5f, 0.5f };
+			constexpr Donya::Vector4 LANCE_COLOR_INVALID{ 0.5f, 0.5f, 0.5f, 0.5f };
+			const auto *pLANCE = PARAM.HitBoxAttackF();
+			Donya::Vector4 color = ( pLANCE->OBB.exist ) ? LANCE_COLOR_VALID: LANCE_COLOR_INVALID;
+			DrawOBB( pLANCE->OBB, color );
+		}
 	}
 
 #endif // DEBUG_MODE
@@ -296,6 +341,11 @@ Donya::OBB Player::GetShieldHitBox() const
 	Donya::OBB wsOBB = MakeOBB( HITBOX, orientation );
 	if ( status != State::Defend ) { wsOBB.exist = false; }
 	return wsOBB;
+}
+Donya::OBB Player::GetAttackHitBox() const
+{
+	const auto &pHITBOX_FRAME = PlayerParam::Get().HitBoxAttackF();
+	return pHITBOX_FRAME->OBB;
 }
 
 void Player::SucceededDefence()
@@ -513,6 +563,9 @@ void Player::AttackInit( Input input )
 
 	const auto &PARAM = PlayerParam::Get();
 	timer = PARAM.FrameWholeAttacking();
+
+	Donya::OBBFrame *pOBBF = PlayerParam::Get().HitBoxAttackF();
+	pOBBF->currentFrame = 0;
 }
 void Player::AttackUpdate( Input input )
 {
@@ -525,10 +578,16 @@ void Player::AttackUpdate( Input input )
 	{
 		lookDirection = input.moveVector;
 	}
+
+	Donya::OBBFrame *pOBBF = PlayerParam::Get().HitBoxAttackF();
+	pOBBF->Update();
 }
 void Player::AttackUninit()
 {
 	timer = 0;
+
+	Donya::OBBFrame *pOBBF = PlayerParam::Get().HitBoxAttackF();
+	pOBBF->currentFrame = 0;
 }
 
 void Player::AssignInputVelocity( Input input )

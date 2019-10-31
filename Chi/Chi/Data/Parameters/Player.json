@@ -1,6 +1,6 @@
 {
     "Player": {
-        "cereal_class_version": 2,
+        "cereal_class_version": 3,
         "scale": 1.0,
         "runSpeed": 4.5,
         "rotSlerpFactor": 0.20000000298023225,
@@ -30,8 +30,8 @@
             "exist": true
         },
         "frameUnfoldableDefence": 45,
-        "frameCancelableAttack": 15,
-        "frameWholeAttacking": 45,
+        "frameCancelableAttack": 45,
+        "frameWholeAttacking": 165,
         "hitBoxShield": {
             "pos": {
                 "x": 0.0,
@@ -44,6 +44,32 @@
                 "z": 16.0
             },
             "exist": true
+        },
+        "hitBoxLance": {
+            "cereal_class_version": 0,
+            "enableFrameStart": 60,
+            "enableFrameLast": 70,
+            "OBB": {
+                "cereal_class_version": 0,
+                "pos": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "size": {
+                    "x": 15.0,
+                    "y": 50.0,
+                    "z": 100.0
+                },
+                "orientation": {
+                    "cereal_class_version": 0,
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0,
+                    "w": 1.0
+                },
+                "exist": false
+            }
         }
     }
 }

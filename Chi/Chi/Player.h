@@ -25,7 +25,7 @@ private:
 	Donya::AABB		hitBoxBody;		// HitBox that collide to boss attacks.
 	Donya::Sphere	hitBoxPhysic;	// HitBox that collide to stage.
 	Donya::AABB		hitBoxShield;	// HitBox of shield.
-	// Donya::AABB		hitBoxLance;	// HitBox of lance.
+	Donya::OBBFrame	hitBoxLance;	// HitBox of lance.
 private:
 	PlayerParam();
 public:
@@ -62,6 +62,10 @@ private:
 		}
 		if ( 3 <= version )
 		{
+			archive( CEREAL_NVP( hitBoxLance ) );
+		}
+		if ( 4 <= version )
+		{
 			// archive( CEREAL_NVP( x ) );
 		}
 	}
@@ -76,9 +80,11 @@ public:
 	float	Scale()					const { return scale; }
 	float	RunSpeed()				const { return runSpeed; }
 	float	SlerpFactor()			const { return rotSlerpFactor; }
-	Donya::AABB   HitBoxBody()		const { return hitBoxBody;   }
-	Donya::Sphere HitBoxPhysic()	const { return hitBoxPhysic; }
-	Donya::AABB   HitBoxShield()	const { return hitBoxShield; }
+	Donya::AABB		HitBoxBody()	const { return hitBoxBody;   }
+	Donya::Sphere	HitBoxPhysic()	const { return hitBoxPhysic; }
+	Donya::AABB		HitBoxShield()	const { return hitBoxShield; }
+	Donya::OBBFrame	*HitBoxAttackF()				{ return &hitBoxLance;  }
+	const Donya::OBBFrame	*HitBoxAttackF() const	{ return &hitBoxLance;  }
 public:
 	void LoadParameter( bool isBinary = true );
 
@@ -90,7 +96,7 @@ public:
 
 #endif // USE_IMGUI
 };
-CEREAL_CLASS_VERSION( PlayerParam, 2 )
+CEREAL_CLASS_VERSION( PlayerParam, 3 )
 
 class skinned_mesh;	// With pointer. because I'm not want include this at header.
 class Player
@@ -162,10 +168,14 @@ public:
 	/// Returns world space hurt-box.
 	/// </summary>
 	Donya::OBB GetHurtBox() const;
-	/// /// <summary>
+	/// <summary>
 	/// Returns world space hit-box of shield.
 	/// </summary>
 	Donya::OBB GetShieldHitBox() const;
+	/// <summary>
+	/// Returns world space hit-box of attack.
+	/// </summary>
+	Donya::OBB GetAttackHitBox() const;
 
 	/// <summary>
 	/// Please call when succeeded defence by enemy's attack.

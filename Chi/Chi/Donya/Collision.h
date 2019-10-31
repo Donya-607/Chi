@@ -342,6 +342,43 @@ namespace Donya
 		}
 	};
 
+	struct OBBFrame
+	{
+		int currentFrame{};
+		int enableFrameStart{};	// WIll be serialize. Contain start frame.
+		int enableFrameLast{};	// WIll be serialize. Contain last frame.
+		Donya::OBB OBB{};
+	private:
+		friend class cereal::access;
+		template<class Archive>
+		void serialize( Archive &archive, std::uint32_t version )
+		{
+			archive
+			(
+				CEREAL_NVP( enableFrameStart ),
+				CEREAL_NVP( enableFrameLast ),
+				CEREAL_NVP( OBB )
+			);
+
+			if ( 1 <= version )
+			{
+				// archive( CEREAL_NVP( x ) );
+			}
+		}
+	public:
+		void Update( int elapsedTime = 1 )
+		{
+			currentFrame += elapsedTime;
+
+			OBB.exist = WithinEnableFrame() ? true : false;
+		}
+
+		bool WithinEnableFrame() const
+		{
+			return ( enableFrameStart <= currentFrame && currentFrame <= enableFrameLast ) ? true : false;
+		}
+	};
+
 	bool		operator == ( const Box &L, const Box &R );
 	static bool	operator != ( const Box &L, const Box &R ) { return !( L == R ); }
 
@@ -364,6 +401,6 @@ CEREAL_CLASS_VERSION( Donya::Circle,	0 );
 CEREAL_CLASS_VERSION( Donya::AABB,		0 );
 CEREAL_CLASS_VERSION( Donya::Sphere,	0 );
 CEREAL_CLASS_VERSION( Donya::OBB,		0 );
-
+CEREAL_CLASS_VERSION( Donya::OBBFrame,	0 );
 
 #endif // INCLUDED_COLLISION_H_

@@ -82,7 +82,7 @@ void BossParam::UseImGui()
 
 					ImGui::Checkbox( ( prefix + ".ExistCollision" ).c_str(), &pOBB->exist );
 				};
-				auto ShowOBBF	= [&ShowOBB]( const std::string &prefix, OBBFrame	*pOBBF	)
+				auto ShowOBBF	= [&ShowOBB]( const std::string &prefix, Donya::OBBFrame	*pOBBF	)
 				{
 					ImGui::DragInt( ( prefix + ".EnableFrame.Start" ).c_str(), &pOBBF->enableFrameStart );
 					ImGui::DragInt( ( prefix + ".EnableFrame.Last"  ).c_str(), &pOBBF->enableFrameLast  );
@@ -91,7 +91,7 @@ void BossParam::UseImGui()
 					ShowOBB( prefix, &pOBBF->OBB );
 					pOBBF->OBB.exist = oldExistFlag;
 				};
-				auto ShowOBBFs	= [&ShowOBBF]( const std::string &prefix, std::vector<OBBFrame> *pOBBFs )
+				auto ShowOBBFs	= [&ShowOBBF]( const std::string &prefix, std::vector<Donya::OBBFrame> *pOBBFs )
 				{
 					if ( ImGui::TreeNode( prefix.c_str() ) )
 					{
@@ -444,7 +444,7 @@ void Boss::MoveInit()
 	for ( size_t i = 0; i < COUNT; ++i )
 	{
 		auto &OBB = pOBBs->at( i );
-		OBB.frame = 0;
+		OBB.currentFrame = 0;
 	}
 #endif // DEBUG_MODE
 }
@@ -468,7 +468,7 @@ void Boss::MoveUninit()
 	for ( size_t i = 0; i < COUNT; ++i )
 	{
 		auto &OBB = pOBBs->at( i );
-		OBB.frame = 0;
+		OBB.currentFrame = 0;
 	}
 #endif // DEBUG_MODE
 }
@@ -483,7 +483,7 @@ void Boss::AttackInit()
 	for ( size_t i = 0; i < COUNT; ++i )
 	{
 		auto &OBB = pOBBs->at( i );
-		OBB.frame = 0;
+		OBB.currentFrame = 0;
 	}
 #endif // DEBUG_MODE
 }
@@ -507,7 +507,7 @@ void Boss::AttackUninit()
 	for ( size_t i = 0; i < COUNT; ++i )
 	{
 		auto &OBB = pOBBs->at( i );
-		OBB.frame = 0;
+		OBB.currentFrame = 0;
 	}
 #endif // DEBUG_MODE
 }
