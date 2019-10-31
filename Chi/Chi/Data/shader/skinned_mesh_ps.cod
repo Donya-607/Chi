@@ -109,7 +109,6 @@ mul r3.xyzw, r0.wwww, r3.xyzw  // r3.x <- _L.x; r3.y <- _L.y; r3.z <- _L.z; r3.w
 
 #line 50
 itof r0.w, l(0)
-mov r3.xyzw, -r3.xyzw
 dp4 r1.w, r3.xyzw, v3.xyzw
 max r0.w, r0.w, r1.w
 mul r3.xyz, r0.wwww, cb0[10].xyzx
@@ -244,8 +243,7 @@ endloop
 add r0.xyz, r3.xyzx, r4.xyzx  // r0.x <- color.x; r0.y <- color.y; r0.z <- color.z
 
 #line 74
-max r0.xyz, r0.xyzx, l(0.000000, 0.000000, 0.000000, 0.000000)
-min o0.xyz, r0.xyzx, l(1.000000, 1.000000, 1.000000, 0.000000)
+mov o0.xyz, r0.xyzx
 mov o0.w, v2.w
 ret 
-// Approximately 99 instruction slots used
+// Approximately 97 instruction slots used

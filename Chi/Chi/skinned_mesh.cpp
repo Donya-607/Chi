@@ -73,7 +73,7 @@ void skinned_mesh::fbxInit(ID3D11Device* _device, const std::string& _fbxFileNam
 		const int number_of_materials = fbx_mesh->GetNode()->GetMaterialCount();
 
 		mesh.subsets.resize(number_of_materials);
-
+		
 
 
 		for (int index_of_material = 0; index_of_material < number_of_materials; ++index_of_material)

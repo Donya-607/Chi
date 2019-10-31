@@ -47,7 +47,7 @@ float4 main(VS_OUT pin) : SV_TARGET
 	ambientColor = diffuse_map.Sample(diffuse_map_sample_state, pin.texcoord).xyz;
 	float4 _L = normalize(-line_light.direction);
 
-	color = ambientColor.xyz *(line_light.color.xyz* max(0, dot(-_L, pin.normal)));
+	color = ambientColor.xyz *(line_light.color.xyz* max(0, dot(_L, pin.normal)));
 
 	_color = ambientColor;
 
@@ -71,5 +71,5 @@ float4 main(VS_OUT pin) : SV_TARGET
 		_color += (diffuseColor + specularColor);
 	}
 	color += _color;
-	return float4(saturate(color) ,pin.color.w);
+	return float4(color ,pin.color.w);
 }

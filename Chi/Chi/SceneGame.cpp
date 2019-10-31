@@ -39,7 +39,7 @@ public:
 
 		cameraPos = Donya::Vector3{ 0.0f, 256.0f, -512.0f };
 		createCube(&testCube);
-		loadFBX(&animTest, "./Data/TestMove.fbx");
+		loadFBX(&animTest, "./Data/aaaa (1).fbx");
 		player.Init();
 	}
 	void Uninit()
