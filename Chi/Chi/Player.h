@@ -146,6 +146,7 @@ private:
 		Run,
 		Defend,
 		Attack,
+		Dead,
 	};
 private:
 	State				status;
@@ -191,6 +192,8 @@ public:
 	/// Please call when succeeded defence by enemy's attack.
 	/// </summary>
 	void SucceededDefence();
+
+	void ReceiveImpact();
 
 	void SetFieldRadius( float fieldRadius );
 private:

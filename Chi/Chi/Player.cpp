@@ -427,6 +427,11 @@ void Player::SucceededDefence()
 	wasSucceededDefence = true;
 }
 
+void Player::ReceiveImpact()
+{
+	status = State::Dead;
+}
+
 void Player::SetFieldRadius( float newFieldRadius )
 {
 	const float bodyRadius = PlayerParam::Get().HitBoxPhysic().radius;
@@ -443,6 +448,9 @@ Donya::Vector4x4 Player::CalcWorldMatrix() const
 {
 	Donya::Vector4x4 S = Donya::Vector4x4::MakeScaling( PlayerParam::Get().Scale() );
 	Donya::Vector4x4 R = orientation.RequireRotationMatrix();
+#if DEBUG_MODE
+	if ( status == State::Dead ) { R = Donya::Quaternion::Make( Donya::Vector3::Front(), ToRadian( 180.0f ) ).RequireRotationMatrix(); }
+#endif // DEBUG_MODE
 	Donya::Vector4x4 T = Donya::Vector4x4::MakeTranslation( pos );
 	return S * R * T;
 }
