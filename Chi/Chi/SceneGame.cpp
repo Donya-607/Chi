@@ -92,7 +92,7 @@ public:
 			setPointLight( i );
 		}
 
-		cameraPos = Donya::Vector3{ 0.0f, 256.0f, -512.0f };
+		cameraPos = Donya::Vector3{ 0.0f, 768.0f, -1024.0f };
 
 	#if DEBUG_MODE
 		// createCube( &testCube );

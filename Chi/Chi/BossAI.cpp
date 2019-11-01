@@ -158,6 +158,28 @@ void BossAI::ImGui()
 
 				ImGui::TreePop();
 			}
+			
+			if ( ImGui::TreeNode( "MaxCounts" ) )
+			{
+				const size_t COUNT = maxCnt.size();
+				for ( size_t i = 0; i < COUNT; ++i )
+				{
+					ImGui::SliderInt( ( "[" + std::to_string( i ) + "]" ).c_str(), &maxCnt[i], 0, 65535 );
+				}
+
+				ImGui::TreePop();
+			}
+			
+			if ( ImGui::TreeNode( "CoolTimeCounts" ) )
+			{
+				const size_t COUNT = coolTimeMaxCnt.size();
+				for ( size_t i = 0; i < COUNT; ++i )
+				{
+					ImGui::SliderInt( ( "[" + std::to_string( i ) + "]" ).c_str(), &coolTimeMaxCnt[i], 0, 65535 );
+				}
+
+				ImGui::TreePop();
+			}
 
 			ImGui::TreePop();
 		}

@@ -341,10 +341,10 @@ void Player::Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matP
 #endif // DEBUG_MODE
 }
 
-static Donya::OBB MakeOBB( const Donya::AABB &AABB, const Donya::Quaternion &orientation )
+static Donya::OBB MakeOBB( const Donya::AABB &AABB, const Donya::Vector3 &wsPos, const Donya::Quaternion &orientation )
 {
 	Donya::OBB OBB{};
-	OBB.pos		= AABB.pos;
+	OBB.pos		= AABB.pos + wsPos;
 	OBB.size	= AABB.size;
 	OBB.orientation = orientation;
 	OBB.exist	= AABB.exist;
@@ -354,14 +354,14 @@ Donya::OBB Player::GetHurtBox() const
 {
 	const auto &HITBOX = PlayerParam::Get().HitBoxBody();
 
-	Donya::OBB wsOBB = MakeOBB( HITBOX, orientation );
+	Donya::OBB wsOBB = MakeOBB( HITBOX, pos, orientation );
 	return wsOBB;
 }
 Donya::OBB Player::GetShieldHitBox() const
 {
 	const auto &HITBOX = PlayerParam::Get().HitBoxShield();
 
-	Donya::OBB wsOBB = MakeOBB( HITBOX, orientation );
+	Donya::OBB wsOBB = MakeOBB( HITBOX, pos, orientation );
 	if ( status != State::Defend ) { wsOBB.exist = false; }
 	return wsOBB;
 }
@@ -390,6 +390,7 @@ Donya::OBB Player::CalcAttackHitBox() const
 		}
 		Donya::Vector4x4 T = Donya::Vector4x4::MakeTranslation( outputPos );
 
+		// Convert to world space from local space.
 		lanceMatrix = T * parentMatrix;
 	}
 
@@ -457,6 +458,15 @@ Donya::Vector4x4 Player::CalcWorldMatrix() const
 
 void Player::ChangeStatus( Input input )
 {
+#if DEBUG_MODE
+
+	if ( status == State::Dead && input.doAttack )
+	{
+		status = State::Idle;
+	}
+
+#endif // DEBUG_MODE
+
 	if ( !input.doDefend )
 	{
 		// This flag not want to false if timer lower than 0.
