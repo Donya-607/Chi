@@ -22,7 +22,7 @@ public:
 	};
 	static constexpr int ACTION_STATE_COUNT = static_cast<int>( END );
 private:
-	int state;
+	int state{};
 	std::array<int, ACTION_STATE_COUNT> cnt{};
 	std::array<int, ACTION_STATE_COUNT> maxCnt{};
 	std::array<int, ACTION_STATE_COUNT> coolTimeMaxCnt{};
@@ -43,6 +43,14 @@ private:
 		);
 
 		if ( 1 <= version )
+		{
+			archive
+			(
+				CEREAL_NVP( maxCnt ),
+				CEREAL_NVP( coolTimeMaxCnt )
+			);
+		}
+		if ( 2 <= version )
 		{
 			// archive( CEREAL_NVP( x ) );
 		}
@@ -65,4 +73,4 @@ public:
 
 #endif // USE_IMGUI
 };
-CEREAL_CLASS_VERSION( BossAI, 0 )
+CEREAL_CLASS_VERSION( BossAI, 1 )

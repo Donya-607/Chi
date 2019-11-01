@@ -36,13 +36,10 @@ public:
 	float	fieldRadius;
 	Donya::Vector3 cameraPos;
 	Donya::Vector3 cameraFocusOffset;
+	Lights	lights;
 	Player	player;
 	Stage	stage;
 	Boss	boss;
-	Lights	lights;
-
-	static_mesh testCube{};
-	skinned_mesh animTest{};
 public:
 	Impl() :
 		fieldRadius(),
@@ -80,16 +77,16 @@ private:
 public:
 	void Init()
 	{
-#if DEBUG_MODE
-		Donya::Sound::Load(BGM_ID, "./Data/Sounds/Test/BGM.wav", true);
-		Donya::Sound::Load(SE_ID, "./Data/Sounds/Test/SE.wav", false);
-#endif // DEBUG_MODE
-
-		resetPointLight();
-
 		LoadParameter();
 
+#if DEBUG_MODE
+		Donya::Sound::Load( BGM_ID, "./Data/Sounds/Test/BGM.wav", true  );
+		Donya::Sound::Load( SE_ID,  "./Data/Sounds/Test/SE.wav",  false );
+#endif // DEBUG_MODE
+
 		getLineLight().setLineLight( lights.direction.direction, lights.direction.color );
+
+		resetPointLight();
 		for ( const auto i : lights.points )
 		{
 			setPointLight( i );
@@ -98,14 +95,12 @@ public:
 		cameraPos = Donya::Vector3{ 0.0f, 256.0f, -512.0f };
 
 	#if DEBUG_MODE
-		createCube( &testCube );
+		// createCube( &testCube );
 
 		constexpr int STAGE_NO = NULL;
 	#endif // DEBUG_MODE
 
 		stage.Init( STAGE_NO );
-
-		loadFBX(&animTest, "./Data/MDL_Player_Attack.fbx");
 
 		player.Init();
 		player.SetFieldRadius( fieldRadius );
@@ -168,8 +163,7 @@ public:
 
 		ProcessCollision();
 		
-	#if DEBUG_MODE
-
+		/*
 		if (getKeyState(KEY_INPUT_1) == 1)
 		{
 			setAnimFlame(&animTest, 0);
@@ -187,8 +181,7 @@ public:
 		{
 			setStopAnimation( &animTest, false );
 		}
-
-	#endif // DEBUG_MODE
+		*/
 	}
 
 	void Draw()
@@ -206,7 +199,7 @@ public:
 		boss.Draw( V, P );
 
 	#if DEBUG_MODE
-
+		/*
 		if ( 0 )
 		{
 			XMFLOAT4X4 World, world_view_projection;
@@ -248,7 +241,7 @@ public:
 
 			OBJRender( &testCube, world_view_projection, World );
 		}
-
+		*/
 	#endif // DEBUG_MODE
 	}
 

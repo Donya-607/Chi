@@ -1,6 +1,6 @@
 {
     "Boss": {
-        "cereal_class_version": 2,
+        "cereal_class_version": 3,
         "scale": 1.0,
         "OBBAttacksFast": [
             {
@@ -142,6 +142,40 @@
                     "z": 50.0
                 },
                 "exist": true
+            }
+        ],
+        "initPosPerStage": [
+            {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 263.0
+            },
+            {
+                "x": 13.0,
+                "y": 0.0,
+                "z": 117.0
+            },
+            {
+                "x": -23.0,
+                "y": 0.0,
+                "z": 124.0
+            }
+        ],
+        "drawOffsetsPerStage": [
+            {
+                "x": 0.0,
+                "y": -200.0,
+                "z": 0.0
+            },
+            {
+                "x": 0.0,
+                "y": -200.0,
+                "z": 0.0
+            },
+            {
+                "x": 0.0,
+                "y": -200.0,
+                "z": 0.0
             }
         ]
     }

@@ -299,7 +299,6 @@ void Boss::Update()
 
 	BossParam::Get().UseImGui();
 	UseImGui();
-	AI.ImGui();
 
 #endif // USE_IMGUI
 

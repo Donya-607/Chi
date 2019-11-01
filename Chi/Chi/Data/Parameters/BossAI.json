@@ -1,0 +1,11 @@
+{
+    "BossAI": {
+        "cereal_class_version": 0,
+        "percent": {
+            "value0": 25,
+            "value1": 35,
+            "value2": 40,
+            "value3": 45
+        }
+    }
+}
