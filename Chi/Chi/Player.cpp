@@ -341,7 +341,7 @@ void Player::Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matP
 #endif // DEBUG_MODE
 }
 
-Donya::OBB MakeOBB( const Donya::AABB &AABB, const Donya::Quaternion &orientation )
+static Donya::OBB MakeOBB( const Donya::AABB &AABB, const Donya::Quaternion &orientation )
 {
 	Donya::OBB OBB{};
 	OBB.pos		= AABB.pos;

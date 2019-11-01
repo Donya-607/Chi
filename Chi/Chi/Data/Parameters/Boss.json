@@ -1,6 +1,6 @@
 {
     "Boss": {
-        "cereal_class_version": 1,
+        "cereal_class_version": 2,
         "scale": 1.0,
         "OBBAttacksFast": [
             {
@@ -100,6 +100,48 @@
                     },
                     "exist": false
                 }
+            }
+        ],
+        "hitBoxesBody": [
+            {
+                "cereal_class_version": 0,
+                "pos": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 32.0
+                },
+                "size": {
+                    "x": 100.0,
+                    "y": 100.0,
+                    "z": 100.0
+                },
+                "exist": true
+            },
+            {
+                "pos": {
+                    "x": 160.0,
+                    "y": 0.0,
+                    "z": 32.0
+                },
+                "size": {
+                    "x": 50.0,
+                    "y": 50.0,
+                    "z": 50.0
+                },
+                "exist": true
+            },
+            {
+                "pos": {
+                    "x": -160.0,
+                    "y": 0.0,
+                    "z": 32.0
+                },
+                "size": {
+                    "x": 50.0,
+                    "y": 50.0,
+                    "z": 50.0
+                },
+                "exist": true
             }
         ]
     }

@@ -10,8 +10,12 @@
 #define scast static_cast
 
 BossParam::BossParam() :
-	scale( 1.0f )
-{}
+	scale( 1.0f ),
+	initPosPerStage(), hitBoxesBody(),
+	OBBAttacksFast(), OBBAttacksSwing()
+{
+	initPosPerStage.resize( 1U );
+}
 BossParam::~BossParam() = default;
 
 void BossParam::Init()
@@ -21,6 +25,13 @@ void BossParam::Init()
 void BossParam::Uninit()
 {
 	// No op.
+}
+
+Donya::Vector3 BossParam::GetInitPosition( int stageNo )
+{
+	_ASSERT_EXPR( stageNo <= initPosPerStage.size(), L"Error : Specified stage number over than stage count !" );
+
+	return initPosPerStage[stageNo];
 }
 
 void BossParam::LoadParameter( bool isBinary )
@@ -55,6 +66,26 @@ void BossParam::UseImGui()
 		if ( ImGui::TreeNode( "Boss.AdjustData" ) )
 		{
 			ImGui::SliderFloat( "Scale", &scale, 0.0f, 8.0f );
+
+			if ( ImGui::TreeNode( "Initialize.Position" ) )
+			{
+				if ( ImGui::Button( "Append" ) )
+				{
+					initPosPerStage.push_back( {} );
+				}
+				if ( 2 <= initPosPerStage.size() && ImGui::Button( "PopBack" ) )
+				{
+					initPosPerStage.pop_back();
+				}
+
+				const size_t COUNT = initPosPerStage.size();
+				for ( size_t i = 0; i < COUNT; ++i )
+				{
+					ImGui::DragFloat3( ( "[" + std::to_string( i ) + "].Pos" ).c_str(), &initPosPerStage[i].x );
+				}
+
+				ImGui::TreePop();
+			}
 			
 			if ( ImGui::TreeNode( "Collisions" ) )
 			{
@@ -91,6 +122,31 @@ void BossParam::UseImGui()
 					ShowOBB( prefix, &pOBBF->OBB );
 					pOBBF->OBB.exist = oldExistFlag;
 				};
+
+				auto ShowAABBs	= [&ShowAABB]( const std::string &prefix, std::vector<Donya::AABB> *pAABBs )
+				{
+					if ( ImGui::TreeNode( prefix.c_str() ) )
+					{
+
+						if ( ImGui::Button( "Append" ) )
+						{
+							pAABBs->push_back( {} );
+						}
+						if ( 1 <= pAABBs->size() && ImGui::Button( "PopBack" ) )
+						{
+							pAABBs->pop_back();
+						}
+
+						const size_t COUNT = pAABBs->size();
+						for ( size_t i = 0; i < COUNT; ++i )
+						{
+							auto &AABB = pAABBs->at( i );
+							ShowAABB( "[" + std::to_string( i ) + "]", &AABB );
+						}
+
+						ImGui::TreePop();
+					}
+				};
 				auto ShowOBBFs	= [&ShowOBBF]( const std::string &prefix, std::vector<Donya::OBBFrame> *pOBBFs )
 				{
 					if ( ImGui::TreeNode( prefix.c_str() ) )
@@ -118,6 +174,8 @@ void BossParam::UseImGui()
 
 				ShowOBBFs( "Attack.Fast",  &OBBAttacksFast  );
 				ShowOBBFs( "Attack.Swing", &OBBAttacksSwing );
+
+				ShowAABBs( "Body.HurtBox", &hitBoxesBody );
 
 				ImGui::TreePop();
 			}
@@ -160,9 +218,22 @@ Boss::Boss() :
 	orientation(),
 	models()
 {
-	models.pIdle		= std::make_unique<skinned_mesh>();
-	models.pAtkFast		= std::make_unique<skinned_mesh>();
-	models.pAtkSwing	= std::make_unique<skinned_mesh>();
+	auto InitializeModel = []( std::unique_ptr<skinned_mesh> *ppMesh )
+	{
+		*ppMesh = std::make_unique<skinned_mesh>();
+		setAnimFlame( ppMesh->get(), 0 );
+	};
+
+	std::vector<std::unique_ptr<skinned_mesh> *> modelRefs
+	{
+		&models.pIdle,
+		&models.pAtkFast,
+		&models.pAtkSwing,
+	};
+	for ( auto &it : modelRefs )
+	{
+		InitializeModel( it );
+	}
 }
 Boss::~Boss() = default;
 
@@ -173,6 +244,11 @@ void Boss::Init( int stageNumber )
 	LoadModel();
 
 	stageNo = stageNumber;
+	pos = BossParam::Get().GetInitPosition( stageNo );
+
+	Donya::Vector3 dirToOrigin = Donya::Vector3::Zero() - pos;
+	dirToOrigin.y = 0.0f;
+	orientation = Donya::Quaternion::LookAt( orientation, dirToOrigin );
 
 	AI.Init();
 }
@@ -285,8 +361,16 @@ void Boss::Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matPro
 	{
 		setBlendMode_ALPHA( 0.5f );
 
-		constexpr Donya::Vector4 COLOR_VALID  { 1.0f, 0.8f, 0.4f, 0.5f };
-		constexpr Donya::Vector4 COLOR_INVALID{ 0.4f, 0.4f, 1.0f, 0.5f };
+		constexpr Donya::Vector4 COLOR_BODY   { 0.0f, 0.5f, 0.0f, 0.6f };
+		
+		const auto *pAABBs = PARAM.BodyHitBoxes();
+		for ( const auto &it : *pAABBs )
+		{
+			DrawCube( it.pos, it.size, COLOR_BODY );
+		}
+
+		constexpr Donya::Vector4 COLOR_VALID  { 1.0f, 0.8f, 0.4f, 0.6f };
+		constexpr Donya::Vector4 COLOR_INVALID{ 0.4f, 0.4f, 1.0f, 0.6f };
 
 		switch ( status )
 		{
@@ -369,6 +453,29 @@ std::vector<Donya::OBB> Boss::GetAttackHitBoxes() const
 		}
 		break;
 	default: break;
+	}
+
+	return collisions;
+}
+
+static Donya::OBB MakeOBB( const Donya::AABB &AABB, const Donya::Quaternion &orientation )
+{
+	Donya::OBB OBB{};
+	OBB.pos			= AABB.pos;
+	OBB.size		= AABB.size;
+	OBB.orientation	= orientation;
+	OBB.exist		= AABB.exist;
+	return OBB;
+}
+std::vector<Donya::OBB> Boss::GetBodyHitBoxes() const
+{
+	const auto &PARAM = BossParam::Get();
+	std::vector<Donya::OBB> collisions{};
+
+	const auto *pAABBs = PARAM.BodyHitBoxes();
+	for ( const auto &it : *pAABBs )
+	{
+		collisions.emplace_back( MakeOBB( it, orientation ) );
 	}
 
 	return collisions;
