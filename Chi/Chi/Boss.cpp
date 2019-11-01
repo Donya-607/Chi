@@ -236,8 +236,18 @@ void BossParam::UseImGui()
 
 #endif // USE_IMGUI
 
+void ResetCurrentOBBFrame( std::vector<Donya::OBBFrame> *pOBBFs )
+{
+	const size_t COUNT = pOBBFs->size();
+	for ( size_t i = 0; i < COUNT; ++i )
+	{
+		auto &OBBF = pOBBFs->at( i );
+		OBBF.currentFrame = 0;
+	}
+}
+
 Boss::Boss() :
-	status( BossAI::ActionStateNum::WAIT ),
+	status( BossAI::ActionState::WAIT ),
 	AI(),
 	stageNo( 1 ),
 	pos(), velocity(),
@@ -319,21 +329,22 @@ void Boss::Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matPro
 
 	switch ( status )
 	{
-	case BossAI::ActionStateNum::WAIT:
+	case BossAI::ActionState::WAIT:
 		{
 			FBXRender( models.pIdle.get(), WVP, W );
 		}
 		break;
-	case BossAI::ActionStateNum::MOVE:
+	case BossAI::ActionState::MOVE:
 		{
-		#if DEBUG_MODE
+			FBXRender( models.pIdle.get(), WVP, W );
+		}
+		break;
+	case BossAI::ActionState::ATTACK_SWING:
+		{
 			FBXRender( models.pAtkSwing.get(), WVP, W );
-		#else
-			FBXRender( models.pIdle.get(), WVP, W );
-		#endif // DEBUG_MODE
 		}
 		break;
-	case BossAI::ActionStateNum::ATTACK:
+	case BossAI::ActionState::ATTACK_FAST:
 		{
 			FBXRender( models.pAtkFast.get(), WVP, W );
 		}
@@ -405,11 +416,12 @@ void Boss::Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matPro
 
 		switch ( status )
 		{
-		case BossAI::ActionStateNum::WAIT:
+		case BossAI::ActionState::WAIT:
 			break;
-		case BossAI::ActionStateNum::MOVE:
+		case BossAI::ActionState::MOVE:
+			break;
+		case BossAI::ActionState::ATTACK_SWING:
 			{
-			#if DEBUG_MODE
 				const auto  *pOBBs = BossParam::Get().OBBAtksSwing();
 				const size_t COUNT = pOBBs->size();
 				Donya::Vector4 color{};
@@ -420,10 +432,9 @@ void Boss::Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matPro
 
 					DrawOBB( OBB.OBB, color );
 				}
-			#endif // DEBUG_MODE
 			}
 			break;
-		case BossAI::ActionStateNum::ATTACK:
+		case BossAI::ActionState::ATTACK_FAST:
 			{
 				const auto  *pOBBs = BossParam::Get().OBBAtksFast();
 				const size_t COUNT = pOBBs->size();
@@ -451,11 +462,12 @@ std::vector<Donya::OBB> Boss::GetAttackHitBoxes() const
 
 	switch ( status )
 	{
-	case BossAI::ActionStateNum::WAIT:
+	case BossAI::ActionState::WAIT:
 		break;
-	case BossAI::ActionStateNum::MOVE:
+	case BossAI::ActionState::MOVE:
+		break;
+	case BossAI::ActionState::ATTACK_SWING:
 		{
-		#if DEBUG_MODE
 			const auto  *pOBBs = PARAM.OBBAtksSwing();
 			const size_t COUNT = pOBBs->size();
 			for ( size_t i = 0; i < COUNT; ++i )
@@ -466,10 +478,9 @@ std::vector<Donya::OBB> Boss::GetAttackHitBoxes() const
 					collisions.emplace_back( OBB.OBB );
 				}
 			}
-		#endif // DEBUG_MODE
 		}
 		break;
-	case BossAI::ActionStateNum::ATTACK:
+	case BossAI::ActionState::ATTACK_FAST:
 		{
 			const auto  *pOBBs = PARAM.OBBAtksFast();
 			const size_t COUNT = pOBBs->size();
@@ -532,28 +543,31 @@ void Boss::ChangeStatus()
 
 	switch ( status )
 	{
-	case BossAI::ActionStateNum::WAIT:		WaitUninit();	break;
-	case BossAI::ActionStateNum::MOVE:		MoveUninit();	break;
-	case BossAI::ActionStateNum::ATTACK:	AttackUninit();	break;
+	case BossAI::ActionState::WAIT:			WaitUninit();		break;
+	case BossAI::ActionState::MOVE:			MoveUninit();		break;
+	case BossAI::ActionState::ATTACK_SWING:	AttackSwingUninit();break;
+	case BossAI::ActionState::ATTACK_FAST:	AttackFastUninit();	break;
 	default: break;
 	}
 	switch ( lotteryStatus )
 	{
-	case BossAI::ActionStateNum::WAIT:		WaitInit();		break;
-	case BossAI::ActionStateNum::MOVE:		MoveInit();		break;
-	case BossAI::ActionStateNum::ATTACK:	AttackInit();	break;
+	case BossAI::ActionState::WAIT:			WaitInit();			break;
+	case BossAI::ActionState::MOVE:			MoveInit();			break;
+	case BossAI::ActionState::ATTACK_SWING:	AttackSwingInit();	break;
+	case BossAI::ActionState::ATTACK_FAST:	AttackFastInit();	break;
 	default: break;
 	}
 
-	status = scast<BossAI::ActionStateNum>( lotteryStatus );
+	status = scast<BossAI::ActionState>( lotteryStatus );
 }
 void Boss::UpdateCurrentStatus()
 {
 	switch ( status )
 	{
-	case BossAI::ActionStateNum::WAIT:		WaitUpdate();		break;
-	case BossAI::ActionStateNum::MOVE:		MoveUpdate();		break;
-	case BossAI::ActionStateNum::ATTACK:	AttackUpdate();		break;
+	case BossAI::ActionState::WAIT:			WaitUpdate();			break;
+	case BossAI::ActionState::MOVE:			MoveUpdate();			break;
+	case BossAI::ActionState::ATTACK_SWING:	AttackSwingUpdate();	break;
+	case BossAI::ActionState::ATTACK_FAST:	AttackFastUpdate();		break;
 	default: break;
 	}
 }
@@ -566,7 +580,9 @@ XXXUninit : call by ChangeStatus when changing status. before YYYInit.
 
 void Boss::WaitInit()
 {
-	status = BossAI::ActionStateNum::WAIT;
+	status = BossAI::ActionState::WAIT;
+
+	setAnimFlame( models.pIdle.get(), 0 );
 }
 void Boss::WaitUpdate()
 {
@@ -574,65 +590,60 @@ void Boss::WaitUpdate()
 }
 void Boss::WaitUninit()
 {
-
+	setAnimFlame( models.pIdle.get(), 0 );
 }
 
 void Boss::MoveInit()
 {
-	status = BossAI::ActionStateNum::MOVE;
+	status = BossAI::ActionState::MOVE;
 
 #if DEBUG_MODE
-	auto *pOBBs = BossParam::Get().OBBAtksSwing();
-	const size_t COUNT = pOBBs->size();
-	for ( size_t i = 0; i < COUNT; ++i )
-	{
-		auto &OBB = pOBBs->at( i );
-		OBB.currentFrame = 0;
-	}
+	setAnimFlame( models.pIdle.get(), 0 );
 #endif // DEBUG_MODE
 }
 void Boss::MoveUpdate()
 {
-#if DEBUG_MODE
-	auto *pOBBs = BossParam::Get().OBBAtksSwing();
-	const size_t COUNT = pOBBs->size();
-	for ( size_t i = 0; i < COUNT; ++i )
-	{
-		auto &OBB = pOBBs->at( i );
-		OBB.Update();
-	}
-#endif // DEBUG_MODE
+
 }
 void Boss::MoveUninit()
 {
 #if DEBUG_MODE
+	setAnimFlame( models.pIdle.get(), 0 );
+#endif // DEBUG_MODE
+}
+
+void Boss::AttackSwingInit()
+{
+	status = BossAI::ActionState::ATTACK_SWING;
+
+	ResetCurrentOBBFrame( BossParam::Get().OBBAtksSwing() );
+	setAnimFlame( models.pAtkSwing.get(), 0 );
+}
+void Boss::AttackSwingUpdate()
+{
 	auto *pOBBs = BossParam::Get().OBBAtksSwing();
 	const size_t COUNT = pOBBs->size();
 	for ( size_t i = 0; i < COUNT; ++i )
 	{
 		auto &OBB = pOBBs->at( i );
-		OBB.currentFrame = 0;
+		OBB.Update();
 	}
-#endif // DEBUG_MODE
+}
+void Boss::AttackSwingUninit()
+{
+	ResetCurrentOBBFrame( BossParam::Get().OBBAtksSwing() );
+	setAnimFlame( models.pAtkSwing.get(), 0 );
 }
 
-void Boss::AttackInit()
+void Boss::AttackFastInit()
 {
-	status = BossAI::ActionStateNum::ATTACK;
+	status = BossAI::ActionState::ATTACK_FAST;
 
-#if DEBUG_MODE
-	auto *pOBBs = BossParam::Get().OBBAtksFast();
-	const size_t COUNT = pOBBs->size();
-	for ( size_t i = 0; i < COUNT; ++i )
-	{
-		auto &OBB = pOBBs->at( i );
-		OBB.currentFrame = 0;
-	}
-#endif // DEBUG_MODE
+	ResetCurrentOBBFrame( BossParam::Get().OBBAtksFast() );
+	setAnimFlame( models.pAtkFast.get(), 0 );
 }
-void Boss::AttackUpdate()
+void Boss::AttackFastUpdate()
 {
-#if DEBUG_MODE
 	auto *pOBBs = BossParam::Get().OBBAtksFast();
 	const size_t COUNT = pOBBs->size();
 	for ( size_t i = 0; i < COUNT; ++i )
@@ -640,24 +651,11 @@ void Boss::AttackUpdate()
 		auto &OBB = pOBBs->at( i );
 		OBB.Update();
 	}
-#endif // DEBUG_MODE
 }
-void Boss::AttackUninit()
+void Boss::AttackFastUninit()
 {
-#if DEBUG_MODE
-	auto *pOBBs = BossParam::Get().OBBAtksFast();
-	const size_t COUNT = pOBBs->size();
-	for ( size_t i = 0; i < COUNT; ++i )
-	{
-		auto &OBB = pOBBs->at( i );
-		OBB.currentFrame = 0;
-	}
-#endif // DEBUG_MODE
-}
-
-void Boss::AssignInputVelocity()
-{
-
+	ResetCurrentOBBFrame( BossParam::Get().OBBAtksFast() );
+	setAnimFlame( models.pAtkFast.get(), 0 );
 }
 
 void Boss::ApplyVelocity()
@@ -681,13 +679,14 @@ void Boss::UseImGui()
 	{
 		if ( ImGui::TreeNode( "Boss.CurrentParameter" ) )
 		{
-			auto GetStatusName = []( BossAI::ActionStateNum status )->std::string
+			auto GetStatusName = []( BossAI::ActionState status )->std::string
 			{
 				switch ( status )
 				{
-				case BossAI::ActionStateNum::WAIT:		return { "Wait" };		break;
-				case BossAI::ActionStateNum::MOVE:		return { "Move" };		break;
-				case BossAI::ActionStateNum::ATTACK:	return { "Attack" };	break;
+				case BossAI::ActionState::WAIT:			return { "Wait" };			break;
+				case BossAI::ActionState::MOVE:			return { "Move" };			break;
+				case BossAI::ActionState::ATTACK_SWING:	return { "AttackSwing" };	break;
+				case BossAI::ActionState::ATTACK_FAST:	return { "AttackFast" };	break;
 				default: break;
 				}
 

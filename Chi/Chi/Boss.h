@@ -104,7 +104,7 @@ private:
 		std::unique_ptr<skinned_mesh> pAtkSwing{ nullptr };
 	};
 private:
-	BossAI::ActionStateNum	status;
+	BossAI::ActionState		status;
 	BossAI					AI;
 	int						stageNo; // 1-based.
 	Donya::Vector3			pos;
@@ -140,12 +140,14 @@ private:
 	void MoveUpdate();
 	void MoveUninit();
 
-	void AttackInit();
-	void AttackUpdate();
-	void AttackUninit();
+	void AttackSwingInit();
+	void AttackSwingUpdate();
+	void AttackSwingUninit();
+	
+	void AttackFastInit();
+	void AttackFastUpdate();
+	void AttackFastUninit();
 private:
-	void AssignInputVelocity();
-
 	/// <summary>
 	/// The position("pos") is only changed by this method(or CollideToWall method).
 	/// </summary>
