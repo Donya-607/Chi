@@ -15,19 +15,46 @@
 
 #include "BossAI.h"
 
+class skinned_mesh;	// With pointer. because I'm not want include this at header.
+
 /// <summary>
 /// Boss's serialize parameter.
 /// </summary>
 class BossParam final : public Donya::Singleton<BossParam>
 {
 	friend Donya::Singleton<BossParam>;
+public:
+	struct OBBFrameWithName
+	{
+		Donya::OBBFrame OBBF{};
+		std::string meshName{};
+	private:
+		friend class cereal::access;
+		template<class Archive>
+		void serialize( Archive &archive, std::uint32_t version )
+		{
+			archive
+			(
+				CEREAL_NVP( OBBF ),
+				CEREAL_NVP( meshName )
+			);
+
+			if ( 1 <= version )
+			{
+				// archive( CEREAL_NVP( x ) );
+			}
+		}
+	public:
+		Donya::OBB CalcTransformedOBB( skinned_mesh *pMesh, const Donya::Vector4x4 &parentSpaceMatrix ) const;
+	};
 private:
-	float							scale;			// Usually 1.0f.
-	std::vector<Donya::Vector3>		initPosPerStage;// The index(stage number) is 1-based. 0 is tutorial.
-	std::vector<Donya::Vector3>		drawOffsetsPerStage;// The index(stage number) is 1-based. 0 is tutorial.
-	std::vector<Donya::AABB>		hitBoxesBody;	// Body's hit boxes.
-	std::vector<Donya::OBBFrame>	OBBAttacksFast;
+	float							scale;					// Usually 1.0f.
+	std::vector<Donya::Vector3>		initPosPerStage;		// The index(stage number) is 1-based. 0 is tutorial.
+	std::vector<Donya::Vector3>		drawOffsetsPerStage;	// The index(stage number) is 1-based. 0 is tutorial.
+	std::vector<Donya::AABB>		hitBoxesBody;			// Body's hit boxes.
+	// std::vector<Donya::OBBFrame>	OBBAttacksFast;
 	std::vector<Donya::OBBFrame>	OBBAttacksSwing;
+	std::vector<OBBFrameWithName>	OBBFAttacksFast;
 private:
 	BossParam();
 public:
@@ -42,6 +69,7 @@ private:
 			CEREAL_NVP( scale )
 		);
 
+		/*
 		if ( 1 <= version )
 		{
 			archive
@@ -50,6 +78,7 @@ private:
 				CEREAL_NVP( OBBAttacksSwing )
 			);
 		}
+		*/
 		if ( 2 <= version )
 		{
 			archive( CEREAL_NVP( hitBoxesBody ) );
@@ -60,6 +89,14 @@ private:
 			(
 				CEREAL_NVP( initPosPerStage ),
 				CEREAL_NVP( drawOffsetsPerStage )
+			);
+		}
+		if ( 4 <= version )
+		{
+			archive
+			(
+				CEREAL_NVP( OBBAttacksSwing ),
+				CEREAL_NVP( OBBFAttacksFast )
 			);
 		}
 		if ( 5 <= version )
@@ -75,10 +112,10 @@ public:
 	float								Scale()			const	{ return scale; }
 	Donya::Vector3						GetInitPosition( int stageNumber ) const;
 	Donya::Vector3						GetDrawOffset  ( int stageNumber ) const;
-	std::vector<Donya::OBBFrame>		*OBBAtksFast()			{ return &OBBAttacksFast; }
 	std::vector<Donya::OBBFrame>		*OBBAtksSwing()			{ return &OBBAttacksSwing; }
-	const std::vector<Donya::OBBFrame>	*OBBAtksFast()	const	{ return &OBBAttacksFast; }
 	const std::vector<Donya::OBBFrame>	*OBBAtksSwing()	const	{ return &OBBAttacksSwing; }
+	std::vector<OBBFrameWithName>		*OBBFAtksFast()			{ return &OBBFAttacksFast; }
+	const std::vector<OBBFrameWithName>	*OBBFAtksFast()	const	{ return &OBBFAttacksFast; }
 	const std::vector<Donya::AABB>		*BodyHitBoxes()	const	{ return &hitBoxesBody; }
 public:
 	void LoadParameter( bool isBinary = true );
@@ -91,9 +128,8 @@ public:
 
 #endif // USE_IMGUI
 };
-CEREAL_CLASS_VERSION( BossParam, 3 )
+CEREAL_CLASS_VERSION( BossParam, 4 )
 
-class skinned_mesh;	// With pointer. because I'm not want include this at header.
 class Boss
 {
 private:

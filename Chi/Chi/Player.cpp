@@ -370,7 +370,7 @@ Donya::OBB Player::CalcAttackHitBox() const
 	const auto &PARAM = PlayerParam::Get();
 	const auto *pOBBF = PARAM.HitBoxAttackF();
 
-	const std::string meshName = PlayerParam::Get().LanceMeshName();
+	const std::string meshName = PARAM.LanceMeshName();
 
 	Donya::OBB oldOBB = pOBBF->OBB;
 

@@ -12,7 +12,7 @@
 BossParam::BossParam() :
 	scale( 1.0f ),
 	initPosPerStage(), drawOffsetsPerStage(), hitBoxesBody(),
-	OBBAttacksFast(), OBBAttacksSwing()
+	OBBAttacksSwing(), OBBFAttacksFast()
 {
 	initPosPerStage.resize( 1U );
 	drawOffsetsPerStage.resize( 1U );
@@ -198,7 +198,40 @@ void BossParam::UseImGui()
 					}
 				};
 
-				ShowOBBFs( "Attack.Fast",  &OBBAttacksFast  );
+				if ( ImGui::TreeNode( "Attacks.Fast" ) )
+				{
+					static std::vector<std::array<char, 512U>> atksFastNameBuffers{};
+
+					if ( ImGui::Button( "Append" ) )
+					{
+						OBBFAttacksFast.push_back( {} );
+						OBBFAttacksFast.back().meshName.reserve( 512U );
+
+						atksFastNameBuffers.resize( OBBFAttacksFast.size() );
+					}
+					if ( 1 <= OBBFAttacksFast.size() && ImGui::Button( "PopBack" ) )
+					{
+						OBBFAttacksFast.pop_back();
+						atksFastNameBuffers.resize( OBBFAttacksFast.size() );
+					}
+
+					const size_t COUNT = OBBFAttacksFast.size();
+					for ( size_t i = 0; i < COUNT; ++i )
+					{
+						auto &OBBF = OBBFAttacksFast[i].OBBF;
+						ShowOBBF( "[" + std::to_string( i ) + "]", &OBBF );
+
+						std::string elementCaption = "MeshName.Fasts[" + std::to_string( i ) + "]";
+						ImGui::InputText( elementCaption.c_str(), atksFastNameBuffers[i].data(), atksFastNameBuffers[i].size() );
+						if ( ImGui::Button( ( "Apply." + elementCaption ).c_str() ) )
+						{
+							OBBFAttacksFast[i].meshName = atksFastNameBuffers[i].data();
+						}
+					}
+
+					ImGui::TreePop();
+				}
+
 				ShowOBBFs( "Attack.Swing", &OBBAttacksSwing );
 
 				ShowAABBs( "Body.HurtBox", &hitBoxesBody );
@@ -235,6 +268,59 @@ void BossParam::UseImGui()
 }
 
 #endif // USE_IMGUI
+
+Donya::OBB BossParam::OBBFrameWithName::CalcTransformedOBB( skinned_mesh *pMesh, const Donya::Vector4x4 &parentSpaceMatrix ) const
+{
+	Donya::OBB oldOBB = OBBF.OBB;
+
+	// To world space from local space.
+	Donya::Vector4x4 parentMatrix = parentSpaceMatrix;
+
+	// To local space from mesh's mesh space.
+	Donya::Vector4x4 meshMatrix{};
+	{
+		// Input:offset in local-space. Output:transformed position.
+		Donya::Vector3 outputPos = oldOBB.pos;
+		bool succeeded = calcTransformedPosBySpecifyMesh( pMesh, outputPos, meshName );
+		if ( !succeeded )
+		{
+			_ASSERT_EXPR( 0, L"Error : specified mesh name was not found !" );
+			return Donya::OBB::Nil();
+		}
+		Donya::Vector4x4 T = Donya::Vector4x4::MakeTranslation( outputPos );
+
+		// Convert to world space from local space.
+		meshMatrix = T * parentMatrix;
+	}
+
+	Donya::OBB resultOBB = oldOBB;
+	resultOBB.pos.x = meshMatrix._41;
+	resultOBB.pos.y = meshMatrix._42;
+	resultOBB.pos.z = meshMatrix._43;
+
+	// Rotation.
+	{
+		Donya::Vector3 localFront = oldOBB.pos + Donya::Vector3::Front();
+		calcTransformedPosBySpecifyMesh( pMesh, localFront, meshName );
+		localFront.Normalize();
+
+		Donya::Vector4x4 LT = Donya::Vector4x4::MakeTranslation( localFront );
+		Donya::Vector4x4 M = LT * parentMatrix;
+
+		Donya::Vector3 resultFront{};
+		resultFront.x = M._41;
+		resultFront.y = M._42;
+		resultFront.z = M._43;
+
+		Donya::Vector3 dir = resultFront - resultOBB.pos;
+
+		oldOBB.orientation = Donya::Quaternion::LookAt( oldOBB.orientation, dir );
+		resultOBB.orientation = oldOBB.orientation;
+	}
+
+	// Should I also apply parent's scale ?
+	return resultOBB;
+}
 
 void ResetCurrentOBBFrame( std::vector<Donya::OBBFrame> *pOBBFs )
 {
@@ -472,6 +558,14 @@ std::vector<Donya::OBB> Boss::GetAttackHitBoxes() const
 		return obb;
 	};
 
+	Donya::Vector4x4 S = Donya::Vector4x4::MakeScaling( PARAM.Scale() );
+	Donya::Vector4x4 R = orientation.RequireRotationMatrix();
+	Donya::Vector4x4 T = Donya::Vector4x4::MakeTranslation( pos );
+#if DEBUG_MODE
+	if ( status == decltype( status )::END ) { R = Donya::Quaternion::Make( Donya::Vector3::Front(), ToRadian( 180.0f ) ).RequireRotationMatrix(); };
+#endif // DEBUG_MODE
+	Donya::Vector4x4 W = S * R * T;
+
 	switch ( status )
 	{
 	case BossAI::ActionState::WAIT:
@@ -494,14 +588,17 @@ std::vector<Donya::OBB> Boss::GetAttackHitBoxes() const
 		break;
 	case BossAI::ActionState::ATTACK_FAST:
 		{
-			const auto  *pOBBs = PARAM.OBBAtksFast();
-			const size_t COUNT = pOBBs->size();
+			auto  *pOBBFs  = PARAM.OBBFAtksFast();
+			const size_t COUNT  = pOBBFs->size();
 			for ( size_t i = 0; i < COUNT; ++i )
 			{
-				auto &OBB = pOBBs->at( i );
-				if (  OBB.OBB.exist )
+				auto &OBBF = pOBBFs->at( i );
+				auto &OBB  = OBBF.OBBF.OBB;
+				if (  OBB.exist )
 				{
-					collisions.emplace_back( ToWorldOBB( OBB.OBB ) );
+					OBB = pOBBFs->at( i ).CalcTransformedOBB( models.pAtkFast.get(), W );
+
+					collisions.emplace_back( OBB );
 				}
 			}
 		}
