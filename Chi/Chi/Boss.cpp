@@ -11,10 +11,11 @@
 
 BossParam::BossParam() :
 	scale( 1.0f ),
-	initPosPerStage(), hitBoxesBody(),
+	initPosPerStage(), drawOffsetsPerStage(), hitBoxesBody(),
 	OBBAttacksFast(), OBBAttacksSwing()
 {
 	initPosPerStage.resize( 1U );
+	drawOffsetsPerStage.resize( 1U );
 }
 BossParam::~BossParam() = default;
 
@@ -27,11 +28,17 @@ void BossParam::Uninit()
 	// No op.
 }
 
-Donya::Vector3 BossParam::GetInitPosition( int stageNo )
+Donya::Vector3 BossParam::GetInitPosition( int stageNo ) const
 {
-	_ASSERT_EXPR( stageNo <= initPosPerStage.size(), L"Error : Specified stage number over than stage count !" );
+	_ASSERT_EXPR( stageNo <= scast<int>( initPosPerStage.size() ), L"Error : Specified stage number over than stage count !" );
 
 	return initPosPerStage[stageNo];
+}
+Donya::Vector3 BossParam::GetDrawOffset( int stageNo ) const
+{
+	_ASSERT_EXPR( stageNo <= scast<int>( drawOffsetsPerStage.size() ), L"Error : Specified stage number over than stage count !" );
+
+	return drawOffsetsPerStage[stageNo];
 }
 
 void BossParam::LoadParameter( bool isBinary )
@@ -81,7 +88,26 @@ void BossParam::UseImGui()
 				const size_t COUNT = initPosPerStage.size();
 				for ( size_t i = 0; i < COUNT; ++i )
 				{
-					ImGui::DragFloat3( ( "[" + std::to_string( i ) + "].Pos" ).c_str(), &initPosPerStage[i].x );
+					ImGui::DragFloat3( ( "Stage[" + std::to_string( i ) + "].Pos" ).c_str(), &initPosPerStage[i].x );
+				}
+
+				ImGui::TreePop();
+			}	
+			if ( ImGui::TreeNode( "DrawPosition.Offset" ) )
+			{
+				if ( ImGui::Button( "Append" ) )
+				{
+					drawOffsetsPerStage.push_back( {} );
+				}
+				if ( 2 <= drawOffsetsPerStage.size() && ImGui::Button( "PopBack" ) )
+				{
+					drawOffsetsPerStage.pop_back();
+				}
+
+				const size_t COUNT = drawOffsetsPerStage.size();
+				for ( size_t i = 0; i < COUNT; ++i )
+				{
+					ImGui::DragFloat3( ( "Stage[" + std::to_string( i ) + "].Pos" ).c_str(), &drawOffsetsPerStage[i].x );
 				}
 
 				ImGui::TreePop();
@@ -280,9 +306,14 @@ void Boss::Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matPro
 {
 	const auto &PARAM = BossParam::Get();
 
+	Donya::Vector3 drawOffset = PARAM.GetDrawOffset( stageNo );
+
 	Donya::Vector4x4 S = Donya::Vector4x4::MakeScaling( PARAM.Scale() );
 	Donya::Vector4x4 R = orientation.RequireRotationMatrix();
-	Donya::Vector4x4 T = Donya::Vector4x4::MakeTranslation( pos );
+	Donya::Vector4x4 T = Donya::Vector4x4::MakeTranslation( pos + drawOffset );
+#if DEBUG_MODE
+	if ( status == decltype( status )::END ) { R = Donya::Quaternion::Make( Donya::Vector3::Front(), ToRadian( 180.0f ) ).RequireRotationMatrix(); };
+#endif // DEBUG_MODE
 	Donya::Vector4x4 W = S * R * T;
 	Donya::Vector4x4 WVP = W * matView * matProjection;
 
@@ -331,7 +362,7 @@ void Boss::Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matPro
 	auto DrawCube	= [&]( const Donya::Vector3 &cubeOffset, const Donya::Vector3 &cubeScale, const Donya::Vector4 &color )
 	{
 		Donya::Vector4x4 CS = Donya::Vector4x4::MakeScaling( cubeScale * 2.0f ); // Half size->Whole size.
-		Donya::Vector4x4 CT = Donya::Vector4x4::MakeTranslation( cubeOffset );
+		Donya::Vector4x4 CT = Donya::Vector4x4::MakeTranslation( cubeOffset - drawOffset );
 		Donya::Vector4x4 CW = ( CS * CT ) * W;
 		Donya::Vector4x4 CWVP = CW * matView * matProjection;
 
@@ -340,7 +371,7 @@ void Boss::Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matPro
 	auto DrawSphere	= [&]( const Donya::Vector3 &sphereOffset, float sphereScale, const Donya::Vector4 &color )
 	{
 		Donya::Vector4x4 CS = Donya::Vector4x4::MakeScaling( sphereScale * 2.0f ); // Half size->Whole size.
-		Donya::Vector4x4 CT = Donya::Vector4x4::MakeTranslation( sphereOffset );
+		Donya::Vector4x4 CT = Donya::Vector4x4::MakeTranslation( sphereOffset - drawOffset );
 		Donya::Vector4x4 CW = ( CS * CT ) * W;
 		Donya::Vector4x4 CWVP = CW * matView * matProjection;
 
@@ -350,7 +381,7 @@ void Boss::Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matPro
 	{
 		Donya::Vector4x4 CS = Donya::Vector4x4::MakeScaling( OBB.size * 2.0f ); // Half size->Whole size.
 		Donya::Vector4x4 CR = OBB.orientation.RequireRotationMatrix();
-		Donya::Vector4x4 CT = Donya::Vector4x4::MakeTranslation( OBB.pos );
+		Donya::Vector4x4 CT = Donya::Vector4x4::MakeTranslation( OBB.pos - drawOffset );
 		Donya::Vector4x4 CW = ( CS * CR * CT ) * W;
 		Donya::Vector4x4 CWVP = CW * matView * matProjection;
 
@@ -479,6 +510,11 @@ std::vector<Donya::OBB> Boss::GetBodyHitBoxes() const
 	}
 
 	return collisions;
+}
+
+void Boss::ReceiveImpact()
+{
+	status = decltype( status )::END;
 }
 
 void Boss::LoadModel()

@@ -24,6 +24,7 @@ class BossParam final : public Donya::Singleton<BossParam>
 private:
 	float							scale;			// Usually 1.0f.
 	std::vector<Donya::Vector3>		initPosPerStage;// The index(stage number) is 1-based. 0 is tutorial.
+	std::vector<Donya::Vector3>		drawOffsetsPerStage;// The index(stage number) is 1-based. 0 is tutorial.
 	std::vector<Donya::AABB>		hitBoxesBody;	// Body's hit boxes.
 	std::vector<Donya::OBBFrame>	OBBAttacksFast;
 	std::vector<Donya::OBBFrame>	OBBAttacksSwing;
@@ -55,9 +56,13 @@ private:
 		}
 		if ( 3 <= version )
 		{
-			archive( CEREAL_NVP( initPosPerStage ) );
+			archive
+			(
+				CEREAL_NVP( initPosPerStage ),
+				CEREAL_NVP( drawOffsetsPerStage )
+			);
 		}
-		if ( 4 <= version )
+		if ( 5 <= version )
 		{
 			// archive( CEREAL_NVP( x ) );
 		}
@@ -67,13 +72,14 @@ public:
 	void Init();
 	void Uninit();
 public:
-	float								Scale()			const { return scale; }
-	Donya::Vector3						GetInitPosition( int stageNumber );
-	std::vector<Donya::OBBFrame>		*OBBAtksFast()  { return &OBBAttacksFast; }
-	std::vector<Donya::OBBFrame>		*OBBAtksSwing() { return &OBBAttacksSwing; }
-	const std::vector<Donya::OBBFrame>	*OBBAtksFast()	const { return &OBBAttacksFast; }
-	const std::vector<Donya::OBBFrame>	*OBBAtksSwing()	const { return &OBBAttacksSwing; }
-	const std::vector<Donya::AABB>		*BodyHitBoxes()	const { return &hitBoxesBody; }
+	float								Scale()			const	{ return scale; }
+	Donya::Vector3						GetInitPosition( int stageNumber ) const;
+	Donya::Vector3						GetDrawOffset  ( int stageNumber ) const;
+	std::vector<Donya::OBBFrame>		*OBBAtksFast()			{ return &OBBAttacksFast; }
+	std::vector<Donya::OBBFrame>		*OBBAtksSwing()			{ return &OBBAttacksSwing; }
+	const std::vector<Donya::OBBFrame>	*OBBAtksFast()	const	{ return &OBBAttacksFast; }
+	const std::vector<Donya::OBBFrame>	*OBBAtksSwing()	const	{ return &OBBAttacksSwing; }
+	const std::vector<Donya::AABB>		*BodyHitBoxes()	const	{ return &hitBoxesBody; }
 public:
 	void LoadParameter( bool isBinary = true );
 
@@ -118,6 +124,8 @@ public:
 public:
 	std::vector<Donya::OBB> GetAttackHitBoxes() const;
 	std::vector<Donya::OBB> GetBodyHitBoxes() const;
+
+	void ReceiveImpact();
 private:
 	void LoadModel();
 private:

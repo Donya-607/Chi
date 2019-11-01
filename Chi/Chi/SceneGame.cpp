@@ -257,6 +257,7 @@ public:
 	{
 		Donya::OBB playerBodyBox   = player.GetHurtBox();
 		Donya::OBB playerShieldBox = player.GetShieldHitBox();
+		Donya::OBB playerAttackBox = player.CalcAttackHitBox();
 
 		// Player VS BossAttacks
 		{
@@ -275,6 +276,19 @@ public:
 				}
 
 				wasHitToShield = false;
+			}
+		}
+		
+		// PlayerAttack VS Boss
+		{
+			const auto pBossBodies = boss.GetBodyHitBoxes();
+			for ( const auto &it : pBossBodies )
+			{
+				if ( Donya::OBB::IsHitOBB( playerAttackBox, it ) )
+				{
+					boss.ReceiveImpact();
+					break;
+				}
 			}
 		}
 	}
