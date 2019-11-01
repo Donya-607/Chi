@@ -8,10 +8,10 @@
             "value3": 45
         },
         "maxCnt": {
-            "value0": 120,
-            "value1": 120,
-            "value2": 120,
-            "value3": 120
+            "value0": 60,
+            "value1": 60,
+            "value2": 90,
+            "value3": 90
         },
         "coolTimeMaxCnt": {
             "value0": 30,

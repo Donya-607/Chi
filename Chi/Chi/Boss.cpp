@@ -315,15 +315,17 @@ void Boss::Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matPro
 {
 	const auto &PARAM = BossParam::Get();
 
-	Donya::Vector3 drawOffset = PARAM.GetDrawOffset( stageNo );
+	const Donya::Vector3 drawOffset = PARAM.GetDrawOffset( stageNo );
+	const Donya::Vector4x4 DRAW_OFFSET = Donya::Vector4x4::MakeTranslation( drawOffset );
+
 
 	Donya::Vector4x4 S = Donya::Vector4x4::MakeScaling( PARAM.Scale() );
 	Donya::Vector4x4 R = orientation.RequireRotationMatrix();
-	Donya::Vector4x4 T = Donya::Vector4x4::MakeTranslation( pos + drawOffset );
+	Donya::Vector4x4 T = Donya::Vector4x4::MakeTranslation( pos );
 #if DEBUG_MODE
 	if ( status == decltype( status )::END ) { R = Donya::Quaternion::Make( Donya::Vector3::Front(), ToRadian( 180.0f ) ).RequireRotationMatrix(); };
 #endif // DEBUG_MODE
-	Donya::Vector4x4 W = S * R * T;
+	Donya::Vector4x4 W = S * R * T * DRAW_OFFSET;
 	Donya::Vector4x4 WVP = W * matView * matProjection;
 
 	switch ( status )
@@ -369,11 +371,15 @@ void Boss::Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matPro
 	static std::shared_ptr<static_mesh> pCube	= GenerateCube();
 	static std::shared_ptr<static_mesh> pSphere	= GenerateSphere();
 
-	auto DrawCube	= [&]( const Donya::Vector3 &cubeOffset, const Donya::Vector3 &cubeScale, const Donya::Vector4 &color )
+	// Except DRAW_OFFSET matrix. because I wanna draw collisions to actual position.
+	W = S * R * T;
+
+	auto DrawCube	= [&]( const Donya::Vector3 &cubeOffset, const Donya::Vector3 &cubeScale, const Donya::Quaternion &orientation, const Donya::Vector4 &color )
 	{
 		Donya::Vector4x4 CS = Donya::Vector4x4::MakeScaling( cubeScale * 2.0f ); // Half size->Whole size.
-		Donya::Vector4x4 CT = Donya::Vector4x4::MakeTranslation( cubeOffset - drawOffset );
-		Donya::Vector4x4 CW = ( CS * CT ) * W;
+		Donya::Vector4x4 CR = orientation.RequireRotationMatrix();
+		Donya::Vector4x4 CT = Donya::Vector4x4::MakeTranslation( cubeOffset );
+		Donya::Vector4x4 CW = ( CS * CR * CT ) * W;
 		Donya::Vector4x4 CWVP = CW * matView * matProjection;
 
 		OBJRender( pCube.get(), CWVP, CW, color );
@@ -381,7 +387,7 @@ void Boss::Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matPro
 	auto DrawSphere	= [&]( const Donya::Vector3 &sphereOffset, float sphereScale, const Donya::Vector4 &color )
 	{
 		Donya::Vector4x4 CS = Donya::Vector4x4::MakeScaling( sphereScale * 2.0f ); // Half size->Whole size.
-		Donya::Vector4x4 CT = Donya::Vector4x4::MakeTranslation( sphereOffset - drawOffset );
+		Donya::Vector4x4 CT = Donya::Vector4x4::MakeTranslation( sphereOffset );
 		Donya::Vector4x4 CW = ( CS * CT ) * W;
 		Donya::Vector4x4 CWVP = CW * matView * matProjection;
 
@@ -391,7 +397,7 @@ void Boss::Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matPro
 	{
 		Donya::Vector4x4 CS = Donya::Vector4x4::MakeScaling( OBB.size * 2.0f ); // Half size->Whole size.
 		Donya::Vector4x4 CR = OBB.orientation.RequireRotationMatrix();
-		Donya::Vector4x4 CT = Donya::Vector4x4::MakeTranslation( OBB.pos - drawOffset );
+		Donya::Vector4x4 CT = Donya::Vector4x4::MakeTranslation( OBB.pos );
 		Donya::Vector4x4 CW = ( CS * CR * CT ) * W;
 		Donya::Vector4x4 CWVP = CW * matView * matProjection;
 
@@ -407,7 +413,7 @@ void Boss::Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matPro
 		const auto *pAABBs = PARAM.BodyHitBoxes();
 		for ( const auto &it : *pAABBs )
 		{
-			DrawCube( it.pos, it.size, COLOR_BODY );
+			DrawCube( it.pos, it.size, orientation, COLOR_BODY );
 		}
 
 		constexpr Donya::Vector4 COLOR_VALID  { 1.0f, 0.8f, 0.4f, 0.6f };

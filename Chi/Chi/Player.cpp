@@ -431,6 +431,7 @@ void Player::SucceededDefence()
 void Player::ReceiveImpact()
 {
 	status = State::Dead;
+	velocity = 0.0f;
 }
 
 void Player::SetFieldRadius( float newFieldRadius )

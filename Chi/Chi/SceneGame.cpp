@@ -152,31 +152,34 @@ public:
 			if ( Donya::Keyboard::Trigger( 'X' ) ) { input.doAttack = true; }
 		#endif // DEBUG_MODE
 
-			Donya::Vector4x4 cameraRotation{};
+			// Transform to camera space from world space.
 			{
-				// Extract inverse rotation matrix here.
-				cameraRotation = viewMat;
-				cameraRotation._14 = 0.0f;
-				cameraRotation._24 = 0.0f;
-				cameraRotation._34 = 0.0f;
-				cameraRotation._41 = 0.0f;
-				cameraRotation._42 = 0.0f;
-				cameraRotation._43 = 0.0f;
-				cameraRotation._44 = 1.0f;
+				Donya::Vector4x4 cameraRotation{};
+				{
+					// Extract inverse rotation matrix here.
+					cameraRotation = viewMat;
+					cameraRotation._14 = 0.0f;
+					cameraRotation._24 = 0.0f;
+					cameraRotation._34 = 0.0f;
+					cameraRotation._41 = 0.0f;
+					cameraRotation._42 = 0.0f;
+					cameraRotation._43 = 0.0f;
+					cameraRotation._44 = 1.0f;
 
-				cameraRotation = cameraRotation.Inverse();
+					cameraRotation = cameraRotation.Inverse();
+				}
+
+				Donya::Vector4 moveVector4{};
+				moveVector4.x = input.moveVector.x;
+				moveVector4.y = input.moveVector.y;
+				moveVector4.z = input.moveVector.z;
+				moveVector4.w = 0.0f;
+
+				moveVector4 = cameraRotation * moveVector4;
+
+				input.moveVector.x = moveVector4.x;
+				input.moveVector.z = moveVector4.z;
 			}
-
-			Donya::Vector4 moveVector4{};
-			moveVector4.x = input.moveVector.x;
-			moveVector4.y = input.moveVector.y;
-			moveVector4.z = input.moveVector.z;
-			moveVector4.w = 0.0f;
-
-			moveVector4 = cameraRotation * moveVector4;
-
-			input.moveVector.x = moveVector4.x;
-			input.moveVector.z = moveVector4.z;
 
 			return input;
 		};
