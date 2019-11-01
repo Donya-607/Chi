@@ -38,7 +38,7 @@
 //       float4 specular;               // Offset:  608
 //
 //   } material;                        // Offset:  576 Size:    48
-//   row_major float4x4 bone_transforms[32];// Offset:  624 Size:  2048 [unused]
+//   row_major float4x4 bone_transforms[64];// Offset:  624 Size:  4096 [unused]
 //
 // }
 //

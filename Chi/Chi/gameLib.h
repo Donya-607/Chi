@@ -23,7 +23,7 @@
 #include "Camera.h"
 
 #include "XinputPad.h"
-
+#include "keyInput.h"
 namespace GameLib
 {
 
@@ -104,7 +104,7 @@ namespace GameLib
 	}
 
 
-	DirectX::XMFLOAT2 getWindowSize();
+	DirectX::XMINT2 getWindowSize();
 
 	//-------------------------------------------------------------------//
 	//
@@ -275,6 +275,15 @@ namespace GameLib
 	{
 		void loadFBX(skinned_mesh*, const std::string& _fbxName);
 
+		void setLoopFlg(skinned_mesh* _mesh, const bool _is_loop);
+		void setStopAnimation(skinned_mesh* _mesh, const bool _is_stop);
+		void setStopTime(skinned_mesh* _mesh, const int _stop_time);
+		void setAnimFlame(skinned_mesh* _mesh, const int _anim_flame);
+		const int getAnimFlame(skinned_mesh*);
+
+		bool calcTransformedPosBySpecifyMesh(skinned_mesh* _mesh, DirectX::XMFLOAT3& _pos, std::string _mesh_name);
+
+
 		void skinnedMeshRender(
 			skinned_mesh* _mesh,
 			const DirectX::XMFLOAT4X4&SynthesisMatrix,
@@ -313,7 +322,8 @@ namespace GameLib
 		DirectX::XMMATRIX GetViewMatrix();
 		DirectX::XMMATRIX GetLightProjectionMatrix();
 		DirectX::XMMATRIX GetLightViewMatrix(DirectX::XMFLOAT3 _pos, DirectX::XMFLOAT3 _direct);
-		void setPos(DirectX::XMFLOAT3 _pos);
+		void setPos(const DirectX::XMFLOAT3& _pos);
+		void setTarget(const DirectX::XMFLOAT3& _target);
 		DirectX::XMFLOAT4 getPos();
 	}
 
@@ -343,14 +353,24 @@ namespace GameLib
 		namespace xInput
 		{
 			int getState();
-
-			bool pressedButtons(int _padNum, int _button);
+			///<summary>
+			///0 : âüÇµÇƒÇ»Ç¢ 1 : âüÇµÇΩèuä‘ 2 : âüÇµÇ¡ÇœÇ»Çµ -1 : ó£ÇµÇΩèuä‘
+			///</summary>
+			int pressedButtons(int _padNum, int _button);
 
 			DirectX::XMINT2 getThumbL(int _padNum);
 			DirectX::XMINT2 getThumbR(int _padNum);
 
 		}
+
+		namespace keyboard
+		{
+			int getState(int _keyNum);
+
+			void update();
+		}
 	}
+
 }
 
 #endif // !GAMELIB_H_

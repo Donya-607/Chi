@@ -15,12 +15,12 @@
 #include "resourceManager.h"
 #include "light.h"
 
-#define MAX_BONE_INFLUENCES 4
-#define MAX_BONES 32
-
 class skinned_mesh
 {
 public:
+	static const int MAX_BONE_INFLUENCES = 4;
+	static const int MAX_BONES = 64;
+
 	struct bone
 	{
 		DirectX::XMFLOAT4X4 transform;
@@ -72,7 +72,7 @@ public:
 		ID3D11ShaderResourceView* shader_resource_view;
 
 		template<class Archive>
-		void serialize(Archive &archive)
+		void serialize(Archive& archive)
 		{
 			archive
 			(
@@ -98,9 +98,12 @@ public:
 		ID3D11Buffer* vertex_buffer;
 		ID3D11Buffer* index_buffer;
 		std::vector<subset> subsets;
-
+		std::string node_name;
 		DirectX::XMFLOAT4X4 global_transform = { 1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1 };
 		skeletal_animation skeletal_animation;
+		FLOAT bone_weights[MAX_BONE_INFLUENCES] = { 1,0,0,0 };
+		INT bone_indices[MAX_BONE_INFLUENCES] = {};
+		DirectX::XMFLOAT4 pos;
 	};
 
 	struct bone_influence
@@ -124,53 +127,72 @@ protected:
 	bool have_uv;
 	bool have_born;
 	bool have_material;
-	ID3D11SamplerState* sampleState;
+	ID3D11SamplerState* sampleState = nullptr;
 
-	ID3D11VertexShader*			vertexShader;		//VertexShader
-	ID3D11PixelShader*			pixelShader;		//PixelShader
-	ID3D11InputLayout*			layout;				//inputLayout
-	ID3D11VertexShader*			noTexVS;		//VertexShader
-	ID3D11PixelShader*			noTexPS;		//PixelShader
-	ID3D11InputLayout*			noTexLayout;				//inputLayout
-	ID3D11Buffer*				constant_buffer;	//íËêîÉoÉbÉtÉ@
-	ID3D11RasterizerState*		rasterizeLine;		//ê¸ï`âÊ
-	ID3D11RasterizerState*		rasterizeFillOut;	//ìhÇËÇ¬Ç‘Çµï`âÊ
-	ID3D11DepthStencilState*	depthStencilState;	//depthStencilState
+	ID3D11VertexShader* vertexShader = nullptr;		//VertexShader
+	ID3D11PixelShader* pixelShader = nullptr;		//PixelShader
+	ID3D11InputLayout* layout = nullptr;				//inputLayout
+	ID3D11VertexShader* noTexVS = nullptr;		//VertexShader
+	ID3D11PixelShader* noTexPS = nullptr;		//PixelShader
+	ID3D11InputLayout* noTexLayout = nullptr;				//inputLayout
+	ID3D11Buffer* constant_buffer = nullptr;	//íËêîÉoÉbÉtÉ@
+	ID3D11RasterizerState* rasterizeLine =nullptr;		//ê¸ï`âÊ
+	ID3D11RasterizerState* rasterizeFillOut = nullptr;	//ìhÇËÇ¬Ç‘Çµï`âÊ
+	ID3D11DepthStencilState* depthStencilState = nullptr;	//depthStencilState
 
 	int							numIndices;
-
+	bool	loop_flg;
+	bool	stop_animation;
+	float	stop_time;
+	int	animation_flame;
 	void fbxInit(ID3D11Device* _device, const std::string& _objFileName);
 
 public:
-	skinned_mesh() {}
+	skinned_mesh() : sampleState(nullptr),vertexShader(nullptr),pixelShader(nullptr),layout(nullptr),noTexVS(nullptr),noTexPS(nullptr),noTexLayout(nullptr),constant_buffer(nullptr),rasterizeFillOut(nullptr),rasterizeLine(nullptr),depthStencilState(nullptr),have_born(false),have_material(false),have_uv(false),numIndices(0),tex2dDesc() ,loop_flg(true),stop_animation(false),stop_time(0),animation_flame(0){}
 	~skinned_mesh() {}
 	void setInfo(ID3D11Device* _device, const std::string& _objFileName);
 
 	void init(ID3D11Device* device,
-		std::string vsName, D3D11_INPUT_ELEMENT_DESC *inputElementDescs, int numElement,
+		std::string vsName, D3D11_INPUT_ELEMENT_DESC* inputElementDescs, int numElement,
 		std::string psName);
 	bool createBuffer(int index_mesh, ID3D11Device* device,
 		vertex* vertices, int numV,
 		unsigned int* indices, int numI);
 
 	void render(
-		ID3D11DeviceContext *context,
-		const DirectX::XMFLOAT4X4&SynthesisMatrix,
-		const DirectX::XMFLOAT4X4&worldMatrix,
-		const DirectX::XMFLOAT4&camPos,
+		ID3D11DeviceContext* context,
+		const DirectX::XMFLOAT4X4& SynthesisMatrix,
+		const DirectX::XMFLOAT4X4& worldMatrix,
+		const DirectX::XMFLOAT4& camPos,
 		line_light& _lineLight,
 		std::vector<point_light>& _point_light,
-		const DirectX::XMFLOAT4&materialColor,
+		const DirectX::XMFLOAT4& materialColor,
 		bool wireFlg,
 		float elapsed_time
 	);
 
 	void release();
 
-	void fetch_bone_influences(const FbxMesh *fbx_mesh, std::vector<bone_influences_per_control_point>&influences);
-	void fetch_bone_matrices(FbxMesh *fbx_mesh, std::vector<skinned_mesh::bone> &skeletal, FbxTime time);
-	void fbxamatrix_to_xmfloat4x4(const FbxAMatrix &fbxamatrix, DirectX::XMFLOAT4X4 &xmfloat4x4);
-	void fetch_animations(FbxMesh *fbx_mesh, skinned_mesh::skeletal_animation &skeletal_animation, u_int sampling_rate = 0);
+	void fetch_bone_influences(const FbxMesh* fbx_mesh, std::vector<bone_influences_per_control_point>& influences);
+	void fetch_bone_matrices(FbxMesh* fbx_mesh, std::vector<skinned_mesh::bone>& skeletal, FbxTime time);
+	void fbxamatrix_to_xmfloat4x4(const FbxAMatrix& fbxamatrix, DirectX::XMFLOAT4X4& xmfloat4x4);
+	void fetch_animations(FbxMesh* fbx_mesh, skinned_mesh::skeletal_animation& skeletal_animation, u_int sampling_rate = 0);
+	
+	bool calcTransformedPosBySpecifyMesh(DirectX::XMFLOAT3& _local_pos, std::string _mesh_name);
+	void setLoopFlg(const bool _is_loop) { loop_flg = _is_loop; }
+	void setStopAnimation(const bool _is_stop) { stop_animation = _is_stop; }
+	void setStoptimer(const int _stop_timer) { stop_time = static_cast<float>( _stop_timer ); }
+	void setAnimFlame(const int _animFlame)
+	{
+		for (auto& it : meshes)
+		{
+			it.skeletal_animation.animation_tick = _animFlame * it.skeletal_animation.sampling_time;
+		}
+	}
+	const int getAnimFlame()
+	{
+		return animation_flame;
+	}
 
 private:
 	//template <class Archive>
@@ -181,5 +203,6 @@ private:
 
 
 };
+
 
 #endif // !SKINNED_MESH_H_

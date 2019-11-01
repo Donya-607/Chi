@@ -119,8 +119,6 @@ void static_mesh::objInit(ID3D11Device* _device, const wchar_t* _objFileName, co
 	if (!_mtlFileName.size())
 		return;
 
-	DirectX::XMFLOAT3 Ka, Kd, Ks;
-
 
 	std::wstring directory(_mtlFileName.substr(0, _mtlFileName.find_last_of(L"/") + 1));
 
@@ -256,7 +254,7 @@ void static_mesh::loadStaticMeshMTL(ID3D11Device* _device, const wchar_t* _objFi
 	psName = "./Data/shader/geometric_phong_ps.cso";
 
 	ResourceManager::LoadVertexShader(_device, vsName, elements, numElements, &noTexVS, &noTexLayout);
-	ResourceManager::LoadPixelShader(_device, psName, &noTexPS[0]);
+	ResourceManager::LoadPixelShader(_device, psName, &noTexPS);
 
 	if (!materials.empty())
 		TextureInit(_device);
@@ -267,13 +265,8 @@ void static_mesh::init(ID3D11Device* device, std::string vsName, D3D11_INPUT_ELE
 	HRESULT hr = S_OK;
 	//vertexShader
 	ResourceManager::LoadVertexShader(device, vsName, inputElementDescs, numElement, &vertexShader, &layout);
-	ResourceManager::LoadVertexShader(device, "./Data/shader/shadowVS_first.cso", inputElementDescs, numElement, &shadowVS[0], &layout);
-	ResourceManager::LoadVertexShader(device, "./Data/shader/shadowVS_second.cso", inputElementDescs, numElement, &shadowVS[1], &layout);
 	//pixelShader
 	ResourceManager::LoadPixelShader(device, psName, &pixelShader);
-	ResourceManager::LoadPixelShader(device, "./Data/shader/shadowPS_first.cso", &shadowPS[0]);
-	ResourceManager::LoadPixelShader(device, "./Data/shader/shadowPS_second.cso", &shadowPS[1]);
-
 	//rasterizerLine
 	D3D11_RASTERIZER_DESC line_desc;
 	line_desc.FillMode = D3D11_FILL_WIREFRAME;	//塗りつぶし設定
@@ -597,6 +590,65 @@ void static_mesh::createSphere(ID3D11Device* _device, u_int slices, u_int stacks
 	createBuffer(_device, vertices.data(), vertices.size(), indices.data(), indices.size());
 }
 
+void static_mesh::createBillboard(ID3D11Device* _device, const wchar_t* _textureName)
+{
+	D3D11_INPUT_ELEMENT_DESC input_desc[] =
+	{
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "NORMAL",   0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT	, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	};
+	UINT numElements = ARRAYSIZE(input_desc);
+	std::string vsName = "./Data/shader/obj_vs.cso";
+	std::string psName = "./Data/shader/obj_ps.cso";
+
+	materials.emplace_back();
+	materials.back().Ka = { 0,0,0 };
+	materials.back().Kd = { 0,0,0 };
+	materials.back().Ks = { 0,0,0 };
+	materials.back().illum = 0;
+	materials.back().map_Kd = _textureName;
+
+	if (!ResourceManager::LoadShaderResourceView(_device, materials.back().map_Kd.c_str(), &materials.back().Resource, &materials.back().tex2dDesc))
+	{
+		assert(0 && "テクスチャ画像読み込み失敗");
+		return;
+	}
+
+	init(_device, vsName, input_desc, numElements, psName);
+
+	vertex vertices[4] = {};
+	unsigned int indices[6] = {};
+
+	int numV = 0, numI = 0;
+
+	vertices[numV + 0].position = DirectX::XMFLOAT3(-0.5f, +0.5f, +0.5f);
+	vertices[numV + 1].position = DirectX::XMFLOAT3(+0.5f, +0.5f, +0.5f);
+	vertices[numV + 2].position = DirectX::XMFLOAT3(-0.5f, +0.5f, -0.5f);
+	vertices[numV + 3].position = DirectX::XMFLOAT3(+0.5f, +0.5f, -0.5f);
+	vertices[numV + 0].normal = vertices[numV + 1].normal =
+		vertices[numV + 2].normal =
+		vertices[numV + 3].normal = DirectX::XMFLOAT3(+0.0f, +1.0f, +0.0f);
+	indices[numI + 0] = numV + 0;	indices[numI + 1] = numV + 1;	indices[numI + 2] = numV + 2;
+	indices[numI + 3] = numV + 1;	indices[numI + 4] = numV + 3;	indices[numI + 5] = numV + 2;
+
+	vertices[0].texcoord = { 0,0 };
+	vertices[1].texcoord = { 1,0 };
+	vertices[2].texcoord = { 0,1 };
+	vertices[3].texcoord = { 1,1 };
+
+	subsets.emplace_back();
+	subsets.back().index_count = numI;
+	subsets.back().index_start = 0;
+
+	for (auto& p : indices)
+	{
+		subsets.back().m_vertexes.push_back(vertices[p]);
+	}
+	createBuffer(_device, vertices, numV, indices, numI);
+
+}
+
 void static_mesh::createPlane(ID3D11Device* _device, u_int _vertical, u_int _side)
 {
 	createPrimitive(_device);
@@ -667,7 +719,7 @@ void static_mesh::render(
 			{
 				if (size <= i)
 				{
-					cb.pntLight[i].pos.w = -1;
+					cb.pntLight[i].pos.w = 0;
 					continue;
 				}
 				cb.pntLight[i] = _point_light[i].getInfo();
@@ -708,7 +760,7 @@ void static_mesh::render(
 				context->IASetInputLayout(noTexLayout);
 				//	シェーダー(2種)の設定
 				context->VSSetShader(noTexVS, nullptr, 0);
-				context->PSSetShader(*noTexPS, nullptr, 0);
+				context->PSSetShader(noTexPS, nullptr, 0);
 			}
 			//	深度テストの設定
 			context->OMSetDepthStencilState(depthStencilState, 0);
@@ -736,14 +788,14 @@ void static_mesh::render(
 		{
 			if (size <= i)
 			{
-				cb.pntLight[i].pos.w = -1;
+				cb.pntLight[i].pos.w = 0;
 				continue;
 			}
 			cb.pntLight[i] = _point_light[i].getInfo();
 		}
-		cb.b_material.ambient = primitiveMaterial.ambient;
-		cb.b_material.diffuse = primitiveMaterial.diffuse;
-		cb.b_material.specular = materialColor;
+		cb.b_material.ambient = materialColor;
+		cb.b_material.diffuse = { 1,1,1,1 };
+		cb.b_material.specular = { 1,1,1,1 };
 		context->UpdateSubresource(constant_buffer, 0, nullptr, &cb, 0, 0);
 		context->VSSetConstantBuffers(0, 1, &constant_buffer);
 		context->PSSetConstantBuffers(0, 1, &constant_buffer);
@@ -781,6 +833,68 @@ void static_mesh::render(
 	}
 }
 
+void static_mesh::billboardRender(
+	ID3D11DeviceContext* context,
+	const DirectX::XMFLOAT4X4& SynthesisMatrix,
+	const DirectX::XMFLOAT4X4& worldMatrix,
+	const DirectX::XMFLOAT4& camPos,
+	const DirectX::XMINT2& texpos, const DirectX::XMINT2& texsize)
+{
+	DirectX::XMINT2 tex = { (int)materials.back().tex2dDesc.Width,(int)materials.back().tex2dDesc.Height };
+	subsets.back().m_vertexes[0].texcoord = { texpos.x / tex.x * 1.0f,texpos.y / tex.y * 1.0f };
+	subsets.back().m_vertexes[1].texcoord = { (texpos.x + texsize.x) / tex.x * 1.0f,texpos.y / tex.y * 1.0f };
+	subsets.back().m_vertexes[2].texcoord = { texpos.x / tex.x * 1.0f,(texpos.y + texsize.y) / tex.y * 1.0f };
+	subsets.back().m_vertexes[3].texcoord = { (texpos.x + texsize.x) / tex.x * 1.0f,(texpos.y + texsize.y) / tex.y * 1.0f };
+
+	cbuffer cb;
+	cb.world_view_projection = SynthesisMatrix;
+	cb.world = worldMatrix;
+	cb.camPos = camPos;
+	cb.lineLight.color = { 0,0,0,0 };
+	cb.lineLight.direction = { 0,0,0,0 };
+
+	for (int i = 0; i < 5; i++)
+	{
+		cb.pntLight[i].pos = { 0,0,0,0 };
+		cb.pntLight[i].attenuate = { 0,0,0,0 };
+
+	}
+	cb.b_material.ambient = { 0,0,0,1.0f };
+	cb.b_material.diffuse = { 0,0,0,1.0f };
+	cb.b_material.specular = { 0,0,0,0.5f };
+	context->UpdateSubresource(constant_buffer, 0, nullptr, &cb, 0, 0);
+	context->VSSetConstantBuffers(0, 1, &constant_buffer);
+
+	// 頂点バッファのバインド
+	UINT stride = sizeof(vertex);
+	UINT offset = 0;
+	context->IASetVertexBuffers(0, 1, &vertex_buffer, &stride, &offset);
+
+	//	インデックスバッファのバインド
+	context->IASetIndexBuffer(index_buffer, DXGI_FORMAT_R32_UINT, 0);
+
+	//	プリミティブモードの設定
+	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+
+	//	ラスタライザーの設定
+	context->RSSetState(rasterizeFillOut);
+
+	//	入力レイアウトのバインド
+	context->IASetInputLayout(layout);
+	//	シェーダー(2種)の設定
+	context->VSSetShader(vertexShader, nullptr, 0);
+	context->PSSetShader(pixelShader, nullptr, 0);
+	//	深度テストの設定
+	context->OMSetDepthStencilState(depthStencilState, 0);
+
+	context->PSSetShaderResources(0, 1, &materials.back().Resource);
+	context->PSSetSamplers(0, 1, &sampleState);
+
+	context->DrawIndexed(subsets.back().index_count, subsets.back().index_start, 0);
+
+}
+
 void static_mesh::renderFirst(ID3D11DeviceContext* context,
 	const DirectX::XMFLOAT4X4& SynthesisMatrix,
 	const DirectX::XMFLOAT4X4& worldMatrix
@@ -812,9 +926,6 @@ void static_mesh::renderFirst(ID3D11DeviceContext* context,
 
 
 	//	シェーダー(2種)の設定
-	context->VSSetShader(shadowVS[0], nullptr, 0);
-
-	context->PSSetShader(shadowPS[0], nullptr, 0);
 
 	//context->OMGetRenderTargets();
 	//	深度テストの設定

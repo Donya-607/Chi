@@ -17,6 +17,13 @@ constexpr bool ZeroEqual( float x		) { return ( -EPSILON < x && x < EPSILON );		
 
 namespace Donya
 {
+	void SetShowCollision( bool newState );
+	void ToggleShowCollision();
+	/// <summary>
+	/// If when release mode, returns false.
+	/// </summary>
+	bool IsShowCollision();
+
 	/// <summary>
 	/// For example, if you pass 316 to CountBits(), returns 5.<para></para>
 	/// ( 316 is 100111100, number of 1 of 100111100 has is 5 )

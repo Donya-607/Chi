@@ -1,0 +1,106 @@
+{
+    "Boss": {
+        "cereal_class_version": 1,
+        "scale": 1.0,
+        "OBBAttacksFast": [
+            {
+                "cereal_class_version": 0,
+                "enableFrameStart": 30,
+                "enableFrameLast": 35,
+                "OBB": {
+                    "cereal_class_version": 0,
+                    "pos": {
+                        "cereal_class_version": 0,
+                        "x": 90.0,
+                        "y": 0.0,
+                        "z": 420.0
+                    },
+                    "size": {
+                        "x": 100.0,
+                        "y": 100.0,
+                        "z": 50.0
+                    },
+                    "orientation": {
+                        "cereal_class_version": 0,
+                        "x": 0.0,
+                        "y": 0.5226872563362122,
+                        "z": 0.0,
+                        "w": 0.8525245189666748
+                    },
+                    "exist": false
+                }
+            },
+            {
+                "enableFrameStart": 150,
+                "enableFrameLast": 155,
+                "OBB": {
+                    "pos": {
+                        "x": -90.0,
+                        "y": 0.0,
+                        "z": 420.0
+                    },
+                    "size": {
+                        "x": 100.0,
+                        "y": 100.0,
+                        "z": 50.0
+                    },
+                    "orientation": {
+                        "x": 0.0,
+                        "y": -0.5226872563362122,
+                        "z": 0.0,
+                        "w": 0.8525245189666748
+                    },
+                    "exist": false
+                }
+            },
+            {
+                "enableFrameStart": 270,
+                "enableFrameLast": 275,
+                "OBB": {
+                    "pos": {
+                        "x": 90.0,
+                        "y": 0.0,
+                        "z": 420.0
+                    },
+                    "size": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "orientation": {
+                        "x": 0.0,
+                        "y": 0.5226872563362122,
+                        "z": 0.0,
+                        "w": 0.8525245189666748
+                    },
+                    "exist": false
+                }
+            }
+        ],
+        "OBBAttacksSwing": [
+            {
+                "enableFrameStart": 60,
+                "enableFrameLast": 70,
+                "OBB": {
+                    "pos": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 32.0
+                    },
+                    "size": {
+                        "x": 200.0,
+                        "y": 100.0,
+                        "z": 200.0
+                    },
+                    "orientation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0,
+                        "w": 1.0
+                    },
+                    "exist": false
+                }
+            }
+        ]
+    }
+}

@@ -15,24 +15,26 @@ namespace GameLib
 		HWND hwnd;  // ウインドウハンドル
 
 					// DirectX11関連
-		ID3D11Device*           device;
-		ID3D11DeviceContext*    context;
-		IDXGISwapChain*         swapChain;
-		ID3D11RenderTargetView* renderTargetView;
-		ID3D11DepthStencilView* depthStencilView;
-		ID3D11BlendState*       blendState;
+		ID3D11Device*           device = nullptr;
+		ID3D11DeviceContext*    context = nullptr;
+		IDXGISwapChain*         swapChain = nullptr;
+		ID3D11RenderTargetView* renderTargetView = nullptr;
+		ID3D11DepthStencilView* depthStencilView = nullptr;
+		ID3D11BlendState*       blendState = nullptr;
 
 		std::wstring projectName;
 
 		//// その他
-		blender*                 Blender;
-		Primitive*               primitive;
+		blender*                 Blender = nullptr;
+		Primitive*               primitive = nullptr;
 		//PrimitiveBatch*        primitiveBatch;
 		high_resolution_timer    hrTimer;
 		Camera					 cam;
 		line_light				 LineLight;
 		std::vector<point_light> pointLights;
 		XboxPad					 pad[4];
+		XboxPad					 prevPad[4];
+		keyInput				 keyboard;
 		dragDrop				drag_drop;
 	};
 
@@ -89,8 +91,8 @@ namespace GameLib
 		ID3D11Texture2D* back_buffer = nullptr;
 		D3D11_TEXTURE2D_DESC renderTextureDesc;
 		ZeroMemory(&renderTextureDesc, sizeof(D3D11_TEXTURE2D_DESC));
-		renderTextureDesc.Width = pSystem->SCREEN_WIDTH;
-		renderTextureDesc.Height = pSystem->SCREEN_HEIGHT;
+		renderTextureDesc.Width = (UINT)pSystem->SCREEN_WIDTH;
+		renderTextureDesc.Height = (UINT)pSystem->SCREEN_HEIGHT;
 		renderTextureDesc.MipLevels = 1;
 		renderTextureDesc.ArraySize = 1;
 		renderTextureDesc.Format = DXGI_FORMAT::DXGI_FORMAT_R32_FLOAT;
@@ -121,8 +123,8 @@ namespace GameLib
 		ID3D11Texture2D* back_buffer = nullptr;
 		D3D11_TEXTURE2D_DESC renderTextureDesc;
 		ZeroMemory(&renderTextureDesc, sizeof(D3D11_TEXTURE2D_DESC));
-		renderTextureDesc.Width = pSystem->SCREEN_WIDTH;
-		renderTextureDesc.Height = pSystem->SCREEN_HEIGHT;
+		renderTextureDesc.Width = (UINT)pSystem->SCREEN_WIDTH;
+		renderTextureDesc.Height = (UINT)pSystem->SCREEN_HEIGHT;
 		renderTextureDesc.MipLevels = 1;
 		renderTextureDesc.ArraySize = 1;
 		renderTextureDesc.Format = DXGI_FORMAT::DXGI_FORMAT_R32_FLOAT;
@@ -149,7 +151,7 @@ namespace GameLib
 		return m.hrTimer.time_interval();
 	}
 
-	DirectX::XMFLOAT2 getWindowSize()
+	DirectX::XMINT2 getWindowSize()
 	{
 		return{ pSystem->SCREEN_WIDTH ,pSystem->SCREEN_HEIGHT };
 	}
@@ -210,6 +212,7 @@ namespace GameLib
 		ImGui::NewFrame();
 		m.cam.update();
 		input::xInput::getState();
+		input::keyboard::update();
 		float ClearColor[4] = { 0.5f, .0f, .0f, 1.0f }; //red,green,blue,alpha
 
 		m.context->ClearRenderTargetView(m.renderTargetView, ClearColor);
@@ -750,6 +753,36 @@ namespace GameLib
 			_mesh->setInfo(m.device, _fbxName);
 		}
 
+		void setLoopFlg(skinned_mesh* _mesh, const bool _is_loop)
+		{
+			_mesh->setLoopFlg(_is_loop);
+		}
+		void setStopAnimation(skinned_mesh* _mesh, const bool _is_stop)
+		{
+			_mesh->setStopAnimation(_is_stop);
+		}
+
+		void setStopTime(skinned_mesh* _mesh, const int _stop_time)
+		{
+			_mesh->setStoptimer(_stop_time);
+		}
+
+		void setAnimFlame(skinned_mesh* _mesh, const int _anim_flame)
+		{
+			_mesh->setAnimFlame(_anim_flame);
+		}
+
+		bool calcTransformedPosBySpecifyMesh(skinned_mesh* _mesh, DirectX::XMFLOAT3& _pos, std::string _mesh_name)
+		{
+			return _mesh->calcTransformedPosBySpecifyMesh(_pos, _mesh_name);
+		}
+
+		const int getAnimFlame(skinned_mesh* _mesh)
+		{
+			return _mesh->getAnimFlame();
+		}
+
+
 		void skinnedMeshRender(
 			skinned_mesh* _mesh,
 			const DirectX::XMFLOAT4X4&SynthesisMatrix,
@@ -786,9 +819,14 @@ namespace GameLib
 			return m.cam.GetLightViewMatrix(_pos, _direct);
 		}
 
-		void setPos(DirectX::XMFLOAT3 _pos)
+		void setPos(const DirectX::XMFLOAT3& _pos)
 		{
 			m.cam.setPosition(_pos);
+		}
+
+		void setTarget(const DirectX::XMFLOAT3& _target)
+		{
+			m.cam.setTarget(_target);
 		}
 
 		DirectX::XMFLOAT4 getPos()
@@ -834,6 +872,8 @@ namespace GameLib
 				int index = 0;
 				for (int i = 0; i < 4; i++)
 				{
+					m.prevPad[i].pad = m.pad[i].pad;
+
 					if (XInputGetState(i, &m.pad[index].pad) == ERROR_SUCCESS)
 						index++;
 				}
@@ -841,9 +881,21 @@ namespace GameLib
 				return index + 1;//padの個数
 			}
 
-			bool pressedButtons(int _padNum, int _button)
+			int pressedButtons(int _padNum, int _button)
 			{
-				return m.pad[_padNum].pressedButton(_button);
+				if (!m.prevPad[_padNum].pressedButton(_button))
+				{
+					if (!m.pad[_padNum].pressedButton(_button))
+						return 0;	//押してない
+					else return 1;	//押した瞬間
+				}
+				else
+				{
+					if (!m.pad[_padNum].pressedButton(_button))
+						return -1;	//離した瞬間
+					else return 2;	//押しっぱなし
+				}
+
 			}
 
 			DirectX::XMINT2 getThumbL(int _padNum)
@@ -860,5 +912,12 @@ namespace GameLib
 	}
 }
 
+int GameLib::input::keyboard::getState(int _keyNum)
+{
+	return m.keyboard.getState(_keyNum);
+}
 
-
+void GameLib::input::keyboard::update()
+{
+	m.keyboard.update();
+}

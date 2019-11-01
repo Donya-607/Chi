@@ -174,7 +174,7 @@ namespace GameLib
 		float cy = h * 0.5f;
 		float x = (v1.x + v2.x) * 0.5f;
 		float y = (v1.y + v2.y) * 0.5f;
-		float angle = atan2(vec.y, vec.x);
+		float angle = atan2f(vec.y, vec.x);
 
 		rect(context, { x, y }, { w, h }, { cx, cy }, angle, color);
 

@@ -8,7 +8,7 @@ VS_OUT main(float4 position : POSITION, float4 normal : NORMAL, float2 texcoord 
 
 	normal.w = 0;
 	vout.normal = normalize(mul(normal, world));
-	vout.color = material.ambient;
+	vout.color = material.diffuse;
 	vout.texcoord = texcoord;
 	return vout;
 }

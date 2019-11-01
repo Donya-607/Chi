@@ -2,6 +2,11 @@
 
 #include <memory>
 
+// For serialize "std::string".
+#include <cereal/cereal.hpp>
+#include <cereal/types/string.hpp>
+
+#include "Donya/Collision.h"
 #include "Donya/Quaternion.h"
 #include "Donya/Serializer.h"
 #include "Donya/Template.h"
@@ -15,9 +20,17 @@ class PlayerParam final : public Donya::Singleton<PlayerParam>
 {
 	friend Donya::Singleton<PlayerParam>;
 private:
-	float scale;			// Usually 1.0f.
-	float runSpeed;			// Scalar.
-	float rotSlerpFactor;	// Use player's rotation.
+	int		frameUnfoldableDefence;	// 1 ~ N. Use when State::Defend.
+	int		frameCancelableAttack;	// 1 ~ "frameWholeAttacking". Use when State::Attack.
+	int		frameWholeAttacking;	// 1 ~ N. this whole frame is irrelevant by "frameCancelableAttack". Use when State::Attack.
+	float	scale;					// Usually 1.0f.
+	float	runSpeed;				// Scalar.
+	float	rotSlerpFactor;			// Use player's rotation.
+	Donya::AABB		hitBoxBody;		// HitBox that collide to boss attacks.
+	Donya::Sphere	hitBoxPhysic;	// HitBox that collide to stage.
+	Donya::AABB		hitBoxShield;	// HitBox of shield.
+	Donya::OBBFrame	hitBoxLance;	// HitBox of lance.
+	std::string		lanceMeshName;	// Use for find a mesh that transform the OBB of lance.
 private:
 	PlayerParam();
 public:
@@ -36,6 +49,32 @@ private:
 		
 		if ( 1 <= version )
 		{
+			archive
+			(
+				CEREAL_NVP( hitBoxBody ),
+				CEREAL_NVP( hitBoxPhysic )
+			);
+		}
+		if ( 2 <= version )
+		{
+			archive
+			(
+				CEREAL_NVP( frameUnfoldableDefence ),
+				CEREAL_NVP( frameCancelableAttack ),
+				CEREAL_NVP( frameWholeAttacking ),
+				CEREAL_NVP( hitBoxShield )
+			);
+		}
+		if ( 3 <= version )
+		{
+			archive( CEREAL_NVP( hitBoxLance ) );
+		}
+		if ( 4 <= version )
+		{
+			archive( CEREAL_NVP( lanceMeshName ) );
+		}
+		if ( 5 <= version )
+		{
 			// archive( CEREAL_NVP( x ) );
 		}
 	}
@@ -44,9 +83,18 @@ public:
 	void Init();
 	void Uninit();
 public:
-	float Scale()		const { return scale; }
-	float RunSpeed()	const { return runSpeed; }
-	float SlerpFactor()	const { return rotSlerpFactor; }
+	int		FrameWholeDefence()		const { return frameUnfoldableDefence; }
+	int		FrameCancelableAttack()	const { return frameCancelableAttack; }
+	int		FrameWholeAttacking()	const { return frameWholeAttacking; }
+	float	Scale()					const { return scale; }
+	float	RunSpeed()				const { return runSpeed; }
+	float	SlerpFactor()			const { return rotSlerpFactor; }
+	Donya::AABB		HitBoxBody()	const { return hitBoxBody;   }
+	Donya::Sphere	HitBoxPhysic()	const { return hitBoxPhysic; }
+	Donya::AABB		HitBoxShield()	const { return hitBoxShield; }
+	Donya::OBBFrame	*HitBoxAttackF()				{ return &hitBoxLance;  }
+	const Donya::OBBFrame	*HitBoxAttackF() const	{ return &hitBoxLance;  }
+	std::string LanceMeshName()		const { return lanceMeshName; }
 public:
 	void LoadParameter( bool isBinary = true );
 
@@ -58,7 +106,7 @@ public:
 
 #endif // USE_IMGUI
 };
-CEREAL_CLASS_VERSION( PlayerParam, 0 )
+CEREAL_CLASS_VERSION( PlayerParam, 4 )
 
 class skinned_mesh;	// With pointer. because I'm not want include this at header.
 class Player
@@ -80,20 +128,36 @@ public:
 			doDefend( doDefend ),
 			doAttack( doAttack )
 		{}
+	public:
+		static Input NoOperation()
+		{
+			return Input{ Donya::Vector3::Zero(), false, false };
+		}
 	};
 private:
+	struct Models
+	{
+		std::unique_ptr<skinned_mesh> pIdle{ nullptr };
+		std::unique_ptr<skinned_mesh> pAttack{ nullptr };
+	};
 	enum class State
 	{
 		Idle,
 		Run,
+		Defend,
+		Attack,
 	};
 private:
-	State							status;
-	Donya::Vector3					pos;			// In world space.
-	Donya::Vector3					velocity;		// In world space.
-	Donya::Vector3					lookDirection;	// In world space.
-	Donya::Quaternion				orientation;
-	std::unique_ptr<skinned_mesh>	pModel;
+	State				status;
+	int					timer;				// Recycle between each state.
+	float				fieldRadius;		// For collision to wall. the field is perfect-circle, so I can detect collide to wall by distance.
+	Donya::Vector3		pos;				// In world space.
+	Donya::Vector3		velocity;			// In world space.
+	Donya::Vector3		lookDirection;		// In world space.
+	Donya::Quaternion	orientation;
+	Models				models;
+	bool				isHoldingDefence;	// Prevent user keeped holded defence button. true when hold defence button, false when detected release the button.
+	bool				wasSucceededDefence;
 public:
 	Player();
 	~Player();
@@ -104,15 +168,72 @@ public:
 	void Update( Input input );
 
 	void Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matProjection );
+public:
+	/// <summary>
+	/// Returns world-space position.
+	/// </summary>
+	Donya::Vector3 GetPosition() const { return pos; }
+
+	/// <summary>
+	/// Returns world space hurt-box.
+	/// </summary>
+	Donya::OBB GetHurtBox() const;
+	/// <summary>
+	/// Returns world space hit-box of shield.
+	/// </summary>
+	Donya::OBB GetShieldHitBox() const;
+	/// <summary>
+	/// Returns world space hit-box of attack.
+	/// </summary>
+	Donya::OBB GetAttackHitBox() const;
+
+	/// <summary>
+	/// Please call when succeeded defence by enemy's attack.
+	/// </summary>
+	void SucceededDefence();
+
+	void SetFieldRadius( float fieldRadius );
 private:
 	void LoadModel();
 
-	void Run( Input input );
+	/// <summary>
+	/// Returns matrix transform to world space from local space.
+	/// </summary>
+	Donya::Vector4x4 CalcWorldMatrix() const;
+private:
+	void ChangeStatus( Input input );
+	void UpdateCurrentStatus( Input input );
+
+	void ChangeStatusFromIdle( Input input );
+	void IdleInit( Input input );
+	void IdleUpdate( Input input );
+	void IdleUninit();
+
+	void ChangeStatusFromRun( Input input );
+	void RunInit( Input input );
+	void RunUpdate( Input input );
+	void RunUninit();
+
+	void ChangeStatusFromDefend( Input input );
+	void DefendInit( Input input );
+	void DefendUpdate( Input input );
+	void DefendUninit();
+
+	void ChangeStatusFromAttack( Input input );
+	void AttackInit( Input input );
+	void AttackUpdate( Input input );
+	void AttackUninit();
+private:
+	void AssignInputVelocity( Input input );
 
 	/// <summary>
-	/// The position("pos") is only changed by this method.
+	/// The position("pos") is only changed by this method(or CollideToWall method).
 	/// </summary>
 	void ApplyVelocity();
+	/// <summary>
+	/// If the position("pos") without to field range, clamp to field range.
+	/// </summary>
+	void CollideToWall();
 private:
 #if USE_IMGUI
 

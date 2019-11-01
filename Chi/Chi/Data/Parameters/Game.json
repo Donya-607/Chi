@@ -1,0 +1,53 @@
+{
+    "Game": {
+        "cereal_class_version": 2,
+        "fieldRadius": 1450.0,
+        "lights": {
+            "cereal_class_version": 0,
+            "direction": {
+                "cereal_class_version": 0,
+                "Color": {
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0,
+                    "w": 1.0
+                },
+                "Direction": {
+                    "x": 0.0,
+                    "y": -1.0,
+                    "z": 1.0,
+                    "w": 0.0
+                }
+            },
+            "points": [
+                {
+                    "cereal_class_version": 0,
+                    "Position": {
+                        "x": 0.0,
+                        "y": 228.0,
+                        "z": 0.0,
+                        "w": 1.0
+                    },
+                    "Color": {
+                        "x": 0.6313725709915161,
+                        "y": 0.5176470875740051,
+                        "z": 0.0,
+                        "w": 1.0
+                    },
+                    "Attenuate": {
+                        "x": 0.009999999776482582,
+                        "y": 0.009999999776482582,
+                        "z": 0.0,
+                        "w": 0.0
+                    }
+                }
+            ]
+        },
+        "cameraFocusOffset": {
+            "cereal_class_version": 0,
+            "x": 0.0,
+            "y": 149.0,
+            "z": 0.0
+        }
+    }
+}

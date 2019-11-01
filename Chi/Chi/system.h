@@ -8,8 +8,8 @@ private:
 	~System() {}
 public:
 	//âÊñ ÉTÉCÉY
-	float SCREEN_WIDTH = 1280.f;
-	float SCREEN_HEIGHT = 720.f;
+	int SCREEN_WIDTH = 1280;
+	int SCREEN_HEIGHT = 720;
 
 	float alpha = 1.0f;
 

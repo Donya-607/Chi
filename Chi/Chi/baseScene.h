@@ -12,7 +12,7 @@ protected:
 	int state;
 	bool isStack;
 public:
-	baseScene() {}
+	baseScene():timer(0),state(0),isStack(0) {}
 	baseScene(baseScene& _copy)
 	{
 		timer = _copy.timer;

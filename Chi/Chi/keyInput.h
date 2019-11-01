@@ -178,12 +178,6 @@ public:
 		}
 	}
 
-	static keyInput* getInstance()
-	{
-		static keyInput instance;
-		return &instance;
-	}
-private:
 	keyInput() {}
 	keyInput(const keyInput& _copy) {}
 	~keyInput() {}

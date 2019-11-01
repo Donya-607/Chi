@@ -37,19 +37,18 @@ SamplerState diffuse_map_sample_state : register(s0);
 
 float4 main(VS_OUT pin) : SV_TARGET
 {
-	float3 color = (0,0,0);
-	float3 _color = (0, 0, 0);
+	float3 color = float3(0,0,0);
+	float3 _color = float3(0, 0, 0);
 	float3 N = pin.normal.xyz;
 	float3 V = normalize(camPos.xyz - pin.posw.xyz);
-	float3 L ,D, specularColor, ambientColor, diffuseColor;
-	float A;
-
-	ambientColor = diffuse_map.Sample(diffuse_map_sample_state, pin.texcoord).xyz;
+	float3 L , specularColor, diffuseColor;
+	float A ,D;
+	float4 sampleColor = diffuse_map.Sample(diffuse_map_sample_state, pin.texcoord);
 	float4 _L = normalize(-line_light.direction);
 
-	color = ambientColor.xyz *(line_light.color.xyz* max(0, dot(-_L, pin.normal)));
+	color = sampleColor.xyz;
 
-	_color = ambientColor;
+	_color = sampleColor.xyz * (line_light.color.xyz * max(0, dot(_L, pin.normal)));
 
 
 	for (int i = 0; i < 5; i++)
@@ -62,7 +61,7 @@ float4 main(VS_OUT pin) : SV_TARGET
 		L = normalize(L);
 		A = saturate(1.0f / (pntLight[i].attenuate.x + pntLight[i].attenuate.y*D + pntLight[i].attenuate.z*D*D));
 
-		diffuseColor = Diffuse(N, L, pntLight[i].color,
+		diffuseColor = Diffuse(N, L, pntLight[i].color.xyz,
 			material.diffuse.xyz, A);//‚½‚Ô‚ñOK
 
 		specularColor = BlinnPhong(N, L, pntLight[i].color.xyz,
@@ -71,5 +70,5 @@ float4 main(VS_OUT pin) : SV_TARGET
 		_color += (diffuseColor + specularColor);
 	}
 	color += _color;
-	return float4(saturate(color) ,pin.color.w);
+	return float4(color ,pin.color.w * sampleColor.w);
 }

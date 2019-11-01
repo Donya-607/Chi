@@ -1,8 +1,76 @@
 {
     "Player": {
-        "cereal_class_version": 0,
+        "cereal_class_version": 4,
         "scale": 1.0,
-        "runSpeed": 1.0,
-        "rotSlerpFactor": 0.20000000298023225
+        "runSpeed": 4.5,
+        "rotSlerpFactor": 0.20000000298023225,
+        "hitBoxBody": {
+            "cereal_class_version": 0,
+            "pos": {
+                "cereal_class_version": 0,
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "size": {
+                "x": 16.0,
+                "y": 16.0,
+                "z": 16.0
+            },
+            "exist": true
+        },
+        "hitBoxPhysic": {
+            "cereal_class_version": 0,
+            "pos": {
+                "x": 0.0,
+                "y": 5.0,
+                "z": 0.0
+            },
+            "radius": 16.0,
+            "exist": true
+        },
+        "frameUnfoldableDefence": 45,
+        "frameCancelableAttack": 20,
+        "frameWholeAttacking": 158,
+        "hitBoxShield": {
+            "pos": {
+                "x": 0.0,
+                "y": 64.0,
+                "z": 48.0
+            },
+            "size": {
+                "x": 64.0,
+                "y": 90.0,
+                "z": 16.0
+            },
+            "exist": true
+        },
+        "hitBoxLance": {
+            "cereal_class_version": 0,
+            "enableFrameStart": 55,
+            "enableFrameLast": 75,
+            "OBB": {
+                "cereal_class_version": 0,
+                "pos": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "size": {
+                    "x": 15.0,
+                    "y": 50.0,
+                    "z": 100.0
+                },
+                "orientation": {
+                    "cereal_class_version": 0,
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0,
+                    "w": 1.0
+                },
+                "exist": false
+            }
+        },
+        "lanceMeshName": "_04_MDL_yoroi1:_02_MDL_yoroi:spear"
     }
 }
