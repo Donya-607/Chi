@@ -459,6 +459,13 @@ std::vector<Donya::OBB> Boss::GetAttackHitBoxes() const
 	const auto &PARAM = BossParam::Get();
 	std::vector<Donya::OBB> collisions{};
 
+	auto ToWorldOBB = [&]( Donya::OBB obb )
+	{
+		obb.pos += pos;
+		obb.orientation.RotateBy( orientation );
+		return obb;
+	};
+
 	switch ( status )
 	{
 	case BossAI::ActionState::WAIT:
@@ -474,7 +481,7 @@ std::vector<Donya::OBB> Boss::GetAttackHitBoxes() const
 				auto &OBB = pOBBs->at( i );
 				if (  OBB.OBB.exist )
 				{
-					collisions.emplace_back( OBB.OBB );
+					collisions.emplace_back( ToWorldOBB( OBB.OBB ) );
 				}
 			}
 		}
@@ -488,7 +495,7 @@ std::vector<Donya::OBB> Boss::GetAttackHitBoxes() const
 				auto &OBB = pOBBs->at( i );
 				if (  OBB.OBB.exist )
 				{
-					collisions.emplace_back( OBB.OBB );
+					collisions.emplace_back( ToWorldOBB( OBB.OBB ) );
 				}
 			}
 		}
@@ -499,10 +506,10 @@ std::vector<Donya::OBB> Boss::GetAttackHitBoxes() const
 	return collisions;
 }
 
-static Donya::OBB MakeOBB( const Donya::AABB &AABB, const Donya::Quaternion &orientation )
+static Donya::OBB MakeOBB( const Donya::AABB &AABB, const Donya::Vector3 &wsPos, const Donya::Quaternion &orientation )
 {
 	Donya::OBB OBB{};
-	OBB.pos			= AABB.pos;
+	OBB.pos			= AABB.pos + wsPos;
 	OBB.size		= AABB.size;
 	OBB.orientation	= orientation;
 	OBB.exist		= AABB.exist;
@@ -516,7 +523,7 @@ std::vector<Donya::OBB> Boss::GetBodyHitBoxes() const
 	const auto *pAABBs = PARAM.BodyHitBoxes();
 	for ( const auto &it : *pAABBs )
 	{
-		collisions.emplace_back( MakeOBB( it, orientation ) );
+		collisions.emplace_back( MakeOBB( it, pos, orientation ) );
 	}
 
 	return collisions;

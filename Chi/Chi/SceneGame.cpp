@@ -138,7 +138,7 @@ public:
 
 		stage.Update();
 
-		auto MakePlayerInput = []()->Player::Input
+		auto MakePlayerInput = []( Donya::Vector4x4 viewMat )->Player::Input
 		{
 			Player::Input input{};
 
@@ -152,17 +152,44 @@ public:
 			if ( Donya::Keyboard::Trigger( 'X' ) ) { input.doAttack = true; }
 		#endif // DEBUG_MODE
 
+			Donya::Vector4x4 cameraRotation{};
+			{
+				// Extract inverse rotation matrix here.
+				cameraRotation = viewMat;
+				cameraRotation._14 = 0.0f;
+				cameraRotation._24 = 0.0f;
+				cameraRotation._34 = 0.0f;
+				cameraRotation._41 = 0.0f;
+				cameraRotation._42 = 0.0f;
+				cameraRotation._43 = 0.0f;
+				cameraRotation._44 = 1.0f;
+
+				cameraRotation = cameraRotation.Inverse();
+			}
+
+			Donya::Vector4 moveVector4{};
+			moveVector4.x = input.moveVector.x;
+			moveVector4.y = input.moveVector.y;
+			moveVector4.z = input.moveVector.z;
+			moveVector4.w = 0.0f;
+
+			moveVector4 = cameraRotation * moveVector4;
+
+			input.moveVector.x = moveVector4.x;
+			input.moveVector.z = moveVector4.z;
+
 			return input;
 		};
-		player.Update( MakePlayerInput() );
+		player.Update( MakePlayerInput( Donya::Vector4x4::FromMatrix( GameLib::camera::GetViewMatrix() ) ) );
 
 		boss.Update();
-
+		
 		GameLib::camera::setPos( cameraPos );
 		GameLib::camera::setTarget( player.GetPosition() + cameraFocusOffset );
 
 		ProcessCollision();
 		
+	#if DEBUG_MODE
 		/*
 		if (getKeyState(KEY_INPUT_1) == 1)
 		{
@@ -182,6 +209,7 @@ public:
 			setStopAnimation( &animTest, false );
 		}
 		*/
+	#endif // DEBUG_MODE
 	}
 
 	void Draw()

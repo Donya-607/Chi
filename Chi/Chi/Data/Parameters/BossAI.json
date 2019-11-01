@@ -1,11 +1,23 @@
 {
     "BossAI": {
-        "cereal_class_version": 0,
+        "cereal_class_version": 1,
         "percent": {
             "value0": 25,
             "value1": 35,
             "value2": 40,
             "value3": 45
+        },
+        "maxCnt": {
+            "value0": 120,
+            "value1": 120,
+            "value2": 120,
+            "value3": 120
+        },
+        "coolTimeMaxCnt": {
+            "value0": 30,
+            "value1": 40,
+            "value2": 50,
+            "value3": 60
         }
     }
 }
