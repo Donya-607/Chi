@@ -185,7 +185,7 @@ public:
 	/// <summary>
 	/// Returns world space hit-box of attack.
 	/// </summary>
-	Donya::OBB GetAttackHitBox() const;
+	Donya::OBB CalcAttackHitBox() const;
 
 	/// <summary>
 	/// Please call when succeeded defence by enemy's attack.

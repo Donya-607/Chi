@@ -332,7 +332,7 @@ void Player::Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matP
 		{
 			constexpr Donya::Vector4 LANCE_COLOR_VALID{ 1.0f, 0.8f, 0.5f, 1.5f };
 			constexpr Donya::Vector4 LANCE_COLOR_INVALID{ 0.5f, 0.5f, 0.5f, 1.5f };
-			const Donya::OBB actualOBB = GetAttackHitBox();
+			const Donya::OBB actualOBB = CalcAttackHitBox();
 			Donya::Vector4 color = ( actualOBB.exist ) ? LANCE_COLOR_VALID: LANCE_COLOR_INVALID;
 			DrawOBB( actualOBB, color, /* applyParentMatrix = */ false );
 		}
@@ -365,10 +365,14 @@ Donya::OBB Player::GetShieldHitBox() const
 	if ( status != State::Defend ) { wsOBB.exist = false; }
 	return wsOBB;
 }
-Donya::OBB Player::GetAttackHitBox() const
+Donya::OBB Player::CalcAttackHitBox() const
 {
 	const auto &PARAM = PlayerParam::Get();
 	const auto *pOBBF = PARAM.HitBoxAttackF();
+
+	const std::string meshName = PlayerParam::Get().LanceMeshName();
+
+	Donya::OBB oldOBB = pOBBF->OBB;
 
 	// To world space from local space.
 	Donya::Vector4x4 parentMatrix = CalcWorldMatrix();
@@ -377,8 +381,7 @@ Donya::OBB Player::GetAttackHitBox() const
 	Donya::Vector4x4 lanceMatrix{};
 	{
 		// Input:offset in local-space. Output:transformed position.
-		Donya::Vector3 outputPos = pOBBF->OBB.pos;
-		std::string meshName = PlayerParam::Get().LanceMeshName();
+		Donya::Vector3 outputPos = oldOBB.pos;
 		bool succeeded = calcTransformedPosBySpecifyMesh( models.pAttack.get(), outputPos, meshName );
 		if ( !succeeded )
 		{
@@ -390,11 +393,31 @@ Donya::OBB Player::GetAttackHitBox() const
 		lanceMatrix = T * parentMatrix;
 	}
 
-	Donya::OBB resultOBB = pOBBF->OBB;
+	Donya::OBB resultOBB = oldOBB;
 	resultOBB.pos.x = lanceMatrix._41;
 	resultOBB.pos.y = lanceMatrix._42;
 	resultOBB.pos.z = lanceMatrix._43;
-	resultOBB.orientation.RotateBy( orientation );
+
+	// Rotation.
+	{
+		Donya::Vector3 localFront = oldOBB.pos + Donya::Vector3::Front();
+		calcTransformedPosBySpecifyMesh( models.pAttack.get(), localFront, meshName );
+		localFront.Normalize();
+
+		Donya::Vector4x4 LT = Donya::Vector4x4::MakeTranslation( localFront );
+		Donya::Vector4x4 M = LT * parentMatrix;
+
+		Donya::Vector3 resultFront{};
+		resultFront.x = M._41;
+		resultFront.y = M._42;
+		resultFront.z = M._43;
+
+		Donya::Vector3 dir = resultFront - resultOBB.pos;
+
+		oldOBB.orientation = Donya::Quaternion::LookAt( oldOBB.orientation, dir );
+		resultOBB.orientation = oldOBB.orientation;
+	}
+
 	// Should I also apply parent's scale ?
 	return resultOBB;
 }

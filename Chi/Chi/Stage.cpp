@@ -28,20 +28,19 @@ void Stage::Update()
 void Stage::Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matProjection )
 {
 #if DEBUG_MODE
-	Donya::Vector4x4 S = Donya::Vector4x4::MakeScaling( 1.0f );
-	Donya::Vector4x4 R = Donya::Vector4x4::Identity();
-	Donya::Vector4x4 T = Donya::Vector4x4::MakeTranslation( { 0.0f, 0.0f, 0.0f } );
-	Donya::Vector4x4 W = S * R * T;
-	Donya::Vector4x4 WVP = W * matView * matProjection;
+	return;
 #else
 	Donya::Vector4x4 W = Donya::Vector4x4::Identity();
 	Donya::Vector4x4 WVP = W * matView * matProjection;
-#endif // DEBUG_MODE
 
 	FBXRender( pModel.get(), WVP, W );
+#endif // DEBUG_MODE
 }
 
 void Stage::LoadModel()
 {
+#if DEBUG_MODE
+	return;
+#endif // DEBUG_MODE
 	loadFBX( pModel.get(), GetModelPath( ModelAttribute::Stage ) );
 }

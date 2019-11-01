@@ -52,14 +52,14 @@
             "OBB": {
                 "cereal_class_version": 0,
                 "pos": {
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
+                    "x": -5.0,
+                    "y": -5.0,
+                    "z": 64.0
                 },
                 "size": {
-                    "x": 15.0,
-                    "y": 50.0,
-                    "z": 100.0
+                    "x": 32.0,
+                    "y": 32.0,
+                    "z": 64.0
                 },
                 "orientation": {
                     "cereal_class_version": 0,
@@ -71,6 +71,6 @@
                 "exist": false
             }
         },
-        "lanceMeshName": "_04_MDL_yoroi1:_02_MDL_yoroi:spear"
+        "lanceMeshName": "MDL_Spear"
     }
 }
