@@ -50,6 +50,11 @@ public:
 	};
 private:
 	float							scale;					// Usually 1.0f.
+	float							stageBodyRadius;		// Using for collision to stage's wall.
+	float							targetDistNear;			// 0.0f ~ 1.0f.
+	float							targetDistFar;			// 0.0f ~ 1.0f.
+	float							moveMoveSpeed;			// Use when status is move.
+	float							attackFastMoveSpeed;	// Use when status is attack of fast.
 	std::vector<Donya::Vector3>		initPosPerStage;		// The index(stage number) is 1-based. 0 is tutorial.
 	std::vector<Donya::Vector3>		drawOffsetsPerStage;	// The index(stage number) is 1-based. 0 is tutorial.
 	std::vector<Donya::AABB>		hitBoxesBody;			// Body's hit boxes.
@@ -78,6 +83,17 @@ private:
 
 			if ( 5 <= version )
 			{
+				archive
+				(
+					CEREAL_NVP( stageBodyRadius ),
+					CEREAL_NVP( targetDistNear ),
+					CEREAL_NVP( targetDistFar ),
+					CEREAL_NVP( moveMoveSpeed ),
+					CEREAL_NVP( attackFastMoveSpeed )
+				);
+			}
+			if ( 6 <= version )
+			{
 				// archive( CEREAL_NVP( x ) );
 			}
 
@@ -85,21 +101,20 @@ private:
 		}
 		// else
 
+		/*
 		archive
 		(
 			CEREAL_NVP( scale )
 		);
 
-		/*
-		if ( 1 <= version )
-		{
-			archive
-			( 
-				CEREAL_NVP( OBBAttacksFast ),
-				CEREAL_NVP( OBBAttacksSwing )
-			);
-		}
-		*/
+		//if ( 1 <= version )
+		//{
+		//	archive
+		//	( 
+		//		CEREAL_NVP( OBBAttacksFast ),
+		//		CEREAL_NVP( OBBAttacksSwing )
+		//	);
+		//}
 		if ( 2 <= version )
 		{
 			archive( CEREAL_NVP( hitBoxesBody ) );
@@ -124,13 +139,18 @@ private:
 		{
 			// archive( CEREAL_NVP( x ) );
 		}
+		*/
 	}
 	static constexpr const char *SERIAL_ID = "Boss";
 public:
 	void Init();
 	void Uninit();
 public:
-	float								Scale()			const	{ return scale; }
+	float								Scale()				const	{ return scale; }
+	float								StageBodyRadius()	const	{ return stageBodyRadius; }
+	float								TargetDistNear()	const	{ return targetDistNear; }
+	float								TargetDistFar()		const	{ return targetDistFar; }
+	float								MoveSpeed( BossAI::ActionState status ) const;
 	Donya::Vector3						GetInitPosition( int stageNumber ) const;
 	Donya::Vector3						GetDrawOffset  ( int stageNumber ) const;
 	std::vector<Donya::OBBFrame>		*OBBAtksSwing()			{ return &OBBAttacksSwing; }
@@ -149,11 +169,16 @@ public:
 
 #endif // USE_IMGUI
 };
-CEREAL_CLASS_VERSION( BossParam, 4 )
+CEREAL_CLASS_VERSION( BossParam, 5 )
 CEREAL_CLASS_VERSION( BossParam::OBBFrameWithName, 0 )
 
 class Boss
 {
+public:
+	struct TargetStatus
+	{
+		Donya::Vector3 pos{}; // World space.
+	};
 private:
 	struct Models
 	{
@@ -164,7 +189,8 @@ private:
 private:
 	BossAI::ActionState		status;
 	BossAI					AI;
-	int						stageNo; // 1-based.
+	int						stageNo;		// 1-based.
+	float					fieldRadius;	// For collision to wall. the field is perfect-circle, so I can detect collide to wall by distance.
 	Donya::Vector3			pos;
 	Donya::Vector3			velocity;
 	Donya::Quaternion		orientation;
@@ -176,7 +202,7 @@ public:
 	void Init( int stageNo );
 	void Uninit();
 
-	void Update();
+	void Update( TargetStatus target );
 
 	void Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matProjection );
 public:
@@ -184,32 +210,36 @@ public:
 	std::vector<Donya::OBB> GetBodyHitBoxes() const;
 
 	void ReceiveImpact();
+
+	void SetFieldRadius( float fieldRadius );
 private:
 	void LoadModel();
-private:
-	void ChangeStatus();
-	void UpdateCurrentStatus();
 
-	void WaitInit();
-	void WaitUpdate();
+	float CalcNormalizedDistance( Donya::Vector3 wsTargetPos );
+private:
+	void ChangeStatus( TargetStatus target );
+	void UpdateCurrentStatus( TargetStatus target );
+
+	void WaitInit( TargetStatus target );
+	void WaitUpdate( TargetStatus target );
 	void WaitUninit();
 
-	void MoveInit();
-	void MoveUpdate();
+	void MoveInit( TargetStatus target );
+	void MoveUpdate( TargetStatus target );
 	void MoveUninit();
 
-	void AttackSwingInit();
-	void AttackSwingUpdate();
+	void AttackSwingInit( TargetStatus target );
+	void AttackSwingUpdate( TargetStatus target );
 	void AttackSwingUninit();
 	
-	void AttackFastInit();
-	void AttackFastUpdate();
+	void AttackFastInit( TargetStatus target );
+	void AttackFastUpdate( TargetStatus target );
 	void AttackFastUninit();
 private:
 	/// <summary>
 	/// The position("pos") is only changed by this method(or CollideToWall method).
 	/// </summary>
-	void ApplyVelocity();
+	void ApplyVelocity( TargetStatus targert );
 	/// <summary>
 	/// If the position("pos") without to field range, clamp to field range.
 	/// </summary>

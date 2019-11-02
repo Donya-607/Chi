@@ -728,7 +728,7 @@ void Player::ApplyVelocity()
 void Player::CollideToWall()
 {
 	const float bodyRadius = PlayerParam::Get().HitBoxPhysic().radius;
-	const float trueFieldRadius = fieldRadius + bodyRadius;
+	const float trueFieldRadius = fieldRadius - bodyRadius;
 
 	constexpr Donya::Vector3 ORIGIN = Donya::Vector3::Zero();
 	const Donya::Vector3 currentDistance = pos - ORIGIN;

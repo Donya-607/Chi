@@ -7,10 +7,15 @@
 #include "gameLibFunctions.h"	// Use FBXRender().
 #include "skinned_mesh.h"
 
+#undef max
+#undef min
+
 #define scast static_cast
 
 BossParam::BossParam() :
-	scale( 1.0f ),
+	scale( 1.0f ), stageBodyRadius( 1.0f ),
+	targetDistNear( 0.0f ), targetDistFar( 1.0f ),
+	moveMoveSpeed( 0.0f ), attackFastMoveSpeed( 0.0f ),
 	initPosPerStage(), drawOffsetsPerStage(), hitBoxesBody(),
 	OBBAttacksSwing(), OBBFAttacksFast()
 {
@@ -28,6 +33,19 @@ void BossParam::Uninit()
 	// No op.
 }
 
+float BossParam::MoveSpeed( BossAI::ActionState status ) const
+{
+	switch ( status )
+	{
+	case BossAI::WAIT:			return 0.0f;				// break;
+	case BossAI::MOVE:			return moveMoveSpeed;		// break;
+	case BossAI::ATTACK_SWING:	return 0.0f;				// break;
+	case BossAI::ATTACK_FAST:	return attackFastMoveSpeed;	// break;
+	default: break;
+	}
+
+	return NULL;
+}
 Donya::Vector3 BossParam::GetInitPosition( int stageNo ) const
 {
 	_ASSERT_EXPR( stageNo <= scast<int>( initPosPerStage.size() ), L"Error : Specified stage number over than stage count !" );
@@ -73,6 +91,15 @@ void BossParam::UseImGui()
 		if ( ImGui::TreeNode( "Boss.AdjustData" ) )
 		{
 			ImGui::SliderFloat( "Scale", &scale, 0.0f, 8.0f );
+			ImGui::DragFloat( "BodyRadiusToStage", &stageBodyRadius );
+			ImGui::Text( "" );
+
+			ImGui::SliderFloat( "Distance.ThinkTo\"Near\"", &targetDistNear, 0.01f, 1.0f );
+			ImGui::SliderFloat( "Distance.ThinkTo\"Far\"",  &targetDistFar,  0.0f, 0.99f );
+			ImGui::Text( "" );
+
+			ImGui::DragFloat( "MoveSpeed.\"Move\"State", &moveMoveSpeed );
+			ImGui::DragFloat( "MoveSpeed.\"Attack.Fast\"State", &attackFastMoveSpeed );
 
 			if ( ImGui::TreeNode( "Initialize.Position" ) )
 			{
@@ -346,7 +373,7 @@ void ResetCurrentOBBFNames( std::vector<BossParam::OBBFrameWithName> *pOBBFNs )
 Boss::Boss() :
 	status( BossAI::ActionState::WAIT ),
 	AI(),
-	stageNo( 1 ),
+	stageNo( 1 ), fieldRadius(),
 	pos(), velocity(),
 	orientation(),
 	models()
@@ -379,6 +406,8 @@ void Boss::Init( int stageNumber )
 	stageNo = stageNumber;
 	pos = BossParam::Get().GetInitPosition( stageNo );
 
+	SetFieldRadius( 0.0f ); // Set to body's radius.
+
 	Donya::Vector3 dirToOrigin = Donya::Vector3::Zero() - pos;
 	dirToOrigin.y = 0.0f;
 	orientation = Donya::Quaternion::LookAt( orientation, dirToOrigin );
@@ -390,7 +419,7 @@ void Boss::Uninit()
 	BossParam::Get().Uninit();
 }
 
-void Boss::Update()
+void Boss::Update( TargetStatus target )
 {
 #if USE_IMGUI
 
@@ -401,10 +430,10 @@ void Boss::Update()
 
 	AI.Update();
 
-	ChangeStatus();
-	UpdateCurrentStatus();
+	ChangeStatus( target );
+	UpdateCurrentStatus( target );
 
-	ApplyVelocity();
+	ApplyVelocity( target );
 	CollideToWall();
 }
 
@@ -414,7 +443,6 @@ void Boss::Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matPro
 
 	const Donya::Vector3 drawOffset = PARAM.GetDrawOffset( stageNo );
 	const Donya::Vector4x4 DRAW_OFFSET = Donya::Vector4x4::MakeTranslation( drawOffset );
-
 
 	Donya::Vector4x4 S = Donya::Vector4x4::MakeScaling( PARAM.Scale() );
 	Donya::Vector4x4 R = orientation.RequireRotationMatrix();
@@ -506,7 +534,8 @@ void Boss::Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matPro
 	{
 		setBlendMode_ALPHA( 0.5f );
 
-		constexpr Donya::Vector4 COLOR_BODY   { 0.0f, 0.5f, 0.0f, 0.6f };
+		constexpr Donya::Vector4 COLOR_BODY			{ 0.0f, 0.5f, 0.0f, 0.6f };
+		constexpr Donya::Vector4 COLOR_BODY_CIRCLE	{ 0.0f, 0.3f, 0.3f, 0.6f };
 		
 		const auto *pAABBs = PARAM.BodyHitBoxes();
 		for ( const auto &it : *pAABBs )
@@ -514,9 +543,12 @@ void Boss::Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matPro
 			DrawCube( it.pos, it.size, orientation, COLOR_BODY );
 		}
 
+		DrawSphere( {/*Zero*/}, PARAM.StageBodyRadius(), COLOR_BODY_CIRCLE );
+
 		constexpr Donya::Vector4 COLOR_VALID  { 1.0f, 0.8f, 0.4f, 0.6f };
 		constexpr Donya::Vector4 COLOR_INVALID{ 0.4f, 0.4f, 1.0f, 0.6f };
 
+		// Attacks collision.
 		switch ( status )
 		{
 		case BossAI::ActionState::WAIT:
@@ -621,7 +653,6 @@ std::vector<Donya::OBB> Boss::GetAttackHitBoxes() const
 
 	return collisions;
 }
-
 static Donya::OBB MakeOBB( const Donya::AABB &AABB, const Donya::Vector3 &wsPos, const Donya::Quaternion &orientation )
 {
 	Donya::OBB OBB{};
@@ -650,6 +681,12 @@ void Boss::ReceiveImpact()
 	status = decltype( status )::END;
 }
 
+void Boss::SetFieldRadius( float newFieldRadius )
+{
+	const float bodyRadius = BossParam::Get().StageBodyRadius();
+	fieldRadius = std::max( newFieldRadius, bodyRadius );
+}
+
 void Boss::LoadModel()
 {
 	loadFBX( models.pIdle.get(),		GetModelPath( ModelAttribute::BossIdle ) );
@@ -657,7 +694,15 @@ void Boss::LoadModel()
 	loadFBX( models.pAtkFast.get(),		GetModelPath( ModelAttribute::BossAtkFast ) );
 }
 
-void Boss::ChangeStatus()
+float Boss::CalcNormalizedDistance( Donya::Vector3 wsTargetPos )
+{
+	float distance = ( wsTargetPos - pos ).Length();
+	return ( ZeroEqual( fieldRadius ) )
+	? fieldRadius
+	: distance / fieldRadius;
+}
+
+void Boss::ChangeStatus( TargetStatus target )
 {
 	int lotteryStatus = AI.GetState();
 	if ( status == lotteryStatus ) { return; }
@@ -673,23 +718,23 @@ void Boss::ChangeStatus()
 	}
 	switch ( lotteryStatus )
 	{
-	case BossAI::ActionState::WAIT:			WaitInit();			break;
-	case BossAI::ActionState::MOVE:			MoveInit();			break;
-	case BossAI::ActionState::ATTACK_SWING:	AttackSwingInit();	break;
-	case BossAI::ActionState::ATTACK_FAST:	AttackFastInit();	break;
+	case BossAI::ActionState::WAIT:			WaitInit( target );			break;
+	case BossAI::ActionState::MOVE:			MoveInit( target );			break;
+	case BossAI::ActionState::ATTACK_SWING:	AttackSwingInit( target );	break;
+	case BossAI::ActionState::ATTACK_FAST:	AttackFastInit( target );	break;
 	default: break;
 	}
 
 	status = scast<BossAI::ActionState>( lotteryStatus );
 }
-void Boss::UpdateCurrentStatus()
+void Boss::UpdateCurrentStatus( TargetStatus target )
 {
 	switch ( status )
 	{
-	case BossAI::ActionState::WAIT:			WaitUpdate();			break;
-	case BossAI::ActionState::MOVE:			MoveUpdate();			break;
-	case BossAI::ActionState::ATTACK_SWING:	AttackSwingUpdate();	break;
-	case BossAI::ActionState::ATTACK_FAST:	AttackFastUpdate();		break;
+	case BossAI::ActionState::WAIT:			WaitUpdate( target );			break;
+	case BossAI::ActionState::MOVE:			MoveUpdate( target );			break;
+	case BossAI::ActionState::ATTACK_SWING:	AttackSwingUpdate( target );	break;
+	case BossAI::ActionState::ATTACK_FAST:	AttackFastUpdate( target );		break;
 	default: break;
 	}
 }
@@ -700,13 +745,13 @@ XXXUpdate : call by UpdateCurrentStatus.
 XXXUninit : call by ChangeStatus when changing status. before YYYInit.
 */
 
-void Boss::WaitInit()
+void Boss::WaitInit( TargetStatus target )
 {
 	status = BossAI::ActionState::WAIT;
 
 	setAnimFlame( models.pIdle.get(), 0 );
 }
-void Boss::WaitUpdate()
+void Boss::WaitUpdate( TargetStatus target )
 {
 
 }
@@ -715,7 +760,7 @@ void Boss::WaitUninit()
 	setAnimFlame( models.pIdle.get(), 0 );
 }
 
-void Boss::MoveInit()
+void Boss::MoveInit( TargetStatus target )
 {
 	status = BossAI::ActionState::MOVE;
 
@@ -723,9 +768,33 @@ void Boss::MoveInit()
 	setAnimFlame( models.pIdle.get(), 0 );
 #endif // DEBUG_MODE
 }
-void Boss::MoveUpdate()
+void Boss::MoveUpdate( TargetStatus target )
 {
+	const float distNear  = BossParam::Get().TargetDistNear();
+	const float distFar   = BossParam::Get().TargetDistFar();
+	const float nDistance = CalcNormalizedDistance( target.pos );
 
+	if ( distNear <= nDistance && nDistance <= distFar )
+	{
+		velocity = 0.0f;
+		return;
+	}
+	// else
+
+	Donya::Vector3 dirToTarget = target.pos - pos;
+	dirToTarget.Normalize();
+	dirToTarget *= BossParam::Get().MoveSpeed( status );
+
+	if ( nDistance < distNear )
+	{
+		// Get far.
+		velocity = -dirToTarget;
+	}
+	else
+	{
+		// Get near.
+		velocity = dirToTarget;
+	}
 }
 void Boss::MoveUninit()
 {
@@ -734,14 +803,14 @@ void Boss::MoveUninit()
 #endif // DEBUG_MODE
 }
 
-void Boss::AttackSwingInit()
+void Boss::AttackSwingInit( TargetStatus target )
 {
 	status = BossAI::ActionState::ATTACK_SWING;
 
 	ResetCurrentOBBFrames( BossParam::Get().OBBAtksSwing() );
 	setAnimFlame( models.pAtkSwing.get(), 0 );
 }
-void Boss::AttackSwingUpdate()
+void Boss::AttackSwingUpdate( TargetStatus target )
 {
 	auto *pOBBs = BossParam::Get().OBBAtksSwing();
 	const size_t COUNT = pOBBs->size();
@@ -757,15 +826,20 @@ void Boss::AttackSwingUninit()
 	setAnimFlame( models.pAtkSwing.get(), 0 );
 }
 
-void Boss::AttackFastInit()
+void Boss::AttackFastInit( TargetStatus target )
 {
 	status = BossAI::ActionState::ATTACK_FAST;
 
 	ResetCurrentOBBFNames( BossParam::Get().OBBFAtksFast() );
 	setAnimFlame( models.pAtkFast.get(), 0 );
 }
-void Boss::AttackFastUpdate()
+void Boss::AttackFastUpdate( TargetStatus target )
 {
+	Donya::Vector3 dirToTarget = target.pos - pos;
+	dirToTarget.Normalize();
+	dirToTarget *= BossParam::Get().MoveSpeed( status );
+	velocity = dirToTarget;
+
 	auto *pOBBFNs = BossParam::Get().OBBFAtksFast();
 	const size_t COUNT = pOBBFNs->size();
 	for ( size_t i = 0; i < COUNT; ++i )
@@ -780,17 +854,33 @@ void Boss::AttackFastUninit()
 	setAnimFlame( models.pAtkFast.get(), 0 );
 }
 
-void Boss::ApplyVelocity()
+void Boss::ApplyVelocity( TargetStatus target )
 {
-	if ( velocity.IsZero() )
-	{
-		pos += velocity;
-	}
+	if ( velocity.IsZero() ) { return; }
+	// else
+
+	pos += velocity;
+
+	Donya::Vector3 dirToTarget = target.pos - pos;
+	dirToTarget.Normalize();
+	orientation = Donya::Quaternion::LookAt( orientation, dirToTarget );
 }
 
 void Boss::CollideToWall()
 {
+	const float bodyRadius = BossParam::Get().StageBodyRadius();
+	const float trueFieldRadius = fieldRadius - bodyRadius;
 
+	constexpr Donya::Vector3 ORIGIN = Donya::Vector3::Zero();
+	const Donya::Vector3 currentDistance = pos - ORIGIN;
+	const float currentLength = currentDistance.Length();
+
+	if ( trueFieldRadius < currentLength )
+	{
+		float diff = currentLength - trueFieldRadius;
+		const Donya::Vector3 direction = currentDistance.Normalized();
+		pos = ORIGIN + ( direction * ( currentLength - diff ) );
+	}
 }
 
 #if USE_IMGUI

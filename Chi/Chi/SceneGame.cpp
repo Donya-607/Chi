@@ -106,6 +106,7 @@ public:
 		player.SetFieldRadius( fieldRadius );
 
 		boss.Init( STAGE_NO );
+		boss.SetFieldRadius( fieldRadius );
 	}
 	void Uninit()
 	{
@@ -143,12 +144,12 @@ public:
 			Player::Input input{};
 
 		#if DEBUG_MODE
-			if ( Donya::Keyboard::Press( VK_UP    ) ) { input.moveVector.z = +1.0f; }
-			if ( Donya::Keyboard::Press( VK_DOWN  ) ) { input.moveVector.z = -1.0f; }
-			if ( Donya::Keyboard::Press( VK_LEFT  ) ) { input.moveVector.x = -1.0f; }
+			if ( Donya::Keyboard::Press( VK_UP ) ) { input.moveVector.z = +1.0f; }
+			if ( Donya::Keyboard::Press( VK_DOWN ) ) { input.moveVector.z = -1.0f; }
+			if ( Donya::Keyboard::Press( VK_LEFT ) ) { input.moveVector.x = -1.0f; }
 			if ( Donya::Keyboard::Press( VK_RIGHT ) ) { input.moveVector.x = +1.0f; }
 
-			if ( Donya::Keyboard::Press  ( 'Z' ) ) { input.doDefend = true; }
+			if ( Donya::Keyboard::Press( 'Z' ) ) { input.doDefend = true; }
 			if ( Donya::Keyboard::Trigger( 'X' ) ) { input.doAttack = true; }
 		#endif // DEBUG_MODE
 
@@ -185,7 +186,9 @@ public:
 		};
 		player.Update( MakePlayerInput( Donya::Vector4x4::FromMatrix( GameLib::camera::GetViewMatrix() ) ) );
 
-		boss.Update();
+		Boss::TargetStatus bossTarget{};
+		bossTarget.pos = player.GetPosition();
+		boss.Update( bossTarget );
 		
 		GameLib::camera::setPos( cameraPos );
 		GameLib::camera::setTarget( player.GetPosition() + cameraFocusOffset );

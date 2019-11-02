@@ -181,7 +181,7 @@ void BossAI::ImGui()
 				ImGui::TreePop();
 			}
 			
-			if ( ImGui::TreeNode( "MaxCounts" ) )
+			if ( ImGui::TreeNode( "AttackingFrames" ) )
 			{
 				const size_t COUNT = maxCnt.size();
 				for ( size_t i = 0; i < COUNT; ++i )
