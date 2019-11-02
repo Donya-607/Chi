@@ -5,6 +5,7 @@
 
 #include <cereal/cereal.hpp>
 #include <cereal/types/vector.hpp>
+#include <cereal/types/string.hpp>
 
 #include "Donya/Collision.h"
 #include "Donya/Quaternion.h"
@@ -52,7 +53,6 @@ private:
 	std::vector<Donya::Vector3>		initPosPerStage;		// The index(stage number) is 1-based. 0 is tutorial.
 	std::vector<Donya::Vector3>		drawOffsetsPerStage;	// The index(stage number) is 1-based. 0 is tutorial.
 	std::vector<Donya::AABB>		hitBoxesBody;			// Body's hit boxes.
-	// std::vector<Donya::OBBFrame>	OBBAttacksFast;
 	std::vector<Donya::OBBFrame>	OBBAttacksSwing;
 	std::vector<OBBFrameWithName>	OBBFAttacksFast;
 private:
@@ -64,6 +64,27 @@ private:
 	template<class Archive>
 	void serialize( Archive &archive, std::uint32_t version )
 	{
+		if ( 4 <= version )
+		{
+			archive
+			(
+				CEREAL_NVP( scale ),
+				CEREAL_NVP( hitBoxesBody ),
+				CEREAL_NVP( initPosPerStage ),
+				CEREAL_NVP( drawOffsetsPerStage ),
+				CEREAL_NVP( OBBAttacksSwing ),
+				CEREAL_NVP( OBBFAttacksFast )
+			);
+
+			if ( 5 <= version )
+			{
+				// archive( CEREAL_NVP( x ) );
+			}
+
+			return;
+		}
+		// else
+
 		archive
 		(
 			CEREAL_NVP( scale )
@@ -129,6 +150,7 @@ public:
 #endif // USE_IMGUI
 };
 CEREAL_CLASS_VERSION( BossParam, 4 )
+CEREAL_CLASS_VERSION( BossParam::OBBFrameWithName, 0 )
 
 class Boss
 {

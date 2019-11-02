@@ -10,14 +10,14 @@
         "maxCnt": {
             "value0": 60,
             "value1": 60,
-            "value2": 90,
-            "value3": 90
+            "value2": 125,
+            "value3": 240
         },
         "coolTimeMaxCnt": {
-            "value0": 30,
-            "value1": 40,
-            "value2": 50,
-            "value3": 60
+            "value0": 0,
+            "value1": 0,
+            "value2": 0,
+            "value3": 0
         }
     }
 }

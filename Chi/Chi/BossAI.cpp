@@ -1,7 +1,10 @@
 #include "BossAI.h"
 
+#include <numeric> // Use accumulate().
+
 #include "Donya/FilePath.h"
 #include "Donya/Serializer.h"
+#include "Donya/Random.h"
 
 void BossAI::Init()
 {
@@ -75,22 +78,26 @@ void BossAI::StateRand()
 #if 0
 	state = rand() % ActionStateNum::END;
 #else
-	int percentRand = rand() % (percent[0] + percent[1] + percent[2]);
-	     if (percentRand <= percent[0])
+	const int percentSum = std::accumulate( percent.begin(), percent.end(), 0 );
+	
+	// Prevent continuous chosen same state.
+	int oldState = state;
+	while ( oldState == state )
 	{
-		state = ActionState::WAIT;
-	}
-	else if (percentRand <= percent[0] + percent[1])
-	{
-		state = ActionState::MOVE;
-	}
-	else if (percentRand <= percent[0] + percent[1] + percent[2])
-	{
-		state = ActionState::ATTACK_SWING;
-	}
-	else if (percentRand <= percent[0] + percent[1] + percent[2] + percent[3])
-	{
-		state = ActionState::ATTACK_FAST;
+		const int percentRand = Donya::Random::GenerateInt( percentSum );
+
+		for ( int i = 0; i < ACTION_STATE_COUNT; ++i )
+		{
+			int partSum = ( i == ACTION_STATE_COUNT - 1 )
+			? percentSum
+			: std::accumulate( percent.begin(), ( percent.begin() + i + 1 ), 0 );
+
+			if ( percentRand <= partSum )
+			{
+				state = static_cast<ActionState>( i );
+				break;
+			}
+		}
 	}
 #endif
 }
@@ -148,12 +155,27 @@ void BossAI::ImGui()
 
 		if ( ImGui::TreeNode( "AdjustData" ) )
 		{
+			auto GetStateName = []( int i )->std::string
+			{
+				constexpr std::array<const char *, ACTION_STATE_COUNT> NAMES
+				{
+					"Wait",
+					"Move",
+					"Attack.Swing",
+					"Attack.Fast",
+				};
+
+				if ( ACTION_STATE_COUNT <= i ) { return "Error Name"; }
+				// else
+				return std::string{ NAMES[i] };
+			};
+
 			if ( ImGui::TreeNode( "Percents" ) )
 			{
 				const size_t COUNT = percent.size();
 				for ( size_t i = 0; i < COUNT; ++i )
 				{
-					ImGui::SliderInt( ( "[" + std::to_string( i ) + "]" ).c_str(), &percent[i], 0, 65535 );
+					ImGui::SliderInt( GetStateName( i ).c_str(), &percent[i], 1, 1024 );
 				}
 
 				ImGui::TreePop();
@@ -164,7 +186,7 @@ void BossAI::ImGui()
 				const size_t COUNT = maxCnt.size();
 				for ( size_t i = 0; i < COUNT; ++i )
 				{
-					ImGui::SliderInt( ( "[" + std::to_string( i ) + "]" ).c_str(), &maxCnt[i], 0, 65535 );
+					ImGui::SliderInt( ( "[" + std::to_string( i ) + "]:" + GetStateName( i ) ).c_str(), &maxCnt[i], 0, 1024 );
 				}
 
 				ImGui::TreePop();
@@ -175,7 +197,7 @@ void BossAI::ImGui()
 				const size_t COUNT = coolTimeMaxCnt.size();
 				for ( size_t i = 0; i < COUNT; ++i )
 				{
-					ImGui::SliderInt( ( "[" + std::to_string( i ) + "]" ).c_str(), &coolTimeMaxCnt[i], 0, 65535 );
+					ImGui::SliderInt( ( "[" + std::to_string( i ) + "]:" + GetStateName( i ) ).c_str(), &coolTimeMaxCnt[i], 0, 1024 );
 				}
 
 				ImGui::TreePop();

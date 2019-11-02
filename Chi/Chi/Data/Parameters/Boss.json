@@ -1,114 +1,15 @@
 {
     "Boss": {
-        "cereal_class_version": 3,
+        "cereal_class_version": 4,
         "scale": 1.0,
-        "OBBAttacksFast": [
-            {
-                "cereal_class_version": 0,
-                "enableFrameStart": 30,
-                "enableFrameLast": 35,
-                "OBB": {
-                    "cereal_class_version": 0,
-                    "pos": {
-                        "cereal_class_version": 0,
-                        "x": 90.0,
-                        "y": 0.0,
-                        "z": 420.0
-                    },
-                    "size": {
-                        "x": 100.0,
-                        "y": 100.0,
-                        "z": 50.0
-                    },
-                    "orientation": {
-                        "cereal_class_version": 0,
-                        "x": 0.0,
-                        "y": 0.5226872563362122,
-                        "z": 0.0,
-                        "w": 0.8525245189666748
-                    },
-                    "exist": false
-                }
-            },
-            {
-                "enableFrameStart": 150,
-                "enableFrameLast": 155,
-                "OBB": {
-                    "pos": {
-                        "x": -90.0,
-                        "y": 0.0,
-                        "z": 420.0
-                    },
-                    "size": {
-                        "x": 100.0,
-                        "y": 100.0,
-                        "z": 50.0
-                    },
-                    "orientation": {
-                        "x": 0.0,
-                        "y": -0.5226872563362122,
-                        "z": 0.0,
-                        "w": 0.8525245189666748
-                    },
-                    "exist": false
-                }
-            },
-            {
-                "enableFrameStart": 270,
-                "enableFrameLast": 275,
-                "OBB": {
-                    "pos": {
-                        "x": 90.0,
-                        "y": 0.0,
-                        "z": 420.0
-                    },
-                    "size": {
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0
-                    },
-                    "orientation": {
-                        "x": 0.0,
-                        "y": 0.5226872563362122,
-                        "z": 0.0,
-                        "w": 0.8525245189666748
-                    },
-                    "exist": false
-                }
-            }
-        ],
-        "OBBAttacksSwing": [
-            {
-                "enableFrameStart": -96,
-                "enableFrameLast": 961,
-                "OBB": {
-                    "pos": {
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0
-                    },
-                    "size": {
-                        "x": 100.0,
-                        "y": 100.0,
-                        "z": 100.0
-                    },
-                    "orientation": {
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0,
-                        "w": 1.0
-                    },
-                    "exist": true
-                }
-            }
-        ],
         "hitBoxesBody": [
             {
                 "cereal_class_version": 0,
                 "pos": {
+                    "cereal_class_version": 0,
                     "x": 0.0,
                     "y": 155.0,
-                    "z": 88.0
+                    "z": 8.0
                 },
                 "size": {
                     "x": 100.0,
@@ -121,7 +22,7 @@
                 "pos": {
                     "x": 160.0,
                     "y": 128.0,
-                    "z": 88.0
+                    "z": 0.0
                 },
                 "size": {
                     "x": 50.0,
@@ -134,7 +35,7 @@
                 "pos": {
                     "x": -160.0,
                     "y": 128.0,
-                    "z": 88.0
+                    "z": 0.0
                 },
                 "size": {
                     "x": 50.0,
@@ -148,15 +49,15 @@
             {
                 "x": 0.0,
                 "y": 0.0,
-                "z": 263.0
+                "z": 295.0
             },
             {
-                "x": 13.0,
+                "x": 0.0,
                 "y": 0.0,
-                "z": 117.0
+                "z": 191.0
             },
             {
-                "x": -23.0,
+                "x": 0.0,
                 "y": 0.0,
                 "z": 124.0
             }
@@ -176,6 +77,115 @@
                 "x": 0.0,
                 "y": -200.0,
                 "z": 0.0
+            }
+        ],
+        "OBBAttacksSwing": [
+            {
+                "cereal_class_version": 0,
+                "enableFrameStart": -1,
+                "enableFrameLast": -1,
+                "OBB": {
+                    "cereal_class_version": 0,
+                    "pos": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 100.0,
+                        "y": 100.0,
+                        "z": 100.0
+                    },
+                    "orientation": {
+                        "cereal_class_version": 0,
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0,
+                        "w": 1.0
+                    },
+                    "exist": false
+                }
+            }
+        ],
+        "OBBFAttacksFast": [
+            {
+                "cereal_class_version": 0,
+                "OBBF": {
+                    "enableFrameStart": 38,
+                    "enableFrameLast": 62,
+                    "OBB": {
+                        "pos": {
+                            "x": 0.0,
+                            "y": -60.0,
+                            "z": -60.0
+                        },
+                        "size": {
+                            "x": 100.0,
+                            "y": 128.0,
+                            "z": 128.0
+                        },
+                        "orientation": {
+                            "x": 0.0,
+                            "y": 0.4794255495071411,
+                            "z": 0.0,
+                            "w": 0.8775825500488281
+                        },
+                        "exist": false
+                    }
+                },
+                "meshName": "MDL_HandL"
+            },
+            {
+                "OBBF": {
+                    "enableFrameStart": 115,
+                    "enableFrameLast": 130,
+                    "OBB": {
+                        "pos": {
+                            "x": 0.0,
+                            "y": -60.0,
+                            "z": -60.0
+                        },
+                        "size": {
+                            "x": 100.0,
+                            "y": 128.0,
+                            "z": 128.0
+                        },
+                        "orientation": {
+                            "x": 0.0,
+                            "y": -0.4794255495071411,
+                            "z": 0.0,
+                            "w": 0.8775825500488281
+                        },
+                        "exist": false
+                    }
+                },
+                "meshName": "MDL_HandR"
+            },
+            {
+                "OBBF": {
+                    "enableFrameStart": 200,
+                    "enableFrameLast": 215,
+                    "OBB": {
+                        "pos": {
+                            "x": 0.0,
+                            "y": -60.0,
+                            "z": -60.0
+                        },
+                        "size": {
+                            "x": 100.0,
+                            "y": 128.0,
+                            "z": 128.0
+                        },
+                        "orientation": {
+                            "x": 0.0,
+                            "y": 0.4794255495071411,
+                            "z": 0.0,
+                            "w": 0.8775825500488281
+                        },
+                        "exist": false
+                    }
+                },
+                "meshName": "MDL_HandL"
             }
         ]
     }

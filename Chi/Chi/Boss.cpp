@@ -206,12 +206,14 @@ void BossParam::UseImGui()
 					{
 						OBBFAttacksFast.push_back( {} );
 						OBBFAttacksFast.back().meshName.reserve( 512U );
-
-						atksFastNameBuffers.resize( OBBFAttacksFast.size() );
 					}
 					if ( 1 <= OBBFAttacksFast.size() && ImGui::Button( "PopBack" ) )
 					{
 						OBBFAttacksFast.pop_back();
+					}
+
+					if ( atksFastNameBuffers.size() != OBBFAttacksFast.size() )
+					{
 						atksFastNameBuffers.resize( OBBFAttacksFast.size() );
 					}
 
@@ -322,13 +324,22 @@ Donya::OBB BossParam::OBBFrameWithName::CalcTransformedOBB( skinned_mesh *pMesh,
 	return resultOBB;
 }
 
-void ResetCurrentOBBFrame( std::vector<Donya::OBBFrame> *pOBBFs )
+void ResetCurrentOBBFrames( std::vector<Donya::OBBFrame> *pOBBFs )
 {
 	const size_t COUNT = pOBBFs->size();
 	for ( size_t i = 0; i < COUNT; ++i )
 	{
 		auto &OBBF = pOBBFs->at( i );
 		OBBF.currentFrame = 0;
+	}
+}
+void ResetCurrentOBBFNames( std::vector<BossParam::OBBFrameWithName> *pOBBFNs )
+{
+	const size_t COUNT = pOBBFNs->size();
+	for ( size_t i = 0; i < COUNT; ++i )
+	{
+		auto &OBBFN = pOBBFNs->at( i );
+		OBBFN.OBBF.currentFrame = 0;
 	}
 }
 
@@ -479,12 +490,13 @@ void Boss::Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matPro
 
 		OBJRender( pSphere.get(), CWVP, CW, color );
 	};
-	auto DrawOBB	= [&]( const Donya::OBB &OBB, const Donya::Vector4 &color )
+	auto DrawOBB	= [&]( const Donya::OBB &OBB, const Donya::Vector4 &color, bool applyParentMatrix = true )
 	{
 		Donya::Vector4x4 CS = Donya::Vector4x4::MakeScaling( OBB.size * 2.0f ); // Half size->Whole size.
 		Donya::Vector4x4 CR = OBB.orientation.RequireRotationMatrix();
 		Donya::Vector4x4 CT = Donya::Vector4x4::MakeTranslation( OBB.pos );
-		Donya::Vector4x4 CW = ( CS * CR * CT ) * W;
+		Donya::Vector4x4 CW = ( CS * CR * CT );
+		if ( applyParentMatrix ) { CW *= W; }
 		Donya::Vector4x4 CWVP = CW * matView * matProjection;
 
 		OBJRender( pCube.get(), CWVP, CW, color );
@@ -527,15 +539,15 @@ void Boss::Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matPro
 			break;
 		case BossAI::ActionState::ATTACK_FAST:
 			{
-				const auto  *pOBBs = BossParam::Get().OBBAtksFast();
-				const size_t COUNT = pOBBs->size();
+				const auto  *pOBBFs = BossParam::Get().OBBFAtksFast();
+				const size_t COUNT = pOBBFs->size();
 				Donya::Vector4 color{};
 				for ( size_t i = 0; i < COUNT; ++i )
 				{
-					const auto &OBB = pOBBs->at( i );
-					color = ( OBB.OBB.exist ) ? COLOR_VALID : COLOR_INVALID;
+					const auto &OBB = pOBBFs->at( i ).CalcTransformedOBB( models.pAtkFast.get(), W ); ;
+					color = ( OBB.exist ) ? COLOR_VALID : COLOR_INVALID;
 
-					DrawOBB( OBB.OBB, color );
+					DrawOBB( OBB, color, /* applyParentMatrix = */ false );
 				}
 			}
 			break;
@@ -596,9 +608,10 @@ std::vector<Donya::OBB> Boss::GetAttackHitBoxes() const
 				auto &OBB  = OBBF.OBBF.OBB;
 				if (  OBB.exist )
 				{
-					OBB = pOBBFs->at( i ).CalcTransformedOBB( models.pAtkFast.get(), W );
-
-					collisions.emplace_back( OBB );
+					collisions.emplace_back
+					(
+						OBBF.CalcTransformedOBB( models.pAtkFast.get(), W )
+					);
 				}
 			}
 		}
@@ -640,8 +653,8 @@ void Boss::ReceiveImpact()
 void Boss::LoadModel()
 {
 	loadFBX( models.pIdle.get(),		GetModelPath( ModelAttribute::BossIdle ) );
-	loadFBX( models.pAtkFast.get(),		GetModelPath( ModelAttribute::BossAtkFast ) );
 	loadFBX( models.pAtkSwing.get(),	GetModelPath( ModelAttribute::BossAtkSwing ) );
+	loadFBX( models.pAtkFast.get(),		GetModelPath( ModelAttribute::BossAtkFast ) );
 }
 
 void Boss::ChangeStatus()
@@ -725,7 +738,7 @@ void Boss::AttackSwingInit()
 {
 	status = BossAI::ActionState::ATTACK_SWING;
 
-	ResetCurrentOBBFrame( BossParam::Get().OBBAtksSwing() );
+	ResetCurrentOBBFrames( BossParam::Get().OBBAtksSwing() );
 	setAnimFlame( models.pAtkSwing.get(), 0 );
 }
 void Boss::AttackSwingUpdate()
@@ -740,7 +753,7 @@ void Boss::AttackSwingUpdate()
 }
 void Boss::AttackSwingUninit()
 {
-	ResetCurrentOBBFrame( BossParam::Get().OBBAtksSwing() );
+	ResetCurrentOBBFrames( BossParam::Get().OBBAtksSwing() );
 	setAnimFlame( models.pAtkSwing.get(), 0 );
 }
 
@@ -748,22 +761,22 @@ void Boss::AttackFastInit()
 {
 	status = BossAI::ActionState::ATTACK_FAST;
 
-	ResetCurrentOBBFrame( BossParam::Get().OBBAtksFast() );
+	ResetCurrentOBBFNames( BossParam::Get().OBBFAtksFast() );
 	setAnimFlame( models.pAtkFast.get(), 0 );
 }
 void Boss::AttackFastUpdate()
 {
-	auto *pOBBs = BossParam::Get().OBBAtksFast();
-	const size_t COUNT = pOBBs->size();
+	auto *pOBBFNs = BossParam::Get().OBBFAtksFast();
+	const size_t COUNT = pOBBFNs->size();
 	for ( size_t i = 0; i < COUNT; ++i )
 	{
-		auto &OBB = pOBBs->at( i );
-		OBB.Update();
+		auto &OBBFN = pOBBFNs->at( i );
+		OBBFN.OBBF.Update();
 	}
 }
 void Boss::AttackFastUninit()
 {
-	ResetCurrentOBBFrame( BossParam::Get().OBBAtksFast() );
+	ResetCurrentOBBFNames( BossParam::Get().OBBFAtksFast() );
 	setAnimFlame( models.pAtkFast.get(), 0 );
 }
 
