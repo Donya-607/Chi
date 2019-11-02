@@ -53,8 +53,11 @@ private:
 	float							stageBodyRadius;		// Using for collision to stage's wall.
 	float							targetDistNear;			// 0.0f ~ 1.0f.
 	float							targetDistFar;			// 0.0f ~ 1.0f.
+	float							idleSlerpFactor;		// 0.0 ~ 1.0. Use when status is idle.
 	float							moveMoveSpeed;			// Use when status is move.
+	float							moveSlerpFactor;		// 0.0 ~ 1.0. Use when status is move.
 	float							attackFastMoveSpeed;	// Use when status is attack of fast.
+	float							attackFastSlerpFactor;	// 0.0 ~ 1.0. Use when status is attack of fast.
 	std::vector<Donya::Vector3>		initPosPerStage;		// The index(stage number) is 1-based. 0 is tutorial.
 	std::vector<Donya::Vector3>		drawOffsetsPerStage;	// The index(stage number) is 1-based. 0 is tutorial.
 	std::vector<Donya::AABB>		hitBoxesBody;			// Body's hit boxes.
@@ -93,6 +96,15 @@ private:
 				);
 			}
 			if ( 6 <= version )
+			{
+				archive
+				(
+					CEREAL_NVP( idleSlerpFactor ),
+					CEREAL_NVP( moveSlerpFactor ),
+					CEREAL_NVP( attackFastSlerpFactor )
+				);
+			}
+			if ( 7 <= version )
 			{
 				// archive( CEREAL_NVP( x ) );
 			}
@@ -150,7 +162,8 @@ public:
 	float								StageBodyRadius()	const	{ return stageBodyRadius; }
 	float								TargetDistNear()	const	{ return targetDistNear; }
 	float								TargetDistFar()		const	{ return targetDistFar; }
-	float								MoveSpeed( BossAI::ActionState status ) const;
+	float								MoveSpeed  ( BossAI::ActionState status ) const;
+	float								SlerpFactor( BossAI::ActionState status ) const;
 	Donya::Vector3						GetInitPosition( int stageNumber ) const;
 	Donya::Vector3						GetDrawOffset  ( int stageNumber ) const;
 	std::vector<Donya::OBBFrame>		*OBBAtksSwing()			{ return &OBBAttacksSwing; }
@@ -169,7 +182,7 @@ public:
 
 #endif // USE_IMGUI
 };
-CEREAL_CLASS_VERSION( BossParam, 5 )
+CEREAL_CLASS_VERSION( BossParam, 6 )
 CEREAL_CLASS_VERSION( BossParam::OBBFrameWithName, 0 )
 
 class Boss
@@ -191,6 +204,7 @@ private:
 	BossAI					AI;
 	int						stageNo;		// 1-based.
 	float					fieldRadius;	// For collision to wall. the field is perfect-circle, so I can detect collide to wall by distance.
+	float					slerpFactor;	// 0.0f ~ 1.0. Use orientation's rotation.
 	Donya::Vector3			pos;
 	Donya::Vector3			velocity;
 	Donya::Quaternion		orientation;

@@ -46,6 +46,19 @@ float BossParam::MoveSpeed( BossAI::ActionState status ) const
 
 	return NULL;
 }
+float BossParam::SlerpFactor( BossAI::ActionState status ) const
+{
+	switch ( status )
+	{
+	case BossAI::WAIT:			return idleSlerpFactor;			// break;
+	case BossAI::MOVE:			return moveSlerpFactor;			// break;
+	case BossAI::ATTACK_SWING:	return 0.5f;					// break;
+	case BossAI::ATTACK_FAST:	return attackFastSlerpFactor;	// break;
+	default: break;
+	}
+
+	return 1.0f;
+}
 Donya::Vector3 BossParam::GetInitPosition( int stageNo ) const
 {
 	_ASSERT_EXPR( stageNo <= scast<int>( initPosPerStage.size() ), L"Error : Specified stage number over than stage count !" );
@@ -100,6 +113,10 @@ void BossParam::UseImGui()
 
 			ImGui::DragFloat( "MoveSpeed.\"Move\"State", &moveMoveSpeed );
 			ImGui::DragFloat( "MoveSpeed.\"Attack.Fast\"State", &attackFastMoveSpeed );
+
+			ImGui::SliderFloat( "SlerpFactor.\"Idle\"State", &idleSlerpFactor, 0.0f, 1.0f );
+			ImGui::SliderFloat( "SlerpFactor.\"Move\"State", &moveSlerpFactor, 0.0f, 1.0f );
+			ImGui::SliderFloat( "SlerpFactor.\"Attack.Fast\"State", &attackFastSlerpFactor, 0.0f, 1.0f );
 
 			if ( ImGui::TreeNode( "Initialize.Position" ) )
 			{
@@ -373,7 +390,7 @@ void ResetCurrentOBBFNames( std::vector<BossParam::OBBFrameWithName> *pOBBFNs )
 Boss::Boss() :
 	status( BossAI::ActionState::WAIT ),
 	AI(),
-	stageNo( 1 ), fieldRadius(),
+	stageNo( 1 ), fieldRadius(), slerpFactor( 1.0f ),
 	pos(), velocity(),
 	orientation(),
 	models()
@@ -740,7 +757,7 @@ void Boss::UpdateCurrentStatus( TargetStatus target )
 }
 
 /*
-XXXInit : call by ChangeStatus when changing status. after XXXUninit.
+XXXInit   : call by ChangeStatus when changing status. after XXXUninit.
 XXXUpdate : call by UpdateCurrentStatus.
 XXXUninit : call by ChangeStatus when changing status. before YYYInit.
 */
@@ -748,6 +765,10 @@ XXXUninit : call by ChangeStatus when changing status. before YYYInit.
 void Boss::WaitInit( TargetStatus target )
 {
 	status = BossAI::ActionState::WAIT;
+
+	slerpFactor = BossParam::Get().SlerpFactor( status );
+
+	velocity = 0.0f;
 
 	setAnimFlame( models.pIdle.get(), 0 );
 }
@@ -764,9 +785,9 @@ void Boss::MoveInit( TargetStatus target )
 {
 	status = BossAI::ActionState::MOVE;
 
-#if DEBUG_MODE
+	slerpFactor = BossParam::Get().SlerpFactor( status );
+
 	setAnimFlame( models.pIdle.get(), 0 );
-#endif // DEBUG_MODE
 }
 void Boss::MoveUpdate( TargetStatus target )
 {
@@ -781,31 +802,32 @@ void Boss::MoveUpdate( TargetStatus target )
 	}
 	// else
 
-	Donya::Vector3 dirToTarget = target.pos - pos;
-	dirToTarget.Normalize();
-	dirToTarget *= BossParam::Get().MoveSpeed( status );
+	const float speed = BossParam::Get().MoveSpeed( status );
+	const Donya::Vector3 front = orientation.LocalFront();
 
 	if ( nDistance < distNear )
 	{
 		// Get far.
-		velocity = -dirToTarget;
+		velocity = -front * speed;
 	}
 	else
 	{
 		// Get near.
-		velocity = dirToTarget;
+		velocity = front * speed;
 	}
 }
 void Boss::MoveUninit()
 {
-#if DEBUG_MODE
 	setAnimFlame( models.pIdle.get(), 0 );
-#endif // DEBUG_MODE
 }
 
 void Boss::AttackSwingInit( TargetStatus target )
 {
 	status = BossAI::ActionState::ATTACK_SWING;
+
+	slerpFactor = BossParam::Get().SlerpFactor( status );
+
+	velocity = 0.0f;
 
 	ResetCurrentOBBFrames( BossParam::Get().OBBAtksSwing() );
 	setAnimFlame( models.pAtkSwing.get(), 0 );
@@ -830,15 +852,14 @@ void Boss::AttackFastInit( TargetStatus target )
 {
 	status = BossAI::ActionState::ATTACK_FAST;
 
+	slerpFactor = BossParam::Get().SlerpFactor( status );
+
 	ResetCurrentOBBFNames( BossParam::Get().OBBFAtksFast() );
 	setAnimFlame( models.pAtkFast.get(), 0 );
 }
 void Boss::AttackFastUpdate( TargetStatus target )
 {
-	Donya::Vector3 dirToTarget = target.pos - pos;
-	dirToTarget.Normalize();
-	dirToTarget *= BossParam::Get().MoveSpeed( status );
-	velocity = dirToTarget;
+	velocity = orientation.LocalFront() * BossParam::Get().MoveSpeed( status );
 
 	auto *pOBBFNs = BossParam::Get().OBBFAtksFast();
 	const size_t COUNT = pOBBFNs->size();
@@ -856,14 +877,17 @@ void Boss::AttackFastUninit()
 
 void Boss::ApplyVelocity( TargetStatus target )
 {
-	if ( velocity.IsZero() ) { return; }
-	// else
-
-	pos += velocity;
+	if ( !velocity.IsZero() )
+	{
+		pos += velocity;
+	}
 
 	Donya::Vector3 dirToTarget = target.pos - pos;
 	dirToTarget.Normalize();
-	orientation = Donya::Quaternion::LookAt( orientation, dirToTarget );
+
+	Donya::Quaternion destination = Donya::Quaternion::LookAt( orientation, dirToTarget ).Normalized();
+	orientation = Donya::Quaternion::Slerp( orientation, destination, slerpFactor );
+	orientation.Normalize();
 }
 
 void Boss::CollideToWall()
