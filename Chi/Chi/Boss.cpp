@@ -737,6 +737,8 @@ std::vector<Donya::Sphere> Boss::RequireAttackHitBoxesSphere() const
 	const auto *pRotateAtks = BossParam::Get().RotateAtkCollisions();
 	for ( const auto &it : *pRotateAtks )
 	{
+		if ( !it.collision.exist ) { continue; }
+		// else
 		spheres.emplace_back( it.collision );
 	}
 
