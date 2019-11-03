@@ -242,6 +242,8 @@ public:
 	void ReceiveImpact();
 
 	void SetFieldRadius( float fieldRadius );
+
+	Donya::Vector3 GetPosition() { return pos; }
 private:
 	void LoadModel();
 

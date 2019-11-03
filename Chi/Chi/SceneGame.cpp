@@ -40,6 +40,10 @@ public:
 	Player	player;
 	Stage	stage;
 	Boss	boss;
+	float cameraPosY;
+	float distance;
+	float length;
+	float targetY;
 public:
 	Impl() :
 		fieldRadius(),
@@ -47,7 +51,11 @@ public:
 		player(),
 		stage(),
 		boss(),
-		lights()
+		lights(),
+		cameraPosY(250.0f),
+		distance(600.0f),
+		length(0.0f),
+		targetY(0.0f)
 	{}
 	~Impl() = default;
 private:
@@ -151,7 +159,14 @@ public:
 
 			if ( Donya::Keyboard::Press( 'Z' ) ) { input.doDefend = true; }
 			if ( Donya::Keyboard::Trigger( 'X' ) ) { input.doAttack = true; }
-		#endif // DEBUG_MODE
+			
+	// TODO : コントローラーがあるか判定する
+			if (GameLib::input::xInput::getThumbL(0).x != 0) { input.moveVector.x = GameLib::input::xInput::getThumbL(0).x / 32768.0f; }
+			if (GameLib::input::xInput::getThumbL(0).y != 0) { input.moveVector.z = GameLib::input::xInput::getThumbL(0).y / 32768.0f; }
+
+			if (GameLib::input::xInput::pressedButtons(0, XboxPad_Button::RIGHT_THUMB) == 1) { input.doDefend = true; }
+			if (GameLib::input::xInput::pressedButtons(0, XboxPad_Button::X) == 1) { input.doAttack = true; }
+	#endif // DEBUG_MODE
 
 			// Transform to camera space from world space.
 			{
@@ -190,8 +205,67 @@ public:
 		bossTarget.pos = player.GetPosition();
 		boss.Update( bossTarget );
 		
+#if 0
+		DirectX::XMFLOAT3 originVec(0.0f, 0.0f, 1.0f);
+		DirectX::XMFLOAT3 boss_Player_Vec(player.GetPosition().x - boss.pos.x, player.GetPosition().y - boss.pos.y, player.GetPosition().z - boss.pos.z);
+		DirectX::XMFLOAT3 _boss_Player_Vec(player.GetPosition().x - boss.pos.x, player.GetPosition().y - boss.pos.y, player.GetPosition().z - boss.pos.z);
+
+		float l1, l2;
+		l1 = sqrtf((originVec.x * originVec.x) + (originVec.y * originVec.y) + (originVec.z * originVec.z));
+		l2 = sqrtf((boss_Player_Vec.x * boss_Player_Vec.x) + 0.0f + (boss_Player_Vec.z * boss_Player_Vec.z));
+		boss_Player_Vec.x /= l2;
+		boss_Player_Vec.y /= l2;
+		boss_Player_Vec.z /= l2;
+
+		float dot = 0.0f;
+		float angle = 0.0f;
+		l2 = sqrtf((boss_Player_Vec.x * boss_Player_Vec.x) + 0.0f + (boss_Player_Vec.z * boss_Player_Vec.z));
+		dot = (originVec.x * boss_Player_Vec.x) + 0.0f + (originVec.z * boss_Player_Vec.z);
+		angle = acos(dot / (l1 * l2)) / (3.141592f / 180.0f);
+
+		if (_boss_Player_Vec.x < 0)
+		{
+			angle *= -1;
+		}
+		float distance = 1000.0f;
+		DirectX::XMFLOAT3 _player_pos = player.GetPosition();
+		cameraPos.x = _player_pos.x + sinf(angle * 0.01745f) * distance;
+		cameraPos.y = 400.0f;
+		cameraPos.z = _player_pos.z + cosf(angle * 0.01745f) * distance;
+#elif 0
+		Donya::Vector3 boss_Player_Vec(player.GetPosition().x - boss.pos.x, 0.0f, player.GetPosition().z - boss.pos.z);
+		Donya::Vector3 boss_Player_Vec_N = boss_Player_Vec;
+		boss_Player_Vec_N.Normalize();
+
+		float add_length = 1000.0f;
+
+		cameraPos.x = boss_Player_Vec_N.x * (boss_Player_Vec.Length() + add_length);
+		cameraPos.y = player.GetPosition().y + add_length;
+		cameraPos.z = boss_Player_Vec_N.z * (boss_Player_Vec.Length() + add_length);
+#else
+		DirectX::XMFLOAT3 playerPos = player.GetPosition();
+		DirectX::XMFLOAT3 targetPos = boss.GetPosition();
+
+		// 単位ベクトル取得
+		DirectX::XMFLOAT3 player_to_target_vec = DirectX::XMFLOAT3(targetPos.x - playerPos.x, targetPos.y - playerPos.y, targetPos.z - playerPos.z);
+		length = sqrtf(powf(player_to_target_vec.x, 2.0f) + powf(player_to_target_vec.y, 2.0f) + powf(player_to_target_vec.z, 2.0f));
+		DirectX::XMFLOAT3 unitvec_player_to_target = DirectX::XMFLOAT3(player_to_target_vec.x / length, player_to_target_vec.y / length, player_to_target_vec.z / length);
+
+		//カメラ位置取得
+		cameraPos = DirectX::XMFLOAT3(playerPos.x - unitvec_player_to_target.x * distance, cameraPosY, playerPos.z - unitvec_player_to_target.z * distance);
+		
+		//注視点取得
+#if 0
+		DirectX::XMFLOAT3 cameraTarget = DirectX::XMFLOAT3(targetPos.x + unitvec_player_to_target.x, targetPos.y + unitvec_player_to_target.y, targetPos.z + unitvec_player_to_target.z);
+#else
+		// TODO : 後々、変更するかも。
+		float tanY = tanf(90.0f);
+		targetY = tanY * (length / 8.0f);
+		DirectX::XMFLOAT3 cameraTarget = DirectX::XMFLOAT3(targetPos.x + unitvec_player_to_target.x, targetY, targetPos.z + unitvec_player_to_target.z);
+#endif
+#endif
 		GameLib::camera::setPos( cameraPos );
-		GameLib::camera::setTarget( player.GetPosition() + cameraFocusOffset );
+		GameLib::camera::setTarget( cameraTarget + cameraFocusOffset );
 
 		ProcessCollision();
 		
@@ -395,6 +469,10 @@ public:
 					ImGui::Text( "" );
 					ImGui::DragFloat3( "Camera.Pos", &cameraPos.x );
 					ImGui::DragFloat3( "Camera.FocusOffset", &cameraFocusOffset.x );
+				//	ImGui::DragFloat(  "CameraPosY", &cameraPosY );
+				//	ImGui::DragFloat(  "Player to Camera Distance", &distance );
+				//	ImGui::Text("player to boss distance : %f", length);
+				//	ImGui::Text("boss to target length : %f", targetY);
 
 					ImGui::TreePop();
 				}
