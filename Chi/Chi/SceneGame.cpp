@@ -289,7 +289,7 @@ public:
 		// BossAttacks VS Player(and Player's Shield)
 		{
 			bool wasHitToShield = false;
-			const auto attackBoxes = boss.GetAttackHitBoxes();
+			const auto attackBoxes = boss.RequireAttackHitBoxesOBB();
 			for ( const auto &it : attackBoxes )
 			{
 				if ( Donya::OBB::IsHitOBB( playerShieldBox, it ) )
@@ -303,6 +303,20 @@ public:
 				}
 
 				wasHitToShield = false;
+			}
+
+			const auto attackSpheres = boss.RequireAttackHitBoxesSphere();
+			for ( const auto &it : attackSpheres )
+			{
+				if ( Donya::OBB::IsHitOBB( playerShieldBox, it ) )
+				{
+					wasHitToShield = true;
+					player.SucceededDefence();
+				}
+				if ( !wasHitToShield && Donya::OBB::IsHitOBB( playerBodyBox, it ) )
+				{
+					player.ReceiveImpact();
+				}
 			}
 		}
 		

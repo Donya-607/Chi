@@ -235,8 +235,9 @@ public:
 
 	void Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matProjection );
 public:
-	std::vector<Donya::OBB> GetAttackHitBoxes() const;
-	std::vector<Donya::OBB> GetBodyHitBoxes() const;
+	std::vector<Donya::OBB>		RequireAttackHitBoxesOBB() const;
+	std::vector<Donya::Sphere>	RequireAttackHitBoxesSphere() const;
+	std::vector<Donya::OBB>		GetBodyHitBoxes() const;
 
 	void ReceiveImpact();
 

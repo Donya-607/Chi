@@ -667,7 +667,7 @@ void Boss::Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matPro
 #endif // DEBUG_MODE
 }
 
-std::vector<Donya::OBB> Boss::GetAttackHitBoxes() const
+std::vector<Donya::OBB> Boss::RequireAttackHitBoxesOBB() const
 {
 	const auto &PARAM = BossParam::Get();
 	std::vector<Donya::OBB> collisions{};
@@ -729,6 +729,18 @@ std::vector<Donya::OBB> Boss::GetAttackHitBoxes() const
 	}
 
 	return collisions;
+}
+std::vector<Donya::Sphere> Boss::RequireAttackHitBoxesSphere() const
+{
+	std::vector<Donya::Sphere> spheres{};
+
+	const auto *pRotateAtks = BossParam::Get().RotateAtkCollisions();
+	for ( const auto &it : *pRotateAtks )
+	{
+		spheres.emplace_back( it.collision );
+	}
+
+	return spheres;
 }
 static Donya::OBB MakeOBB( const Donya::AABB &AABB, const Donya::Vector3 &wsPos, const Donya::Quaternion &orientation )
 {
