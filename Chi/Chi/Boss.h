@@ -243,7 +243,7 @@ public:
 
 	void SetFieldRadius( float fieldRadius );
 
-	Donya::Vector3 GetPosition() { return pos; }
+	Donya::Vector3 GetPosition() const { return pos; }
 private:
 	void LoadModel();
 
