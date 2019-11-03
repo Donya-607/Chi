@@ -663,6 +663,58 @@ namespace Donya
 		return true;
 	}
 
+	float CalcShortestDistance( const OBB &L, const Donya::Vector3 &point )
+	{
+		// see http://marupeke296.com/COL_3D_No12_OBBvsPoint.html
+
+		enum IntAxis{ X = 0, Y, Z, END };
+		auto RotatedAxis = []( const OBB &OBB, IntAxis axisIndex )->Donya::Vector3
+		{
+			_ASSERT_EXPR( 0 <= axisIndex && axisIndex < END, L"Error : Passed index out of range !" );
+
+			Donya::Vector3 axis{};
+			switch ( axisIndex )
+			{
+			case X: axis = Donya::Vector3{ 1.0f, 0.0f, 0.0f }; break;
+			case Y: axis = Donya::Vector3{ 0.0f, 1.0f, 0.0f }; break;
+			case Z: axis = Donya::Vector3{ 0.0f, 0.0f, 1.0f }; break;
+			default: return {};
+			}
+
+			return OBB.orientation.RotateVector( axis );
+		};
+
+		Donya::Vector3 protrudedSum{};
+		Donya::Vector3 axis{};
+		for ( int i = 0; i < END; ++i )
+		{
+			axis = RotatedAxis( L, static_cast<IntAxis>( i ) );
+
+			float halfLength = axis.Length();
+			if ( halfLength <= 0 ) { continue; } // This case can not calculate.
+			// else
+
+			float magni = Donya::Vector3::Dot( ( point - L.pos ), axis ) / halfLength;
+			magni = fabsf( magni );
+
+			if ( 1.0f < magni )
+			{
+				protrudedSum += ( 1.0f - magni ) * halfLength * axis;
+			}
+		}
+
+		return protrudedSum.Length();
+	}
+
+	bool OBB::IsHitSphere( const OBB &L, const Sphere &R, bool ignoreExistFlag )
+	{
+		if ( !ignoreExistFlag && ( !L.exist || !R.exist ) ) { return false; }
+		// else
+
+		float distance = CalcShortestDistance( L, R.pos );
+		return ( distance <= R.radius ) ? true : false;
+	}
+
 	bool operator == ( const Box	&L, const Box		&R )
 	{
 		if ( !ZeroEqual( L.cx - R.cx ) )	{ return false; }

@@ -340,6 +340,8 @@ namespace Donya
 		{
 			return L.JudgeOBB( &R, ignoreExistFlag );
 		}
+
+		static bool IsHitSphere( const OBB &L, const Sphere &R, bool ignoreExistFlag = false );
 	};
 
 	struct SphereFrame
