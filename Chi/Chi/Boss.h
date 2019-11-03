@@ -58,11 +58,14 @@ private:
 	float							moveSlerpFactor;		// 0.0 ~ 1.0. Use when status is move.
 	float							attackFastMoveSpeed;	// Use when status is attack of fast.
 	float							attackFastSlerpFactor;	// 0.0 ~ 1.0. Use when status is attack of fast.
+	float							attackRotateMoveSpeed;	// Use when status is attack of rotate.
+	float							attackRotateSlerpFactor;// 0.0 ~ 1.0. Use when status is attack of rotate.
 	std::vector<Donya::Vector3>		initPosPerStage;		// The index(stage number) is 1-based. 0 is tutorial.
 	std::vector<Donya::Vector3>		drawOffsetsPerStage;	// The index(stage number) is 1-based. 0 is tutorial.
 	std::vector<Donya::AABB>		hitBoxesBody;			// Body's hit boxes.
 	std::vector<Donya::OBBFrame>	OBBAttacksSwing;
 	std::vector<OBBFrameWithName>	OBBFAttacksFast;
+	std::vector<Donya::SphereFrame>	rotateAttackCollisions;
 private:
 	BossParam();
 public:
@@ -105,6 +108,15 @@ private:
 				);
 			}
 			if ( 7 <= version )
+			{
+				archive
+				(
+					CEREAL_NVP( attackRotateMoveSpeed ),
+					CEREAL_NVP( attackRotateSlerpFactor ),
+					CEREAL_NVP( rotateAttackCollisions )
+				);
+			}
+			if ( 8 <= version )
 			{
 				// archive( CEREAL_NVP( x ) );
 			}
@@ -158,19 +170,21 @@ public:
 	void Init();
 	void Uninit();
 public:
-	float								Scale()				const	{ return scale; }
-	float								StageBodyRadius()	const	{ return stageBodyRadius; }
-	float								TargetDistNear()	const	{ return targetDistNear; }
-	float								TargetDistFar()		const	{ return targetDistFar; }
-	float								MoveSpeed  ( BossAI::ActionState status ) const;
-	float								SlerpFactor( BossAI::ActionState status ) const;
-	Donya::Vector3						GetInitPosition( int stageNumber ) const;
-	Donya::Vector3						GetDrawOffset  ( int stageNumber ) const;
-	std::vector<Donya::OBBFrame>		*OBBAtksSwing()			{ return &OBBAttacksSwing; }
-	const std::vector<Donya::OBBFrame>	*OBBAtksSwing()	const	{ return &OBBAttacksSwing; }
-	std::vector<OBBFrameWithName>		*OBBFAtksFast()			{ return &OBBFAttacksFast; }
-	const std::vector<OBBFrameWithName>	*OBBFAtksFast()	const	{ return &OBBFAttacksFast; }
-	const std::vector<Donya::AABB>		*BodyHitBoxes()	const	{ return &hitBoxesBody; }
+	float									Scale()					const	{ return scale; }
+	float									StageBodyRadius()		const	{ return stageBodyRadius; }
+	float									TargetDistNear()		const	{ return targetDistNear; }
+	float									TargetDistFar()			const	{ return targetDistFar; }
+	float									MoveSpeed  ( BossAI::ActionState status ) const;
+	float									SlerpFactor( BossAI::ActionState status ) const;
+	Donya::Vector3							GetInitPosition( int stageNumber ) const;
+	Donya::Vector3							GetDrawOffset  ( int stageNumber ) const;
+	std::vector<Donya::OBBFrame>			*OBBAtksSwing()					{ return &OBBAttacksSwing; }
+	const std::vector<Donya::OBBFrame>		*OBBAtksSwing()			const	{ return &OBBAttacksSwing; }
+	std::vector<OBBFrameWithName>			*OBBFAtksFast()					{ return &OBBFAttacksFast; }
+	const std::vector<OBBFrameWithName>		*OBBFAtksFast()			const	{ return &OBBFAttacksFast; }
+	std::vector<Donya::SphereFrame>			*RotateAtkCollisions()			{ return &rotateAttackCollisions; }
+	const std::vector<Donya::SphereFrame>	*RotateAtkCollisions()	const	{ return &rotateAttackCollisions; }
+	const std::vector<Donya::AABB>			*BodyHitBoxes()			const	{ return &hitBoxesBody; }
 public:
 	void LoadParameter( bool isBinary = true );
 
@@ -182,7 +196,7 @@ public:
 
 #endif // USE_IMGUI
 };
-CEREAL_CLASS_VERSION( BossParam, 6 )
+CEREAL_CLASS_VERSION( BossParam, 7 )
 CEREAL_CLASS_VERSION( BossParam::OBBFrameWithName, 0 )
 
 class Boss
@@ -198,6 +212,7 @@ private:
 		std::unique_ptr<skinned_mesh> pIdle{ nullptr };
 		std::unique_ptr<skinned_mesh> pAtkFast{ nullptr };
 		std::unique_ptr<skinned_mesh> pAtkSwing{ nullptr };
+		std::unique_ptr<skinned_mesh> pAtkRotate{ nullptr };
 	};
 private:
 	BossAI::ActionState		status;
@@ -249,6 +264,10 @@ private:
 	void AttackFastInit( TargetStatus target );
 	void AttackFastUpdate( TargetStatus target );
 	void AttackFastUninit();
+
+	void AttackRotateInit( TargetStatus target );
+	void AttackRotateUpdate( TargetStatus target );
+	void AttackRotateUninit();
 private:
 	/// <summary>
 	/// The position("pos") is only changed by this method(or CollideToWall method).

@@ -17,6 +17,7 @@ public:
 		MOVE,
 		ATTACK_SWING,
 		ATTACK_FAST,
+		ATTACK_ROTATE,
 
 		END
 	};

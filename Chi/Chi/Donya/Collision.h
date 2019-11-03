@@ -342,12 +342,49 @@ namespace Donya
 		}
 	};
 
+	struct SphereFrame
+	{
+		int currentFrame{};
+		int enableFrameStart{};	// WIll be serialize. Contain start frame.
+		int enableFrameLast{};	// WIll be serialize. Contain last frame.
+		Sphere collision{};
+	private:
+		friend class cereal::access;
+		template<class Archive>
+		void serialize( Archive &archive, std::uint32_t version )
+		{
+			archive
+			(
+				CEREAL_NVP( enableFrameStart ),
+				CEREAL_NVP( enableFrameLast ),
+				CEREAL_NVP( collision )
+			);
+
+			if ( 1 <= version )
+			{
+				// archive( CEREAL_NVP( x ) );
+			}
+		}
+	public:
+		void Update( int elapsedTime = 1 )
+		{
+			currentFrame += elapsedTime;
+
+			collision.exist = WithinEnableFrame() ? true : false;
+		}
+
+		bool WithinEnableFrame() const
+		{
+			return ( enableFrameStart <= currentFrame && currentFrame <= enableFrameLast ) ? true : false;
+		}
+	};
+
 	struct OBBFrame
 	{
 		int currentFrame{};
 		int enableFrameStart{};	// WIll be serialize. Contain start frame.
 		int enableFrameLast{};	// WIll be serialize. Contain last frame.
-		Donya::OBB OBB{};
+		OBB OBB{};
 	private:
 		friend class cereal::access;
 		template<class Archive>
@@ -396,11 +433,12 @@ namespace Donya
 }
 
 
-CEREAL_CLASS_VERSION( Donya::Box,		0 );
-CEREAL_CLASS_VERSION( Donya::Circle,	0 );
-CEREAL_CLASS_VERSION( Donya::AABB,		0 );
-CEREAL_CLASS_VERSION( Donya::Sphere,	0 );
-CEREAL_CLASS_VERSION( Donya::OBB,		0 );
-CEREAL_CLASS_VERSION( Donya::OBBFrame,	0 );
+CEREAL_CLASS_VERSION( Donya::Box,			0 );
+CEREAL_CLASS_VERSION( Donya::Circle,		0 );
+CEREAL_CLASS_VERSION( Donya::AABB,			0 );
+CEREAL_CLASS_VERSION( Donya::Sphere,		0 );
+CEREAL_CLASS_VERSION( Donya::OBB,			0 );
+CEREAL_CLASS_VERSION( Donya::SphereFrame,	0 );
+CEREAL_CLASS_VERSION( Donya::OBBFrame,		0 );
 
 #endif // INCLUDED_COLLISION_H_

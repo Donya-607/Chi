@@ -1,6 +1,6 @@
 {
     "Boss": {
-        "cereal_class_version": 6,
+        "cereal_class_version": 7,
         "scale": 1.0,
         "hitBoxesBody": [
             {
@@ -65,17 +65,17 @@
         "drawOffsetsPerStage": [
             {
                 "x": 0.0,
-                "y": -57.0,
+                "y": -60.0,
                 "z": 0.0
             },
             {
                 "x": 0.0,
-                "y": -200.0,
+                "y": -60.0,
                 "z": 0.0
             },
             {
                 "x": 0.0,
-                "y": -200.0,
+                "y": -60.0,
                 "z": 0.0
             }
         ],
@@ -188,13 +188,32 @@
                 "meshName": "MDL_HandL"
             }
         ],
-        "stageBodyRadius": 249.0,
+        "stageBodyRadius": -29.0,
         "targetDistNear": 0.20000000298023225,
         "targetDistFar": 0.44999998807907107,
         "moveMoveSpeed": 6.0,
         "attackFastMoveSpeed": 6.0,
         "idleSlerpFactor": 0.30000001192092898,
         "moveSlerpFactor": 0.15000000596046449,
-        "attackFastSlerpFactor": 0.009999999776482582
+        "attackFastSlerpFactor": 0.009999999776482582,
+        "attackRotateMoveSpeed": 0.0,
+        "attackRotateSlerpFactor": 1.0,
+        "rotateAttackCollisions": [
+            {
+                "cereal_class_version": 0,
+                "enableFrameStart": 45,
+                "enableFrameLast": 100,
+                "collision": {
+                    "cereal_class_version": 0,
+                    "pos": {
+                        "x": 0.0,
+                        "y": 251.0,
+                        "z": 0.0
+                    },
+                    "radius": 228.0,
+                    "exist": false
+                }
+            }
+        ]
     }
 }

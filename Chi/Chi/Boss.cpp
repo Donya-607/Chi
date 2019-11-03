@@ -15,9 +15,12 @@
 BossParam::BossParam() :
 	scale( 1.0f ), stageBodyRadius( 1.0f ),
 	targetDistNear( 0.0f ), targetDistFar( 1.0f ),
-	moveMoveSpeed( 0.0f ), attackFastMoveSpeed( 0.0f ),
+	idleSlerpFactor( 1.0f ),
+	moveMoveSpeed( 0.0f ), moveSlerpFactor( 1.0f ),
+	attackFastMoveSpeed( 0.0f ), attackFastSlerpFactor( 1.0f ),
+	attackRotateMoveSpeed( 0.0f ), attackRotateSlerpFactor( 1.0f ),
 	initPosPerStage(), drawOffsetsPerStage(), hitBoxesBody(),
-	OBBAttacksSwing(), OBBFAttacksFast()
+	OBBAttacksSwing(), OBBFAttacksFast(), rotateAttackCollisions()
 {
 	initPosPerStage.resize( 1U );
 	drawOffsetsPerStage.resize( 1U );
@@ -37,10 +40,11 @@ float BossParam::MoveSpeed( BossAI::ActionState status ) const
 {
 	switch ( status )
 	{
-	case BossAI::WAIT:			return 0.0f;				// break;
-	case BossAI::MOVE:			return moveMoveSpeed;		// break;
-	case BossAI::ATTACK_SWING:	return 0.0f;				// break;
-	case BossAI::ATTACK_FAST:	return attackFastMoveSpeed;	// break;
+	case BossAI::WAIT:			return 0.0f;					// break;
+	case BossAI::MOVE:			return moveMoveSpeed;			// break;
+	case BossAI::ATTACK_SWING:	return 0.0f;					// break;
+	case BossAI::ATTACK_FAST:	return attackFastMoveSpeed;		// break;
+	case BossAI::ATTACK_ROTATE:	return attackRotateMoveSpeed;	// break;
 	default: break;
 	}
 
@@ -54,6 +58,7 @@ float BossParam::SlerpFactor( BossAI::ActionState status ) const
 	case BossAI::MOVE:			return moveSlerpFactor;			// break;
 	case BossAI::ATTACK_SWING:	return 0.5f;					// break;
 	case BossAI::ATTACK_FAST:	return attackFastSlerpFactor;	// break;
+	case BossAI::ATTACK_ROTATE:	return attackRotateSlerpFactor;	// break;
 	default: break;
 	}
 
@@ -113,10 +118,12 @@ void BossParam::UseImGui()
 
 			ImGui::DragFloat( "MoveSpeed.\"Move\"State", &moveMoveSpeed );
 			ImGui::DragFloat( "MoveSpeed.\"Attack.Fast\"State", &attackFastMoveSpeed );
+			ImGui::DragFloat( "MoveSpeed.\"Attack.Rotate\"State", &attackRotateMoveSpeed );
 
 			ImGui::SliderFloat( "SlerpFactor.\"Idle\"State", &idleSlerpFactor, 0.0f, 1.0f );
 			ImGui::SliderFloat( "SlerpFactor.\"Move\"State", &moveSlerpFactor, 0.0f, 1.0f );
 			ImGui::SliderFloat( "SlerpFactor.\"Attack.Fast\"State", &attackFastSlerpFactor, 0.0f, 1.0f );
+			ImGui::SliderFloat( "SlerpFactor.\"Attack.Rotate\"State", &attackRotateSlerpFactor, 0.0f, 1.0f );
 
 			if ( ImGui::TreeNode( "Initialize.Position" ) )
 			{
@@ -159,20 +166,20 @@ void BossParam::UseImGui()
 			
 			if ( ImGui::TreeNode( "Collisions" ) )
 			{
-				auto ShowAABB	= []( const std::string &prefix, Donya::AABB		*pAABB	)
+				auto ShowAABB		= []( const std::string &prefix, Donya::AABB		*pAABB	)
 				{
 					ImGui::DragFloat3( ( prefix + ".Offset" ).c_str(), &pAABB->pos.x );
 					ImGui::DragFloat3( ( prefix + ".Scale" ).c_str(), &pAABB->size.x );
 					ImGui::Checkbox( ( prefix + ".ExistCollision" ).c_str(), &pAABB->exist );
 				};
-				auto ShowSphere	= []( const std::string &prefix, Donya::Sphere		*pSphere)
+				auto ShowSphere		= []( const std::string &prefix, Donya::Sphere		*pSphere)
 				{
 					ImGui::DragFloat3( ( prefix + ".Offset" ).c_str(), &pSphere->pos.x );
 					ImGui::DragFloat( ( prefix + ".Scale" ).c_str(), &pSphere->radius );
 					ImGui::Checkbox( ( prefix + ".ExistCollision" ).c_str(), &pSphere->exist );
 				};
 
-				auto ShowOBB	= []( const std::string &prefix, Donya::OBB			*pOBB	)
+				auto ShowOBB		= []( const std::string &prefix, Donya::OBB			*pOBB	)
 				{
 					ImGui::DragFloat3( ( prefix + ".Offset" ).c_str(), &pOBB->pos.x );
 					ImGui::DragFloat3( ( prefix + ".Scale" ).c_str(), &pOBB->size.x );
@@ -183,7 +190,7 @@ void BossParam::UseImGui()
 
 					ImGui::Checkbox( ( prefix + ".ExistCollision" ).c_str(), &pOBB->exist );
 				};
-				auto ShowOBBF	= [&ShowOBB]( const std::string &prefix, Donya::OBBFrame	*pOBBF	)
+				auto ShowOBBF		= [&ShowOBB]( const std::string &prefix, Donya::OBBFrame	*pOBBF	)
 				{
 					ImGui::DragInt( ( prefix + ".EnableFrame.Start" ).c_str(), &pOBBF->enableFrameStart );
 					ImGui::DragInt( ( prefix + ".EnableFrame.Last"  ).c_str(), &pOBBF->enableFrameLast  );
@@ -192,8 +199,17 @@ void BossParam::UseImGui()
 					ShowOBB( prefix, &pOBBF->OBB );
 					pOBBF->OBB.exist = oldExistFlag;
 				};
+				auto ShowSphereF	= [&ShowSphere]( const std::string &prefix, Donya::SphereFrame	*pSphereF	)
+				{
+					ImGui::DragInt( ( prefix + ".EnableFrame.Start" ).c_str(), &pSphereF->enableFrameStart );
+					ImGui::DragInt( ( prefix + ".EnableFrame.Last"  ).c_str(), &pSphereF->enableFrameLast  );
 
-				auto ShowAABBs	= [&ShowAABB]( const std::string &prefix, std::vector<Donya::AABB> *pAABBs )
+					bool oldExistFlag = pSphereF->collision.exist;
+					ShowSphere( prefix, &pSphereF->collision );
+					pSphereF->collision.exist = oldExistFlag;
+				};
+
+				auto ShowAABBs		= [&ShowAABB]( const std::string &prefix, std::vector<Donya::AABB> *pAABBs )
 				{
 					if ( ImGui::TreeNode( prefix.c_str() ) )
 					{
@@ -217,11 +233,10 @@ void BossParam::UseImGui()
 						ImGui::TreePop();
 					}
 				};
-				auto ShowOBBFs	= [&ShowOBBF]( const std::string &prefix, std::vector<Donya::OBBFrame> *pOBBFs )
+				auto ShowOBBFs		= [&ShowOBBF]( const std::string &prefix, std::vector<Donya::OBBFrame> *pOBBFs )
 				{
 					if ( ImGui::TreeNode( prefix.c_str() ) )
 					{
-
 						if ( ImGui::Button( "Append" ) )
 						{
 							pOBBFs->push_back( {} );
@@ -236,6 +251,29 @@ void BossParam::UseImGui()
 						{
 							auto &OBBF = pOBBFs->at( i );
 							ShowOBBF( "[" + std::to_string( i ) + "]", &OBBF );
+						}
+
+						ImGui::TreePop();
+					}
+				};
+				auto ShowSphereFs	= [&ShowSphereF]( const std::string &prefix, std::vector<Donya::SphereFrame> *pSphereFs )
+				{
+					if ( ImGui::TreeNode( prefix.c_str() ) )
+					{
+						if ( ImGui::Button( "Append" ) )
+						{
+							pSphereFs->push_back( {} );
+						}
+						if ( 1 <= pSphereFs->size() && ImGui::Button( "PopBack" ) )
+						{
+							pSphereFs->pop_back();
+						}
+
+						const size_t COUNT = pSphereFs->size();
+						for ( size_t i = 0; i < COUNT; ++i )
+						{
+							auto &sphereF = pSphereFs->at( i );
+							ShowSphereF( "[" + std::to_string( i ) + "]", &sphereF );
 						}
 
 						ImGui::TreePop();
@@ -279,6 +317,8 @@ void BossParam::UseImGui()
 				}
 
 				ShowOBBFs( "Attack.Swing", &OBBAttacksSwing );
+
+				ShowSphereFs( "Attacks.Rotate", &rotateAttackCollisions );
 
 				ShowAABBs( "Body.HurtBox", &hitBoxesBody );
 
@@ -377,6 +417,15 @@ void ResetCurrentOBBFrames( std::vector<Donya::OBBFrame> *pOBBFs )
 		OBBF.currentFrame = 0;
 	}
 }
+void ResetCurrentSphereFrames( std::vector<Donya::SphereFrame> *pSphereFs )
+{
+	const size_t COUNT = pSphereFs->size();
+	for ( size_t i = 0; i < COUNT; ++i )
+	{
+		auto &sphereF = pSphereFs->at( i );
+		sphereF.currentFrame = 0;
+	}
+}
 void ResetCurrentOBBFNames( std::vector<BossParam::OBBFrameWithName> *pOBBFNs )
 {
 	const size_t COUNT = pOBBFNs->size();
@@ -406,6 +455,7 @@ Boss::Boss() :
 		&models.pIdle,
 		&models.pAtkFast,
 		&models.pAtkSwing,
+		&models.pAtkRotate,
 	};
 	for ( auto &it : modelRefs )
 	{
@@ -420,8 +470,9 @@ void Boss::Init( int stageNumber )
 
 	LoadModel();
 
-	stageNo = stageNumber;
-	pos = BossParam::Get().GetInitPosition( stageNo );
+	stageNo	= stageNumber;
+	status	= BossAI::ActionState::WAIT;
+	pos		= BossParam::Get().GetInitPosition( stageNo );
 
 	SetFieldRadius( 0.0f ); // Set to body's radius.
 
@@ -473,24 +524,19 @@ void Boss::Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matPro
 	switch ( status )
 	{
 	case BossAI::ActionState::WAIT:
-		{
-			FBXRender( models.pIdle.get(), WVP, W );
-		}
+		FBXRender( models.pIdle.get(), WVP, W );
 		break;
 	case BossAI::ActionState::MOVE:
-		{
-			FBXRender( models.pIdle.get(), WVP, W );
-		}
+		FBXRender( models.pIdle.get(), WVP, W );
 		break;
 	case BossAI::ActionState::ATTACK_SWING:
-		{
-			FBXRender( models.pAtkSwing.get(), WVP, W );
-		}
+		FBXRender( models.pAtkSwing.get(), WVP, W );
 		break;
 	case BossAI::ActionState::ATTACK_FAST:
-		{
-			FBXRender( models.pAtkFast.get(), WVP, W );
-		}
+		FBXRender( models.pAtkFast.get(), WVP, W );
+		break;
+	case BossAI::ActionState::ATTACK_ROTATE:
+		FBXRender( models.pAtkRotate.get(), WVP, W );
 		break;
 	default: break;
 	}
@@ -562,7 +608,7 @@ void Boss::Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matPro
 
 		DrawSphere( {/*Zero*/}, PARAM.StageBodyRadius(), COLOR_BODY_CIRCLE );
 
-		constexpr Donya::Vector4 COLOR_VALID  { 1.0f, 0.8f, 0.4f, 0.6f };
+		constexpr Donya::Vector4 COLOR_VALID  { 1.0f, 0.5f, 0.0f, 0.6f };
 		constexpr Donya::Vector4 COLOR_INVALID{ 0.4f, 0.4f, 1.0f, 0.6f };
 
 		// Attacks collision.
@@ -597,6 +643,20 @@ void Boss::Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matPro
 					color = ( OBB.exist ) ? COLOR_VALID : COLOR_INVALID;
 
 					DrawOBB( OBB, color, /* applyParentMatrix = */ false );
+				}
+			}
+			break;
+		case BossAI::ActionState::ATTACK_ROTATE:
+			{
+				const auto *pSphereFs = BossParam::Get().RotateAtkCollisions();
+				const size_t COUNT = pSphereFs->size();
+				Donya::Vector4 color{};
+				for ( size_t i = 0; i < COUNT; ++i )
+				{
+					const auto &sphereF = pSphereFs->at( i );
+					color = ( sphereF.collision.exist ) ? COLOR_VALID : COLOR_INVALID;
+
+					DrawSphere( sphereF.collision.pos, sphereF.collision.radius, color );
 				}
 			}
 			break;
@@ -706,9 +766,10 @@ void Boss::SetFieldRadius( float newFieldRadius )
 
 void Boss::LoadModel()
 {
-	loadFBX( models.pIdle.get(),		GetModelPath( ModelAttribute::BossIdle ) );
-	loadFBX( models.pAtkSwing.get(),	GetModelPath( ModelAttribute::BossAtkSwing ) );
-	loadFBX( models.pAtkFast.get(),		GetModelPath( ModelAttribute::BossAtkFast ) );
+	loadFBX( models.pIdle.get(),		GetModelPath( ModelAttribute::BossIdle		) );
+	loadFBX( models.pAtkSwing.get(),	GetModelPath( ModelAttribute::BossAtkSwing	) );
+	loadFBX( models.pAtkFast.get(),		GetModelPath( ModelAttribute::BossAtkFast	) );
+	loadFBX( models.pAtkRotate.get(),	GetModelPath( ModelAttribute::BossAtkRotate	) );
 }
 
 float Boss::CalcNormalizedDistance( Donya::Vector3 wsTargetPos )
@@ -727,18 +788,20 @@ void Boss::ChangeStatus( TargetStatus target )
 
 	switch ( status )
 	{
-	case BossAI::ActionState::WAIT:			WaitUninit();		break;
-	case BossAI::ActionState::MOVE:			MoveUninit();		break;
-	case BossAI::ActionState::ATTACK_SWING:	AttackSwingUninit();break;
-	case BossAI::ActionState::ATTACK_FAST:	AttackFastUninit();	break;
+	case BossAI::ActionState::WAIT:				WaitUninit();			break;
+	case BossAI::ActionState::MOVE:				MoveUninit();			break;
+	case BossAI::ActionState::ATTACK_SWING:		AttackSwingUninit();	break;
+	case BossAI::ActionState::ATTACK_FAST:		AttackFastUninit();		break;
+	case BossAI::ActionState::ATTACK_ROTATE:	AttackRotateUninit();	break;
 	default: break;
 	}
 	switch ( lotteryStatus )
 	{
-	case BossAI::ActionState::WAIT:			WaitInit( target );			break;
-	case BossAI::ActionState::MOVE:			MoveInit( target );			break;
-	case BossAI::ActionState::ATTACK_SWING:	AttackSwingInit( target );	break;
-	case BossAI::ActionState::ATTACK_FAST:	AttackFastInit( target );	break;
+	case BossAI::ActionState::WAIT:				WaitInit( target );			break;
+	case BossAI::ActionState::MOVE:				MoveInit( target );			break;
+	case BossAI::ActionState::ATTACK_SWING:		AttackSwingInit( target );	break;
+	case BossAI::ActionState::ATTACK_FAST:		AttackFastInit( target );	break;
+	case BossAI::ActionState::ATTACK_ROTATE:	AttackRotateInit( target );	break;
 	default: break;
 	}
 
@@ -748,10 +811,11 @@ void Boss::UpdateCurrentStatus( TargetStatus target )
 {
 	switch ( status )
 	{
-	case BossAI::ActionState::WAIT:			WaitUpdate( target );			break;
-	case BossAI::ActionState::MOVE:			MoveUpdate( target );			break;
-	case BossAI::ActionState::ATTACK_SWING:	AttackSwingUpdate( target );	break;
-	case BossAI::ActionState::ATTACK_FAST:	AttackFastUpdate( target );		break;
+	case BossAI::ActionState::WAIT:				WaitUpdate( target );			break;
+	case BossAI::ActionState::MOVE:				MoveUpdate( target );			break;
+	case BossAI::ActionState::ATTACK_SWING:		AttackSwingUpdate( target );	break;
+	case BossAI::ActionState::ATTACK_FAST:		AttackFastUpdate( target );		break;
+	case BossAI::ActionState::ATTACK_ROTATE:	AttackRotateUpdate( target );	break;
 	default: break;
 	}
 }
@@ -875,6 +939,33 @@ void Boss::AttackFastUninit()
 	setAnimFlame( models.pAtkFast.get(), 0 );
 }
 
+void Boss::AttackRotateInit( TargetStatus target )
+{
+	status = BossAI::ActionState::ATTACK_ROTATE;
+
+	slerpFactor = BossParam::Get().SlerpFactor( status );
+
+	ResetCurrentSphereFrames( BossParam::Get().RotateAtkCollisions() );
+	setAnimFlame( models.pAtkRotate.get(), 0 );
+}
+void Boss::AttackRotateUpdate( TargetStatus target )
+{
+	velocity = orientation.LocalFront() * BossParam::Get().MoveSpeed( status );
+
+	auto *pSphereFs = BossParam::Get().RotateAtkCollisions();
+	const size_t COUNT = pSphereFs->size();
+	for ( size_t i = 0; i < COUNT; ++i )
+	{
+		auto &sphereF = pSphereFs->at( i );
+		sphereF.Update();
+	}
+}
+void Boss::AttackRotateUninit()
+{
+	ResetCurrentSphereFrames( BossParam::Get().RotateAtkCollisions() );
+	setAnimFlame( models.pAtkRotate.get(), 0 );
+}
+
 void Boss::ApplyVelocity( TargetStatus target )
 {
 	if ( !velocity.IsZero() )
@@ -919,14 +1010,15 @@ void Boss::UseImGui()
 			{
 				switch ( status )
 				{
-				case BossAI::ActionState::WAIT:			return { "Wait" };			break;
-				case BossAI::ActionState::MOVE:			return { "Move" };			break;
-				case BossAI::ActionState::ATTACK_SWING:	return { "AttackSwing" };	break;
-				case BossAI::ActionState::ATTACK_FAST:	return { "AttackFast" };	break;
+				case BossAI::ActionState::WAIT:				return { "Wait" };			break;
+				case BossAI::ActionState::MOVE:				return { "Move" };			break;
+				case BossAI::ActionState::ATTACK_SWING:		return { "Attack.Swing" };	break;
+				case BossAI::ActionState::ATTACK_FAST:		return { "Attack.Fast" };	break;
+				case BossAI::ActionState::ATTACK_ROTATE:	return { "Attack.Rotate" };	break;
 				default: break;
 				}
 
-				return { "Unsupported status" };
+				return { "Unexpected status" };
 			};
 			std::string statusCaption = "Status : " + GetStatusName( status );
 			ImGui::Text( statusCaption.c_str() );

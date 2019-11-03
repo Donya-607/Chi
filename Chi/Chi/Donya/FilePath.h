@@ -22,8 +22,9 @@ enum class ModelAttribute
 	PlayerDefend,
 	Stage,
 	BossIdle,
-	BossAtkFast,
 	BossAtkSwing,
+	BossAtkFast,
+	BossAtkRotate,
 };
 
 std::string GetModelPath( ModelAttribute modelAttribute );

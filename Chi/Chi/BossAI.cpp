@@ -10,25 +10,15 @@ void BossAI::Init()
 {
 	state = ActionState::WAIT;
 
-	for (int i = 0; i < ACTION_STATE_COUNT; i++)
+	for ( auto &it : cnt )
 	{
-		cnt[i] = 0;
-	}
-
-	maxCnt[0] = 60;
-	maxCnt[1] = 120;
-	maxCnt[2] = 180;
-	maxCnt[3] = 240;
-
-	coolTimeMaxCnt[0] = 30;
-	coolTimeMaxCnt[1] = 40;
-	coolTimeMaxCnt[2] = 50;
-	coolTimeMaxCnt[3] = 60;
-
-	percent[0] = 25;
-	percent[1] = 35;
-	percent[2] = 40;
-	percent[3] = 45;
+		it = 0;
+	};
+	for ( auto &it : percent )
+	{
+		// Must set Lowest percent.
+		it = 1;
+	};
 
 	LoadParameter();
 }
@@ -66,7 +56,7 @@ void BossAI::Update()
 	}
 #endif
 
-	if (maxCnt[state] + coolTimeMaxCnt[state] < cnt[state]++) // クールタイム後
+	if ( maxCnt[state] + coolTimeMaxCnt[state] < cnt[state]++ ) // クールタイム後
 	{
 		cnt[state] = 0;
 		StateRand();
@@ -135,20 +125,23 @@ void BossAI::ImGui()
 		{
 			ImGui::Text("state : %d", state);
 
-			ImGui::Text("wait_cnt : %d", cnt[0]);
-			ImGui::Text("move_cnt : %d", cnt[1]);
-			ImGui::Text("attack_swing_cnt : %d", cnt[2]);
-			ImGui::Text("attack_fast_cnt : %d", cnt[3]);
+			ImGui::Text("wait_cnt : %d",			cnt[0]);
+			ImGui::Text("move_cnt : %d",			cnt[1]);
+			ImGui::Text("attack_swing_cnt : %d",	cnt[2]);
+			ImGui::Text("attack_fast_cnt : %d",		cnt[3]);
+			ImGui::Text("attack_rotate_cnt : %d",	cnt[4]);
 
-			ImGui::Text("wait_max_cnt : %d", maxCnt[0]);
-			ImGui::Text("move_max_cnt : %d", maxCnt[1]);
-			ImGui::Text("attack_swing_max_cnt : %d", maxCnt[2]);
-			ImGui::Text("attack_fast_max_cnt : %d", maxCnt[3]);
+			ImGui::Text("wait_max_cnt : %d",			maxCnt[0]);
+			ImGui::Text("move_max_cnt : %d",			maxCnt[1]);
+			ImGui::Text("attack_swing_max_cnt : %d",	maxCnt[2]);
+			ImGui::Text("attack_fast_max_cnt : %d",		maxCnt[3]);
+			ImGui::Text("attack_rotate_max_cnt : %d",	maxCnt[4]);
 
-			ImGui::Text("wait_coolTime_max_cnt : %d", coolTimeMaxCnt[0]);
-			ImGui::Text("move_coolTime_max_cnt : %d", coolTimeMaxCnt[1]);
-			ImGui::Text("attack_swing_coolTime_max_cnt : %d", coolTimeMaxCnt[2]);
-			ImGui::Text("attack_fast_coolTime_max_cnt : %d", coolTimeMaxCnt[3]);
+			ImGui::Text("wait_coolTime_max_cnt : %d",			coolTimeMaxCnt[0]);
+			ImGui::Text("move_coolTime_max_cnt : %d",			coolTimeMaxCnt[1]);
+			ImGui::Text("attack_swing_coolTime_max_cnt : %d",	coolTimeMaxCnt[2]);
+			ImGui::Text("attack_fast_coolTime_max_cnt : %d",	coolTimeMaxCnt[3]);
+			ImGui::Text("attack_rotate_coolTime_max_cnt : %d",	coolTimeMaxCnt[4]);
 
 			ImGui::TreePop();
 		}
@@ -163,6 +156,7 @@ void BossAI::ImGui()
 					"Move",
 					"Attack.Swing",
 					"Attack.Fast",
+					"Attack.Rotate",
 				};
 
 				if ( ACTION_STATE_COUNT <= i ) { return "Error Name"; }
