@@ -2,7 +2,7 @@
     "Player": {
         "cereal_class_version": 4,
         "scale": 1.0,
-        "runSpeed": 4.5,
+        "runSpeed": 23.5,
         "rotSlerpFactor": 0.20000000298023225,
         "hitBoxBody": {
             "cereal_class_version": 0,
@@ -31,7 +31,7 @@
         },
         "frameUnfoldableDefence": 45,
         "frameCancelableAttack": 20,
-        "frameWholeAttacking": 158,
+        "frameWholeAttacking": 135,
         "hitBoxShield": {
             "pos": {
                 "x": 0.0,

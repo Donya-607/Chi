@@ -184,11 +184,23 @@ Player::Player() :
 	std::vector<std::unique_ptr<skinned_mesh> *> modelRefs
 	{
 		&models.pIdle,
+		&models.pRun,
+		&models.pDefend,
 		&models.pAttack,
 	};
 	for ( auto &it : modelRefs )
 	{
 		InitializeModel( it );
+	}
+
+	std::vector<std::unique_ptr<skinned_mesh> *> dontLoopModels
+	{
+		&models.pDefend,
+		&models.pAttack,
+	};
+	for ( auto &it : dontLoopModels )
+	{
+		setLoopFlg( it->get(), /* is_loop = */ false );
 	}
 }
 Player::~Player() = default;
@@ -237,24 +249,16 @@ void Player::Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matP
 	switch ( status )
 	{
 	case Player::State::Idle:
-		{
-			FBXRender( models.pIdle.get(), WVP, W );
-		}
+		FBXRender( models.pIdle.get(), WVP, W );
 		break;
 	case Player::State::Run:
-		{
-			FBXRender( models.pIdle.get(), WVP, W );
-		}
+		FBXRender( models.pRun.get(), WVP, W );
 		break;
 	case Player::State::Defend:
-		{
-			FBXRender( models.pIdle.get(), WVP, W );
-		}
+		FBXRender( models.pDefend.get(), WVP, W );
 		break;
 	case Player::State::Attack:
-		{
-			FBXRender( models.pAttack.get(), WVP, W );
-		}
+		FBXRender( models.pAttack.get(), WVP, W );
 		break;
 	default: break;
 	}
@@ -442,8 +446,10 @@ void Player::SetFieldRadius( float newFieldRadius )
 
 void Player::LoadModel()
 {
-	loadFBX( models.pIdle.get(),	GetModelPath( ModelAttribute::PlayerIdle ) );
-	loadFBX( models.pAttack.get(),	GetModelPath( ModelAttribute::PlayerAtk ) );
+	loadFBX( models.pIdle.get(),	GetModelPath( ModelAttribute::PlayerIdle	) );
+	loadFBX( models.pRun.get(),		GetModelPath( ModelAttribute::PlayerRun		) );
+	loadFBX( models.pDefend.get(),	GetModelPath( ModelAttribute::PlayerDefend	) );
+	loadFBX( models.pAttack.get(),	GetModelPath( ModelAttribute::PlayerAtk		) );
 }
 
 Donya::Vector4x4 Player::CalcWorldMatrix() const
@@ -575,6 +581,8 @@ void Player::ChangeStatusFromRun( Input input )
 void Player::RunInit( Input input )
 {
 	status = State::Run;
+
+	setAnimFlame( models.pRun.get(), 0 );
 }
 void Player::RunUpdate( Input input )
 {
@@ -582,7 +590,7 @@ void Player::RunUpdate( Input input )
 }
 void Player::RunUninit()
 {
-	// No op.
+	setAnimFlame( models.pRun.get(), 0 );
 }
 
 void Player::ChangeStatusFromDefend( Input input )
@@ -611,6 +619,8 @@ void Player::DefendInit( Input input )
 
 	const auto &PARAM = PlayerParam::Get();
 	timer = PARAM.FrameWholeDefence();
+
+	setAnimFlame( models.pDefend.get(), 0 );
 }
 void Player::DefendUpdate( Input input )
 {
@@ -625,6 +635,8 @@ void Player::DefendUninit()
 {
 	timer = 0;
 	wasSucceededDefence = false;
+
+	setAnimFlame( models.pDefend.get(), 0 );
 }
 
 void Player::ChangeStatusFromAttack( Input input )
