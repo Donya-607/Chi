@@ -308,12 +308,12 @@ public:
 			const auto attackSpheres = boss.RequireAttackHitBoxesSphere();
 			for ( const auto &it : attackSpheres )
 			{
-				if ( Donya::OBB::IsHitOBB( playerShieldBox, it ) )
+				if ( Donya::OBB::IsHitSphere( playerShieldBox, it ) )
 				{
 					wasHitToShield = true;
 					player.SucceededDefence();
 				}
-				if ( !wasHitToShield && Donya::OBB::IsHitOBB( playerBodyBox, it ) )
+				if ( !wasHitToShield && Donya::OBB::IsHitSphere( playerBodyBox, it ) )
 				{
 					player.ReceiveImpact();
 				}

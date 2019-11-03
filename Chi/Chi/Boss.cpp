@@ -581,12 +581,17 @@ void Boss::Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matPro
 
 		OBJRender( pSphere.get(), CWVP, CW, color );
 	};
-	auto DrawOBB	= [&]( const Donya::OBB &OBB, const Donya::Vector4 &color, bool applyParentMatrix = true )
+	auto DrawOBB	= [&]( const Donya::OBB &OBB, const Donya::Vector4 &color, bool applyParentMatrix = true, bool applyParentDrawOffset = false )
 	{
 		Donya::Vector4x4 CS = Donya::Vector4x4::MakeScaling( OBB.size * 2.0f ); // Half size->Whole size.
 		Donya::Vector4x4 CR = OBB.orientation.RequireRotationMatrix();
 		Donya::Vector4x4 CT = Donya::Vector4x4::MakeTranslation( OBB.pos );
 		Donya::Vector4x4 CW = ( CS * CR * CT );
+		if ( applyParentDrawOffset )
+		{
+			Donya::Vector4x4 OFS = Donya::Vector4x4::MakeTranslation( drawOffset );
+			CW *= OFS;
+		}
 		if ( applyParentMatrix ) { CW *= W; }
 		Donya::Vector4x4 CWVP = CW * matView * matProjection;
 
@@ -740,6 +745,12 @@ std::vector<Donya::Sphere> Boss::RequireAttackHitBoxesSphere() const
 		if ( !it.collision.exist ) { continue; }
 		// else
 		spheres.emplace_back( it.collision );
+	}
+
+	// To world space.
+	for ( auto &it : spheres )
+	{
+		it.pos += pos;
 	}
 
 	return spheres;

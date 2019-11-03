@@ -668,7 +668,21 @@ namespace Donya
 		// see http://marupeke296.com/COL_3D_No12_OBBvsPoint.html
 
 		enum IntAxis{ X = 0, Y, Z, END };
-		auto RotatedAxis = []( const OBB &OBB, IntAxis axisIndex )->Donya::Vector3
+		auto ExtractHalfLength  = []( const OBB &OBB, IntAxis axisIndex )->float
+		{
+			_ASSERT_EXPR( 0 <= axisIndex && axisIndex < END, L"Error : Passed index out of range !" );
+
+			switch ( axisIndex )
+			{
+			case X: return OBB.size.x; // break;
+			case Y: return OBB.size.y; // break;
+			case Z: return OBB.size.z; // break;
+			default: break;
+			}
+
+			return NULL;
+		};
+		auto ExtractRotatedAxis = []( const OBB &OBB, IntAxis axisIndex )->Donya::Vector3
 		{
 			_ASSERT_EXPR( 0 <= axisIndex && axisIndex < END, L"Error : Passed index out of range !" );
 
@@ -685,12 +699,12 @@ namespace Donya
 		};
 
 		Donya::Vector3 protrudedSum{};
-		Donya::Vector3 axis{};
+
 		for ( int i = 0; i < END; ++i )
 		{
-			axis = RotatedAxis( L, static_cast<IntAxis>( i ) );
+			Donya::Vector3 axis	= ExtractRotatedAxis( L, static_cast<IntAxis>( i ) );
+			float halfLength	= ExtractHalfLength ( L, static_cast<IntAxis>( i ) );
 
-			float halfLength = axis.Length();
 			if ( halfLength <= 0 ) { continue; } // This case can not calculate.
 			// else
 
