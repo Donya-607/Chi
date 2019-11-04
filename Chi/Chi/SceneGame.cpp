@@ -27,7 +27,7 @@
 
 #if DEBUG_MODE
 constexpr int BGM_ID = 'BGM';
-constexpr int SE_ID = 'SE';
+constexpr int SE_ID  = 'SE';
 #endif // DEBUG_MODE
 
 struct SceneGame::Impl
@@ -40,6 +40,10 @@ public:
 	Player	player;
 	Stage	stage;
 	Boss	boss;
+	float cameraPosY;
+	float distance;
+	float length;
+	float targetY;
 public:
 	Impl() :
 		fieldRadius(),
@@ -47,7 +51,11 @@ public:
 		player(),
 		stage(),
 		boss(),
-		lights()
+		lights(),
+		cameraPosY( 250.0f ),
+		distance( 600.0f ),
+		length( 0.0f ),
+		targetY( 0.0f )
 	{}
 	~Impl() = default;
 private:
@@ -79,6 +87,11 @@ public:
 	{
 		LoadParameter();
 
+		if ( !LoadSounds() )
+		{
+			_ASSERT_EXPR( 0, L"Failed : Loading sound." );
+			exit( -1 );
+		}
 #if DEBUG_MODE
 		Donya::Sound::Load( BGM_ID, "./Data/Sounds/Test/BGM.wav", true  );
 		Donya::Sound::Load( SE_ID,  "./Data/Sounds/Test/SE.wav",  false );
@@ -144,13 +157,30 @@ public:
 			Player::Input input{};
 
 		#if DEBUG_MODE
-			if ( Donya::Keyboard::Press( VK_UP ) ) { input.moveVector.z = +1.0f; }
-			if ( Donya::Keyboard::Press( VK_DOWN ) ) { input.moveVector.z = -1.0f; }
-			if ( Donya::Keyboard::Press( VK_LEFT ) ) { input.moveVector.x = -1.0f; }
+			
+			if ( Donya::Keyboard::Press( VK_UP    ) ) { input.moveVector.z = +1.0f; }
+			if ( Donya::Keyboard::Press( VK_DOWN  ) ) { input.moveVector.z = -1.0f; }
+			if ( Donya::Keyboard::Press( VK_LEFT  ) ) { input.moveVector.x = -1.0f; }
 			if ( Donya::Keyboard::Press( VK_RIGHT ) ) { input.moveVector.x = +1.0f; }
 
-			if ( Donya::Keyboard::Press( 'Z' ) ) { input.doDefend = true; }
+			if ( Donya::Keyboard::Trigger( 'Z' ) ) { input.doDefend = true; }
 			if ( Donya::Keyboard::Trigger( 'X' ) ) { input.doAttack = true; }
+			
+			// XINPUT_GAMEPAD : https://docs.microsoft.com/ja-jp/windows/win32/api/xinput/ns-xinput-xinput_gamepad
+
+			// TODO : コントローラーがあるか判定する
+			{
+				constexpr int   PAD_NO = 0;
+				constexpr float STICK_RANGE_MAX = 32768.0f;
+				const auto leftStick = GameLib::input::xInput::getThumbL( PAD_NO );
+				if ( leftStick.x != 0 ) { input.moveVector.x = scast<float>( leftStick.x ) / STICK_RANGE_MAX; }
+				if ( leftStick.y != 0 ) { input.moveVector.z = scast<float>( leftStick.y ) / STICK_RANGE_MAX; }
+
+				constexpr int TRIGGER_FLAG = 1;
+				if ( GameLib::input::xInput::pressedButtons( PAD_NO, XboxPad_Button::RIGHT_THUMB ) == TRIGGER_FLAG ) { input.doDefend = true; }
+				if ( GameLib::input::xInput::pressedButtons( PAD_NO, XboxPad_Button::X           ) == TRIGGER_FLAG ) { input.doAttack = true; }
+			}
+
 		#endif // DEBUG_MODE
 
 			// Transform to camera space from world space.
@@ -190,8 +220,7 @@ public:
 		bossTarget.pos = player.GetPosition();
 		boss.Update( bossTarget );
 		
-		GameLib::camera::setPos( cameraPos );
-		GameLib::camera::setTarget( player.GetPosition() + cameraFocusOffset );
+		CameraUpdate();
 
 		ProcessCollision();
 		
@@ -280,6 +309,111 @@ public:
 	}
 
 public:
+	bool LoadSounds() const
+	{
+		struct Bundle
+		{
+			MusicAttribute	id;
+			bool			isEnableLoop;
+		public:
+			constexpr Bundle( MusicAttribute id, bool isEnableLoop ) : id( id ), isEnableLoop( isEnableLoop ) {}
+		};
+
+		constexpr std::array<Bundle, scast<int>( MusicAttribute::MUSIC_COUNT )> BUNDLES
+		{
+			{	// ID, isEnableLoop
+				{ MusicAttribute::PlayerDefend,		false	},
+				{ MusicAttribute::PlayerProtected,	false	},
+			}
+		};
+
+		bool successed = true;
+		for ( const auto &it : BUNDLES )
+		{
+			bool  result = Donya::Sound::Load( scast<int>( it.id ), GetMusicPath( it.id ), it.isEnableLoop );
+			if ( !result ) { successed = false; }
+		}
+		return successed;
+	}
+
+	void CameraUpdate()
+	{
+	#if 0
+		DirectX::XMFLOAT3 originVec( 0.0f, 0.0f, 1.0f );
+		DirectX::XMFLOAT3 boss_Player_Vec( player.GetPosition().x - boss.pos.x, player.GetPosition().y - boss.pos.y, player.GetPosition().z - boss.pos.z );
+		DirectX::XMFLOAT3 _boss_Player_Vec( player.GetPosition().x - boss.pos.x, player.GetPosition().y - boss.pos.y, player.GetPosition().z - boss.pos.z );
+
+		float l1, l2;
+		l1 = sqrtf( ( originVec.x * originVec.x ) + ( originVec.y * originVec.y ) + ( originVec.z * originVec.z ) );
+		l2 = sqrtf( ( boss_Player_Vec.x * boss_Player_Vec.x ) + 0.0f + ( boss_Player_Vec.z * boss_Player_Vec.z ) );
+		boss_Player_Vec.x /= l2;
+		boss_Player_Vec.y /= l2;
+		boss_Player_Vec.z /= l2;
+
+		float dot = 0.0f;
+		float angle = 0.0f;
+		l2 = sqrtf( ( boss_Player_Vec.x * boss_Player_Vec.x ) + 0.0f + ( boss_Player_Vec.z * boss_Player_Vec.z ) );
+		dot = ( originVec.x * boss_Player_Vec.x ) + 0.0f + ( originVec.z * boss_Player_Vec.z );
+		angle = acos( dot / ( l1 * l2 ) ) / ( 3.141592f / 180.0f );
+
+		if ( _boss_Player_Vec.x < 0 )
+		{
+			angle *= -1;
+		}
+		float distance = 1000.0f;
+		DirectX::XMFLOAT3 _player_pos = player.GetPosition();
+		cameraPos.x = _player_pos.x + sinf( angle * 0.01745f ) * distance;
+		cameraPos.y = 400.0f;
+		cameraPos.z = _player_pos.z + cosf( angle * 0.01745f ) * distance;
+	#elif 0
+		Donya::Vector3 boss_Player_Vec( player.GetPosition().x - boss.pos.x, 0.0f, player.GetPosition().z - boss.pos.z );
+		Donya::Vector3 boss_Player_Vec_N = boss_Player_Vec;
+		boss_Player_Vec_N.Normalize();
+
+		float add_length = 1000.0f;
+
+		cameraPos.x = boss_Player_Vec_N.x * ( boss_Player_Vec.Length() + add_length );
+		cameraPos.y = player.GetPosition().y + add_length;
+		cameraPos.z = boss_Player_Vec_N.z * ( boss_Player_Vec.Length() + add_length );
+	#else
+		Donya::Vector3 playerPos = player.GetPosition();
+		Donya::Vector3 targetPos = boss.GetPosition();
+
+		// 単位ベクトル取得
+		// DirectX::XMFLOAT3 player_to_target_vec = DirectX::XMFLOAT3( targetPos.x - playerPos.x, targetPos.y - playerPos.y, targetPos.z - playerPos.z );
+		Donya::Vector3 player_to_target_vec = targetPos - playerPos;
+		length = player_to_target_vec.Length();
+		Donya::Vector3 unitvec_player_to_target = player_to_target_vec.Normalized();
+
+		//カメラ位置取得
+		cameraPos = Donya::Vector3
+		{
+			playerPos.x - unitvec_player_to_target.x * distance,
+			cameraPosY,
+			playerPos.z - unitvec_player_to_target.z * distance
+		};
+
+		//注視点取得
+	#if 0
+		DirectX::XMFLOAT3 cameraTarget = DirectX::XMFLOAT3( targetPos.x + unitvec_player_to_target.x, targetPos.y + unitvec_player_to_target.y, targetPos.z + unitvec_player_to_target.z );
+	#else
+		// TODO : 後々、変更するかも。
+		float tanY = tanf( 90.0f );
+		targetY = tanY * ( length / 8.0f );
+		// DirectX::XMFLOAT3 cameraTarget = DirectX::XMFLOAT3( targetPos.x + unitvec_player_to_target.x, targetY, targetPos.z + unitvec_player_to_target.z );
+		Donya::Vector3 cameraTarget = Donya::Vector3
+		{
+			targetPos.x + unitvec_player_to_target.x,
+			targetY,
+			targetPos.z + unitvec_player_to_target.z
+		};
+	#endif
+
+	#endif
+		GameLib::camera::setPos( cameraPos );
+		GameLib::camera::setTarget( cameraTarget + cameraFocusOffset );
+	}
+
 	void ProcessCollision()
 	{
 		Donya::OBB playerBodyBox   = player.GetHurtBox();
@@ -374,17 +508,17 @@ public:
 				ImGui::Text( "Show.Press \'ALT\' and \'H\'key : Toggle Collision ON/OFF" );
 				ImGui::Text( "" );
 
-				if ( ImGui::TreeNode( u8"Sound test" ) )
+				if ( ImGui::TreeNode( "Sound test" ) )
 				{
-					if ( ImGui::Button( u8"BGM.Play"   ) ) { Donya::Sound::Play  ( BGM_ID ); }
-					if ( ImGui::Button( u8"BGM.Pause"  ) ) { Donya::Sound::Pause ( BGM_ID ); }
-					if ( ImGui::Button( u8"BGM.Resume" ) ) { Donya::Sound::Resume( BGM_ID ); }
-					if ( ImGui::Button( u8"BGM.Stop"   ) ) { Donya::Sound::Stop  ( BGM_ID ); }
+					if ( ImGui::Button( "BGM.Play"   ) ) { Donya::Sound::Play  ( BGM_ID ); }
+					if ( ImGui::Button( "BGM.Pause"  ) ) { Donya::Sound::Pause ( BGM_ID ); }
+					if ( ImGui::Button( "BGM.Resume" ) ) { Donya::Sound::Resume( BGM_ID ); }
+					if ( ImGui::Button( "BGM.Stop"   ) ) { Donya::Sound::Stop  ( BGM_ID ); }
 					ImGui::Text( "" );
-					if ( ImGui::Button( u8"SE.Play"    ) ) { Donya::Sound::Play  ( SE_ID  ); }
-					if ( ImGui::Button( u8"SE.Pause"   ) ) { Donya::Sound::Pause ( SE_ID  ); }
-					if ( ImGui::Button( u8"SE.Resume"  ) ) { Donya::Sound::Resume( SE_ID  ); }
-					if ( ImGui::Button( u8"SE.Stop"    ) ) { Donya::Sound::Stop  ( SE_ID  ); }
+					if ( ImGui::Button( "SE.Play"    ) ) { Donya::Sound::Play  ( SE_ID  ); }
+					if ( ImGui::Button( "SE.Pause"   ) ) { Donya::Sound::Pause ( SE_ID  ); }
+					if ( ImGui::Button( "SE.Resume"  ) ) { Donya::Sound::Resume( SE_ID  ); }
+					if ( ImGui::Button( "SE.Stop"    ) ) { Donya::Sound::Stop  ( SE_ID  ); }
 
 					ImGui::TreePop();
 				}
@@ -395,6 +529,10 @@ public:
 					ImGui::Text( "" );
 					ImGui::DragFloat3( "Camera.Pos", &cameraPos.x );
 					ImGui::DragFloat3( "Camera.FocusOffset", &cameraFocusOffset.x );
+					ImGui::DragFloat(  "CameraPosY", &cameraPosY );
+					ImGui::DragFloat(  "Player to Camera Distance", &distance );
+					ImGui::Text( "player to boss distance : %f", length );
+					ImGui::Text( "boss to target length : %f", targetY );
 
 					ImGui::TreePop();
 				}
