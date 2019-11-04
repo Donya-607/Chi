@@ -33,29 +33,22 @@ constexpr int SE_ID  = 'SE';
 struct SceneGame::Impl
 {
 public:
-	float	fieldRadius;
-	Donya::Vector3 cameraPos;
-	Donya::Vector3 cameraFocusOffset;
-	Lights	lights;
-	Player	player;
-	Stage	stage;
-	Boss	boss;
-	float cameraPosY;
-	float distance;
-	float length;
-	float targetY;
+	float			fieldRadius;
+	float			cameraLeaveDistance;	// Leave from player.
+	Donya::Vector3	cameraPos;				// The Y will be serialize.
+	Donya::Vector3	cameraFocusOffset;
+	Lights			lights;
+	Player			player;
+	Stage			stage;
+	Boss			boss;
 public:
 	Impl() :
-		fieldRadius(),
+		fieldRadius(), cameraLeaveDistance(),
 		cameraPos(), cameraFocusOffset(),
 		player(),
 		stage(),
 		boss(),
-		lights(),
-		cameraPosY( 250.0f ),
-		distance( 600.0f ),
-		length( 0.0f ),
-		targetY( 0.0f )
+		lights()
 	{}
 	~Impl() = default;
 private:
@@ -77,6 +70,14 @@ private:
 			archive( CEREAL_NVP( cameraFocusOffset ) );
 		}
 		if ( 3 <= version )
+		{
+			archive
+			(
+				CEREAL_NVP( cameraPos.y ),
+				CEREAL_NVP( cameraLeaveDistance )
+			);
+		}
+		if ( 4 <= version )
 		{
 			// archive( CEREAL_NVP( x ) );
 		}
@@ -105,8 +106,6 @@ public:
 			setPointLight( i );
 		}
 
-		cameraPos = Donya::Vector3{ 0.0f, 768.0f, -1024.0f };
-
 	#if DEBUG_MODE
 		// createCube( &testCube );
 
@@ -120,6 +119,9 @@ public:
 
 		boss.Init( STAGE_NO );
 		boss.SetFieldRadius( fieldRadius );
+
+		// Set camera's position and focus.
+		CameraUpdate();
 	}
 	void Uninit()
 	{
@@ -382,15 +384,15 @@ public:
 		// 単位ベクトル取得
 		// DirectX::XMFLOAT3 player_to_target_vec = DirectX::XMFLOAT3( targetPos.x - playerPos.x, targetPos.y - playerPos.y, targetPos.z - playerPos.z );
 		Donya::Vector3 player_to_target_vec = targetPos - playerPos;
-		length = player_to_target_vec.Length();
+		float distPlayerBoss = player_to_target_vec.Length();
 		Donya::Vector3 unitvec_player_to_target = player_to_target_vec.Normalized();
 
 		//カメラ位置取得
 		cameraPos = Donya::Vector3
 		{
-			playerPos.x - unitvec_player_to_target.x * distance,
-			cameraPosY,
-			playerPos.z - unitvec_player_to_target.z * distance
+			playerPos.x - unitvec_player_to_target.x * cameraLeaveDistance,
+			cameraPos.y,
+			playerPos.z - unitvec_player_to_target.z * cameraLeaveDistance
 		};
 
 		//注視点取得
@@ -399,12 +401,12 @@ public:
 	#else
 		// TODO : 後々、変更するかも。
 		float tanY = tanf( 90.0f );
-		targetY = tanY * ( length / 8.0f );
+		float cameraFocusY = tanY * ( distPlayerBoss / 8.0f );
 		// DirectX::XMFLOAT3 cameraTarget = DirectX::XMFLOAT3( targetPos.x + unitvec_player_to_target.x, targetY, targetPos.z + unitvec_player_to_target.z );
 		Donya::Vector3 cameraTarget = Donya::Vector3
 		{
 			targetPos.x + unitvec_player_to_target.x,
-			targetY,
+			cameraFocusY,
 			targetPos.z + unitvec_player_to_target.z
 		};
 	#endif
@@ -495,7 +497,7 @@ public:
 	{
 #if USE_IMGUI
 
-		if (ImGui::BeginIfAllowed())
+		if ( ImGui::BeginIfAllowed() )
 		{
 			if ( ImGui::Button( "GotoTitle" ) )
 			{
@@ -527,12 +529,10 @@ public:
 				{
 					ImGui::DragFloat( "Field.Radius", &fieldRadius ); player.SetFieldRadius( fieldRadius );
 					ImGui::Text( "" );
-					ImGui::DragFloat3( "Camera.Pos", &cameraPos.x );
-					ImGui::DragFloat3( "Camera.FocusOffset", &cameraFocusOffset.x );
-					ImGui::DragFloat(  "CameraPosY", &cameraPosY );
-					ImGui::DragFloat(  "Player to Camera Distance", &distance );
-					ImGui::Text( "player to boss distance : %f", length );
-					ImGui::Text( "boss to target length : %f", targetY );
+
+					ImGui::DragFloat ( "Camera.Position.Y",		&cameraPos.y );
+					ImGui::DragFloat ( "Camera.LeaveDistance",	&cameraLeaveDistance );
+					ImGui::DragFloat3( "Camera.FocusOffset",	&cameraFocusOffset.x );
 
 					ImGui::TreePop();
 				}
@@ -615,7 +615,7 @@ public:
 #endif // USE_IMGUI
 	}
 };
-CEREAL_CLASS_VERSION( SceneGame::Impl, 2 )
+CEREAL_CLASS_VERSION( SceneGame::Impl, 3 )
 
 SceneGame::SceneGame() : baseScene(), pImpl(std::make_unique<Impl>())
 {}
