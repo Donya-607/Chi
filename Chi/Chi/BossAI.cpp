@@ -220,6 +220,7 @@ void BossAI::ImGui()
 		{
 			ImGui::Text( "Status : %d", scast<int>( status ) );
 			ImGui::Text( "Timer : %d", timer );
+			ImGui::Text( "CoolTime : %d", coolTime );
 
 			// Show whole frame.
 			{
