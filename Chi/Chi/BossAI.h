@@ -11,7 +11,10 @@
 class BossAI
 {
 public:
-	enum ActionState
+	/// <summary>
+	/// Contain all behavior.
+	/// </summary>
+	enum class ActionState
 	{
 		WAIT,
 		MOVE,
@@ -21,23 +24,75 @@ public:
 
 		END
 	};
-	static constexpr int ACTION_STATE_COUNT = static_cast<int>( END );
+	static constexpr int ACTION_STATE_COUNT = static_cast<int>( ActionState::END );
 private:
-	int state{};
-	std::array<int, ACTION_STATE_COUNT> cnt{};
-	std::array<int, ACTION_STATE_COUNT> maxCnt{};
-	std::array<int, ACTION_STATE_COUNT> coolTimeMaxCnt{};
-	std::array<int, ACTION_STATE_COUNT> percent{};
+	/// <summary>
+	/// Only cool-time behavior.
+	/// </summary>
+	enum class WaitState
+	{
+		WAIT,
+		MOVE,
+
+		END
+	};
+	static constexpr int WAIT_STATE_COUNT = static_cast<int>( WaitState::END );
+	/// <summary>
+	/// Only attack behavior.
+	/// </summary>
+	enum class AttackState
+	{
+		SWING,
+		FAST,
+		ROTATE,
+
+		END
+	};
+	static constexpr int ATTACK_STATE_COUNT = static_cast<int>( AttackState::END );
 private:
-	void StateRand();
+	ActionState status{};
+
+	int timer{};
+	int coolTime{};
+
+	std::array<int, ATTACK_STATE_COUNT>	wholeFrame{};
+	std::array<int, ATTACK_STATE_COUNT>	coolTimeFrame{};
+	std::array<int, WAIT_STATE_COUNT>	waitPercents{};
+	std::array<int, ATTACK_STATE_COUNT>	attackPercents{};
 public:
 	BossAI() {}
-	~BossAI() {}
+	// ~BossAI() = default;
 private:
 	friend class cereal::access;
 	template<class Archive>
 	void serialize( Archive &archive, std::uint32_t version )
 	{
+		if ( 2 <= version )
+		{
+			archive
+			(
+				CEREAL_NVP( wholeFrame ),
+				CEREAL_NVP( coolTimeFrame )
+			);
+
+			if ( 3 <= version )
+			{
+				archive
+				(
+					CEREAL_NVP( waitPercents ),
+					CEREAL_NVP( attackPercents )
+				);
+			}
+			if ( 4 <= version )
+			{
+				// archive( CEREAL_NVP( x ) );
+			}
+
+			return;
+		}
+		// else
+
+		/*
 		archive
 		(
 			CEREAL_NVP( percent )
@@ -47,20 +102,25 @@ private:
 		{
 			archive
 			(
-				CEREAL_NVP( maxCnt ),
-				CEREAL_NVP( coolTimeMaxCnt )
+				CEREAL_NVP( wholeFrame ),
+				CEREAL_NVP( coolTimeFrame )
 			);
 		}
-		if ( 2 <= version )
-		{
-			// archive( CEREAL_NVP( x ) );
-		}
+		*/
 	}
 	static constexpr const char *SERIAL_ID = "BossAI";
 public:
 	void Init();
 	void Update();
-	int GetState() { return state; }
+	ActionState GetState() const { return status; }
+private:
+	ActionState ToActionState( WaitState status ) const;
+	ActionState ToActionState( AttackState status ) const;
+
+	void LotteryWaitState();
+	void LotteryAttackState();
+
+	bool NowStatusAction() const;
 private:
 	void LoadParameter( bool isBinary = true );
 
@@ -74,4 +134,4 @@ public:
 
 #endif // USE_IMGUI
 };
-CEREAL_CLASS_VERSION( BossAI, 1 )
+CEREAL_CLASS_VERSION( BossAI, 2 )

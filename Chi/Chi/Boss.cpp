@@ -40,11 +40,11 @@ float BossParam::MoveSpeed( BossAI::ActionState status ) const
 {
 	switch ( status )
 	{
-	case BossAI::WAIT:			return 0.0f;					// break;
-	case BossAI::MOVE:			return moveMoveSpeed;			// break;
-	case BossAI::ATTACK_SWING:	return 0.0f;					// break;
-	case BossAI::ATTACK_FAST:	return attackFastMoveSpeed;		// break;
-	case BossAI::ATTACK_ROTATE:	return attackRotateMoveSpeed;	// break;
+	case BossAI::ActionState::WAIT:				return 0.0f;					// break;
+	case BossAI::ActionState::MOVE:				return moveMoveSpeed;			// break;
+	case BossAI::ActionState::ATTACK_SWING:		return 0.0f;					// break;
+	case BossAI::ActionState::ATTACK_FAST:		return attackFastMoveSpeed;		// break;
+	case BossAI::ActionState::ATTACK_ROTATE:	return attackRotateMoveSpeed;	// break;
 	default: break;
 	}
 
@@ -54,11 +54,11 @@ float BossParam::SlerpFactor( BossAI::ActionState status ) const
 {
 	switch ( status )
 	{
-	case BossAI::WAIT:			return idleSlerpFactor;			// break;
-	case BossAI::MOVE:			return moveSlerpFactor;			// break;
-	case BossAI::ATTACK_SWING:	return 0.5f;					// break;
-	case BossAI::ATTACK_FAST:	return attackFastSlerpFactor;	// break;
-	case BossAI::ATTACK_ROTATE:	return attackRotateSlerpFactor;	// break;
+	case BossAI::ActionState::WAIT:				return idleSlerpFactor;			// break;
+	case BossAI::ActionState::MOVE:				return moveSlerpFactor;			// break;
+	case BossAI::ActionState::ATTACK_SWING:		return 0.5f;					// break;
+	case BossAI::ActionState::ATTACK_FAST:		return attackFastSlerpFactor;	// break;
+	case BossAI::ActionState::ATTACK_ROTATE:	return attackRotateSlerpFactor;	// break;
 	default: break;
 	}
 
@@ -807,7 +807,7 @@ float Boss::CalcNormalizedDistance( Donya::Vector3 wsTargetPos )
 
 void Boss::ChangeStatus( TargetStatus target )
 {
-	int lotteryStatus = AI.GetState();
+	BossAI::ActionState lotteryStatus = AI.GetState();
 	if ( status == lotteryStatus ) { return; }
 	// else
 

@@ -1,26 +1,15 @@
 {
     "BossAI": {
-        "cereal_class_version": 1,
-        "percent": {
-            "value0": 10,
-            "value1": 10,
-            "value2": 20,
-            "value3": 20,
-            "value4": 20
+        "cereal_class_version": 2,
+        "wholeFrame": {
+            "value0": 125,
+            "value1": 240,
+            "value2": 165
         },
-        "maxCnt": {
-            "value0": 60,
-            "value1": 60,
-            "value2": 125,
-            "value3": 240,
-            "value4": 180
-        },
-        "coolTimeMaxCnt": {
-            "value0": 0,
-            "value1": 0,
-            "value2": 0,
-            "value3": 0,
-            "value4": 0
+        "coolTimeFrame": {
+            "value0": 20,
+            "value1": 75,
+            "value2": 50
         }
     }
 }
