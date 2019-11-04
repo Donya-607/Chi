@@ -13,6 +13,7 @@
 #define scast static_cast
 
 BossParam::BossParam() :
+	rotLeaveStartFrame(), rotLeaveWholeFrame( 1 ), rotLeaveDistance(),
 	scale( 1.0f ), stageBodyRadius( 1.0f ),
 	targetDistNear( 0.0f ), targetDistFar( 1.0f ),
 	idleSlerpFactor( 1.0f ),
@@ -119,11 +120,13 @@ void BossParam::UseImGui()
 			ImGui::DragFloat( "MoveSpeed.\"Move\"State", &moveMoveSpeed );
 			ImGui::DragFloat( "MoveSpeed.\"Attack.Fast\"State", &attackFastMoveSpeed );
 			ImGui::DragFloat( "MoveSpeed.\"Attack.Rotate\"State", &attackRotateMoveSpeed );
+			ImGui::Text( "" );
 
 			ImGui::SliderFloat( "SlerpFactor.\"Idle\"State", &idleSlerpFactor, 0.0f, 1.0f );
 			ImGui::SliderFloat( "SlerpFactor.\"Move\"State", &moveSlerpFactor, 0.0f, 1.0f );
 			ImGui::SliderFloat( "SlerpFactor.\"Attack.Fast\"State", &attackFastSlerpFactor, 0.0f, 1.0f );
 			ImGui::SliderFloat( "SlerpFactor.\"Attack.Rotate\"State", &attackRotateSlerpFactor, 0.0f, 1.0f );
+			ImGui::Text( "" );
 
 			if ( ImGui::TreeNode( "Initialize.Position" ) )
 			{
@@ -163,7 +166,16 @@ void BossParam::UseImGui()
 
 				ImGui::TreePop();
 			}
-			
+			ImGui::Text( "" );
+			if ( ImGui::TreeNode( "RotateAttack" ) )
+			{
+				ImGui::DragInt( "Leave.StartFrame", &rotLeaveStartFrame );
+				ImGui::DragInt( "Leave.WholeFrame", &rotLeaveWholeFrame );
+				ImGui::DragFloat( "Leave.Distance", &rotLeaveDistance   );
+
+				ImGui::TreePop();
+			}
+			ImGui::Text( "" );
 			if ( ImGui::TreeNode( "Collisions" ) )
 			{
 				auto ShowAABB		= []( const std::string &prefix, Donya::AABB		*pAABB	)
@@ -324,7 +336,7 @@ void BossParam::UseImGui()
 
 				ImGui::TreePop();
 			}
-
+			ImGui::Text( "" );
 			if ( ImGui::TreeNode( "File.I/O" ) )
 			{
 				static bool isBinary = true;
@@ -439,8 +451,8 @@ void ResetCurrentOBBFNames( std::vector<BossParam::OBBFrameWithName> *pOBBFNs )
 Boss::Boss() :
 	status( BossAI::ActionState::WAIT ),
 	AI(),
-	stageNo( 1 ), fieldRadius(), slerpFactor( 1.0f ),
-	pos(), velocity(),
+	stageNo( 1 ), fieldRadius(), slerpFactor( 1.0f ), easeFactor(),
+	pos(), velocity(), extraOffset(),
 	orientation(),
 	models()
 {
@@ -969,6 +981,8 @@ void Boss::AttackRotateInit( TargetStatus target )
 	status = BossAI::ActionState::ATTACK_ROTATE;
 
 	slerpFactor = BossParam::Get().SlerpFactor( status );
+	easeFactor  = 0.0f;
+	extraOffset = 0.0f;
 
 	ResetCurrentSphereFrames( BossParam::Get().RotateAtkCollisions() );
 	setAnimFlame( models.pAtkRotate.get(), 0 );
@@ -976,6 +990,13 @@ void Boss::AttackRotateInit( TargetStatus target )
 void Boss::AttackRotateUpdate( TargetStatus target )
 {
 	velocity = orientation.LocalFront() * BossParam::Get().MoveSpeed( status );
+
+	const int startLeaveFrame	= BossParam::Get().RotLeaveStartFrame();
+	const int currentFrame		= models.pAtkRotate->getAnimFlame();
+	if ( startLeaveFrame <= currentFrame )
+	{
+		// TODO:implement here.
+	}
 
 	auto *pSphereFs = BossParam::Get().RotateAtkCollisions();
 	const size_t COUNT = pSphereFs->size();
@@ -987,6 +1008,9 @@ void Boss::AttackRotateUpdate( TargetStatus target )
 }
 void Boss::AttackRotateUninit()
 {
+	easeFactor  = 0.0f;
+	extraOffset = 0.0f;
+
 	ResetCurrentSphereFrames( BossParam::Get().RotateAtkCollisions() );
 	setAnimFlame( models.pAtkRotate.get(), 0 );
 }

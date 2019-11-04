@@ -49,6 +49,9 @@ public:
 		Donya::OBB CalcTransformedOBB( skinned_mesh *pMesh, const Donya::Vector4x4 &parentSpaceMatrix ) const;
 	};
 private:
+	int								rotLeaveStartFrame;		// Use when status is attack of rotate.
+	int								rotLeaveWholeFrame;		// Use when status is attack of rotate.
+	float							rotLeaveDistance;		// Use when status is attack of rotate.
 	float							scale;					// Usually 1.0f.
 	float							stageBodyRadius;		// Using for collision to stage's wall.
 	float							targetDistNear;			// 0.0f ~ 1.0f.
@@ -118,6 +121,15 @@ private:
 			}
 			if ( 8 <= version )
 			{
+				archive
+				(
+					CEREAL_NVP( rotLeaveStartFrame ),
+					CEREAL_NVP( rotLeaveWholeFrame ),
+					CEREAL_NVP( rotLeaveDistance )
+				);
+			}
+			if ( 9 <= version )
+			{
 				// archive( CEREAL_NVP( x ) );
 			}
 
@@ -170,6 +182,9 @@ public:
 	void Init();
 	void Uninit();
 public:
+	int										RotLeaveStartFrame()	const	{ return rotLeaveStartFrame; }
+	int										RotLeaveWholeFrame()	const	{ return rotLeaveWholeFrame; }
+	float									RotLeaveDistance()		const	{ return rotLeaveDistance; }
 	float									Scale()					const	{ return scale; }
 	float									StageBodyRadius()		const	{ return stageBodyRadius; }
 	float									TargetDistNear()		const	{ return targetDistNear; }
@@ -196,7 +211,7 @@ public:
 
 #endif // USE_IMGUI
 };
-CEREAL_CLASS_VERSION( BossParam, 7 )
+CEREAL_CLASS_VERSION( BossParam, 8 )
 CEREAL_CLASS_VERSION( BossParam::OBBFrameWithName, 0 )
 
 class Boss
@@ -219,9 +234,11 @@ private:
 	BossAI					AI;
 	int						stageNo;		// 1-based.
 	float					fieldRadius;	// For collision to wall. the field is perfect-circle, so I can detect collide to wall by distance.
-	float					slerpFactor;	// 0.0f ~ 1.0. Use orientation's rotation.
+	float					slerpFactor;	// 0.0f ~ 1.0f. Use orientation's rotation.
+	float					easeFactor;		// 0.0f ~ 1.0f.
 	Donya::Vector3			pos;
 	Donya::Vector3			velocity;
+	Donya::Vector3			extraOffset;	// Actual position is "pos + extraOffset".
 	Donya::Quaternion		orientation;
 	Models					models;
 public:
@@ -243,7 +260,7 @@ public:
 
 	void SetFieldRadius( float fieldRadius );
 
-	Donya::Vector3 GetPosition() const { return pos; }
+	Donya::Vector3 GetPosition() const { return pos + extraOffset; }
 private:
 	void LoadModel();
 
