@@ -134,4 +134,4 @@ public:
 
 #endif // USE_IMGUI
 };
-CEREAL_CLASS_VERSION( BossAI, 2 )
+CEREAL_CLASS_VERSION( BossAI, 3 )

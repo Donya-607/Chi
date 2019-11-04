@@ -1,6 +1,6 @@
 {
     "BossAI": {
-        "cereal_class_version": 2,
+        "cereal_class_version": 3,
         "wholeFrame": {
             "value0": 125,
             "value1": 240,
@@ -10,6 +10,15 @@
             "value0": 20,
             "value1": 75,
             "value2": 50
+        },
+        "waitPercents": {
+            "value0": 10,
+            "value1": 35
+        },
+        "attackPercents": {
+            "value0": 10,
+            "value1": 8,
+            "value2": 10
         }
     }
 }
