@@ -3,6 +3,7 @@
 #include <array>
 
 #include "Donya/FilePath.h"
+#include "Donya/Sound.h"
 #include "Donya/Useful.h"		// Use convert character-code function.
 #include "Donya/UseImGui.h"
 
@@ -431,6 +432,7 @@ Donya::OBB Player::CalcAttackHitBox() const
 void Player::SucceededDefence()
 {
 	wasSucceededDefence = true;
+	Donya::Sound::Play( scast<int>( MusicAttribute::PlayerProtected ) );
 }
 
 void Player::ReceiveImpact()
@@ -638,6 +640,8 @@ void Player::DefendInit( Input input )
 	timer = PARAM.FrameWholeDefence();
 
 	setAnimFlame( models.pDefend.get(), 0 );
+
+	Donya::Sound::Play( scast<int>( MusicAttribute::PlayerDefend ) );
 }
 void Player::DefendUpdate( Input input )
 {

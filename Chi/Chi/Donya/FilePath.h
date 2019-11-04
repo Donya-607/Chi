@@ -28,3 +28,13 @@ enum class ModelAttribute
 };
 
 std::string GetModelPath( ModelAttribute modelAttribute );
+
+enum class MusicAttribute
+{
+	PlayerDefend,
+	PlayerProtected,
+
+	MUSIC_COUNT
+};
+
+std::string GetMusicPath( MusicAttribute musicAttribute );

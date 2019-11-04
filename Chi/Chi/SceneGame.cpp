@@ -27,7 +27,7 @@
 
 #if DEBUG_MODE
 constexpr int BGM_ID = 'BGM';
-constexpr int SE_ID = 'SE';
+constexpr int SE_ID  = 'SE';
 #endif // DEBUG_MODE
 
 struct SceneGame::Impl
@@ -87,6 +87,11 @@ public:
 	{
 		LoadParameter();
 
+		if ( !LoadSounds() )
+		{
+			_ASSERT_EXPR( 0, L"Failed : Loading sound." );
+			exit( -1 );
+		}
 #if DEBUG_MODE
 		Donya::Sound::Load( BGM_ID, "./Data/Sounds/Test/BGM.wav", true  );
 		Donya::Sound::Load( SE_ID,  "./Data/Sounds/Test/SE.wav",  false );
@@ -304,6 +309,33 @@ public:
 	}
 
 public:
+	bool LoadSounds() const
+	{
+		struct Bundle
+		{
+			MusicAttribute	id;
+			bool			isEnableLoop;
+		public:
+			constexpr Bundle( MusicAttribute id, bool isEnableLoop ) : id( id ), isEnableLoop( isEnableLoop ) {}
+		};
+
+		constexpr std::array<Bundle, scast<int>( MusicAttribute::MUSIC_COUNT )> BUNDLES
+		{
+			{	// ID, isEnableLoop
+				{ MusicAttribute::PlayerDefend,		false	},
+				{ MusicAttribute::PlayerProtected,	false	},
+			}
+		};
+
+		bool successed = true;
+		for ( const auto &it : BUNDLES )
+		{
+			bool  result = Donya::Sound::Load( scast<int>( it.id ), GetMusicPath( it.id ), it.isEnableLoop );
+			if ( !result ) { successed = false; }
+		}
+		return successed;
+	}
+
 	void CameraUpdate()
 	{
 	#if 0

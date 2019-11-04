@@ -61,3 +61,19 @@ std::string GetModelPath( ModelAttribute modelAttribute )
 
 	return "ERROR_ATTRIBUTE";
 }
+
+std::string GetMusicPath( MusicAttribute musicAttribute )
+{
+	switch ( musicAttribute )
+	{
+	case MusicAttribute::PlayerDefend:
+		return "./Data/Sounds/SE/Player/Defend.wav";				// break;
+	case MusicAttribute::PlayerProtected:
+		return "./Data/Sounds/SE/Player/Protected.wav";				// break;
+	default:
+		assert( !"Error : Specified unexpect music type." ); break;
+		break;
+	}
+
+	return "ERROR_ATTRIBUTE";
+}
