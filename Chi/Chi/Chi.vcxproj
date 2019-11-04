@@ -147,6 +147,7 @@
     <ClInclude Include="Donya\ChiUtility.h" />
     <ClInclude Include="Donya\Collision.h" />
     <ClInclude Include="Donya\Constant.h" />
+    <ClInclude Include="Donya\Easing.h" />
     <ClInclude Include="Donya\FilePath.h" />
     <ClInclude Include="Donya\Keyboard.h" />
     <ClInclude Include="Donya\Quaternion.h" />

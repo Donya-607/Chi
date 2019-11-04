@@ -123,6 +123,7 @@
     <ClInclude Include="Boss.h" />
     <ClInclude Include="OBB.h" />
     <ClInclude Include="Donya\Random.h" />
+    <ClInclude Include="Donya\Easing.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp">
