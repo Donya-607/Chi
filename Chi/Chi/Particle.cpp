@@ -119,18 +119,18 @@ void FlashParticle::ImGuiDataInit()
 {
 	LoadParameter();
 
-	imguiData.speed[0] = 0.0f;
-	imguiData.speed[1] = 0.0f;
-	imguiData.speed[2] = 0.0f;
+	imguiData.speed[0] = 0; // 0.0f;
+	imguiData.speed[1] = 0; // 0.0f;
+	imguiData.speed[2] = 0; // 0.0f;
 	//imguiData.accel[0] = 0.0f;
 	//imguiData.accel[1] = 0.0f;
 	//imguiData.accel[2] = 0.0f;
-	imguiData.accelStart[0] = 0.0f;
-	imguiData.accelStart[1] = 0.0f;
-	imguiData.accelStart[2] = 0.0f;
-	imguiData.accelStage[0] = 0.0f;
-	imguiData.accelStage[1] = 0.0f;
-	imguiData.accelStage[2] = 0.0f;
+	imguiData.accelStart[0] = 0; // 0.0f;
+	imguiData.accelStart[1] = 0; // 0.0f;
+	imguiData.accelStart[2] = 0; // 0.0f;
+	imguiData.accelStage[0] = 0; // 0.0f;
+	imguiData.accelStage[1] = 0; // 0.0f;
+	imguiData.accelStage[2] = 0; // 0.0f;
 }
 
 void FlashParticle::Emit()
@@ -252,18 +252,18 @@ void BubbleParticle::Set()
 
 void BubbleParticle::ImGuiDataInit()
 {
-	imguiData.speed[0] = 0.0f;
-	imguiData.speed[1] = 0.0f;
-	imguiData.speed[2] = 0.0f;
-	imguiData.accel[0] = 0.0f;
-	imguiData.accel[1] = 0.0f;
-	imguiData.accel[2] = 0.0f;
-	imguiData.accelStart[0] = 0.0f;
-	imguiData.accelStart[1] = 0.0f;
-	imguiData.accelStart[2] = 0.0f;
-	imguiData.accelStage[0] = 0.0f;
-	imguiData.accelStage[1] = 0.0f;
-	imguiData.accelStage[2] = 0.0f;
+	imguiData.speed[0] = 0; // 0.0f;
+	imguiData.speed[1] = 0; // 0.0f;
+	imguiData.speed[2] = 0; // 0.0f;
+	imguiData.accel[0] = 0; // 0.0f;
+	imguiData.accel[1] = 0; // 0.0f;
+	imguiData.accel[2] = 0; // 0.0f;
+	imguiData.accelStart[0] = 0; // 0.0f;
+	imguiData.accelStart[1] = 0; // 0.0f;
+	imguiData.accelStart[2] = 0; // 0.0f;
+	imguiData.accelStage[0] = 0; // 0.0f;
+	imguiData.accelStage[1] = 0; // 0.0f;
+	imguiData.accelStage[2] = 0; // 0.0f;
 }
 
 void BubbleParticle::Emit()
