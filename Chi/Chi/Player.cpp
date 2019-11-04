@@ -21,7 +21,7 @@
 #define scast static_cast
 
 PlayerParam::PlayerParam() :
-	frameUnfoldableDefence( 1 ), frameCancelableAttack( 1 ), frameWholeAttacking( 1 ),
+	frameUnfoldableDefence( 1 ), shieldsRecastFrame( 1 ), frameCancelableAttack( 1 ), frameWholeAttacking( 1 ),
 	scale( 1.0f ), runSpeed( 1.0f ), rotSlerpFactor( 0.3f ),
 	hitBoxBody(), hitBoxPhysic(), hitBoxShield(), hitBoxLance(),
 	lanceMeshName()
@@ -76,6 +76,7 @@ void PlayerParam::UseImGui()
 		if ( ImGui::TreeNode( "Player.AdjustData" ) )
 		{
 			ImGui::SliderInt( "Defence.WholeExpandingFrame", &frameUnfoldableDefence, 1, 120 );
+			ImGui::SliderInt( "Defence.RecastFrame", &shieldsRecastFrame, 0, 360 );
 			ImGui::SliderInt( "Attack.CancelableFrame", &frameCancelableAttack, 1, frameWholeAttacking );
 			ImGui::SliderInt( "Attack.WholeAttackingFrame", &frameWholeAttacking, 1, 300 );
 			ImGui::Text( "" );
@@ -168,12 +169,12 @@ void PlayerParam::UseImGui()
 
 Player::Player() :
 	status( State::Idle ),
-	timer( 0 ),
+	timer( 0 ), shieldsRecastTime( 0 ),
 	fieldRadius( 0 ),
 	pos(), velocity(), lookDirection(),
 	orientation(),
 	models(),
-	isHoldingDefence( false ), wasSucceededDefence( false )
+	wasSucceededDefence( false )
 {
 	auto InitializeModel = []( std::unique_ptr<skinned_mesh> *ppMesh )
 	{
@@ -474,10 +475,9 @@ void Player::ChangeStatus( Input input )
 
 #endif // DEBUG_MODE
 
-	if ( !input.doDefend )
+	if ( 0 < shieldsRecastTime )
 	{
-		// This flag not want to false if timer lower than 0.
-		isHoldingDefence = false;
+		shieldsRecastTime--;
 	}
 
 	// These method is change my status if needs.
@@ -512,7 +512,7 @@ XXXUninit : call by ChangeStatusXXX when changing status. before YYYInit.
 
 void Player::ChangeStatusFromIdle( Input input )
 {
-	if ( input.doDefend && !isHoldingDefence )
+	if ( input.doDefend && !shieldsRecastTime )
 	{
 		IdleUninit();
 		DefendInit( input );
@@ -554,7 +554,7 @@ void Player::IdleUninit()
 
 void Player::ChangeStatusFromRun( Input input )
 {
-	if ( input.doDefend && !isHoldingDefence )
+	if ( input.doDefend && !shieldsRecastTime )
 	{
 		RunUninit();
 		DefendInit( input );
@@ -595,9 +595,27 @@ void Player::RunUninit()
 
 void Player::ChangeStatusFromDefend( Input input )
 {
-	if ( !input.doDefend || timer <= 0 )
+	bool cancelable = wasSucceededDefence;
+	bool doCancel   = cancelable && ( !input.moveVector.IsZero() || input.doAttack );
+	if ( doCancel )
 	{
 		DefendUninit();
+
+		if ( input.doAttack )
+		{
+			AttackInit( input );
+		}
+		else
+		{
+			RunInit( input );
+		}
+	}
+	else
+	if ( timer <= 0 )
+	{
+		DefendUninit();
+
+		// If allows hold attack button, insert AttackInit() here.
 
 		if ( input.moveVector.IsZero() )
 		{
@@ -613,9 +631,8 @@ void Player::DefendInit( Input input )
 {
 	status   = State::Defend;
 	velocity = 0.0f; // Each member set to zero.
-
-	isHoldingDefence    = true;
-	wasSucceededDefence = false;
+	shieldsRecastTime	= 0;
+	wasSucceededDefence	= false;
 
 	const auto &PARAM = PlayerParam::Get();
 	timer = PARAM.FrameWholeDefence();
@@ -634,17 +651,14 @@ void Player::DefendUpdate( Input input )
 void Player::DefendUninit()
 {
 	timer = 0;
-	wasSucceededDefence = false;
+	shieldsRecastTime	= ( wasSucceededDefence ) ? 0 : PlayerParam::Get().FrameReuseShield();
+	wasSucceededDefence	= false;
 
 	setAnimFlame( models.pDefend.get(), 0 );
 }
 
 void Player::ChangeStatusFromAttack( Input input )
 {
-	const auto &PARAM = PlayerParam::Get();
-	const int WHOLE_FRAME = PARAM.FrameWholeAttacking();
-	const int CANCELABLE  = PARAM.FrameCancelableAttack();
-
 	if ( timer <= 0 )
 	{
 		AttackUninit();
@@ -662,7 +676,11 @@ void Player::ChangeStatusFromAttack( Input input )
 	}
 	// else
 
-	if ( input.doDefend && !isHoldingDefence && ( WHOLE_FRAME - CANCELABLE ) <= timer )
+	const auto &PARAM		= PlayerParam::Get();
+	const int  WHOLE_FRAME	= PARAM.FrameWholeAttacking();
+	const int  CANCELABLE	= PARAM.FrameCancelableAttack();
+	const bool withinCancelableRange = ( WHOLE_FRAME - CANCELABLE ) <= timer;
+	if ( input.doDefend && !shieldsRecastTime && withinCancelableRange )
 	{
 		AttackUninit();
 		DefendInit( input );
@@ -673,11 +691,10 @@ void Player::ChangeStatusFromAttack( Input input )
 }
 void Player::AttackInit( Input input )
 {
-	status   = State::Attack;
-	velocity = 0.0f; // Each member set to zero.
+	status		= State::Attack;
+	velocity	= 0.0f; // Each member set to zero.
 
-	const auto &PARAM = PlayerParam::Get();
-	timer = PARAM.FrameWholeAttacking();
+	timer		= PlayerParam::Get().FrameWholeAttacking();
 
 	Donya::OBBFrame *pOBBF = PlayerParam::Get().HitBoxAttackF();
 	pOBBF->currentFrame = 0;
@@ -687,10 +704,10 @@ void Player::AttackUpdate( Input input )
 {
 	timer--;
 
-	const auto &PARAM = PlayerParam::Get();
-	const int WHOLE_FRAME = PARAM.FrameWholeAttacking();
-	const int CANCELABLE  = PARAM.FrameCancelableAttack();
-	if ( !input.moveVector.IsZero() && ( WHOLE_FRAME - CANCELABLE ) <= timer )
+	const int  WHOLE_FRAME	= PlayerParam::Get().FrameWholeAttacking();
+	const int  CANCELABLE	= PlayerParam::Get().FrameCancelableAttack();
+	const bool withinCancelableRange = ( WHOLE_FRAME - CANCELABLE ) <= timer;
+	if ( !input.moveVector.IsZero() && withinCancelableRange )
 	{
 		lookDirection = input.moveVector;
 	}
@@ -777,9 +794,10 @@ void Player::UseImGui()
 			};
 			std::string statusCaption = "Status : " + GetStatusName( status );
 			ImGui::Text( statusCaption.c_str() );
-			ImGui::Text( "Timer : %d", timer );
-			ImGui::Text( "FieldRadius : %f", fieldRadius );
-			ImGui::Text( "HoldDefence : %d", isHoldingDefence ? 1 : 0 );
+			ImGui::Text( "Timer : %d",				timer );
+			ImGui::Text( "ShieldRecast : %d",		shieldsRecastTime );
+			ImGui::Text( "ShieldSucceeded : %d",	wasSucceededDefence ? 1 : 0 );
+			ImGui::Text( "FieldRadius : %f",		fieldRadius );
 			ImGui::Text( "" );
 
 			const std::string vec3Info{ "[X:%5.3f][Y:%5.3f][Z:%5.3f]" };

@@ -158,7 +158,7 @@ public:
 			if ( Donya::Keyboard::Press( VK_LEFT  ) ) { input.moveVector.x = -1.0f; }
 			if ( Donya::Keyboard::Press( VK_RIGHT ) ) { input.moveVector.x = +1.0f; }
 
-			if ( Donya::Keyboard::Press  ( 'Z' ) ) { input.doDefend = true; }
+			if ( Donya::Keyboard::Trigger( 'Z' ) ) { input.doDefend = true; }
 			if ( Donya::Keyboard::Trigger( 'X' ) ) { input.doAttack = true; }
 			
 			// XINPUT_GAMEPAD : https://docs.microsoft.com/ja-jp/windows/win32/api/xinput/ns-xinput-xinput_gamepad

@@ -21,6 +21,7 @@ class PlayerParam final : public Donya::Singleton<PlayerParam>
 	friend Donya::Singleton<PlayerParam>;
 private:
 	int		frameUnfoldableDefence;	// 1 ~ N. Use when State::Defend.
+	int		shieldsRecastFrame;		// Frame of reuse shield.
 	int		frameCancelableAttack;	// 1 ~ "frameWholeAttacking". Use when State::Attack.
 	int		frameWholeAttacking;	// 1 ~ N. this whole frame is irrelevant by "frameCancelableAttack". Use when State::Attack.
 	float	scale;					// Usually 1.0f.
@@ -75,6 +76,10 @@ private:
 		}
 		if ( 5 <= version )
 		{
+			archive( CEREAL_NVP( shieldsRecastFrame ) );
+		}
+		if ( 6 <= version )
+		{
 			// archive( CEREAL_NVP( x ) );
 		}
 	}
@@ -84,6 +89,7 @@ public:
 	void Uninit();
 public:
 	int		FrameWholeDefence()		const { return frameUnfoldableDefence; }
+	int		FrameReuseShield()		const { return shieldsRecastFrame; }
 	int		FrameCancelableAttack()	const { return frameCancelableAttack; }
 	int		FrameWholeAttacking()	const { return frameWholeAttacking; }
 	float	Scale()					const { return scale; }
@@ -106,7 +112,7 @@ public:
 
 #endif // USE_IMGUI
 };
-CEREAL_CLASS_VERSION( PlayerParam, 4 )
+CEREAL_CLASS_VERSION( PlayerParam, 5 )
 
 class skinned_mesh;	// With pointer. because I'm not want include this at header.
 class Player
@@ -153,13 +159,13 @@ private:
 private:
 	State				status;
 	int					timer;				// Recycle between each state.
+	int					shieldsRecastTime;	// I can defend when this time is zero.
 	float				fieldRadius;		// For collision to wall. the field is perfect-circle, so I can detect collide to wall by distance.
 	Donya::Vector3		pos;				// In world space.
 	Donya::Vector3		velocity;			// In world space.
 	Donya::Vector3		lookDirection;		// In world space.
 	Donya::Quaternion	orientation;
 	Models				models;
-	bool				isHoldingDefence;	// Prevent user keeped holded defence button. true when hold defence button, false when detected release the button.
 	bool				wasSucceededDefence;
 public:
 	Player();
