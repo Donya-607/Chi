@@ -277,7 +277,7 @@ namespace GameLib
 
 		void setLoopFlg(skinned_mesh* _mesh, const bool _is_loop);
 		void setStopAnimation(skinned_mesh* _mesh, const bool _is_stop);
-		void setStopTime(skinned_mesh* _mesh, const int _stop_time);
+		void setStopTime(skinned_mesh* _mesh, const float _stop_time);
 		void setAnimFlame(skinned_mesh* _mesh, const int _anim_flame);
 		const int getAnimFlame(skinned_mesh*);
 

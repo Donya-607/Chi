@@ -516,7 +516,7 @@ void setStopAnimation(skinned_mesh* _mesh, const bool _is_stop)
 	GameLib::skinnedMesh::setStopAnimation(_mesh, _is_stop);
 }
 
-void setStopTime(skinned_mesh* _mesh, const int _stop_time)
+void setStopTime(skinned_mesh* _mesh, const float _stop_time)
 {
 	GameLib::skinnedMesh::setStopTime(_mesh, _stop_time);
 }

@@ -49,6 +49,8 @@ public:
 		Donya::OBB CalcTransformedOBB( skinned_mesh *pMesh, const Donya::Vector4x4 &parentSpaceMatrix ) const;
 	};
 private:
+	int								swingStopFrame;			// Use when status is attack of swing.
+	int								swingStopLength;		// Per second. Use when status is attack of swing.
 	int								rotLeaveEaseKind;		// Use when status is attack of rotate.
 	int								rotLeaveEaseType;		// Use when status is attack of rotate.
 	int								rotLeaveStartFrame;		// Use when status is attack of rotate.
@@ -134,6 +136,14 @@ private:
 			}
 			if ( 9 <= version )
 			{
+				archive
+				(
+					CEREAL_NVP( swingStopFrame ),
+					CEREAL_NVP( swingStopLength )
+				);
+			}
+			if ( 10 <= version )
+			{
 				// archive( CEREAL_NVP( x ) );
 			}
 
@@ -186,6 +196,10 @@ public:
 	void Init();
 	void Uninit();
 public:
+	// These getter method for maintaining private member.
+
+	int										SwingStopFrame()		const	{ return swingStopFrame; }
+	int										SwingStopLength()		const	{ return swingStopLength; }
 	int										RotLeaveEaseKind()		const	{ return rotLeaveEaseKind; }
 	int										RotLeaveEaseType()		const	{ return rotLeaveEaseType; }
 	int										RotLeaveStartFrame()	const	{ return rotLeaveStartFrame; }
@@ -217,7 +231,7 @@ public:
 
 #endif // USE_IMGUI
 };
-CEREAL_CLASS_VERSION( BossParam, 8 )
+CEREAL_CLASS_VERSION( BossParam, 9 )
 CEREAL_CLASS_VERSION( BossParam::OBBFrameWithName, 0 )
 
 class Boss
@@ -239,6 +253,7 @@ private:
 	BossAI::ActionState		status;
 	BossAI					AI;
 	int						stageNo;		// 1-based.
+	int						timer;			// Recycle between each state.
 	float					fieldRadius;	// For collision to wall. the field is perfect-circle, so I can detect collide to wall by distance.
 	float					slerpFactor;	// 0.0f ~ 1.0f. Use orientation's rotation.
 	float					easeFactor;		// 0.0f ~ 1.0f.

@@ -2,7 +2,7 @@
     "BossAI": {
         "cereal_class_version": 3,
         "wholeFrame": {
-            "value0": 125,
+            "value0": 175,
             "value1": 240,
             "value2": 165
         },
@@ -16,7 +16,7 @@
             "value1": 35
         },
         "attackPercents": {
-            "value0": 1,
+            "value0": 497,
             "value1": 1,
             "value2": 1
         }

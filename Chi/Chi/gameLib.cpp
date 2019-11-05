@@ -762,7 +762,7 @@ namespace GameLib
 			_mesh->setStopAnimation(_is_stop);
 		}
 
-		void setStopTime(skinned_mesh* _mesh, const int _stop_time)
+		void setStopTime(skinned_mesh* _mesh, const float _stop_time)
 		{
 			_mesh->setStoptimer(_stop_time);
 		}

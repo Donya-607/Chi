@@ -621,7 +621,7 @@ SceneGame::SceneGame() : baseScene(), pImpl(std::make_unique<Impl>())
 {}
 SceneGame::~SceneGame()
 {
-	pImpl.reset(nullptr);
+	pImpl.reset( nullptr );
 }
 
 void SceneGame::init()

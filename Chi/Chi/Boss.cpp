@@ -168,6 +168,16 @@ void BossParam::UseImGui()
 				ImGui::TreePop();
 			}
 			ImGui::Text( "" );
+			if ( ImGui::TreeNode( "SwingAttack" ) )
+			{
+				ImGui::DragInt( "StopFrame",			&swingStopFrame  );
+				ImGui::DragInt( "StopLength(Second)",	&swingStopLength );
+				swingStopFrame  = std::max( 0, swingStopFrame  );
+				swingStopLength = std::max( 0, swingStopLength );
+
+				ImGui::TreePop();
+			}
+			ImGui::Text( "" );
 			if ( ImGui::TreeNode( "RotateAttack" ) )
 			{
 				// Easing parameter.
@@ -185,6 +195,9 @@ void BossParam::UseImGui()
 				ImGui::DragInt( "Leave.StartFrame", &rotLeaveStartFrame );
 				ImGui::DragInt( "Leave.WholeFrame", &rotLeaveWholeFrame );
 				ImGui::DragFloat( "Leave.Distance", &rotLeaveDistance   );
+				rotLeaveStartFrame	= std::max( 0, rotLeaveStartFrame );
+				rotLeaveWholeFrame	= std::max( 0, rotLeaveWholeFrame );
+				rotLeaveDistance	= std::max( 0.0f, rotLeaveDistance );
 
 				ImGui::TreePop();
 			}
@@ -464,7 +477,8 @@ void ResetCurrentOBBFNames( std::vector<BossParam::OBBFrameWithName> *pOBBFNs )
 Boss::Boss() :
 	status( BossAI::ActionState::WAIT ),
 	AI(),
-	stageNo( 1 ), fieldRadius(), slerpFactor( 1.0f ), easeFactor(),
+	stageNo( 1 ), timer(),
+	fieldRadius(), slerpFactor( 1.0f ), easeFactor(),
 	pos(), velocity(), extraOffset(),
 	orientation(),
 	models()
@@ -938,7 +952,7 @@ void Boss::MoveUninit()
 void Boss::AttackSwingInit( TargetStatus target )
 {
 	status = BossAI::ActionState::ATTACK_SWING;
-
+	timer  = 0;
 	slerpFactor = BossParam::Get().SlerpFactor( status );
 
 	velocity = 0.0f;
@@ -948,16 +962,43 @@ void Boss::AttackSwingInit( TargetStatus target )
 }
 void Boss::AttackSwingUpdate( TargetStatus target )
 {
-	auto *pOBBs = BossParam::Get().OBBAtksSwing();
-	const size_t COUNT = pOBBs->size();
-	for ( size_t i = 0; i < COUNT; ++i )
+	bool nowStop = ( timer != 0 );
+	if ( nowStop )
 	{
-		auto &OBB = pOBBs->at( i );
-		OBB.Update();
+		timer--;
+		if ( timer <= 0 )
+		{
+			// Finish stop and spawn effects.
+			timer = 0;
+		}
+	}
+	else
+	{
+		const auto &PARAM = BossParam::Get();
+		const int currentFrame = models.pAtkSwing->getAnimFlame();
+		if ( currentFrame == PARAM.SwingStopFrame() && timer != -1 )
+		{
+			// Start stop and spawn effects.
+			timer = PARAM.SwingStopLength();
+			setStopTime( models.pAtkSwing.get(), PARAM.SwingStopLength() );
+		}
+	}
+
+	if ( !nowStop )
+	{
+		auto *pOBBs = BossParam::Get().OBBAtksSwing();
+		const size_t COUNT = pOBBs->size();
+		for ( size_t i = 0; i < COUNT; ++i )
+		{
+			auto &OBB = pOBBs->at( i );
+			OBB.Update();
+		}
 	}
 }
 void Boss::AttackSwingUninit()
 {
+	timer = 0;
+
 	ResetCurrentOBBFrames( BossParam::Get().OBBAtksSwing() );
 	setAnimFlame( models.pAtkSwing.get(), 0 );
 }
