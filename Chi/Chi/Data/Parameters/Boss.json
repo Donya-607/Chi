@@ -1,6 +1,6 @@
 {
     "Boss": {
-        "cereal_class_version": 7,
+        "cereal_class_version": 8,
         "scale": 1.0,
         "hitBoxesBody": [
             {
@@ -211,9 +211,14 @@
                         "z": 0.0
                     },
                     "radius": 230.0,
-                    "exist": false
+                    "exist": true
                 }
             }
-        ]
+        ],
+        "rotLeaveEaseKind": 8,
+        "rotLeaveEaseType": 1,
+        "rotLeaveStartFrame": 70,
+        "rotLeaveWholeFrame": 60,
+        "rotLeaveDistance": 666.0
     }
 }

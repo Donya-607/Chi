@@ -16,9 +16,9 @@
             "value1": 35
         },
         "attackPercents": {
-            "value0": 10,
-            "value1": 8,
-            "value2": 10
+            "value0": 1,
+            "value1": 1,
+            "value2": 1
         }
     }
 }

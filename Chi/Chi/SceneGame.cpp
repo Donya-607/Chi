@@ -379,7 +379,7 @@ public:
 		cameraPos.z = boss_Player_Vec_N.z * ( boss_Player_Vec.Length() + add_length );
 	#else
 		Donya::Vector3 playerPos = player.GetPosition();
-		Donya::Vector3 targetPos = boss.GetPosition();
+		Donya::Vector3 targetPos = boss.GetPos();
 
 		// 単位ベクトル取得
 		// DirectX::XMFLOAT3 player_to_target_vec = DirectX::XMFLOAT3( targetPos.x - playerPos.x, targetPos.y - playerPos.y, targetPos.z - playerPos.z );

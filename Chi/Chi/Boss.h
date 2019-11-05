@@ -49,6 +49,8 @@ public:
 		Donya::OBB CalcTransformedOBB( skinned_mesh *pMesh, const Donya::Vector4x4 &parentSpaceMatrix ) const;
 	};
 private:
+	int								rotLeaveEaseKind;		// Use when status is attack of rotate.
+	int								rotLeaveEaseType;		// Use when status is attack of rotate.
 	int								rotLeaveStartFrame;		// Use when status is attack of rotate.
 	int								rotLeaveWholeFrame;		// Use when status is attack of rotate.
 	float							rotLeaveDistance;		// Use when status is attack of rotate.
@@ -123,6 +125,8 @@ private:
 			{
 				archive
 				(
+					CEREAL_NVP( rotLeaveEaseKind ),
+					CEREAL_NVP( rotLeaveEaseType ),
 					CEREAL_NVP( rotLeaveStartFrame ),
 					CEREAL_NVP( rotLeaveWholeFrame ),
 					CEREAL_NVP( rotLeaveDistance )
@@ -182,6 +186,8 @@ public:
 	void Init();
 	void Uninit();
 public:
+	int										RotLeaveEaseKind()		const	{ return rotLeaveEaseKind; }
+	int										RotLeaveEaseType()		const	{ return rotLeaveEaseType; }
 	int										RotLeaveStartFrame()	const	{ return rotLeaveStartFrame; }
 	int										RotLeaveWholeFrame()	const	{ return rotLeaveWholeFrame; }
 	float									RotLeaveDistance()		const	{ return rotLeaveDistance; }
@@ -236,7 +242,7 @@ private:
 	float					fieldRadius;	// For collision to wall. the field is perfect-circle, so I can detect collide to wall by distance.
 	float					slerpFactor;	// 0.0f ~ 1.0f. Use orientation's rotation.
 	float					easeFactor;		// 0.0f ~ 1.0f.
-	Donya::Vector3			pos;
+	Donya::Vector3			pos;			// Contain world space position. actual position is "pos + extraOffset".
 	Donya::Vector3			velocity;
 	Donya::Vector3			extraOffset;	// Actual position is "pos + extraOffset".
 	Donya::Quaternion		orientation;
@@ -260,7 +266,7 @@ public:
 
 	void SetFieldRadius( float fieldRadius );
 
-	Donya::Vector3 GetPosition() const { return pos + extraOffset; }
+	Donya::Vector3 GetPos() const { return pos + extraOffset; }
 private:
 	void LoadModel();
 

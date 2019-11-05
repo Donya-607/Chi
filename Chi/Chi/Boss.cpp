@@ -1,5 +1,6 @@
 #include "Boss.h"
 
+#include "Donya/Easing.h"
 #include "Donya/FilePath.h"
 #include "Donya/Useful.h"		// For IsShowCollision().
 
@@ -13,7 +14,7 @@
 #define scast static_cast
 
 BossParam::BossParam() :
-	rotLeaveStartFrame(), rotLeaveWholeFrame( 1 ), rotLeaveDistance(),
+	rotLeaveEaseType(), rotLeaveEaseKind(), rotLeaveStartFrame(), rotLeaveWholeFrame( 1 ), rotLeaveDistance(),
 	scale( 1.0f ), stageBodyRadius( 1.0f ),
 	targetDistNear( 0.0f ), targetDistFar( 1.0f ),
 	idleSlerpFactor( 1.0f ),
@@ -57,7 +58,7 @@ float BossParam::SlerpFactor( BossAI::ActionState status ) const
 	{
 	case BossAI::ActionState::WAIT:				return idleSlerpFactor;			// break;
 	case BossAI::ActionState::MOVE:				return moveSlerpFactor;			// break;
-	case BossAI::ActionState::ATTACK_SWING:		return 0.5f;					// break;
+	case BossAI::ActionState::ATTACK_SWING:		return 0.0f;					// break;
 	case BossAI::ActionState::ATTACK_FAST:		return attackFastSlerpFactor;	// break;
 	case BossAI::ActionState::ATTACK_ROTATE:	return attackRotateSlerpFactor;	// break;
 	default: break;
@@ -169,6 +170,18 @@ void BossParam::UseImGui()
 			ImGui::Text( "" );
 			if ( ImGui::TreeNode( "RotateAttack" ) )
 			{
+				// Easing parameter.
+				{
+					using namespace Donya;
+					constexpr int KIND_COUNT = Easing::GetKindCount();
+					constexpr int TYPE_COUNT = Easing::GetTypeCount();
+					ImGui::SliderInt( "Leave.EasingKind", &rotLeaveEaseKind, 0, KIND_COUNT - 1 );
+					ImGui::SliderInt( "Leave.EasingType", &rotLeaveEaseType, 0, TYPE_COUNT - 1 );
+					std::string strKind = Easing::KindName( rotLeaveEaseKind );
+					std::string strType = Easing::TypeName( rotLeaveEaseType );
+					ImGui::Text( ( "Easing : " + strKind + "." + strType ).c_str() );
+				}
+
 				ImGui::DragInt( "Leave.StartFrame", &rotLeaveStartFrame );
 				ImGui::DragInt( "Leave.WholeFrame", &rotLeaveWholeFrame );
 				ImGui::DragFloat( "Leave.Distance", &rotLeaveDistance   );
@@ -526,7 +539,7 @@ void Boss::Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matPro
 
 	Donya::Vector4x4 S = Donya::Vector4x4::MakeScaling( PARAM.Scale() );
 	Donya::Vector4x4 R = orientation.RequireRotationMatrix();
-	Donya::Vector4x4 T = Donya::Vector4x4::MakeTranslation( pos );
+	Donya::Vector4x4 T = Donya::Vector4x4::MakeTranslation( GetPos() );
 #if DEBUG_MODE
 	if ( status == decltype( status )::END ) { R = Donya::Quaternion::Make( Donya::Vector3::Front(), ToRadian( 180.0f ) ).RequireRotationMatrix(); };
 #endif // DEBUG_MODE
@@ -691,14 +704,14 @@ std::vector<Donya::OBB> Boss::RequireAttackHitBoxesOBB() const
 
 	auto ToWorldOBB = [&]( Donya::OBB obb )
 	{
-		obb.pos += pos;
+		obb.pos += GetPos();
 		obb.orientation.RotateBy( orientation );
 		return obb;
 	};
 
 	Donya::Vector4x4 S = Donya::Vector4x4::MakeScaling( PARAM.Scale() );
 	Donya::Vector4x4 R = orientation.RequireRotationMatrix();
-	Donya::Vector4x4 T = Donya::Vector4x4::MakeTranslation( pos );
+	Donya::Vector4x4 T = Donya::Vector4x4::MakeTranslation( GetPos() );
 #if DEBUG_MODE
 	if ( status == decltype( status )::END ) { R = Donya::Quaternion::Make( Donya::Vector3::Front(), ToRadian( 180.0f ) ).RequireRotationMatrix(); };
 #endif // DEBUG_MODE
@@ -762,7 +775,7 @@ std::vector<Donya::Sphere> Boss::RequireAttackHitBoxesSphere() const
 	// To world space.
 	for ( auto &it : spheres )
 	{
-		it.pos += pos;
+		it.pos += GetPos();
 	}
 
 	return spheres;
@@ -784,7 +797,7 @@ std::vector<Donya::OBB> Boss::GetBodyHitBoxes() const
 	const auto *pAABBs = PARAM.BodyHitBoxes();
 	for ( const auto &it : *pAABBs )
 	{
-		collisions.emplace_back( MakeOBB( it, pos, orientation ) );
+		collisions.emplace_back( MakeOBB( it, GetPos(), orientation ) );
 	}
 
 	return collisions;
@@ -811,7 +824,7 @@ void Boss::LoadModel()
 
 float Boss::CalcNormalizedDistance( Donya::Vector3 wsTargetPos )
 {
-	float distance = ( wsTargetPos - pos ).Length();
+	float distance = ( wsTargetPos - GetPos() ).Length();
 	return ( ZeroEqual( fieldRadius ) )
 	? fieldRadius
 	: distance / fieldRadius;
@@ -995,7 +1008,22 @@ void Boss::AttackRotateUpdate( TargetStatus target )
 	const int currentFrame		= models.pAtkRotate->getAnimFlame();
 	if ( startLeaveFrame <= currentFrame )
 	{
-		// TODO:implement here.
+		const auto &PARAM = BossParam::Get();
+		const float increaseSpeed = 1.0f / scast<float>( PARAM.RotLeaveWholeFrame() );
+
+		easeFactor += increaseSpeed;
+		if ( 1.0f <= easeFactor )
+		{
+			easeFactor = 1.0f;
+		}
+
+		float easePercent = Donya::Easing::Ease
+		(
+			scast<Donya::Easing::Kind>( PARAM.RotLeaveEaseKind() ),
+			scast<Donya::Easing::Type>( PARAM.RotLeaveEaseType() ),
+			easeFactor
+		);
+		extraOffset = -orientation.LocalFront() * ( PARAM.RotLeaveDistance() * easePercent );
 	}
 
 	auto *pSphereFs = BossParam::Get().RotateAtkCollisions();
@@ -1008,6 +1036,8 @@ void Boss::AttackRotateUpdate( TargetStatus target )
 }
 void Boss::AttackRotateUninit()
 {
+	pos += extraOffset;
+
 	easeFactor  = 0.0f;
 	extraOffset = 0.0f;
 
@@ -1022,7 +1052,7 @@ void Boss::ApplyVelocity( TargetStatus target )
 		pos += velocity;
 	}
 
-	Donya::Vector3 dirToTarget = target.pos - pos;
+	Donya::Vector3 dirToTarget = target.pos - GetPos();
 	dirToTarget.Normalize();
 
 	Donya::Quaternion destination = Donya::Quaternion::LookAt( orientation, dirToTarget ).Normalized();
@@ -1036,7 +1066,7 @@ void Boss::CollideToWall()
 	const float trueFieldRadius = fieldRadius - bodyRadius;
 
 	constexpr Donya::Vector3 ORIGIN = Donya::Vector3::Zero();
-	const Donya::Vector3 currentDistance = pos - ORIGIN;
+	const Donya::Vector3 currentDistance = GetPos() - ORIGIN;
 	const float currentLength = currentDistance.Length();
 
 	if ( trueFieldRadius < currentLength )
@@ -1044,6 +1074,7 @@ void Boss::CollideToWall()
 		float diff = currentLength - trueFieldRadius;
 		const Donya::Vector3 direction = currentDistance.Normalized();
 		pos = ORIGIN + ( direction * ( currentLength - diff ) );
+		pos -= extraOffset; // Calculating position contains "extraOffset", so I should except "extraOffset".
 	}
 }
 
