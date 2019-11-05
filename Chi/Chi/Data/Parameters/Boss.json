@@ -220,7 +220,7 @@
         "rotLeaveStartFrame": 70,
         "rotLeaveWholeFrame": 60,
         "rotLeaveDistance": 666.0,
-        "swingStopFrame": 50,
-        "swingStopLength": 0.5
+        "swingStopFrame": 105,
+        "swingStopLength": 0.0
     }
 }

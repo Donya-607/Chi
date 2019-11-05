@@ -171,9 +171,9 @@ void BossParam::UseImGui()
 			if ( ImGui::TreeNode( "SwingAttack" ) )
 			{
 				ImGui::DragInt  ( "StopFrame",			&swingStopFrame  );
-				ImGui::DragFloat( "StopLength(Second)",	&swingStopLength );
-				swingStopFrame  = std::max( 0, swingStopFrame  );
-				swingStopLength = std::max( 0.0f, swingStopLength );
+				ImGui::DragFloat( "StopLength(Second)",	&swingStopLength, 0.1f );
+				swingStopFrame  = std::max( 0,		swingStopFrame  );
+				swingStopLength = std::max( 0.0f,	swingStopLength );
 
 				ImGui::TreePop();
 			}
@@ -959,7 +959,7 @@ void Boss::AttackSwingInit( TargetStatus target )
 
 	ResetCurrentOBBFrames( BossParam::Get().OBBAtksSwing() );
 	setAnimFlame( models.pAtkSwing.get(), 0 );
-	setStopTime ( models.pAtkSwing.get(), 0 );
+	setStopAnimation( models.pAtkSwing.get(), /* is_stop = */ false );
 }
 void Boss::AttackSwingUpdate( TargetStatus target )
 {
@@ -1006,12 +1006,12 @@ void Boss::AttackSwingUpdate( TargetStatus target )
 }
 void Boss::AttackSwingUninit()
 {
-	timer = 0;
-	swingTimer = 0;
+	timer		= 0;
+	swingTimer	= 0;
 
 	ResetCurrentOBBFrames( BossParam::Get().OBBAtksSwing() );
 	setAnimFlame( models.pAtkSwing.get(), 0 );
-	setStopTime ( models.pAtkSwing.get(), 0 );
+	setStopAnimation( models.pAtkSwing.get(), /* is_stop = */ false );
 }
 
 void Boss::AttackFastInit( TargetStatus target )
