@@ -171,7 +171,7 @@ void BossParam::UseImGui()
 			if ( ImGui::TreeNode( "SwingAttack" ) )
 			{
 				ImGui::DragInt  ( "StopFrame",			&swingStopFrame  );
-				ImGui::DragFloat( "StopLength(Second)",	&swingStopLength, 0.1f );
+				ImGui::DragFloat( "StopLength(Second)",	&swingStopLength, 0.01f );
 				swingStopFrame  = std::max( 0,		swingStopFrame  );
 				swingStopLength = std::max( 0.0f,	swingStopLength );
 
@@ -973,7 +973,10 @@ void Boss::AttackSwingUpdate( TargetStatus target )
 
 			constexpr float SEC_TO_FRAME = 1.0f / 60.0f;
 			swingTimer = scast<int>( BossParam::Get().SwingStopSecond() / SEC_TO_FRAME );
-			setStopAnimation( models.pAtkSwing.get(), /* is_stop = */ true );
+			if ( 0 < swingTimer )
+			{
+				setStopAnimation( models.pAtkSwing.get(), /* is_stop = */ true );
+			}
 		}
 	}
 	else // When stopping and spawn effects.
