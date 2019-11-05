@@ -170,10 +170,10 @@ void BossParam::UseImGui()
 			ImGui::Text( "" );
 			if ( ImGui::TreeNode( "SwingAttack" ) )
 			{
-				ImGui::DragInt( "StopFrame",			&swingStopFrame  );
-				ImGui::DragInt( "StopLength(Second)",	&swingStopLength );
+				ImGui::DragInt  ( "StopFrame",			&swingStopFrame  );
+				ImGui::DragFloat( "StopLength(Second)",	&swingStopLength );
 				swingStopFrame  = std::max( 0, swingStopFrame  );
-				swingStopLength = std::max( 0, swingStopLength );
+				swingStopLength = std::max( 0.0f, swingStopLength );
 
 				ImGui::TreePop();
 			}
@@ -477,7 +477,7 @@ void ResetCurrentOBBFNames( std::vector<BossParam::OBBFrameWithName> *pOBBFNs )
 Boss::Boss() :
 	status( BossAI::ActionState::WAIT ),
 	AI(),
-	stageNo( 1 ), timer(),
+	stageNo( 1 ), timer(), swingTimer(),
 	fieldRadius(), slerpFactor( 1.0f ), easeFactor(),
 	pos(), velocity(), extraOffset(),
 	orientation(),
@@ -951,39 +951,48 @@ void Boss::MoveUninit()
 
 void Boss::AttackSwingInit( TargetStatus target )
 {
-	status = BossAI::ActionState::ATTACK_SWING;
-	timer  = 0;
-	slerpFactor = BossParam::Get().SlerpFactor( status );
-
-	velocity = 0.0f;
+	status		= BossAI::ActionState::ATTACK_SWING;
+	timer		= BossParam::Get().SwingStopFrame();
+	swingTimer	= 0;
+	slerpFactor	= BossParam::Get().SlerpFactor( status );
+	velocity	= 0.0f;
 
 	ResetCurrentOBBFrames( BossParam::Get().OBBAtksSwing() );
 	setAnimFlame( models.pAtkSwing.get(), 0 );
+	setStopTime ( models.pAtkSwing.get(), 0 );
 }
 void Boss::AttackSwingUpdate( TargetStatus target )
 {
-	bool nowStop = ( timer != 0 );
-	if ( nowStop )
+	// When beginning status.
+	if ( 0 < timer )
 	{
 		timer--;
 		if ( timer <= 0 )
 		{
-			// Finish stop and spawn effects.
-			timer = 0;
+			// Start stop and spawn effects.
+
+			constexpr float SEC_TO_FRAME = 1.0f / 60.0f;
+			swingTimer = scast<int>( BossParam::Get().SwingStopSecond() / SEC_TO_FRAME );
+			setStopAnimation( models.pAtkSwing.get(), /* is_stop = */ true );
 		}
 	}
-	else
+	else // When stopping and spawn effects.
+	if ( 0 < swingTimer )
 	{
-		const auto &PARAM = BossParam::Get();
-		const int currentFrame = models.pAtkSwing->getAnimFlame();
-		if ( currentFrame == PARAM.SwingStopFrame() && timer != -1 )
+		swingTimer--;
+		if ( swingTimer <= 0 )
 		{
-			// Start stop and spawn effects.
-			timer = PARAM.SwingStopLength();
-			setStopTime( models.pAtkSwing.get(), PARAM.SwingStopLength() );
+			// Finish stop and spawn effects.
+			swingTimer = 0;
+			setStopAnimation( models.pAtkSwing.get(), /* is_stop = */ false );
 		}
+	}
+	else // When finish attacking status.
+	{
+		// No op.
 	}
 
+	bool nowStop = ( 0 < swingTimer );
 	if ( !nowStop )
 	{
 		auto *pOBBs = BossParam::Get().OBBAtksSwing();
@@ -998,9 +1007,11 @@ void Boss::AttackSwingUpdate( TargetStatus target )
 void Boss::AttackSwingUninit()
 {
 	timer = 0;
+	swingTimer = 0;
 
 	ResetCurrentOBBFrames( BossParam::Get().OBBAtksSwing() );
 	setAnimFlame( models.pAtkSwing.get(), 0 );
+	setStopTime ( models.pAtkSwing.get(), 0 );
 }
 
 void Boss::AttackFastInit( TargetStatus target )

@@ -2,12 +2,12 @@
     "BossAI": {
         "cereal_class_version": 3,
         "wholeFrame": {
-            "value0": 175,
+            "value0": 225,
             "value1": 240,
             "value2": 165
         },
         "coolTimeFrame": {
-            "value0": 20,
+            "value0": 40,
             "value1": 75,
             "value2": 50
         },

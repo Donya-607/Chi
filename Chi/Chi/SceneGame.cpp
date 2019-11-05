@@ -112,13 +112,19 @@ public:
 		constexpr int STAGE_NO = NULL;
 	#endif // DEBUG_MODE
 
-		stage.Init( STAGE_NO );
-
+		OutputDebugStr( "Begin Player::Init.\n" );
 		player.Init();
 		player.SetFieldRadius( fieldRadius );
+		OutputDebugStr( "End Player::Init.\n" );
 
+		OutputDebugStr( "Begin Stage::Init.\n" );
+		stage.Init( STAGE_NO );
+		OutputDebugStr( "End Stage::Init.\n" );
+
+		OutputDebugStr( "Begin Boss::Init.\n" );
 		boss.Init( STAGE_NO );
 		boss.SetFieldRadius( fieldRadius );
+		OutputDebugStr( "End Boss::Init.\n" );
 
 		// Set camera's position and focus.
 		CameraUpdate();
@@ -311,6 +317,13 @@ public:
 	}
 
 public:
+	void OutputDebugStr( const std::string &str )
+	{
+	#if DEBUG_MODE
+		Donya::OutputDebugStr( str.c_str() );
+	#endif // DEBUG_MODE
+	}
+
 	bool LoadSounds() const
 	{
 		struct Bundle

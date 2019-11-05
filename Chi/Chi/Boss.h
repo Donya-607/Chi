@@ -50,7 +50,7 @@ public:
 	};
 private:
 	int								swingStopFrame;			// Use when status is attack of swing.
-	int								swingStopLength;		// Per second. Use when status is attack of swing.
+	float							swingStopLength;		// Per second. Use when status is attack of swing.
 	int								rotLeaveEaseKind;		// Use when status is attack of rotate.
 	int								rotLeaveEaseType;		// Use when status is attack of rotate.
 	int								rotLeaveStartFrame;		// Use when status is attack of rotate.
@@ -199,7 +199,7 @@ public:
 	// These getter method for maintaining private member.
 
 	int										SwingStopFrame()		const	{ return swingStopFrame; }
-	int										SwingStopLength()		const	{ return swingStopLength; }
+	float									SwingStopSecond()		const	{ return swingStopLength; }
 	int										RotLeaveEaseKind()		const	{ return rotLeaveEaseKind; }
 	int										RotLeaveEaseType()		const	{ return rotLeaveEaseType; }
 	int										RotLeaveStartFrame()	const	{ return rotLeaveStartFrame; }
@@ -254,6 +254,7 @@ private:
 	BossAI					AI;
 	int						stageNo;		// 1-based.
 	int						timer;			// Recycle between each state.
+	int						swingTimer;		// Use when status is attack of swing.
 	float					fieldRadius;	// For collision to wall. the field is perfect-circle, so I can detect collide to wall by distance.
 	float					slerpFactor;	// 0.0f ~ 1.0f. Use orientation's rotation.
 	float					easeFactor;		// 0.0f ~ 1.0f.

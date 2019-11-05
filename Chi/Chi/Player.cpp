@@ -213,7 +213,7 @@ void Player::Init()
 	SetFieldRadius( 0.0f ); // Set to body's radius.
 
 	LoadModel();
-
+	
 	lookDirection = Donya::Vector3::Front();
 	orientation   = Donya::Quaternion::Identity();
 
@@ -449,10 +449,18 @@ void Player::SetFieldRadius( float newFieldRadius )
 
 void Player::LoadModel()
 {
+	Donya::OutputDebugStr( "Begin Player::LoadModel.\n" );
+
 	loadFBX( models.pIdle.get(),	GetModelPath( ModelAttribute::PlayerIdle	) );
+	Donya::OutputDebugStr( "Done PlayerMode.Wait\n" );
 	loadFBX( models.pRun.get(),		GetModelPath( ModelAttribute::PlayerRun		) );
+	Donya::OutputDebugStr( "Done PlayerMode.Run\n" );
 	loadFBX( models.pDefend.get(),	GetModelPath( ModelAttribute::PlayerDefend	) );
+	Donya::OutputDebugStr( "Done PlayerMode.Defend\n" );
 	loadFBX( models.pAttack.get(),	GetModelPath( ModelAttribute::PlayerAtk		) );
+	Donya::OutputDebugStr( "Done PlayerMode.Attack\n" );
+
+	Donya::OutputDebugStr( "End Player::LoadModel.\n" );
 }
 
 Donya::Vector4x4 Player::CalcWorldMatrix() const
