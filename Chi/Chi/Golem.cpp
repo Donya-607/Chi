@@ -14,6 +14,7 @@
 #define scast static_cast
 
 GolemParam::GolemParam() :
+	swingStopFrame(), swingStopLength(),
 	rotLeaveEaseType(), rotLeaveEaseKind(), rotLeaveStartFrame(), rotLeaveWholeFrame( 1 ), rotLeaveDistance(),
 	scale( 1.0f ), stageBodyRadius( 1.0f ),
 	targetDistNear( 0.0f ), targetDistFar( 1.0f ),

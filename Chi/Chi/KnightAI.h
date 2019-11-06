@@ -10,7 +10,7 @@
 
 #include "Donya/UseImGui.h"
 
-class GolemAI
+class KnightAI
 {
 public:
 	/// <summary>
@@ -20,9 +20,9 @@ public:
 	{
 		WAIT,
 		MOVE,
+		ATTACK_EXPLOSION,
 		ATTACK_SWING,
-		ATTACK_FAST,
-		ATTACK_ROTATE,
+		ATTACK_RAID,
 
 		END
 	};
@@ -44,8 +44,8 @@ private:
 	/// </summary>
 	enum class AttackState
 	{
-		FAST,
-		ROTATE,
+		SWING,
+		RAID,
 
 		END
 	};
@@ -66,59 +66,28 @@ private:
 	int intervalIndex{};
 	std::vector<int> gapIntervals{};	// At least have 1 element.
 public:
-	GolemAI() {}
-	// ~GolemAI() = default;
+	KnightAI() {}
+	// ~KnightAI() = default;
 private:
 	friend class cereal::access;
 	template<class Archive>
 	void serialize( Archive &archive, std::uint32_t version )
 	{
-		if ( 2 <= version )
-		{
-			archive
-			(
-				CEREAL_NVP( wholeFrame ),
-				CEREAL_NVP( coolTimeFrame )
-			);
-
-			if ( 3 <= version )
-			{
-				archive
-				(
-					CEREAL_NVP( waitPercents ),
-					CEREAL_NVP( attackPercents )
-				);
-			}
-			if ( 4 <= version )
-			{ 
-				archive( CEREAL_NVP( gapIntervals ) );
-			}
-			if ( 5 <= version )
-			{
-				// archive( CEREAL_NVP( x ) );
-			}
-
-			return;
-		}
-		// else
-
-		/*
 		archive
 		(
-			CEREAL_NVP( percent )
+				CEREAL_NVP( wholeFrame ),
+				CEREAL_NVP( coolTimeFrame ),
+				CEREAL_NVP( waitPercents ),
+				CEREAL_NVP( attackPercents ),
+				CEREAL_NVP( gapIntervals ) 
 		);
 
 		if ( 1 <= version )
 		{
-			archive
-			(
-				CEREAL_NVP( wholeFrame ),
-				CEREAL_NVP( coolTimeFrame )
-			);
+			// archive( CEREAL_NVP( x ) );
 		}
-		*/
 	}
-	static constexpr const char *SERIAL_ID = "GolemAI";
+	static constexpr const char *SERIAL_ID = "KnightAI";
 public:
 	void Init();
 	void Update();
@@ -145,4 +114,4 @@ public:
 
 #endif // USE_IMGUI
 };
-CEREAL_CLASS_VERSION( GolemAI, 4 )
+CEREAL_CLASS_VERSION( KnightAI, 0 )
