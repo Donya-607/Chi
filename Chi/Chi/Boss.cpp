@@ -13,7 +13,7 @@
 
 #define scast static_cast
 
-BossParam::BossParam() :
+GolemParam::GolemParam() :
 	rotLeaveEaseType(), rotLeaveEaseKind(), rotLeaveStartFrame(), rotLeaveWholeFrame( 1 ), rotLeaveDistance(),
 	scale( 1.0f ), stageBodyRadius( 1.0f ),
 	targetDistNear( 0.0f ), targetDistFar( 1.0f ),
@@ -27,59 +27,59 @@ BossParam::BossParam() :
 	initPosPerStage.resize( 1U );
 	drawOffsetsPerStage.resize( 1U );
 }
-BossParam::~BossParam() = default;
+GolemParam::~GolemParam() = default;
 
-void BossParam::Init()
+void GolemParam::Init()
 {
 	LoadParameter();
 }
-void BossParam::Uninit()
+void GolemParam::Uninit()
 {
 	// No op.
 }
 
-float BossParam::MoveSpeed( BossAI::ActionState status ) const
+float GolemParam::MoveSpeed( GolemAI::ActionState status ) const
 {
 	switch ( status )
 	{
-	case BossAI::ActionState::WAIT:				return 0.0f;					// break;
-	case BossAI::ActionState::MOVE:				return moveMoveSpeed;			// break;
-	case BossAI::ActionState::ATTACK_SWING:		return 0.0f;					// break;
-	case BossAI::ActionState::ATTACK_FAST:		return attackFastMoveSpeed;		// break;
-	case BossAI::ActionState::ATTACK_ROTATE:	return attackRotateMoveSpeed;	// break;
+	case GolemAI::ActionState::WAIT:				return 0.0f;					// break;
+	case GolemAI::ActionState::MOVE:				return moveMoveSpeed;			// break;
+	case GolemAI::ActionState::ATTACK_SWING:		return 0.0f;					// break;
+	case GolemAI::ActionState::ATTACK_FAST:		return attackFastMoveSpeed;		// break;
+	case GolemAI::ActionState::ATTACK_ROTATE:	return attackRotateMoveSpeed;	// break;
 	default: break;
 	}
 
 	return NULL;
 }
-float BossParam::SlerpFactor( BossAI::ActionState status ) const
+float GolemParam::SlerpFactor( GolemAI::ActionState status ) const
 {
 	switch ( status )
 	{
-	case BossAI::ActionState::WAIT:				return idleSlerpFactor;			// break;
-	case BossAI::ActionState::MOVE:				return moveSlerpFactor;			// break;
-	case BossAI::ActionState::ATTACK_SWING:		return 0.0f;					// break;
-	case BossAI::ActionState::ATTACK_FAST:		return attackFastSlerpFactor;	// break;
-	case BossAI::ActionState::ATTACK_ROTATE:	return attackRotateSlerpFactor;	// break;
+	case GolemAI::ActionState::WAIT:				return idleSlerpFactor;			// break;
+	case GolemAI::ActionState::MOVE:				return moveSlerpFactor;			// break;
+	case GolemAI::ActionState::ATTACK_SWING:		return 0.0f;					// break;
+	case GolemAI::ActionState::ATTACK_FAST:		return attackFastSlerpFactor;	// break;
+	case GolemAI::ActionState::ATTACK_ROTATE:	return attackRotateSlerpFactor;	// break;
 	default: break;
 	}
 
 	return 1.0f;
 }
-Donya::Vector3 BossParam::GetInitPosition( int stageNo ) const
+Donya::Vector3 GolemParam::GetInitPosition( int stageNo ) const
 {
 	_ASSERT_EXPR( stageNo <= scast<int>( initPosPerStage.size() ), L"Error : Specified stage number over than stage count !" );
 
 	return initPosPerStage[stageNo];
 }
-Donya::Vector3 BossParam::GetDrawOffset( int stageNo ) const
+Donya::Vector3 GolemParam::GetDrawOffset( int stageNo ) const
 {
 	_ASSERT_EXPR( stageNo <= scast<int>( drawOffsetsPerStage.size() ), L"Error : Specified stage number over than stage count !" );
 
 	return drawOffsetsPerStage[stageNo];
 }
 
-void BossParam::LoadParameter( bool isBinary )
+void GolemParam::LoadParameter( bool isBinary )
 {
 	Donya::Serializer::Extension ext = ( isBinary )
 	? Donya::Serializer::Extension::BINARY
@@ -92,7 +92,7 @@ void BossParam::LoadParameter( bool isBinary )
 
 #if USE_IMGUI
 
-void BossParam::SaveParameter()
+void GolemParam::SaveParameter()
 {
 	Donya::Serializer::Extension bin  = Donya::Serializer::Extension::BINARY;
 	Donya::Serializer::Extension json = Donya::Serializer::Extension::JSON;
@@ -104,11 +104,11 @@ void BossParam::SaveParameter()
 	seria.Save( json, jsonPath.c_str(), SERIAL_ID, *this );
 }
 
-void BossParam::UseImGui()
+void GolemParam::UseImGui()
 {
 	if ( ImGui::BeginIfAllowed() )
 	{
-		if ( ImGui::TreeNode( "Boss.AdjustData" ) )
+		if ( ImGui::TreeNode( "Golem.AdjustData" ) )
 		{
 			ImGui::SliderFloat( "Scale", &scale, 0.0f, 8.0f );
 			ImGui::DragFloat( "BodyRadiusToStage", &stageBodyRadius );
@@ -393,7 +393,7 @@ void BossParam::UseImGui()
 
 #endif // USE_IMGUI
 
-Donya::OBB BossParam::OBBFrameWithName::CalcTransformedOBB( skinned_mesh *pMesh, const Donya::Vector4x4 &parentSpaceMatrix ) const
+Donya::OBB GolemParam::OBBFrameWithName::CalcTransformedOBB( skinned_mesh *pMesh, const Donya::Vector4x4 &parentSpaceMatrix ) const
 {
 	Donya::OBB oldOBB = OBBF.OBB;
 
@@ -464,7 +464,7 @@ void ResetCurrentSphereFrames( std::vector<Donya::SphereFrame> *pSphereFs )
 		sphereF.currentFrame = 0;
 	}
 }
-void ResetCurrentOBBFNames( std::vector<BossParam::OBBFrameWithName> *pOBBFNs )
+void ResetCurrentOBBFNames( std::vector<GolemParam::OBBFrameWithName> *pOBBFNs )
 {
 	const size_t COUNT = pOBBFNs->size();
 	for ( size_t i = 0; i < COUNT; ++i )
@@ -474,8 +474,8 @@ void ResetCurrentOBBFNames( std::vector<BossParam::OBBFrameWithName> *pOBBFNs )
 	}
 }
 
-Boss::Boss() :
-	status( BossAI::ActionState::WAIT ),
+Golem::Golem() :
+	status( GolemAI::ActionState::WAIT ),
 	AI(),
 	stageNo( 1 ), timer(), swingTimer(),
 	fieldRadius(), slerpFactor( 1.0f ), easeFactor(),
@@ -501,17 +501,17 @@ Boss::Boss() :
 		InitializeModel( it );
 	}
 }
-Boss::~Boss() = default;
+Golem::~Golem() = default;
 
-void Boss::Init( int stageNumber )
+void Golem::Init( int stageNumber )
 {
-	BossParam::Get().Init();
+	GolemParam::Get().Init();
 
 	LoadModel();
 
 	stageNo	= stageNumber;
-	status	= BossAI::ActionState::WAIT;
-	pos		= BossParam::Get().GetInitPosition( stageNo );
+	status	= GolemAI::ActionState::WAIT;
+	pos		= GolemParam::Get().GetInitPosition( stageNo );
 
 	SetFieldRadius( 0.0f ); // Set to body's radius.
 
@@ -521,16 +521,16 @@ void Boss::Init( int stageNumber )
 
 	AI.Init();
 }
-void Boss::Uninit()
+void Golem::Uninit()
 {
-	BossParam::Get().Uninit();
+	GolemParam::Get().Uninit();
 }
 
-void Boss::Update( TargetStatus target )
+void Golem::Update( TargetStatus target )
 {
 #if USE_IMGUI
 
-	BossParam::Get().UseImGui();
+	GolemParam::Get().UseImGui();
 	UseImGui();
 
 #endif // USE_IMGUI
@@ -544,9 +544,9 @@ void Boss::Update( TargetStatus target )
 	CollideToWall();
 }
 
-void Boss::Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matProjection )
+void Golem::Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matProjection )
 {
-	const auto &PARAM = BossParam::Get();
+	const auto &PARAM = GolemParam::Get();
 
 	const Donya::Vector3 drawOffset = PARAM.GetDrawOffset( stageNo );
 	const Donya::Vector4x4 DRAW_OFFSET = Donya::Vector4x4::MakeTranslation( drawOffset );
@@ -562,19 +562,19 @@ void Boss::Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matPro
 
 	switch ( status )
 	{
-	case BossAI::ActionState::WAIT:
+	case GolemAI::ActionState::WAIT:
 		FBXRender( models.pIdle.get(), WVP, W );
 		break;
-	case BossAI::ActionState::MOVE:
+	case GolemAI::ActionState::MOVE:
 		FBXRender( models.pIdle.get(), WVP, W );
 		break;
-	case BossAI::ActionState::ATTACK_SWING:
+	case GolemAI::ActionState::ATTACK_SWING:
 		FBXRender( models.pAtkSwing.get(), WVP, W );
 		break;
-	case BossAI::ActionState::ATTACK_FAST:
+	case GolemAI::ActionState::ATTACK_FAST:
 		FBXRender( models.pAtkFast.get(), WVP, W );
 		break;
-	case BossAI::ActionState::ATTACK_ROTATE:
+	case GolemAI::ActionState::ATTACK_ROTATE:
 		FBXRender( models.pAtkRotate.get(), WVP, W );
 		break;
 	default: break;
@@ -658,13 +658,13 @@ void Boss::Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matPro
 		// Attacks collision.
 		switch ( status )
 		{
-		case BossAI::ActionState::WAIT:
+		case GolemAI::ActionState::WAIT:
 			break;
-		case BossAI::ActionState::MOVE:
+		case GolemAI::ActionState::MOVE:
 			break;
-		case BossAI::ActionState::ATTACK_SWING:
+		case GolemAI::ActionState::ATTACK_SWING:
 			{
-				const auto  *pOBBs = BossParam::Get().OBBAtksSwing();
+				const auto  *pOBBs = GolemParam::Get().OBBAtksSwing();
 				const size_t COUNT = pOBBs->size();
 				Donya::Vector4 color{};
 				for ( size_t i = 0; i < COUNT; ++i )
@@ -676,9 +676,9 @@ void Boss::Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matPro
 				}
 			}
 			break;
-		case BossAI::ActionState::ATTACK_FAST:
+		case GolemAI::ActionState::ATTACK_FAST:
 			{
-				const auto  *pOBBFs = BossParam::Get().OBBFAtksFast();
+				const auto  *pOBBFs = GolemParam::Get().OBBFAtksFast();
 				const size_t COUNT = pOBBFs->size();
 				Donya::Vector4 color{};
 				for ( size_t i = 0; i < COUNT; ++i )
@@ -690,9 +690,9 @@ void Boss::Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matPro
 				}
 			}
 			break;
-		case BossAI::ActionState::ATTACK_ROTATE:
+		case GolemAI::ActionState::ATTACK_ROTATE:
 			{
-				const auto *pSphereFs = BossParam::Get().RotateAtkCollisions();
+				const auto *pSphereFs = GolemParam::Get().RotateAtkCollisions();
 				const size_t COUNT = pSphereFs->size();
 				Donya::Vector4 color{};
 				for ( size_t i = 0; i < COUNT; ++i )
@@ -711,9 +711,9 @@ void Boss::Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matPro
 #endif // DEBUG_MODE
 }
 
-std::vector<Donya::OBB> Boss::RequireAttackHitBoxesOBB() const
+std::vector<Donya::OBB> Golem::RequireAttackHitBoxesOBB() const
 {
-	const auto &PARAM = BossParam::Get();
+	const auto &PARAM = GolemParam::Get();
 	std::vector<Donya::OBB> collisions{};
 
 	auto ToWorldOBB = [&]( Donya::OBB obb )
@@ -733,11 +733,11 @@ std::vector<Donya::OBB> Boss::RequireAttackHitBoxesOBB() const
 
 	switch ( status )
 	{
-	case BossAI::ActionState::WAIT:
+	case GolemAI::ActionState::WAIT:
 		break;
-	case BossAI::ActionState::MOVE:
+	case GolemAI::ActionState::MOVE:
 		break;
-	case BossAI::ActionState::ATTACK_SWING:
+	case GolemAI::ActionState::ATTACK_SWING:
 		{
 			const auto  *pOBBs = PARAM.OBBAtksSwing();
 			const size_t COUNT = pOBBs->size();
@@ -751,7 +751,7 @@ std::vector<Donya::OBB> Boss::RequireAttackHitBoxesOBB() const
 			}
 		}
 		break;
-	case BossAI::ActionState::ATTACK_FAST:
+	case GolemAI::ActionState::ATTACK_FAST:
 		{
 			auto  *pOBBFs  = PARAM.OBBFAtksFast();
 			const size_t COUNT  = pOBBFs->size();
@@ -774,11 +774,11 @@ std::vector<Donya::OBB> Boss::RequireAttackHitBoxesOBB() const
 
 	return collisions;
 }
-std::vector<Donya::Sphere> Boss::RequireAttackHitBoxesSphere() const
+std::vector<Donya::Sphere> Golem::RequireAttackHitBoxesSphere() const
 {
 	std::vector<Donya::Sphere> spheres{};
 
-	const auto *pRotateAtks = BossParam::Get().RotateAtkCollisions();
+	const auto *pRotateAtks = GolemParam::Get().RotateAtkCollisions();
 	for ( const auto &it : *pRotateAtks )
 	{
 		if ( !it.collision.exist ) { continue; }
@@ -803,9 +803,9 @@ static Donya::OBB MakeOBB( const Donya::AABB &AABB, const Donya::Vector3 &wsPos,
 	OBB.exist		= AABB.exist;
 	return OBB;
 }
-std::vector<Donya::OBB> Boss::GetBodyHitBoxes() const
+std::vector<Donya::OBB> Golem::GetBodyHitBoxes() const
 {
-	const auto &PARAM = BossParam::Get();
+	const auto &PARAM = GolemParam::Get();
 	std::vector<Donya::OBB> collisions{};
 
 	const auto *pAABBs = PARAM.BodyHitBoxes();
@@ -817,18 +817,18 @@ std::vector<Donya::OBB> Boss::GetBodyHitBoxes() const
 	return collisions;
 }
 
-void Boss::ReceiveImpact()
+void Golem::ReceiveImpact()
 {
 	status = decltype( status )::END;
 }
 
-void Boss::SetFieldRadius( float newFieldRadius )
+void Golem::SetFieldRadius( float newFieldRadius )
 {
-	const float bodyRadius = BossParam::Get().StageBodyRadius();
+	const float bodyRadius = GolemParam::Get().StageBodyRadius();
 	fieldRadius = std::max( newFieldRadius, bodyRadius );
 }
 
-void Boss::LoadModel()
+void Golem::LoadModel()
 {
 	loadFBX( models.pIdle.get(),		GetModelPath( ModelAttribute::BossIdle		) );
 	loadFBX( models.pAtkSwing.get(),	GetModelPath( ModelAttribute::BossAtkSwing	) );
@@ -836,7 +836,7 @@ void Boss::LoadModel()
 	loadFBX( models.pAtkRotate.get(),	GetModelPath( ModelAttribute::BossAtkRotate	) );
 }
 
-float Boss::CalcNormalizedDistance( Donya::Vector3 wsTargetPos )
+float Golem::CalcNormalizedDistance( Donya::Vector3 wsTargetPos )
 {
 	float distance = ( wsTargetPos - GetPos() ).Length();
 	return ( ZeroEqual( fieldRadius ) )
@@ -844,42 +844,42 @@ float Boss::CalcNormalizedDistance( Donya::Vector3 wsTargetPos )
 	: distance / fieldRadius;
 }
 
-void Boss::ChangeStatus( TargetStatus target )
+void Golem::ChangeStatus( TargetStatus target )
 {
-	BossAI::ActionState lotteryStatus = AI.GetState();
+	GolemAI::ActionState lotteryStatus = AI.GetState();
 	if ( status == lotteryStatus ) { return; }
 	// else
 
 	switch ( status )
 	{
-	case BossAI::ActionState::WAIT:				WaitUninit();			break;
-	case BossAI::ActionState::MOVE:				MoveUninit();			break;
-	case BossAI::ActionState::ATTACK_SWING:		AttackSwingUninit();	break;
-	case BossAI::ActionState::ATTACK_FAST:		AttackFastUninit();		break;
-	case BossAI::ActionState::ATTACK_ROTATE:	AttackRotateUninit();	break;
+	case GolemAI::ActionState::WAIT:				WaitUninit();			break;
+	case GolemAI::ActionState::MOVE:				MoveUninit();			break;
+	case GolemAI::ActionState::ATTACK_SWING:		AttackSwingUninit();	break;
+	case GolemAI::ActionState::ATTACK_FAST:		AttackFastUninit();		break;
+	case GolemAI::ActionState::ATTACK_ROTATE:	AttackRotateUninit();	break;
 	default: break;
 	}
 	switch ( lotteryStatus )
 	{
-	case BossAI::ActionState::WAIT:				WaitInit( target );			break;
-	case BossAI::ActionState::MOVE:				MoveInit( target );			break;
-	case BossAI::ActionState::ATTACK_SWING:		AttackSwingInit( target );	break;
-	case BossAI::ActionState::ATTACK_FAST:		AttackFastInit( target );	break;
-	case BossAI::ActionState::ATTACK_ROTATE:	AttackRotateInit( target );	break;
+	case GolemAI::ActionState::WAIT:				WaitInit( target );			break;
+	case GolemAI::ActionState::MOVE:				MoveInit( target );			break;
+	case GolemAI::ActionState::ATTACK_SWING:		AttackSwingInit( target );	break;
+	case GolemAI::ActionState::ATTACK_FAST:		AttackFastInit( target );	break;
+	case GolemAI::ActionState::ATTACK_ROTATE:	AttackRotateInit( target );	break;
 	default: break;
 	}
 
-	status = scast<BossAI::ActionState>( lotteryStatus );
+	status = scast<GolemAI::ActionState>( lotteryStatus );
 }
-void Boss::UpdateCurrentStatus( TargetStatus target )
+void Golem::UpdateCurrentStatus( TargetStatus target )
 {
 	switch ( status )
 	{
-	case BossAI::ActionState::WAIT:				WaitUpdate( target );			break;
-	case BossAI::ActionState::MOVE:				MoveUpdate( target );			break;
-	case BossAI::ActionState::ATTACK_SWING:		AttackSwingUpdate( target );	break;
-	case BossAI::ActionState::ATTACK_FAST:		AttackFastUpdate( target );		break;
-	case BossAI::ActionState::ATTACK_ROTATE:	AttackRotateUpdate( target );	break;
+	case GolemAI::ActionState::WAIT:				WaitUpdate( target );			break;
+	case GolemAI::ActionState::MOVE:				MoveUpdate( target );			break;
+	case GolemAI::ActionState::ATTACK_SWING:		AttackSwingUpdate( target );	break;
+	case GolemAI::ActionState::ATTACK_FAST:		AttackFastUpdate( target );		break;
+	case GolemAI::ActionState::ATTACK_ROTATE:	AttackRotateUpdate( target );	break;
 	default: break;
 	}
 }
@@ -890,37 +890,37 @@ XXXUpdate : call by UpdateCurrentStatus.
 XXXUninit : call by ChangeStatus when changing status. before YYYInit.
 */
 
-void Boss::WaitInit( TargetStatus target )
+void Golem::WaitInit( TargetStatus target )
 {
-	status = BossAI::ActionState::WAIT;
+	status = GolemAI::ActionState::WAIT;
 
-	slerpFactor = BossParam::Get().SlerpFactor( status );
+	slerpFactor = GolemParam::Get().SlerpFactor( status );
 
 	velocity = 0.0f;
 
 	setAnimFlame( models.pIdle.get(), 0 );
 }
-void Boss::WaitUpdate( TargetStatus target )
+void Golem::WaitUpdate( TargetStatus target )
 {
 
 }
-void Boss::WaitUninit()
+void Golem::WaitUninit()
 {
 	setAnimFlame( models.pIdle.get(), 0 );
 }
 
-void Boss::MoveInit( TargetStatus target )
+void Golem::MoveInit( TargetStatus target )
 {
-	status = BossAI::ActionState::MOVE;
+	status = GolemAI::ActionState::MOVE;
 
-	slerpFactor = BossParam::Get().SlerpFactor( status );
+	slerpFactor = GolemParam::Get().SlerpFactor( status );
 
 	setAnimFlame( models.pIdle.get(), 0 );
 }
-void Boss::MoveUpdate( TargetStatus target )
+void Golem::MoveUpdate( TargetStatus target )
 {
-	const float distNear  = BossParam::Get().TargetDistNear();
-	const float distFar   = BossParam::Get().TargetDistFar();
+	const float distNear  = GolemParam::Get().TargetDistNear();
+	const float distFar   = GolemParam::Get().TargetDistFar();
 	const float nDistance = CalcNormalizedDistance( target.pos );
 
 	if ( distNear <= nDistance && nDistance <= distFar )
@@ -930,7 +930,7 @@ void Boss::MoveUpdate( TargetStatus target )
 	}
 	// else
 
-	const float speed = BossParam::Get().MoveSpeed( status );
+	const float speed = GolemParam::Get().MoveSpeed( status );
 	const Donya::Vector3 front = orientation.LocalFront();
 
 	if ( nDistance < distNear )
@@ -944,24 +944,24 @@ void Boss::MoveUpdate( TargetStatus target )
 		velocity = front * speed;
 	}
 }
-void Boss::MoveUninit()
+void Golem::MoveUninit()
 {
 	setAnimFlame( models.pIdle.get(), 0 );
 }
 
-void Boss::AttackSwingInit( TargetStatus target )
+void Golem::AttackSwingInit( TargetStatus target )
 {
-	status		= BossAI::ActionState::ATTACK_SWING;
-	timer		= BossParam::Get().SwingStopFrame();
+	status		= GolemAI::ActionState::ATTACK_SWING;
+	timer		= GolemParam::Get().SwingStopFrame();
 	swingTimer	= 0;
-	slerpFactor	= BossParam::Get().SlerpFactor( status );
+	slerpFactor	= GolemParam::Get().SlerpFactor( status );
 	velocity	= 0.0f;
 
-	ResetCurrentOBBFrames( BossParam::Get().OBBAtksSwing() );
+	ResetCurrentOBBFrames( GolemParam::Get().OBBAtksSwing() );
 	setAnimFlame( models.pAtkSwing.get(), 0 );
 	setStopAnimation( models.pAtkSwing.get(), /* is_stop = */ false );
 }
-void Boss::AttackSwingUpdate( TargetStatus target )
+void Golem::AttackSwingUpdate( TargetStatus target )
 {
 	// When beginning status.
 	if ( 0 < timer )
@@ -972,7 +972,7 @@ void Boss::AttackSwingUpdate( TargetStatus target )
 			// Start stop and spawn effects.
 
 			constexpr float SEC_TO_FRAME = 1.0f / 60.0f;
-			swingTimer = scast<int>( BossParam::Get().SwingStopSecond() / SEC_TO_FRAME );
+			swingTimer = scast<int>( GolemParam::Get().SwingStopSecond() / SEC_TO_FRAME );
 			if ( 0 < swingTimer )
 			{
 				setStopAnimation( models.pAtkSwing.get(), /* is_stop = */ true );
@@ -998,7 +998,7 @@ void Boss::AttackSwingUpdate( TargetStatus target )
 	bool nowStop = ( 0 < swingTimer );
 	if ( !nowStop )
 	{
-		auto *pOBBs = BossParam::Get().OBBAtksSwing();
+		auto *pOBBs = GolemParam::Get().OBBAtksSwing();
 		const size_t COUNT = pOBBs->size();
 		for ( size_t i = 0; i < COUNT; ++i )
 		{
@@ -1007,30 +1007,30 @@ void Boss::AttackSwingUpdate( TargetStatus target )
 		}
 	}
 }
-void Boss::AttackSwingUninit()
+void Golem::AttackSwingUninit()
 {
 	timer		= 0;
 	swingTimer	= 0;
 
-	ResetCurrentOBBFrames( BossParam::Get().OBBAtksSwing() );
+	ResetCurrentOBBFrames( GolemParam::Get().OBBAtksSwing() );
 	setAnimFlame( models.pAtkSwing.get(), 0 );
 	setStopAnimation( models.pAtkSwing.get(), /* is_stop = */ false );
 }
 
-void Boss::AttackFastInit( TargetStatus target )
+void Golem::AttackFastInit( TargetStatus target )
 {
-	status = BossAI::ActionState::ATTACK_FAST;
+	status = GolemAI::ActionState::ATTACK_FAST;
 
-	slerpFactor = BossParam::Get().SlerpFactor( status );
+	slerpFactor = GolemParam::Get().SlerpFactor( status );
 
-	ResetCurrentOBBFNames( BossParam::Get().OBBFAtksFast() );
+	ResetCurrentOBBFNames( GolemParam::Get().OBBFAtksFast() );
 	setAnimFlame( models.pAtkFast.get(), 0 );
 }
-void Boss::AttackFastUpdate( TargetStatus target )
+void Golem::AttackFastUpdate( TargetStatus target )
 {
-	velocity = orientation.LocalFront() * BossParam::Get().MoveSpeed( status );
+	velocity = orientation.LocalFront() * GolemParam::Get().MoveSpeed( status );
 
-	auto *pOBBFNs = BossParam::Get().OBBFAtksFast();
+	auto *pOBBFNs = GolemParam::Get().OBBFAtksFast();
 	const size_t COUNT = pOBBFNs->size();
 	for ( size_t i = 0; i < COUNT; ++i )
 	{
@@ -1038,32 +1038,32 @@ void Boss::AttackFastUpdate( TargetStatus target )
 		OBBFN.OBBF.Update();
 	}
 }
-void Boss::AttackFastUninit()
+void Golem::AttackFastUninit()
 {
-	ResetCurrentOBBFNames( BossParam::Get().OBBFAtksFast() );
+	ResetCurrentOBBFNames( GolemParam::Get().OBBFAtksFast() );
 	setAnimFlame( models.pAtkFast.get(), 0 );
 }
 
-void Boss::AttackRotateInit( TargetStatus target )
+void Golem::AttackRotateInit( TargetStatus target )
 {
-	status = BossAI::ActionState::ATTACK_ROTATE;
+	status = GolemAI::ActionState::ATTACK_ROTATE;
 
-	slerpFactor = BossParam::Get().SlerpFactor( status );
+	slerpFactor = GolemParam::Get().SlerpFactor( status );
 	easeFactor  = 0.0f;
 	extraOffset = 0.0f;
 
-	ResetCurrentSphereFrames( BossParam::Get().RotateAtkCollisions() );
+	ResetCurrentSphereFrames( GolemParam::Get().RotateAtkCollisions() );
 	setAnimFlame( models.pAtkRotate.get(), 0 );
 }
-void Boss::AttackRotateUpdate( TargetStatus target )
+void Golem::AttackRotateUpdate( TargetStatus target )
 {
-	velocity = orientation.LocalFront() * BossParam::Get().MoveSpeed( status );
+	velocity = orientation.LocalFront() * GolemParam::Get().MoveSpeed( status );
 
-	const int startLeaveFrame	= BossParam::Get().RotLeaveStartFrame();
+	const int startLeaveFrame	= GolemParam::Get().RotLeaveStartFrame();
 	const int currentFrame		= models.pAtkRotate->getAnimFlame();
 	if ( startLeaveFrame <= currentFrame )
 	{
-		const auto &PARAM = BossParam::Get();
+		const auto &PARAM = GolemParam::Get();
 		const float increaseSpeed = 1.0f / scast<float>( PARAM.RotLeaveWholeFrame() );
 
 		easeFactor += increaseSpeed;
@@ -1081,7 +1081,7 @@ void Boss::AttackRotateUpdate( TargetStatus target )
 		extraOffset = -orientation.LocalFront() * ( PARAM.RotLeaveDistance() * easePercent );
 	}
 
-	auto *pSphereFs = BossParam::Get().RotateAtkCollisions();
+	auto *pSphereFs = GolemParam::Get().RotateAtkCollisions();
 	const size_t COUNT = pSphereFs->size();
 	for ( size_t i = 0; i < COUNT; ++i )
 	{
@@ -1089,18 +1089,18 @@ void Boss::AttackRotateUpdate( TargetStatus target )
 		sphereF.Update();
 	}
 }
-void Boss::AttackRotateUninit()
+void Golem::AttackRotateUninit()
 {
 	pos += extraOffset;
 
 	easeFactor  = 0.0f;
 	extraOffset = 0.0f;
 
-	ResetCurrentSphereFrames( BossParam::Get().RotateAtkCollisions() );
+	ResetCurrentSphereFrames( GolemParam::Get().RotateAtkCollisions() );
 	setAnimFlame( models.pAtkRotate.get(), 0 );
 }
 
-void Boss::ApplyVelocity( TargetStatus target )
+void Golem::ApplyVelocity( TargetStatus target )
 {
 	if ( !velocity.IsZero() )
 	{
@@ -1115,9 +1115,9 @@ void Boss::ApplyVelocity( TargetStatus target )
 	orientation.Normalize();
 }
 
-void Boss::CollideToWall()
+void Golem::CollideToWall()
 {
-	const float bodyRadius = BossParam::Get().StageBodyRadius();
+	const float bodyRadius = GolemParam::Get().StageBodyRadius();
 	const float trueFieldRadius = fieldRadius - bodyRadius;
 
 	constexpr Donya::Vector3 ORIGIN = Donya::Vector3::Zero();
@@ -1135,21 +1135,21 @@ void Boss::CollideToWall()
 
 #if USE_IMGUI
 
-void Boss::UseImGui()
+void Golem::UseImGui()
 {
 	if ( ImGui::BeginIfAllowed() )
 	{
-		if ( ImGui::TreeNode( "Boss.CurrentParameter" ) )
+		if ( ImGui::TreeNode( "Golem.CurrentParameter" ) )
 		{
-			auto GetStatusName = []( BossAI::ActionState status )->std::string
+			auto GetStatusName = []( GolemAI::ActionState status )->std::string
 			{
 				switch ( status )
 				{
-				case BossAI::ActionState::WAIT:				return { "Wait" };			break;
-				case BossAI::ActionState::MOVE:				return { "Move" };			break;
-				case BossAI::ActionState::ATTACK_SWING:		return { "Attack.Swing" };	break;
-				case BossAI::ActionState::ATTACK_FAST:		return { "Attack.Fast" };	break;
-				case BossAI::ActionState::ATTACK_ROTATE:	return { "Attack.Rotate" };	break;
+				case GolemAI::ActionState::WAIT:				return { "Wait" };			break;
+				case GolemAI::ActionState::MOVE:				return { "Move" };			break;
+				case GolemAI::ActionState::ATTACK_SWING:		return { "Attack.Swing" };	break;
+				case GolemAI::ActionState::ATTACK_FAST:		return { "Attack.Fast" };	break;
+				case GolemAI::ActionState::ATTACK_ROTATE:	return { "Attack.Rotate" };	break;
 				default: break;
 				}
 

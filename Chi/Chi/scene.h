@@ -82,7 +82,7 @@ class SceneEffect : public baseScene
 private:
 	FlashParticle flashParticle;
 	BubbleParticle bubbleParticle;
-	BossAI bossAI;
+	GolemAI bossAI;
 	int keyCnt;
 
 	std::shared_ptr<static_mesh> pCube1;

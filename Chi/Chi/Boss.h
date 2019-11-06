@@ -19,11 +19,11 @@
 class skinned_mesh;	// With pointer. because I'm not want include this at header.
 
 /// <summary>
-/// Boss's serialize parameter.
+/// Golem's serialize parameter.
 /// </summary>
-class BossParam final : public Donya::Singleton<BossParam>
+class GolemParam final : public Donya::Singleton<GolemParam>
 {
-	friend Donya::Singleton<BossParam>;
+	friend Donya::Singleton<GolemParam>;
 public:
 	struct OBBFrameWithName
 	{
@@ -74,9 +74,9 @@ private:
 	std::vector<OBBFrameWithName>	OBBFAttacksFast;
 	std::vector<Donya::SphereFrame>	rotateAttackCollisions;
 private:
-	BossParam();
+	GolemParam();
 public:
-	~BossParam();
+	~GolemParam();
 private:
 	friend class cereal::access;
 	template<class Archive>
@@ -191,7 +191,7 @@ private:
 		}
 		*/
 	}
-	static constexpr const char *SERIAL_ID = "Boss";
+	static constexpr const char *SERIAL_ID = "Golem";
 public:
 	void Init();
 	void Uninit();
@@ -209,8 +209,8 @@ public:
 	float									StageBodyRadius()		const	{ return stageBodyRadius; }
 	float									TargetDistNear()		const	{ return targetDistNear; }
 	float									TargetDistFar()			const	{ return targetDistFar; }
-	float									MoveSpeed  ( BossAI::ActionState status ) const;
-	float									SlerpFactor( BossAI::ActionState status ) const;
+	float									MoveSpeed  ( GolemAI::ActionState status ) const;
+	float									SlerpFactor( GolemAI::ActionState status ) const;
 	Donya::Vector3							GetInitPosition( int stageNumber ) const;
 	Donya::Vector3							GetDrawOffset  ( int stageNumber ) const;
 	std::vector<Donya::OBBFrame>			*OBBAtksSwing()					{ return &OBBAttacksSwing; }
@@ -231,10 +231,13 @@ public:
 
 #endif // USE_IMGUI
 };
-CEREAL_CLASS_VERSION( BossParam, 9 )
-CEREAL_CLASS_VERSION( BossParam::OBBFrameWithName, 0 )
+CEREAL_CLASS_VERSION( GolemParam, 9 )
+CEREAL_CLASS_VERSION( GolemParam::OBBFrameWithName, 0 )
 
-class Boss
+/// <summary>
+/// Golem number 3.
+/// </summary>
+class Golem
 {
 public:
 	struct TargetStatus
@@ -250,8 +253,8 @@ private:
 		std::unique_ptr<skinned_mesh> pAtkRotate{ nullptr };
 	};
 private:
-	BossAI::ActionState		status;
-	BossAI					AI;
+	GolemAI::ActionState		status;
+	GolemAI					AI;
 	int						stageNo;		// 1-based.
 	int						timer;			// Recycle between each state.
 	int						swingTimer;		// Use when status is attack of swing.
@@ -264,8 +267,8 @@ private:
 	Donya::Quaternion		orientation;
 	Models					models;
 public:
-	Boss();
-	~Boss();
+	Golem();
+	~Golem();
 public:
 	void Init( int stageNo );
 	void Uninit();

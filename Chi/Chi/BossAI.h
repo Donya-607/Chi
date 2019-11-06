@@ -8,7 +8,7 @@
 
 #include "Donya/UseImGui.h"
 
-class BossAI
+class GolemAI
 {
 public:
 	/// <summary>
@@ -60,8 +60,8 @@ private:
 	std::array<int, WAIT_STATE_COUNT>	waitPercents{};
 	std::array<int, ATTACK_STATE_COUNT>	attackPercents{};
 public:
-	BossAI() {}
-	// ~BossAI() = default;
+	GolemAI() {}
+	// ~GolemAI() = default;
 private:
 	friend class cereal::access;
 	template<class Archive>
@@ -108,7 +108,7 @@ private:
 		}
 		*/
 	}
-	static constexpr const char *SERIAL_ID = "BossAI";
+	static constexpr const char *SERIAL_ID = "GolemAI";
 public:
 	void Init();
 	void Update();
@@ -134,4 +134,4 @@ public:
 
 #endif // USE_IMGUI
 };
-CEREAL_CLASS_VERSION( BossAI, 3 )
+CEREAL_CLASS_VERSION( GolemAI, 3 )

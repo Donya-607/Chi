@@ -8,7 +8,7 @@
 
 #define scast static_cast
 
-void BossAI::Init()
+void GolemAI::Init()
 {
 	status		= ActionState::WAIT;
 	timer		= 0;
@@ -22,7 +22,7 @@ void BossAI::Init()
 	LoadParameter();
 }
 
-void BossAI::Update()
+void GolemAI::Update()
 {
 #if USE_IMGUI
 
@@ -48,7 +48,7 @@ void BossAI::Update()
 	}
 }
 
-BossAI::ActionState BossAI::ToActionState( WaitState waitStatus ) const
+GolemAI::ActionState GolemAI::ToActionState( WaitState waitStatus ) const
 {
 	ActionState to = ActionState::END;
 	
@@ -64,7 +64,7 @@ BossAI::ActionState BossAI::ToActionState( WaitState waitStatus ) const
 
 	return to;
 }
-BossAI::ActionState BossAI::ToActionState( AttackState attackStatus ) const
+GolemAI::ActionState GolemAI::ToActionState( AttackState attackStatus ) const
 {
 	ActionState to = ActionState::END;
 
@@ -82,7 +82,7 @@ BossAI::ActionState BossAI::ToActionState( AttackState attackStatus ) const
 	return to;
 }
 
-void BossAI::LotteryWaitState()
+void GolemAI::LotteryWaitState()
 {
 	timer = coolTime;
 
@@ -107,7 +107,7 @@ void BossAI::LotteryWaitState()
 		}
 	}
 }
-void BossAI::LotteryAttackState()
+void GolemAI::LotteryAttackState()
 {
 	const int percentSum = std::accumulate( attackPercents.begin(), attackPercents.end(), 0 );
 
@@ -133,7 +133,7 @@ void BossAI::LotteryAttackState()
 	}
 }
 
-bool BossAI::NowStatusAction() const
+bool GolemAI::NowStatusAction() const
 {
 	switch ( status )
 	{
@@ -146,7 +146,7 @@ bool BossAI::NowStatusAction() const
 	return false;
 }
 
-void BossAI::LoadParameter( bool isBinary )
+void GolemAI::LoadParameter( bool isBinary )
 {
 	Donya::Serializer::Extension ext = ( isBinary )
 	? Donya::Serializer::Extension::BINARY
@@ -159,7 +159,7 @@ void BossAI::LoadParameter( bool isBinary )
 
 #if USE_IMGUI
 
-void BossAI::SaveParameter()
+void GolemAI::SaveParameter()
 {
 	Donya::Serializer::Extension bin  = Donya::Serializer::Extension::BINARY;
 	Donya::Serializer::Extension json = Donya::Serializer::Extension::JSON;
@@ -171,9 +171,9 @@ void BossAI::SaveParameter()
 	seria.Save( json, jsonPath.c_str(), SERIAL_ID, *this );
 }
 
-void BossAI::ImGui()
+void GolemAI::ImGui()
 {
-	if ( ImGui::BeginIfAllowed( "BossAI" ) )
+	if ( ImGui::BeginIfAllowed( "GolemAI" ) )
 	{
 		auto GetActionName = []( int i )->std::string
 		{

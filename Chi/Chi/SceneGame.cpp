@@ -40,7 +40,7 @@ public:
 	Lights			lights;
 	Player			player;
 	Stage			stage;
-	Boss			boss;
+	Golem			boss;
 public:
 	Impl() :
 		fieldRadius(), cameraLeaveDistance(),
@@ -224,7 +224,7 @@ public:
 		};
 		player.Update( MakePlayerInput( Donya::Vector4x4::FromMatrix( GameLib::camera::GetViewMatrix() ) ) );
 
-		Boss::TargetStatus bossTarget{};
+		Golem::TargetStatus bossTarget{};
 		bossTarget.pos = player.GetPosition();
 		boss.Update( bossTarget );
 		
