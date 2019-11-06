@@ -10,7 +10,7 @@
 
 #include "Sprite.h"
 #include "Particle.h"
-#include "BossAI.h"
+#include "GolemAI.h"
 #include "OBB.h"
 
 

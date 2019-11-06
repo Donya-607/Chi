@@ -140,8 +140,6 @@
   <ItemGroup>
     <ClInclude Include="baseScene.h" />
     <ClInclude Include="blend.h" />
-    <ClInclude Include="Boss.h" />
-    <ClInclude Include="BossAI.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Donya\AudioSystem.h" />
     <ClInclude Include="Donya\ChiUtility.h" />
@@ -163,6 +161,8 @@
     <ClInclude Include="frame_rate.h" />
     <ClInclude Include="gameLib.h" />
     <ClInclude Include="GameLibFunctions.h" />
+    <ClInclude Include="Golem.h" />
+    <ClInclude Include="GolemAI.h" />
     <ClInclude Include="high_resolution_timer.h" />
     <ClInclude Include="keyInput.h" />
     <ClInclude Include="liblary\imgui\imconfig.h" />
@@ -195,8 +195,6 @@
     <ClInclude Include="XinputPad.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Boss.cpp" />
-    <ClCompile Include="BossAI.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Donya\AudioSystem.cpp" />
     <ClCompile Include="Donya\ChiUtility.cpp" />
@@ -214,6 +212,8 @@
     <ClCompile Include="frame_rate.cpp" />
     <ClCompile Include="gameLib.cpp" />
     <ClCompile Include="gameLibFunctions.cpp" />
+    <ClCompile Include="Golem.cpp" />
+    <ClCompile Include="GolemAI.cpp" />
     <ClCompile Include="liblary\imgui\imgui.cpp" />
     <ClCompile Include="liblary\imgui\imgui_demo.cpp" />
     <ClCompile Include="liblary\imgui\imgui_draw.cpp" />

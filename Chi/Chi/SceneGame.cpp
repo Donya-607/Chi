@@ -19,7 +19,7 @@
 #include "gameLib.h"
 #include "light.h"
 
-#include "Boss.h"
+#include "Golem.h"
 #include "Player.h"
 #include "Stage.h"
 

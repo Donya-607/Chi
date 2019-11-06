@@ -14,7 +14,7 @@
 #include "Donya/UseImGui.h"
 #include "Donya/Vector.h"
 
-#include "BossAI.h"
+#include "GolemAI.h"
 
 class skinned_mesh;	// With pointer. because I'm not want include this at header.
 
