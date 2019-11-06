@@ -69,7 +69,7 @@ private:
 			CEREAL_NVP( m.swingMoveSpeed ),
 			CEREAL_NVP( m.swingSlerpFactor ),
 			CEREAL_NVP( m.raidMoveSpeed ),
-			CEREAL_NVP( m.SlerpFactor ),
+			CEREAL_NVP( m.raidSlerpFactor ),
 			CEREAL_NVP( m.initPos ),
 			CEREAL_NVP( m.drawOffset ),
 			CEREAL_NVP( m.hitBoxBody )

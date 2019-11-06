@@ -124,6 +124,8 @@
     <ClInclude Include="Donya\Easing.h" />
     <ClInclude Include="Golem.h" />
     <ClInclude Include="GolemAI.h" />
+    <ClInclude Include="Knight.h" />
+    <ClInclude Include="KnightAI.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp">
@@ -212,6 +214,8 @@
     <ClCompile Include="Donya\Random.cpp" />
     <ClCompile Include="Golem.cpp" />
     <ClCompile Include="GolemAI.cpp" />
+    <ClCompile Include="KnightAI.cpp" />
+    <ClCompile Include="Knight.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="geometric_phong_ps.hlsl">

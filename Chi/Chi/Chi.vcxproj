@@ -165,6 +165,8 @@
     <ClInclude Include="GolemAI.h" />
     <ClInclude Include="high_resolution_timer.h" />
     <ClInclude Include="keyInput.h" />
+    <ClInclude Include="Knight.h" />
+    <ClInclude Include="KnightAI.h" />
     <ClInclude Include="liblary\imgui\imconfig.h" />
     <ClInclude Include="liblary\imgui\imgui.h" />
     <ClInclude Include="liblary\imgui\imgui_impl_dx11.h" />
@@ -214,6 +216,8 @@
     <ClCompile Include="gameLibFunctions.cpp" />
     <ClCompile Include="Golem.cpp" />
     <ClCompile Include="GolemAI.cpp" />
+    <ClCompile Include="Knight.cpp" />
+    <ClCompile Include="KnightAI.cpp" />
     <ClCompile Include="liblary\imgui\imgui.cpp" />
     <ClCompile Include="liblary\imgui\imgui_demo.cpp" />
     <ClCompile Include="liblary\imgui\imgui_draw.cpp" />
