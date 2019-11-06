@@ -21,10 +21,11 @@ enum class ModelAttribute
 	PlayerAtk,
 	PlayerDefend,
 	Stage,
-	BossIdle,
-	BossAtkSwing,
-	BossAtkFast,
-	BossAtkRotate,
+	GolemIdle,
+	GolemAtkSwing,
+	GolemAtkFast,
+	GolemAtkRotate,
+	KnightIdle,
 };
 
 std::string GetModelPath( ModelAttribute modelAttribute );

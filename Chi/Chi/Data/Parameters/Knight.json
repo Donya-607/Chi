@@ -1,0 +1,39 @@
+{
+    "Knight": {
+        "cereal_class_version": 0,
+        "m.scale": 1.0,
+        "m.stageBodyRadius": 320.0,
+        "m.targetDistNear": 0.30000001192092898,
+        "m.targetDistFar": 0.699999988079071,
+        "m.idleSlerpFactor": 0.4000000059604645,
+        "m.moveMoveSpeed": 8.0,
+        "m.moveSlerpFactor": 0.20000000298023225,
+        "m.explMoveSpeed": 0.0,
+        "m.explSlerpFactor": 0.0,
+        "m.swingMoveSpeed": 0.0,
+        "m.swingSlerpFactor": 0.0,
+        "m.raidMoveSpeed": 0.0,
+        "m.raidSlerpFactor": 0.0,
+        "m.initPos": {
+            "cereal_class_version": 0,
+            "x": 10.0,
+            "y": 0.0,
+            "z": 93.0
+        },
+        "m.drawOffset": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+        },
+        "m.hitBoxBody": {
+            "cereal_class_version": 0,
+            "pos": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "radius": 10.0,
+            "exist": true
+        }
+    }
+}

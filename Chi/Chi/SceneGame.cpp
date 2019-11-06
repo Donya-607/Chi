@@ -19,7 +19,8 @@
 #include "gameLib.h"
 #include "light.h"
 
-#include "Golem.h"
+// #include "Golem.h"
+#include "Knight.h"
 #include "Player.h"
 #include "Stage.h"
 
@@ -40,7 +41,8 @@ public:
 	Lights			lights;
 	Player			player;
 	Stage			stage;
-	Golem			boss;
+	// Golem			boss;
+	Knight			boss;
 public:
 	Impl() :
 		fieldRadius(), cameraLeaveDistance(),
@@ -205,6 +207,8 @@ public:
 					cameraRotation._43 = 0.0f;
 					cameraRotation._44 = 1.0f;
 
+					// XXX : If "viewMat" is invalid matrix, Inverse() will returns NaN.
+
 					cameraRotation = cameraRotation.Inverse();
 				}
 
@@ -224,7 +228,8 @@ public:
 		};
 		player.Update( MakePlayerInput( Donya::Vector4x4::FromMatrix( GameLib::camera::GetViewMatrix() ) ) );
 
-		Golem::TargetStatus bossTarget{};
+		// Golem::TargetStatus bossTarget{};
+		Knight::TargetStatus bossTarget{};
 		bossTarget.pos = player.GetPosition();
 		boss.Update( bossTarget );
 		
@@ -397,6 +402,11 @@ public:
 		// 単位ベクトル取得
 		// DirectX::XMFLOAT3 player_to_target_vec = DirectX::XMFLOAT3( targetPos.x - playerPos.x, targetPos.y - playerPos.y, targetPos.z - playerPos.z );
 		Donya::Vector3 player_to_target_vec = targetPos - playerPos;
+		if ( player_to_target_vec.IsZero() )
+		{
+			// Prevent NaN when calculate Player's input.
+			player_to_target_vec = -Donya::Vector3::Front();
+		}
 		float distPlayerBoss = player_to_target_vec.Length();
 		Donya::Vector3 unitvec_player_to_target = player_to_target_vec.Normalized();
 
@@ -431,6 +441,7 @@ public:
 
 	void ProcessCollision()
 	{
+		/*
 		Donya::OBB playerBodyBox   = player.GetHurtBox();
 		Donya::OBB playerShieldBox = player.GetShieldHitBox();
 		Donya::OBB playerAttackBox = player.CalcAttackHitBox();
@@ -481,6 +492,7 @@ public:
 				}
 			}
 		}
+		*/
 	}
 public:
 	void LoadParameter( bool isBinary = true )

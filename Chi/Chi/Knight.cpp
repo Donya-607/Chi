@@ -392,7 +392,7 @@ void Knight::SetFieldRadius( float newFieldRadius )
 
 void Knight::LoadModel()
 {
-	loadFBX( models.pIdle.get(), GetModelPath( ModelAttribute::BossIdle ) );
+	loadFBX( models.pIdle.get(), GetModelPath( ModelAttribute::KnightIdle ) );
 }
 
 float Knight::CalcNormalizedDistance( Donya::Vector3 wsTargetPos )

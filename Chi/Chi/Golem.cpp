@@ -831,10 +831,10 @@ void Golem::SetFieldRadius( float newFieldRadius )
 
 void Golem::LoadModel()
 {
-	loadFBX( models.pIdle.get(),		GetModelPath( ModelAttribute::BossIdle		) );
-	loadFBX( models.pAtkSwing.get(),	GetModelPath( ModelAttribute::BossAtkSwing	) );
-	loadFBX( models.pAtkFast.get(),		GetModelPath( ModelAttribute::BossAtkFast	) );
-	loadFBX( models.pAtkRotate.get(),	GetModelPath( ModelAttribute::BossAtkRotate	) );
+	loadFBX( models.pIdle.get(),		GetModelPath( ModelAttribute::GolemIdle		) );
+	loadFBX( models.pAtkSwing.get(),	GetModelPath( ModelAttribute::GolemAtkSwing	) );
+	loadFBX( models.pAtkFast.get(),		GetModelPath( ModelAttribute::GolemAtkFast	) );
+	loadFBX( models.pAtkRotate.get(),	GetModelPath( ModelAttribute::GolemAtkRotate	) );
 }
 
 float Golem::CalcNormalizedDistance( Donya::Vector3 wsTargetPos )
