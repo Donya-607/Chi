@@ -6,6 +6,9 @@
 #include "Donya/Serializer.h"
 #include "Donya/Random.h"
 
+#undef max
+#undef min
+
 #define scast static_cast
 
 void GolemAI::Init()
@@ -20,6 +23,11 @@ void GolemAI::Init()
 	attackPercents.fill( 1 );
 
 	LoadParameter();
+
+	if ( gapIntervals.empty() )
+	{
+		gapIntervals.resize( 1U );
+	}
 }
 
 void GolemAI::Update()
@@ -73,7 +81,6 @@ GolemAI::ActionState GolemAI::ToActionState( AttackState attackStatus ) const
 
 	switch ( attackStatus )
 	{
-	case AttackState::SWING:	to = ActionState::ATTACK_SWING;		break;
 	case AttackState::FAST:		to = ActionState::ATTACK_FAST;		break;
 	case AttackState::ROTATE:	to = ActionState::ATTACK_ROTATE;	break;
 	default: break;
@@ -109,6 +116,20 @@ void GolemAI::LotteryWaitState()
 }
 void GolemAI::LotteryAttackState()
 {
+	if ( attackTimes <= 0 )
+	{
+		status			= ActionState::ATTACK_SWING;
+		timer			= wholeFrame.back();
+		coolTime		= coolTimeFrame.back();
+
+		intervalIndex	= ( intervalIndex <= scast<int>( gapIntervals.size() ) - 1 ) ? 0 : intervalIndex + 1;
+		attackTimes		= gapIntervals[intervalIndex];
+		return;
+	}
+	// else
+
+	attackTimes--;
+
 	const int percentSum = std::accumulate( attackPercents.begin(), attackPercents.end(), 0 );
 
 	ActionState oldState = status;
@@ -145,6 +166,10 @@ bool GolemAI::NowStatusAction() const
 
 	return false;
 }
+GolemAI::ActionState GolemAI::GetGapAttack() const
+{
+	return ActionState::ATTACK_SWING;
+}
 
 void GolemAI::LoadParameter( bool isBinary )
 {
@@ -175,7 +200,7 @@ void GolemAI::ImGui()
 {
 	if ( ImGui::BeginIfAllowed( "GolemAI" ) )
 	{
-		auto GetActionName = []( int i )->std::string
+		auto GetActionName	= []( int i )->std::string
 		{
 			constexpr std::array<const char *, ACTION_STATE_COUNT> NAMES
 			{
@@ -190,7 +215,7 @@ void GolemAI::ImGui()
 			// else
 			return std::string{ NAMES[i] };
 		};
-		auto GetWaitName = []( int i )->std::string
+		auto GetWaitName	= []( int i )->std::string
 		{
 			constexpr std::array<const char *, WAIT_STATE_COUNT> NAMES
 			{
@@ -202,16 +227,16 @@ void GolemAI::ImGui()
 			// else
 			return std::string{ NAMES[i] };
 		};
-		auto GetAttackName = []( int i )->std::string
+		auto GetAttackName	= []( int i )->std::string
 		{
-			constexpr std::array<const char *, ATTACK_STATE_COUNT> NAMES
+			constexpr std::array<const char *, ALL_ATTACK_COUNT> NAMES
 			{
-				"Attack.Swing",
 				"Attack.Fast",
 				"Attack.Rotate",
+				"Attack.Swing",
 			};
 
-			if ( ATTACK_STATE_COUNT <= i ) { return "Error Name"; }
+			if ( ALL_ATTACK_COUNT <= i ) { return "Error Name"; }
 			// else
 			return std::string{ NAMES[i] };
 		};
@@ -267,6 +292,26 @@ void GolemAI::ImGui()
 				{
 					ImGui::SliderInt( GetAttackName( i ).c_str(), &it, 1, 1024 );
 					i++;
+				}
+
+				ImGui::TreePop();
+			}
+
+			if ( ImGui::TreeNode( "Gap.Intervals" ) )
+			{
+				if ( ImGui::Button( "List.Append" ) )
+				{
+					gapIntervals.push_back( 0 );
+				}
+				if ( 1 < gapIntervals.size() && ImGui::Button( "List.PopBack" ) )
+				{
+					gapIntervals.pop_back();
+				}
+
+				const size_t COUNT = gapIntervals.size();
+				for ( size_t i = 0; i < COUNT; ++i )
+				{
+					ImGui::SliderInt( ( "AttackTimes[" + std::to_string( i ) + "]" ).c_str(), &gapIntervals[i], 0, 16 );
 				}
 
 				ImGui::TreePop();

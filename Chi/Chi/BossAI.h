@@ -2,9 +2,11 @@
 
 #include <array>
 #include <memory>
+#include <vector>
 
 #include <cereal/cereal.hpp>
 #include <cereal/types/array.hpp>
+#include <cereal/types/vector.hpp>
 
 #include "Donya/UseImGui.h"
 
@@ -38,27 +40,31 @@ private:
 	};
 	static constexpr int WAIT_STATE_COUNT = static_cast<int>( WaitState::END );
 	/// <summary>
-	/// Only attack behavior.
+	/// Only attack behavior. but excepting an attack with gap.
 	/// </summary>
 	enum class AttackState
 	{
-		SWING,
 		FAST,
 		ROTATE,
 
 		END
 	};
-	static constexpr int ATTACK_STATE_COUNT = static_cast<int>( AttackState::END );
+	static constexpr int ATTACK_STATE_COUNT	= static_cast<int>( AttackState::END );		// Except an attack with gap.
+	static constexpr int ALL_ATTACK_COUNT	= static_cast<int>( AttackState::END ) + 1;	// Contain an attack with gap.
 private:
 	ActionState status{};
 
 	int timer{};
 	int coolTime{};
 
-	std::array<int, ATTACK_STATE_COUNT>	wholeFrame{};
-	std::array<int, ATTACK_STATE_COUNT>	coolTimeFrame{};
+	std::array<int, ALL_ATTACK_COUNT>	wholeFrame{};		// An attack with gap is stored at back().
+	std::array<int, ALL_ATTACK_COUNT>	coolTimeFrame{};	// An attack with gap is stored at back().
 	std::array<int, WAIT_STATE_COUNT>	waitPercents{};
 	std::array<int, ATTACK_STATE_COUNT>	attackPercents{};
+
+	int attackTimes{};	// Store "gapIntervals" count.
+	int intervalIndex{};
+	std::vector<int> gapIntervals{}; // At least have 1 element.
 public:
 	GolemAI() {}
 	// ~GolemAI() = default;
@@ -84,6 +90,10 @@ private:
 				);
 			}
 			if ( 4 <= version )
+			{ 
+				archive( CEREAL_NVP( gapIntervals ) );
+			}
+			if ( 5 <= version )
 			{
 				// archive( CEREAL_NVP( x ) );
 			}
@@ -121,6 +131,7 @@ private:
 	void LotteryAttackState();
 
 	bool NowStatusAction() const;
+	ActionState GetGapAttack() const;
 private:
 	void LoadParameter( bool isBinary = true );
 
@@ -134,4 +145,4 @@ public:
 
 #endif // USE_IMGUI
 };
-CEREAL_CLASS_VERSION( GolemAI, 3 )
+CEREAL_CLASS_VERSION( GolemAI, 4 )
