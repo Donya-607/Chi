@@ -3,7 +3,8 @@
 #include "sceneManager.h"
 #include "keyInput.h"
 
-#include "Donya/Keyboard.h" // Insert by Donya.
+#include "Donya/Keyboard.h"	// Insert by Donya.
+#include "Donya/Useful.h"	// Insert by Donya.
 
 void sceneTitle::init()
 {
@@ -44,7 +45,9 @@ void sceneTitle::update()
 		size_t start = sample.find_last_of(L"\\") + 1;
 		name = sample.substr(start, sample.size() - start);
 
-		std::string dummy(name.begin(), name.end());
+		// std::string dummy(name.begin(), name.end());
+		std::string dummy = Donya::WideToMulti( name );
+
 		std::string file_name = "./Data/" + dummy;
 		start = dummy.find_last_of(".") + 1;
 		std::string extend = dummy.substr(start, dummy.size() - start);

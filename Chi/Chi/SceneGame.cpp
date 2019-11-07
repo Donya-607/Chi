@@ -147,25 +147,25 @@ public:
 
 	void Update()
 	{
-#if DEBUG_MODE
+	#if DEBUG_MODE
 
-		if (Donya::Keyboard::Press(VK_MENU))
+		if ( Donya::Keyboard::Press( VK_MENU ) )
 		{
-			if (Donya::Keyboard::Trigger('C'))
+			if ( Donya::Keyboard::Trigger( 'C' ) )
 			{
 				char breakPoint = 0;
 			}
-			if (Donya::Keyboard::Trigger('H'))
+			if ( Donya::Keyboard::Trigger( 'H' ) )
 			{
 				Donya::ToggleShowCollision();
 			}
-			if (Donya::Keyboard::Trigger('T') || Donya::Keyboard::Trigger('I'))
+			if ( Donya::Keyboard::Trigger( 'T' ) || Donya::Keyboard::Trigger( 'I' ) )
 			{
 				Donya::ToggleShowStateOfImGui();
 			}
 		}
 
-#endif // DEBUG_MODE
+	#endif // DEBUG_MODE
 
 		stage.Update();
 
