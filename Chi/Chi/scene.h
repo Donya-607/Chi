@@ -12,6 +12,10 @@
 #include "Particle.h"
 #include "GolemAI.h"
 #include "OBB.h"
+#include "Effect.h"
+#include "Stage.h"
+#include "light.h"
+#include "Donya/ChiUtility.h"
 
 
 using namespace DirectX;
@@ -84,6 +88,7 @@ private:
 	BubbleParticle bubbleParticle;
 	GolemAI bossAI;
 	int keyCnt;
+	int keyCnt2;
 
 	std::shared_ptr<static_mesh> pCube1;
 	std::shared_ptr<static_mesh> pCube2;
@@ -93,9 +98,20 @@ private:
 	DirectX::XMFLOAT4 color2;
 	float angle1[3];
 	float angle2[3];
+	bool exist1;
+	bool exist2;
+
+//	EruptionEffect eruptionEffect;
+	Stage stage;
+
+	Donya::Vector3 cameraPos;
+	Donya::Vector3 cameraFocusOffset;
+	Lights	lights;
+
+	Donya::Vector3 originPos;
 
 public:
-	SceneEffect() {}
+	SceneEffect() : stage(), cameraPos(), cameraFocusOffset(), lights() {}
 	~SceneEffect()
 	{
 		uninit();
