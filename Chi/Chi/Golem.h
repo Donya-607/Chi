@@ -234,6 +234,7 @@ public:
 CEREAL_CLASS_VERSION( GolemParam, 9 )
 CEREAL_CLASS_VERSION( GolemParam::OBBFrameWithName, 0 )
 
+struct fbx_shader; // Use for argument.
 /// <summary>
 /// Golem number 3.
 /// </summary>
@@ -275,7 +276,7 @@ public:
 
 	void Update( TargetStatus target );
 
-	void Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matProjection );
+	void Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matProjection );
 public:
 	bool IsCollideAttackHitBoxes( const Donya::AABB   judgeOther, bool disableCollidingHitBoxes );
 	bool IsCollideAttackHitBoxes( const Donya::OBB    judgeOther, bool disableCollidingHitBoxes );

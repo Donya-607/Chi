@@ -123,7 +123,7 @@ void dragDrop::deleteDirectory(const wchar_t* _directory_name)
 	directories.erase(removeIt, directories.end());
 
 }
-void dragDrop::moveFile(HWND _hwnd)
+void dragDrop::moveFile(HWND _hwnd,bool& _flg)
 {
 	SetCurrentDirectory(L"./Data");
 	for (file_info* p = files.data(); p < files.data() + files.size(); p++)
@@ -146,8 +146,11 @@ void dragDrop::moveFile(HWND _hwnd)
 	files.erase(removeIt, files.end());
 
 	if (files.empty())
+	{
+		SetCurrentDirectory(L"..");
+		_flg = true;
 		return;
-
+	}
 
 	while (1)
 	{
@@ -166,13 +169,15 @@ void dragDrop::moveFile(HWND _hwnd)
 				std::wstring name;
 				size_t start = p->file_name.find_last_of(L"\\") + 1;
 				name = p->file_name.substr(start, p->file_name.size() - start);
-				if (CopyFile(p->file_name.c_str(), name.c_str(), true))
+				BOOL dummy = CopyFile(p->file_name.c_str(), name.c_str(), false);
+				if(dummy)
 				{
 
 					p->erase_flg = true;
 				}
 			}
 			files.erase(files.begin(), files.end());
+			_flg = true;
 
 			break;
 		}
@@ -200,5 +205,8 @@ void dragDrop::moveFile(HWND _hwnd)
 
 			break;
 		}
+
 	}
+	SetCurrentDirectory(L"..");
+
 }

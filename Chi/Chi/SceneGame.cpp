@@ -43,6 +43,7 @@ public:
 	Stage			stage;
 	// Golem			boss;
 	Knight			boss;
+	fbx_shader		shader;
 public:
 	Impl() :
 		fieldRadius(), cameraLeaveDistance(),
@@ -50,28 +51,29 @@ public:
 		player(),
 		stage(),
 		boss(),
-		lights()
+		lights(),
+		shader()
 	{}
 	~Impl() = default;
 private:
 	friend class cereal::access;
 	template<class Archive>
-	void serialize( Archive &archive, std::uint32_t version )
+	void serialize(Archive& archive, std::uint32_t version)
 	{
 		archive
 		(
-			CEREAL_NVP( fieldRadius )
+			CEREAL_NVP(fieldRadius)
 		);
 
-		if ( 1 <= version )
+		if (1 <= version)
 		{
-			archive( CEREAL_NVP( lights ) );
+			archive(CEREAL_NVP(lights));
 		}
-		if ( 2 <= version )
+		if (2 <= version)
 		{
-			archive( CEREAL_NVP( cameraFocusOffset ) );
+			archive(CEREAL_NVP(cameraFocusOffset));
 		}
-		if ( 3 <= version )
+		if (3 <= version)
 		{
 			archive
 			(
@@ -84,7 +86,7 @@ private:
 			// archive( CEREAL_NVP( x ) );
 		}
 	}
-	static constexpr const char *SERIAL_ID = "Game";
+	static constexpr const char* SERIAL_ID = "Game";
 public:
 	void Init()
 	{
@@ -109,7 +111,7 @@ public:
 		}
 
 	#if DEBUG_MODE
-		// createCube( &testCube );
+		loadShader(shader, "./Data/shader/skinned_mesh_has_born_vs.cso", "./Data/shader/skinned_mesh_ps.cso", "./Data/shader/skinned_mesh_vs.cso", "./Data/shader/skinned_mesh_no_uv_ps.cso");
 
 		constexpr int STAGE_NO = NULL;
 	#endif // DEBUG_MODE
@@ -145,25 +147,25 @@ public:
 
 	void Update()
 	{
-	#if DEBUG_MODE
+#if DEBUG_MODE
 
-		if ( Donya::Keyboard::Press( VK_MENU ) )
+		if (Donya::Keyboard::Press(VK_MENU))
 		{
-			if ( Donya::Keyboard::Trigger( 'C' ) )
+			if (Donya::Keyboard::Trigger('C'))
 			{
 				char breakPoint = 0;
 			}
-			if ( Donya::Keyboard::Trigger( 'H' ) )
+			if (Donya::Keyboard::Trigger('H'))
 			{
 				Donya::ToggleShowCollision();
 			}
-			if ( Donya::Keyboard::Trigger( 'T' ) || Donya::Keyboard::Trigger( 'I' ) )
+			if (Donya::Keyboard::Trigger('T') || Donya::Keyboard::Trigger('I'))
 			{
 				Donya::ToggleShowStateOfImGui();
 			}
 		}
 
-	#endif // DEBUG_MODE
+#endif // DEBUG_MODE
 
 		stage.Update();
 
@@ -252,6 +254,10 @@ public:
 		{
 			setAnimFlame(&animTest, 20);
 		}
+		if (getKeyState(KEY_INPUT_B) == 1)
+		{
+			bloom_flg ^= 1;
+		}
 		if (getKeyState(KEY_INPUT_SPACE))
 		{
 			//setStopTime(&animTest,1);
@@ -259,7 +265,7 @@ public:
 		}
 		else
 		{
-			setStopAnimation( &animTest, false );
+			setStopAnimation(&animTest, false);
 		}
 		*/
 	#endif // DEBUG_MODE
@@ -273,11 +279,17 @@ public:
 		Donya::Vector4x4 V = Donya::Vector4x4::FromMatrix( getViewMatrix() );
 		Donya::Vector4x4 P = Donya::Vector4x4::FromMatrix( getProjectionMatrix() );
 
-		stage.Draw( V, P );
+		stage.Draw( shader, V, P );
 
-		player.Draw( V, P );
+		player.Draw( shader, V, P );
 
-		boss.Draw( V, P );
+		boss.Draw( shader, V, P );
+
+		stage.Draw( shader, V, P );
+
+		player.Draw( shader, V, P );
+
+		boss.Draw( shader, V, P );
 
 	#if DEBUG_MODE
 		/*
@@ -288,39 +300,34 @@ public:
 			DirectX::XMMATRIX worldcubeM;
 			DirectX::XMMATRIX S, R, Rx, Ry, Rz, T;
 			auto plPos = player.GetPosition();
-			T = DirectX::XMMatrixTranslation( plPos.x, plPos.y, plPos.z );
+			T = DirectX::XMMatrixTranslation(plPos.x, plPos.y, plPos.z);
 			worldM = T;
 
-			//	Matrix -> Float4x4 変換
-			DirectX::XMStoreFloat4x4( &world_view_projection, worldM * getViewMatrix() * getProjectionMatrix() );
-			DirectX::XMStoreFloat4x4( &World, worldM );
-			
-			FBXRender( &animTest, world_view_projection, World );
+			DirectX::XMStoreFloat4x4(&world_view_projection, worldM * getViewMatrix() * getProjectionMatrix());
+			DirectX::XMStoreFloat4x4(&World, worldM);
+
+			FBXRender(&animTest,shader, world_view_projection, World);
 
 			DirectX::XMFLOAT3 pos = { -10,10,100 };
 			worldcubeM = DirectX::XMMatrixIdentity();
 
-			//	拡大・縮小
-			S = DirectX::XMMatrixScaling( 10, 10, 10 );
+			S = DirectX::XMMatrixScaling(10, 10, 10);
 
-			//	回転
-			Rx = DirectX::XMMatrixRotationX( 0 );				//	X軸を基準とした回転行列
-			Ry = DirectX::XMMatrixRotationY( 0 );				//	Y軸を基準とした回転行列
-			Rz = DirectX::XMMatrixRotationZ( 0 );				//	Z軸を基準とした回転行列
+			Rx = DirectX::XMMatrixRotationX(0);
+			Ry = DirectX::XMMatrixRotationY(0);
+			Rz = DirectX::XMMatrixRotationZ(0);
 			R = Rz * Rx * Ry;
 
-			//	平行移動
-			calcTransformedPosBySpecifyMesh( &animTest, pos, "_04_MDL_yoroi1:_02_MDL_yoroi:spear" );
-			T = DirectX::XMMatrixTranslation( pos.x, pos.y, pos.z );
+			calcTransformedPosBySpecifyMesh(&animTest, pos, "_04_MDL_yoroi1:_02_MDL_yoroi:spear");
+			T = DirectX::XMMatrixTranslation(pos.x, pos.y, pos.z);
 
-			//	ワールド変換行列
 			worldcubeM = S * R * T * worldM;
 
-			//	Matrix -> Float4x4 変換
-			DirectX::XMStoreFloat4x4( &world_view_projection, worldcubeM * getViewMatrix() * getProjectionMatrix() );
-			DirectX::XMStoreFloat4x4( &World, worldcubeM );
+			DirectX::XMStoreFloat4x4(&world_view_projection, worldcubeM * getViewMatrix() * getProjectionMatrix());
+			DirectX::XMStoreFloat4x4(&World, worldcubeM);
 
-			OBJRender( &testCube, world_view_projection, World );
+			OBJRender(&testCube, world_view_projection, World);
+
 		}
 		*/
 	#endif // DEBUG_MODE
@@ -397,7 +404,6 @@ public:
 		Donya::Vector3 playerPos = player.GetPosition();
 		Donya::Vector3 targetPos = boss.GetPos();
 
-		// 単位ベクトル取得
 		// DirectX::XMFLOAT3 player_to_target_vec = DirectX::XMFLOAT3( targetPos.x - playerPos.x, targetPos.y - playerPos.y, targetPos.z - playerPos.z );
 		Donya::Vector3 player_to_target_vec = targetPos - playerPos;
 		if ( player_to_target_vec.IsZero() )
@@ -408,7 +414,6 @@ public:
 		float distPlayerBoss = player_to_target_vec.Length();
 		Donya::Vector3 unitvec_player_to_target = player_to_target_vec.Normalized();
 
-		//カメラ位置取得
 		cameraPos = Donya::Vector3
 		{
 			playerPos.x - unitvec_player_to_target.x * cameraLeaveDistance,
@@ -416,7 +421,6 @@ public:
 			playerPos.z - unitvec_player_to_target.z * cameraLeaveDistance
 		};
 
-		//注視点取得
 	#if 0
 		DirectX::XMFLOAT3 cameraTarget = DirectX::XMFLOAT3( targetPos.x + unitvec_player_to_target.x, targetPos.y + unitvec_player_to_target.y, targetPos.z + unitvec_player_to_target.z );
 	#else
@@ -512,27 +516,27 @@ public:
 		
 	}
 public:
-	void LoadParameter( bool isBinary = true )
+	void LoadParameter(bool isBinary = true)
 	{
-		Donya::Serializer::Extension ext = ( isBinary )
-		? Donya::Serializer::Extension::BINARY
-		: Donya::Serializer::Extension::JSON;
-		std::string filePath = GenerateSerializePath( SERIAL_ID, ext );
+		Donya::Serializer::Extension ext = (isBinary)
+			? Donya::Serializer::Extension::BINARY
+			: Donya::Serializer::Extension::JSON;
+		std::string filePath = GenerateSerializePath(SERIAL_ID, ext);
 
 		Donya::Serializer seria;
-		seria.Load( ext, filePath.c_str(), SERIAL_ID, *this );
+		seria.Load(ext, filePath.c_str(), SERIAL_ID, *this);
 	}
 
 	void SaveParameter()
 	{
-		Donya::Serializer::Extension bin  = Donya::Serializer::Extension::BINARY;
+		Donya::Serializer::Extension bin = Donya::Serializer::Extension::BINARY;
 		Donya::Serializer::Extension json = Donya::Serializer::Extension::JSON;
-		std::string binPath  = GenerateSerializePath( SERIAL_ID, bin  );
-		std::string jsonPath = GenerateSerializePath( SERIAL_ID, json );
+		std::string binPath = GenerateSerializePath(SERIAL_ID, bin);
+		std::string jsonPath = GenerateSerializePath(SERIAL_ID, json);
 
 		Donya::Serializer seria;
-		seria.Save( bin,  binPath.c_str(),  SERIAL_ID, *this );
-		seria.Save( json, jsonPath.c_str(), SERIAL_ID, *this );
+		seria.Save(bin, binPath.c_str(), SERIAL_ID, *this);
+		seria.Save(json, jsonPath.c_str(), SERIAL_ID, *this);
 	}
 
 	void UseImGui()
@@ -543,7 +547,7 @@ public:
 		{
 			if ( ImGui::Button( "GotoTitle" ) )
 			{
-				pSceneManager->setNextScene( new sceneTitle(), false );
+				pSceneManager->setNextScene(new sceneTitle(), false);
 			}
 
 			if ( ImGui::TreeNode( "Game" ) )
@@ -590,13 +594,13 @@ public:
 
 						ImGui::TreePop();
 					}
-					
+
 					if ( ImGui::TreeNode( "PointLight" ) )
 					{
 						constexpr size_t MAX_COUNT = 4U;
 						bool canAppend  = ( lights.points.size() < MAX_COUNT ) ? true : false;
 						bool canPopBack = ( 1U <= lights.points.size() ) ? true : false;
-						if ( canAppend && ImGui::Button( "Append" ) )
+						if ( canAppend  && ImGui::Button( "Append" ) )
 						{
 							PointLight add{};
 							add.pos   = { 0.0f, 0.0f, 0.0f, 1.0f };
@@ -613,14 +617,14 @@ public:
 						const size_t COUNT = lights.points.size();
 						for ( size_t i = 0; i < COUNT; ++i )
 						{
-							auto &point = lights.points[i];
-							ImGui::DragFloat3( std::string( "Position"  + std::to_string( i ) ).c_str(), &point.pos.x		); point.pos.w = 1.0f;
-							ImGui::ColorEdit4( std::string( "Color"     + std::to_string( i ) ).c_str(), &point.color.x		);
+							auto& point = lights.points[i];
+							ImGui::DragFloat3( std::string( "Position" + std::to_string( i ) ).c_str(), &point.pos.x ); point.pos.w = 1.0f;
+							ImGui::ColorEdit4( std::string( "Color" + std::to_string( i ) ).c_str(), &point.color.x );
 							ImGui::SliderFloat4( std::string( "Attenuate" + std::to_string( i ) ).c_str(), &point.attenuate.x, 0.0f, 1.0f );
 
 							setPointlightInfo( scast<int>( i ), point );
 						}
-						
+
 						ImGui::TreePop();
 					}
 
@@ -633,7 +637,7 @@ public:
 					if ( ImGui::RadioButton( "Binary", isBinary ) ) { isBinary = true; }
 					if ( ImGui::RadioButton( "JSON", !isBinary ) ) { isBinary = false; }
 					std::string loadStr{ "Load " };
-					loadStr += ( isBinary ) ? "Binary" : "JSON";
+					loadStr += (isBinary) ? "Binary" : "JSON";
 
 					if ( ImGui::Button( "Save" ) )
 					{

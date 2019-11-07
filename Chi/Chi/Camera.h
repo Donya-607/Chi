@@ -33,7 +33,7 @@ public:
 		target = _target;
 	}
 	DirectX::XMFLOAT4 getCameraPos() { return{ position.x,position.y,position.z,1.0 }; }
-	DirectX::XMMATRIX SetOrthographicMatrix(float _w, float _h, float _zNear, float _zFar);
+	DirectX::XMFLOAT4 getCamTarget() { return { target.x,target.y,target.z,1.0f }; } DirectX::XMMATRIX SetOrthographicMatrix(float _w, float _h, float _zNear, float _zFar);
 	DirectX::XMMATRIX SetPerspectiveMatrix(float _fov, float _aspect, float _zNear, float _zFar);
 	DirectX::XMMATRIX GetViewMatrix();
 	DirectX::XMMATRIX GetProjectionMatrix() { return projection; }

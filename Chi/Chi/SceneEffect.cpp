@@ -54,6 +54,15 @@ void SceneEffect::init()
 	cameraPos = Donya::Vector3{ 0.0f, 256.0f, -1000.0f };
 	cameraFocusOffset = Donya::Vector3{ 0.0f, 80.0f, 0.0f };
 
+	loadShader
+	(
+		shader,
+		"./Data/shader/skinned_mesh_has_born_vs.cso",
+		"./Data/shader/skinned_mesh_ps.cso",
+		"./Data/shader/skinned_mesh_vs.cso",
+		"./Data/shader/skinned_mesh_no_uv_ps.cso"
+	);
+
 	getLineLight().setLineLight(lights.direction.direction, lights.direction.color);
 	for (const auto i : lights.points)
 	{
@@ -155,9 +164,9 @@ void SceneEffect::render()
 
 
 //	eruptionEffect.Render();
-	EffectManager::GetInstance()->Render();
+	EffectManager::GetInstance()->Render( shader );
 
-	stage.Draw(V, P);
+	stage.Draw( shader, V, P);
 }
 void SceneEffect::uninit()
 {

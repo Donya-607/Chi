@@ -34,6 +34,20 @@ void clearWindow(const DirectX::XMFLOAT4& color)
 	GameLib::clear(color);
 }
 
+bool createSRV(ID3D11ShaderResourceView** _SRV,ID3D11RenderTargetView** RT)
+{
+	return GameLib::createSRV(_SRV,RT);
+}
+
+void postEffect_Bloom_SRV(ID3D11ShaderResourceView** _shaderResource, DirectX::XMFLOAT4 _judge_color)
+{
+	GameLib::postEffect_Bloom_SRV(_shaderResource, _judge_color);
+}
+
+void postEffect_Bloom(ID3D11ShaderResourceView** _shaderResource, float _blur_value, DirectX::XMFLOAT4 _judge_color)
+{
+	GameLib::postEffect_Bloom(_shaderResource, _blur_value, _judge_color);
+}
 
 //BLENDMODE//
 
@@ -421,6 +435,10 @@ DirectX::XMFLOAT4 getCamPos()
 	return GameLib::camera::getPos();
 }
 
+DirectX::XMFLOAT4 getCamTarget()
+{
+	return GameLib::camera::getTarget();
+}
 
 //light//
 
@@ -480,6 +498,11 @@ void createPlane(static_mesh * _plane, u_int _vertical, u_int _side)
 	GameLib::staticMesh::createPlane(_plane, _vertical, _side);
 }
 
+void createBillboard(static_mesh* _mesh, const wchar_t* _textureName)
+{
+	GameLib::staticMesh::createBillboard(_mesh, _textureName);
+}
+
 void loadOBJ(static_mesh* staticMesh, const wchar_t* objName)
 {
 	GameLib::staticMesh::loadMesh(staticMesh, objName);
@@ -500,11 +523,21 @@ void OBJRender(static_mesh* staticMesh, const DirectX::XMFLOAT4X4&SynthesisMatri
 	GameLib::staticMesh::staticMeshRender(staticMesh, SynthesisMatrix,worldMatrix, getCamPos(), getLineLight(),getPointLight(), materialColor, wireFlg);
 }
 
+void billboardRender(static_mesh* _mesh, const DirectX::XMFLOAT4X4& view_projection, const DirectX::XMFLOAT4& _pos, const float _scale, const float _angle, const DirectX::XMFLOAT4& _cam_pos, const DirectX::XMFLOAT2& texpos, const DirectX::XMFLOAT2& texsize)
+{
+	GameLib::staticMesh::builboradRender(_mesh, view_projection, _pos, _scale, _angle, _cam_pos, texpos, texsize);
+}
+
 
 //skinned_mesh//
 void loadFBX(skinned_mesh* skinnedMesh, const std::string& FBXName)
 {
 	GameLib::skinnedMesh::loadFBX(skinnedMesh, FBXName);
+}
+
+void loadShader(fbx_shader& shader, std::string vertex, std::string pixel, std::string noBoneVertex, std::string notexPS)
+{
+	GameLib::skinnedMesh::loadShader(shader, vertex, pixel, noBoneVertex, notexPS);
 }
 
 void setLoopFlg(skinned_mesh* _mesh, const bool _is_loop)
@@ -536,9 +569,9 @@ bool calcTransformedPosBySpecifyMesh(skinned_mesh* _mesh, DirectX::XMFLOAT3& _po
 	return GameLib::skinnedMesh::calcTransformedPosBySpecifyMesh(_mesh, _pos, _mesh_name);
 }
 
-void FBXRender(skinned_mesh* skinnedMesh, const DirectX::XMFLOAT4X4&SynthesisMatrix, const DirectX::XMFLOAT4X4&worldMatrix, const DirectX::XMFLOAT4&materialColor, bool wireFlg)
+void FBXRender(skinned_mesh* skinnedMesh, fbx_shader& hlsl,const DirectX::XMFLOAT4X4&SynthesisMatrix, const DirectX::XMFLOAT4X4&worldMatrix, const DirectX::XMFLOAT4&materialColor, bool wireFlg)
 {
-	GameLib::skinnedMesh::skinnedMeshRender(skinnedMesh, SynthesisMatrix, worldMatrix,getCamPos(),getLineLight(),getPointLight(), materialColor, wireFlg);
+	GameLib::skinnedMesh::skinnedMeshRender(skinnedMesh,hlsl, SynthesisMatrix, worldMatrix,getCamPos(),getLineLight(),getPointLight(), materialColor, wireFlg);
 }
 
 

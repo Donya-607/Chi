@@ -102,6 +102,7 @@ public:
 };
 CEREAL_CLASS_VERSION( KnightParam, 0 )
 
+struct fbx_shader; // Use for argument.
 /// <summary>
 /// Knight number 3.
 /// </summary>
@@ -141,7 +142,7 @@ public:
 
 	void Update( TargetStatus target );
 
-	void Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matProjection );
+	void Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matProjection );
 public:
 	Donya::Sphere	GetBodyHitBoxes() const;
 

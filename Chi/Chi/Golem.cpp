@@ -548,7 +548,7 @@ void Golem::Update( TargetStatus target )
 	CollideToWall();
 }
 
-void Golem::Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matProjection )
+void Golem::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matProjection )
 {
 	const auto &PARAM = GolemParam::Get();
 
@@ -561,19 +561,19 @@ void Golem::Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matPr
 	switch ( status )
 	{
 	case GolemAI::ActionState::WAIT:
-		FBXRender( models.pIdle.get(), WVP, W );
+		FBXRender( models.pIdle.get(), HLSL, WVP, W );
 		break;
 	case GolemAI::ActionState::MOVE:
-		FBXRender( models.pIdle.get(), WVP, W );
+		FBXRender( models.pIdle.get(), HLSL, WVP, W );
 		break;
 	case GolemAI::ActionState::ATTACK_SWING:
-		FBXRender( models.pAtkSwing.get(), WVP, W );
+		FBXRender( models.pAtkSwing.get(), HLSL, WVP, W );
 		break;
 	case GolemAI::ActionState::ATTACK_FAST:
-		FBXRender( models.pAtkFast.get(), WVP, W );
+		FBXRender( models.pAtkFast.get(), HLSL, WVP, W );
 		break;
 	case GolemAI::ActionState::ATTACK_ROTATE:
-		FBXRender( models.pAtkRotate.get(), WVP, W );
+		FBXRender( models.pAtkRotate.get(), HLSL, WVP, W );
 		break;
 	default: break;
 	}

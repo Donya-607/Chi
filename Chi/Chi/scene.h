@@ -17,18 +17,49 @@
 #include "light.h"
 #include "Donya/ChiUtility.h"
 
+#include "Mouse.h"
 
 using namespace DirectX;
 class sceneTitle : public baseScene
 {
 private:
-	Ray pl_down_ray;
-	XMFLOAT4X4 World[2], world_view_projection[2];
+	struct model
+	{
+		skinned_mesh mesh;
+		XMFLOAT3  model_pos;
+		XMFLOAT3  model_scale;
+		XMFLOAT3  model_angle;
+		bool  is_enable;
+		std::vector<ImTextureID> tex_SRV;
+	};
+
 	float camPos[3] = { 0,6,-10 };
 	bool flg;
-	XMFLOAT3 pos;
+
+	std::unique_ptr<DirectX::Mouse> mouse;
+	DirectX::XMFLOAT3 pos, target, angle;
+	DirectX::XMFLOAT3 setPos, setAngle;
+	DirectX::XMFLOAT3 zoomVec;
+	DirectX::XMFLOAT3 rightVec, upVec;
+	DirectX::XMFLOAT2 power;
+	float zoomSpeed, moveSpeed;
+	float cam_angle;
+	DirectX::XMINT2 mousePos, prevMPos, moveVol;
+	bool mouse_right;
+	fbx_shader shader;
+
+	std::vector<model> models;
+
+	static_mesh builborad;
+	DirectX::XMFLOAT4 builboard_pos;
+	float builborad_angle;
+	float builborad_size;
+	DirectX::XMFLOAT2 texpos;
+	DirectX::XMFLOAT2 texsize;
+
+
 public:
-	sceneTitle() {}
+	sceneTitle(){}
 	~sceneTitle()
 	{
 		uninit();
@@ -92,8 +123,8 @@ private:
 
 	std::shared_ptr<static_mesh> pCube1;
 	std::shared_ptr<static_mesh> pCube2;
-	OBB obb1;
-	OBB obb2;
+	::OBB obb1;
+	::OBB obb2;
 	DirectX::XMFLOAT4 color1;
 	DirectX::XMFLOAT4 color2;
 	float angle1[3];
@@ -110,8 +141,10 @@ private:
 
 	Donya::Vector3 originPos;
 
+	fbx_shader shader;
+
 public:
-	SceneEffect() : stage(), cameraPos(), cameraFocusOffset(), lights() {}
+	SceneEffect() : stage(), cameraPos(), cameraFocusOffset(), lights(), shader(){}
 	~SceneEffect()
 	{
 		uninit();

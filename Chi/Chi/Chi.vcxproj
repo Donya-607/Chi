@@ -140,6 +140,7 @@
   <ItemGroup>
     <ClInclude Include="baseScene.h" />
     <ClInclude Include="blend.h" />
+    <ClInclude Include="bloom.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Donya\AudioSystem.h" />
     <ClInclude Include="Donya\ChiUtility.h" />
@@ -198,6 +199,7 @@
     <ClInclude Include="XinputPad.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="bloom.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Donya\AudioSystem.cpp" />
     <ClCompile Include="Donya\ChiUtility.cpp" />
@@ -245,6 +247,24 @@
     <ClCompile Include="timeMeasurement.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="bloomSRV.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="bloom_ps.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="bloom_vs.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
     <FxCompile Include="geometric_phong_ps.hlsl">
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
@@ -332,6 +352,7 @@
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
+    <None Include="bloom.hlsli" />
     <None Include="geometric_primitive.hlsli" />
     <None Include="obj.hlsli" />
     <None Include="shadow_first.hlsli" />

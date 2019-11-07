@@ -8,7 +8,7 @@
 #include "sceneManager.h"
 #include "imgui.h"
 
-#include "Donya/Sound.h" // Insert by Donya.
+#include "Donya/Sound.h"
 
 INT WINAPI wWinMain(HINSTANCE instance, HINSTANCE prev_instance, LPWSTR cmd_line, INT cmd_show)
 {
@@ -26,7 +26,7 @@ INT WINAPI wWinMain(HINSTANCE instance, HINSTANCE prev_instance, LPWSTR cmd_line
 #endif
 
 	startUpLibrary
-	(L"コンクエスト", instance, 1920,1080, false, -1, 60.0f);
+	(L"コンクエスト", instance, 1920, 1080, false, -1, 60.0f);
 
 	DragAcceptFiles(GameLib::getHandle(), true);
 	pSceneManager->init(new sceneTitle);

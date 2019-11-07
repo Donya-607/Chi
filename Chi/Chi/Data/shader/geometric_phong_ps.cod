@@ -54,7 +54,7 @@
 // -------------------- ----- ------ -------- -------- ------- ------
 // SV_POSITION              0   xyzw        0      POS   float       
 // POSITION                 0   xyzw        1     NONE   float   xyz 
-// NORMAL                   0   xyzw        2     NONE   float   xyzw
+// NORMAL                   0   xyzw        2     NONE   float   xyz 
 // TEXCOORD                 0   xy          3     NONE   float       
 //
 //
@@ -68,7 +68,7 @@ ps_5_0
 dcl_globalFlags refactoringAllowed | skipOptimization
 dcl_constantbuffer CB0[29], dynamicIndexed
 dcl_input_ps linear v1.xyz
-dcl_input_ps linear v2.xyzw
+dcl_input_ps linear v2.xyz
 dcl_output o0.xyzw
 dcl_temps 12
 //
@@ -79,33 +79,85 @@ dcl_temps 12
 //   v3.x <- pin.texcoord.x; v3.y <- pin.texcoord.y; 
 //   o0.x <- <main return value>.x; o0.y <- <main return value>.y; o0.z <- <main return value>.z; o0.w <- <main return value>.w
 //
-#line 40 "D:\Develop\Chi\Chi\Chi\Chi\geometric_phong_ps.hlsl"
+#line 67 "D:\Develop\Chi\Chi\Chi\Chi\geometric_phong_ps.hlsl"
 mov r0.xyz, v2.xyzx  // r0.x <- N.x; r0.y <- N.y; r0.z <- N.z
 
-#line 41
+#line 68
 mov r1.xyz, -v1.xyzx
 add r1.xyz, r1.xyzx, cb0[8].xyzx
 dp3 r0.w, r1.xyzx, r1.xyzx
 rsq r0.w, r0.w
 mul r1.xyz, r0.wwww, r1.xyzx  // r1.x <- V.x; r1.y <- V.y; r1.z <- V.z
 
-#line 44
+#line 71
 mov r2.xyzw, -cb0[9].xyzw
 dp4 r0.w, r2.xyzw, r2.xyzw
 rsq r0.w, r0.w
-mul r2.xyzw, r0.wwww, r2.xyzw  // r2.x <- _L.x; r2.y <- _L.y; r2.z <- _L.z; r2.w <- _L.w
+mul r2.xyz, r0.wwww, r2.xyzx  // r2.x <- _L.x; r2.y <- _L.y; r2.z <- _L.z
 
-#line 49
+#line 73
 mov r3.xyz, cb0[26].xyzx  // r3.x <- color.x; r3.y <- color.y; r3.z <- color.z
 
-#line 50
-itof r0.w, l(0)
-dp4 r1.w, r2.xyzw, v2.xyzw
-max r0.w, r0.w, r1.w
-mul r2.xyz, r0.wwww, cb0[10].xyzx
-mul r2.xyz, r2.xyzx, cb0[26].xyzx  // r2.x <- _color.x; r2.y <- _color.y; r2.z <- _color.z
+#line 75
+nop 
+mov r0.xyz, r0.xyzx
+mov r2.xyz, r2.xyzx
+mov r4.xyz, cb0[10].xyzx
+mov r5.xyz, cb0[27].xyzx
 
-#line 53
+#line 17
+dp3 r0.w, r0.xyzx, r2.xyzx
+mul r0.w, r0.w, l(0.500000)
+add r0.w, r0.w, l(0.500000)  // r0.w <- D
+
+#line 18
+mul r0.w, r0.w, r0.w
+
+#line 19
+mul r4.xyz, r4.xyzx, r5.xyzx
+mul r4.xyz, r0.wwww, r4.xyzx  // r4.x <- <HalfLambart_L return value>.x; r4.y <- <HalfLambart_L return value>.y; r4.z <- <HalfLambart_L return value>.z
+
+#line 75
+mul r4.xyz, r4.xyzx, cb0[26].xyzx
+nop 
+mov r0.xyz, r0.xyzx
+mov r2.xyz, r2.xyzx
+mov r5.xyz, cb0[10].xyzx
+mov r1.xyz, r1.xyzx
+mov r6.xyz, cb0[28].xyzx
+mov r0.w, cb0[28].w
+
+#line 39
+mul r7.xyz, r0.xyzx, l(2.000000, 2.000000, 2.000000, 0.000000)
+dp3 r1.w, r0.xyzx, r2.xyzx
+mul r7.xyz, r1.wwww, r7.xyzx
+mov r2.xyz, -r2.xyzx
+add r2.xyz, r2.xyzx, r7.xyzx  // r2.x <- H.x; r2.y <- H.y; r2.z <- H.z
+
+#line 41
+dp3 r2.z, r2.xyzx, r1.xyzx
+mov r2.xyz, r2.zzzz  // r2.x <- S.x; r2.y <- S.y; r2.z <- S.z
+
+#line 42
+itof r7.xyz, l(0, 0, 0, 0)
+max r2.xyz, r2.xyzx, r7.xyzx
+
+#line 43
+log r2.xyz, r2.xyzx
+mul r2.xyz, r0.wwww, r2.xyzx
+exp r2.xyz, r2.xyzx  // r2.x <- S.x; r2.y <- S.y; r2.z <- S.z
+
+#line 44
+mul r2.xyz, r6.xyzx, r2.xyzx
+mul r2.xyz, r5.xyzx, r2.xyzx  // r2.x <- S.x; r2.y <- S.y; r2.z <- S.z
+
+#line 45
+mov r2.xyz, r2.xyzx  // r2.x <- <BlinnPhong_L return value>.x; r2.y <- <BlinnPhong_L return value>.y; r2.z <- <BlinnPhong_L return value>.z
+
+#line 75
+add r2.xyz, r2.xyzx, r4.xyzx  // r2.x <- _color.x; r2.y <- _color.y; r2.z <- _color.z
+
+#line 79
 mov r0.w, l(0)  // r0.w <- i
 mov r4.xyz, r2.xyzx  // r4.x <- _color.x; r4.y <- _color.y; r4.z <- _color.z
 mov r1.w, r0.w  // r1.w <- i
@@ -113,32 +165,32 @@ loop
   ilt r2.w, r1.w, l(5)
   breakc_z r2.w
 
-#line 55
+#line 81
   imul null, r2.w, r1.w, l(3)
   itof r3.w, l(0)
   eq r2.w, r3.w, cb0[r2.w + 11].w
   if_nz r2.w
 
-#line 56
+#line 82
     iadd r1.w, r1.w, l(1)
     continue 
   endif 
 
-#line 58
+#line 84
   imul null, r2.w, r1.w, l(3)
   mov r5.xyz, -v1.xyzx
   add r5.xyz, r5.xyzx, cb0[r2.w + 11].xyzx  // r5.x <- L.x; r5.y <- L.y; r5.z <- L.z
 
-#line 59
+#line 85
   dp3 r2.w, r5.xyzx, r5.xyzx
   sqrt r2.w, r2.w  // r2.w <- D
 
-#line 60
+#line 86
   dp3 r3.w, r5.xyzx, r5.xyzx
   rsq r3.w, r3.w
   mul r5.xyz, r3.wwww, r5.xyzx
 
-#line 61
+#line 87
   imul null, r3.w, r1.w, l(3)
   imul null, r4.w, r1.w, l(3)
   mul r4.w, r2.w, cb0[r4.w + 13].y
@@ -151,7 +203,7 @@ loop
   max r2.w, r2.w, l(0.000000)
   min r2.w, r2.w, l(1.000000)  // r2.w <- A
 
-#line 63
+#line 89
   nop 
   mov r6.xyz, r0.xyzx
   mov r5.xyz, r5.xyzx
@@ -160,22 +212,23 @@ loop
   mov r8.xyz, cb0[27].xyzx
   mov r2.w, r2.w
 
-#line 4
-  dp3 r3.w, r6.xyzx, r5.xyzx  // r3.w <- D
+#line 11
+  dp3 r3.w, r6.xyzx, r5.xyzx
+  mul r3.w, r3.w, l(0.500000)
+  add r3.w, r3.w, l(0.500000)  // r3.w <- D
 
-#line 5
-  itof r4.w, l(0)
-  max r3.w, r3.w, r4.w
+#line 12
+  mul r3.w, r3.w, r3.w
 
-#line 6
+#line 13
   mul r6.xyz, r7.xyzx, r8.xyzx
   mul r3.w, r2.w, r3.w
-  mul r6.xyz, r3.wwww, r6.xyzx  // r6.x <- <Diffuse return value>.x; r6.y <- <Diffuse return value>.y; r6.z <- <Diffuse return value>.z
+  mul r6.xyz, r3.wwww, r6.xyzx  // r6.x <- <HalfLambart return value>.x; r6.y <- <HalfLambart return value>.y; r6.z <- <HalfLambart return value>.z
 
-#line 63
+#line 89
   mov r6.xyz, r6.xyzx  // r6.x <- diffuseColor.x; r6.y <- diffuseColor.y; r6.z <- diffuseColor.z
 
-#line 66
+#line 92
   nop 
   mov r7.xyz, r0.xyzx
   mov r5.xyz, r5.xyzx
@@ -186,52 +239,53 @@ loop
   mov r3.w, cb0[28].w
   mov r2.w, r2.w
 
-#line 13
+#line 27
   mul r11.xyz, r7.xyzx, l(2.000000, 2.000000, 2.000000, 0.000000)
   dp3 r4.w, r7.xyzx, r5.xyzx
   mul r7.xyz, r4.wwww, r11.xyzx
   mov r5.xyz, -r5.xyzx
   add r5.xyz, r5.xyzx, r7.xyzx  // r5.x <- H.x; r5.y <- H.y; r5.z <- H.z
 
-#line 15
+#line 29
   dp3 r5.z, r5.xyzx, r9.xyzx
   mov r5.xyz, r5.zzzz  // r5.x <- S.x; r5.y <- S.y; r5.z <- S.z
 
-#line 16
+#line 30
   itof r7.xyz, l(0, 0, 0, 0)
   max r5.xyz, r5.xyzx, r7.xyzx
 
-#line 17
+#line 31
   log r5.xyz, r5.xyzx
   mul r5.xyz, r3.wwww, r5.xyzx
   exp r5.xyz, r5.xyzx  // r5.x <- S.x; r5.y <- S.y; r5.z <- S.z
 
-#line 18
+#line 32
   mul r5.xyz, r10.xyzx, r5.xyzx
   mul r5.xyz, r8.xyzx, r5.xyzx
   mul r5.xyz, r2.wwww, r5.xyzx  // r5.x <- S.x; r5.y <- S.y; r5.z <- S.z
 
-#line 19
+#line 33
   mov r5.xyz, r5.xyzx  // r5.x <- <BlinnPhong return value>.x; r5.y <- <BlinnPhong return value>.y; r5.z <- <BlinnPhong return value>.z
 
-#line 66
+#line 92
   mov r5.xyz, r5.xyzx  // r5.x <- specularColor.x; r5.y <- specularColor.y; r5.z <- specularColor.z
 
-#line 69
+#line 95
   add r5.xyz, r5.xyzx, r6.xyzx
   add r4.xyz, r4.xyzx, r5.xyzx
 
-#line 53
+#line 79
   iadd r1.w, r1.w, l(1)
 
-#line 70
+#line 96
 endloop 
 
-#line 71
+#line 97
 add r0.xyz, r3.xyzx, r4.xyzx  // r0.x <- color.x; r0.y <- color.y; r0.z <- color.z
 
-#line 72
-mov o0.xyz, r0.xyzx
+#line 98
+max r0.xyz, r0.xyzx, l(0.000000, 0.000000, 0.000000, 0.000000)
+min o0.xyz, r0.xyzx, l(1.000000, 1.000000, 1.000000, 0.000000)
 mov o0.w, cb0[26].w
 ret 
-// Approximately 96 instruction slots used
+// Approximately 128 instruction slots used

@@ -69,7 +69,7 @@ void Sprite::RoadSprite(ID3D11Device * _device, const wchar_t* _fileName)
 		assert(0 && "テクスチャ画像読み込み失敗");
 		return;
 	}
-
+	DirectX::XMFLOAT4 dummy(0.0f, 0.0f, 0.0f, 0.0f);
 	D3D11_SAMPLER_DESC sampler_desc;
 	sampler_desc.Filter = D3D11_FILTER_ANISOTROPIC; //UNIT.06
 	sampler_desc.AddressU = D3D11_TEXTURE_ADDRESS_BORDER;
@@ -78,7 +78,7 @@ void Sprite::RoadSprite(ID3D11Device * _device, const wchar_t* _fileName)
 	sampler_desc.MipLODBias = 0;
 	sampler_desc.MaxAnisotropy = 16;
 	sampler_desc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
-	memcpy(sampler_desc.BorderColor, &DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f), sizeof(DirectX::XMFLOAT4));
+	memcpy(sampler_desc.BorderColor, &dummy, sizeof(DirectX::XMFLOAT4));
 	sampler_desc.MinLOD = 0;
 	sampler_desc.MaxLOD = D3D11_FLOAT32_MAX;
 	hr = _device->CreateSamplerState(&sampler_desc, &m_sampleState);
@@ -416,7 +416,7 @@ sprite_batch::sprite_batch(ID3D11Device *device, const wchar_t *file_name, size_
 		assert(0 && "テクスチャ画像読み込み失敗");
 		return;
 	}
-
+	DirectX::XMFLOAT4 dummy(0.0f, 0.0f, 0.0f, 0.0f);
 	D3D11_SAMPLER_DESC sampler_desc;
 	sampler_desc.Filter = D3D11_FILTER_ANISOTROPIC; //UNIT.06
 	sampler_desc.AddressU = D3D11_TEXTURE_ADDRESS_BORDER;
@@ -425,7 +425,7 @@ sprite_batch::sprite_batch(ID3D11Device *device, const wchar_t *file_name, size_
 	sampler_desc.MipLODBias = 0;
 	sampler_desc.MaxAnisotropy = 16;
 	sampler_desc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
-	memcpy(sampler_desc.BorderColor, &DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f), sizeof(DirectX::XMFLOAT4));
+	memcpy(sampler_desc.BorderColor, &dummy, sizeof(DirectX::XMFLOAT4));
 	sampler_desc.MinLOD = 0;
 	sampler_desc.MaxLOD = D3D11_FLOAT32_MAX;
 	hr = device->CreateSamplerState(&sampler_desc, &sampler_state);

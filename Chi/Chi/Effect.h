@@ -93,7 +93,7 @@ public:
 	void SetData(Donya::Vector3 _pos, int _startTimer = 0);
 
 	void Update();
-	void Render();
+	void Render( fbx_shader &HLSL );
 
 	bool GetActivated() { return activated; }
 	std::vector<Donya::Sphere> GetHitSphereVector() { return hitSphere; }
@@ -152,7 +152,7 @@ public:
 
 	// _bossPos : ボス座標, _playerPos : プレイヤー座標,
 	void Update();
-	void Render();
+	void Render( fbx_shader &HLSL );
 
 	std::vector<EruptionEffect> GetEruptionEffectVector() { return eruptionEffect; }
 };
@@ -174,7 +174,7 @@ public:
 	void ReSet();
 
 	void Update(Donya::Vector3 pos);
-	void Render();
+	void Render( fbx_shader &HLSL );
 };
 
 class EffectManager
@@ -209,7 +209,7 @@ public:
 
 	void Update();
 	void Update(Donya::Vector3 pos);
-	void Render();
+	void Render( fbx_shader &HLSL );
 
 	// effectType : エフェクト番号(EffectType参照), pos : 出現位置, startTime : 関数がコールされてから動き始める時間
 	void Set(EffectType effectType, Donya::Vector3 pos, int startTime = 0);

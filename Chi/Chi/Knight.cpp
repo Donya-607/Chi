@@ -243,7 +243,7 @@ void Knight::Update( TargetStatus target )
 	CollideToWall();
 }
 
-void Knight::Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matProjection )
+void Knight::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matProjection )
 {
 	const auto &PARAM = KnightParam::Open();
 
@@ -262,19 +262,19 @@ void Knight::Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matP
 	switch ( status )
 	{
 	case KnightAI::ActionState::WAIT:
-		FBXRender( models.pIdle.get(), WVP, W );
+		FBXRender( models.pIdle.get(), HLSL, WVP, W );
 		break;
 	case KnightAI::ActionState::MOVE:
-		FBXRender( models.pRunFront.get(), WVP, W );
+		FBXRender( models.pRunFront.get(), HLSL, WVP, W );
 		break;
 	case KnightAI::ActionState::ATTACK_EXPLOSION:
-		FBXRender( models.pAtkExpl.get(), WVP, W );
+		FBXRender( models.pAtkExpl.get(), HLSL, WVP, W );
 		break;
 	case KnightAI::ActionState::ATTACK_SWING:
-		FBXRender( models.pAtkSwing.get(), WVP, W );
+		FBXRender( models.pAtkSwing.get(), HLSL, WVP, W );
 		break;
 	case KnightAI::ActionState::ATTACK_RAID:
-		FBXRender( models.pAtkRaid.get(), WVP, W );
+		FBXRender( models.pAtkRaid.get(), HLSL, WVP, W );
 		break;
 	default: break;
 	}

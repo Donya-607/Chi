@@ -4,6 +4,7 @@
 #include "imgui_impl_dx11.h"
 #include "imgui_impl_win32.h"
 #include "imgui_internal.h"
+#include "Mouse.h"
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wparam, LPARAM lparam);
 
 
@@ -15,27 +16,30 @@ namespace GameLib
 		HWND hwnd;  // ウインドウハンドル
 
 					// DirectX11関連
-		ID3D11Device*           device = nullptr;
-		ID3D11DeviceContext*    context = nullptr;
-		IDXGISwapChain*         swapChain = nullptr;
+		ID3D11Device* device = nullptr;
+		ID3D11DeviceContext* context = nullptr;
+		IDXGISwapChain* swapChain = nullptr;
 		ID3D11RenderTargetView* renderTargetView = nullptr;
 		ID3D11DepthStencilView* depthStencilView = nullptr;
-		ID3D11BlendState*       blendState = nullptr;
+		ID3D11BlendState* blendState = nullptr;
 
 		std::wstring projectName;
 
 		//// その他
-		blender*                 Blender = nullptr;
-		Primitive*               primitive = nullptr;
+		blender* Blender = nullptr;
+		Primitive* primitive = nullptr;
 		//PrimitiveBatch*        primitiveBatch;
 		high_resolution_timer    hrTimer;
-		Camera					 cam;
+		Camera*					 cam;
 		line_light				 LineLight;
 		std::vector<point_light> pointLights;
 		XboxPad					 pad[4];
 		XboxPad					 prevPad[4];
 		keyInput				 keyboard;
 		dragDrop				drag_drop;
+		bloom					Bloom;
+		std::vector<wstring> loadFileName;
+		bool loadFin;
 	};
 
 	static Members m;
@@ -46,12 +50,12 @@ namespace GameLib
 		return m.hwnd;
 	}
 
-	ID3D11Device * getDevice()
+	ID3D11Device* getDevice()
 	{
 		return m.device;
 	}
 
-	ID3D11DeviceContext * getContext()
+	ID3D11DeviceContext* getContext()
 	{
 		return m.context;
 	}
@@ -84,7 +88,7 @@ namespace GameLib
 	}
 
 
-	bool createShadowRT(ID3D11RenderTargetView** _renderTarget)
+	bool createRT(ID3D11RenderTargetView** _renderTarget)
 	{
 
 		HRESULT hr = S_OK;
@@ -117,7 +121,7 @@ namespace GameLib
 		//back_buffer->Release();
 		return true;
 	}
-	bool createShadowSRV(ID3D11ShaderResourceView* _shaderResource)
+	bool createSRV(ID3D11ShaderResourceView** _shaderResource, ID3D11RenderTargetView** RT)
 	{
 		HRESULT hr = S_OK;
 		ID3D11Texture2D* back_buffer = nullptr;
@@ -127,22 +131,30 @@ namespace GameLib
 		renderTextureDesc.Height = (UINT)pSystem->SCREEN_HEIGHT;
 		renderTextureDesc.MipLevels = 1;
 		renderTextureDesc.ArraySize = 1;
-		renderTextureDesc.Format = DXGI_FORMAT::DXGI_FORMAT_R32_FLOAT;
+		renderTextureDesc.Format = DXGI_FORMAT::DXGI_FORMAT_R32G32B32A32_FLOAT;
 		renderTextureDesc.SampleDesc.Count = 1;
 		renderTextureDesc.SampleDesc.Quality = 0;
 		renderTextureDesc.Usage = D3D11_USAGE::D3D11_USAGE_DEFAULT;
-		renderTextureDesc.BindFlags = D3D11_BIND_FLAG::D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_FLAG::D3D11_BIND_RENDER_TARGET;
+		renderTextureDesc.BindFlags = D3D11_BIND_FLAG::D3D11_BIND_RENDER_TARGET | D3D11_BIND_FLAG::D3D11_BIND_SHADER_RESOURCE;
 		renderTextureDesc.CPUAccessFlags = 0;
 		hr = m.device->CreateTexture2D(&renderTextureDesc, nullptr, &back_buffer);
 		if (FAILED(hr))
 			return false;
 
-		hr = m.device->CreateShaderResourceView(back_buffer, nullptr, &_shaderResource);
+		D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
+		ZeroMemory(&srvDesc, sizeof(srvDesc));
+		srvDesc.Format = renderTextureDesc.Format;
+		srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+		srvDesc.Texture2D.MostDetailedMip = 0;
+		srvDesc.Texture2D.MipLevels = renderTextureDesc.MipLevels;
+
+		hr = m.device->CreateShaderResourceView(back_buffer, &srvDesc, _shaderResource);
 		if (FAILED(hr))
 			return false;
+		hr = m.device->CreateRenderTargetView(back_buffer, NULL, RT);
+		if (FAILED(hr)) { return false; }
+
 		return true;
-
-
 	}
 
 
@@ -210,7 +222,7 @@ namespace GameLib
 		ImGui_ImplDX11_NewFrame();
 		ImGui_ImplWin32_NewFrame();
 		ImGui::NewFrame();
-		m.cam.update();
+		m.cam->update();
 		input::xInput::getState();
 		input::keyboard::update();
 		float ClearColor[4] = { 0.5f, .0f, .0f, 1.0f }; //red,green,blue,alpha
@@ -303,6 +315,23 @@ namespace GameLib
 			return 1;
 		switch (msg)
 		{
+		case WM_ACTIVATEAPP:
+		case WM_INPUT:
+		case WM_MOUSEMOVE:
+		case WM_LBUTTONDOWN:
+		case WM_LBUTTONUP:
+		case WM_RBUTTONDOWN:
+		case WM_RBUTTONUP:
+		case WM_MBUTTONDOWN:
+		case WM_MBUTTONUP:
+		case WM_MOUSEWHEEL:
+		case WM_XBUTTONDOWN:
+		case WM_XBUTTONUP:
+		case WM_MOUSEHOVER:
+			DirectX::Mouse::ProcessMessage(msg, wParam, lParam);
+			Keyboard::ProcessMessage(msg, wParam, lParam);
+			break;
+
 		case WM_PAINT:
 		{
 			PAINTSTRUCT ps;
@@ -313,9 +342,6 @@ namespace GameLib
 		}
 		case WM_DESTROY:
 			PostQuitMessage(0);
-			break;
-		case WM_ACTIVATEAPP:
-			Keyboard::ProcessMessage(msg, wParam, lParam);
 			break;
 		case WM_KEYDOWN:
 			if (wParam == VK_ESCAPE)
@@ -338,22 +364,24 @@ namespace GameLib
 			m.hrTimer.start();
 			break;
 		case WM_DROPFILES:
-				hDrop = (HDROP)wParam;
-				uFileNo = DragQueryFile((HDROP)wParam, 0xFFFFFFFF, NULL, 0);
-				for (int i = 0; i < (int)uFileNo; i++) 
+			m.loadFin = false;
+			hDrop = (HDROP)wParam;
+			uFileNo = DragQueryFile((HDROP)wParam, 0xFFFFFFFF, NULL, 0);
+			for (int i = 0; i < (int)uFileNo; i++)
+			{
+				DragQueryFile(hDrop, i, szFileName, sizeof(szFileName));
+				m.drag_drop.signUpFileName(szFileName);
+				m.loadFileName.push_back(szFileName);
+				for (int i = 0; i < 256; i++)
 				{
-					DragQueryFile(hDrop, i, szFileName, sizeof(szFileName));
-					m.drag_drop.signUpFileName(szFileName);
-					for (int i = 0; i < 256; i++)
-					{
-						szFileName[i] = 0;
-					}
+					szFileName[i] = 0;
 				}
-				DragFinish(hDrop);
-				m.drag_drop.moveFile(hwnd);
-				break;
-			default:
-				return DefWindowProc(hwnd, msg, wParam, lParam);
+			}
+			DragFinish(hDrop);
+			m.drag_drop.moveFile(hwnd, m.loadFin);
+			break;
+		default:
+			return DefWindowProc(hwnd, msg, wParam, lParam);
 		}
 		return 0;
 	}
@@ -397,7 +425,7 @@ namespace GameLib
 			sd.BufferCount = 1;
 			sd.BufferDesc.Width = width;
 			sd.BufferDesc.Height = height;
-			sd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+			sd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
 			sd.BufferDesc.RefreshRate.Numerator = 60;
 			sd.BufferDesc.RefreshRate.Denominator = 1;
 			sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
@@ -480,6 +508,8 @@ namespace GameLib
 			m.primitive = new Primitive(m.device);
 			m.Blender = new blender(m.device);
 			m.context->OMSetBlendState(m.Blender->states[m.Blender->BS_NONE], nullptr, 0xFFFFFFFF);
+			m.Bloom.init(m.device);
+			m.cam = new Camera();
 			FontManager::getInstance()->init(m.device);
 			return true;
 		}
@@ -505,8 +535,44 @@ namespace GameLib
 
 	void clear(const DirectX::XMFLOAT4& color)
 	{
-		m.context->ClearRenderTargetView(m.renderTargetView, (const float *)&color);
+		m.context->ClearRenderTargetView(m.renderTargetView, (const float*)&color);
 		m.context->ClearDepthStencilView(m.depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1, 0);
+	}
+
+	void clearRT(ID3D11RenderTargetView* RT, const DirectX::XMFLOAT4& color)
+	{
+		m.context->ClearRenderTargetView(RT, (const float*)&color);
+		m.context->ClearDepthStencilView(m.depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1, 0);
+	}
+	void postEffect_Bloom_SRV(ID3D11ShaderResourceView** _shaderResource, DirectX::XMFLOAT4 _judge_color)
+	{
+		m.Bloom.createSRV(m.context, _shaderResource, _judge_color);
+	}
+	void postEffect_Bloom(ID3D11ShaderResourceView** _shaderResource, float _blur_value, DirectX::XMFLOAT4 _judge_color)
+	{
+		m.context->OMSetBlendState(m.Blender->states[2], nullptr, 0xFFFFFFFF);
+
+		m.Bloom.Render(m.context, _shaderResource, _blur_value, _judge_color);
+
+		m.context->OMSetBlendState(m.Blender->states[0], nullptr, 0xFFFFFFFF);
+	}
+
+
+	std::wstring getLoadedFileName()
+	{
+		std::wstring dummy = m.loadFileName.back();
+		m.loadFileName.erase(m.loadFileName.end() - 1);
+		return dummy;
+	}
+
+	int getLoadedFileCount()
+	{
+		return m.loadFileName.size();
+	}
+
+	bool getLoadFlg()
+	{
+		return m.loadFin;
 	}
 
 	namespace blend
@@ -565,7 +631,7 @@ namespace GameLib
 			rect({ x, y }, { w, h }, { cx, cy }, angle, { r, g, b });
 		}
 
-		void rect(const DirectX::XMFLOAT2 &pos, const DirectX::XMFLOAT2 &size, const DirectX::XMFLOAT2 & center, float angle, const DirectX::XMFLOAT3 & color)
+		void rect(const DirectX::XMFLOAT2& pos, const DirectX::XMFLOAT2& size, const DirectX::XMFLOAT2& center, float angle, const DirectX::XMFLOAT3& color)
 		{
 			m.primitive->rect(m.context, pos, size, center, angle, { color.x,color.y,color.z,pSystem->alpha });
 		}
@@ -634,13 +700,13 @@ namespace GameLib
 
 	namespace light
 	{
-		void setLineLight(const DirectX::XMFLOAT4& _lightDirection,const DirectX::XMFLOAT4& _lightColor)
+		void setLineLight(const DirectX::XMFLOAT4& _lightDirection, const DirectX::XMFLOAT4& _lightColor)
 		{
-			m.LineLight.setLineLight(_lightDirection,_lightColor);
+			m.LineLight.setLineLight(_lightDirection, _lightColor);
 		}
 		void setLineLight(const float x, const float y, const float z, const float w, const float r, const float g, const float b, const float cw)
 		{
-			m.LineLight.setLineLight({ x, y, z, w }, {r,g,b,cw});
+			m.LineLight.setLineLight({ x, y, z, w }, { r,g,b,cw });
 		}
 
 		line_light& getLineLight()
@@ -696,6 +762,11 @@ namespace GameLib
 			_plane->createPlane(m.device, _vertical, _side);
 		}
 
+		void createBillboard(static_mesh* _mesh, const wchar_t* _textureName)
+		{
+			_mesh->createBillboard(m.device, _textureName);
+		}
+
 		void loadMesh(static_mesh* _mesh, const wchar_t* objName)
 		{
 			_mesh->loadStaticMesh(m.device, objName);
@@ -712,31 +783,36 @@ namespace GameLib
 
 		void staticMeshRender(
 			static_mesh* _mesh,
-			const DirectX::XMFLOAT4X4&SynthesisMatrix,
-			const DirectX::XMFLOAT4X4&worldMatrix,
-			const DirectX::XMFLOAT4&camPos,
+			const DirectX::XMFLOAT4X4& SynthesisMatrix,
+			const DirectX::XMFLOAT4X4& worldMatrix,
+			const DirectX::XMFLOAT4& camPos,
 			line_light& _line_light,
 			std::vector<point_light>& _point_light,
-			const DirectX::XMFLOAT4&materialColor,
+			const DirectX::XMFLOAT4& materialColor,
 			bool wireFlg
 		)
 		{
 			_mesh->render(m.context, SynthesisMatrix, worldMatrix, camPos, _line_light, _point_light, materialColor, wireFlg);
 		}
 
+		void builboradRender(static_mesh* _mesh, const DirectX::XMFLOAT4X4& view_projection, const DirectX::XMFLOAT4& _pos, const float _scale, const float _angle, const DirectX::XMFLOAT4& _cam_pos, const DirectX::XMFLOAT2& texpos, const DirectX::XMFLOAT2& texsize)
+		{
+			_mesh->billboardRender(m.context, view_projection, _pos, _scale, _angle, _cam_pos, texpos, texsize);
+		}
+
 		void staticMeshShadowRender1(static_mesh* _mesh,
-			const DirectX::XMFLOAT4X4&SynthesisMatrix,
-			const DirectX::XMFLOAT4X4&worldMatrix
+			const DirectX::XMFLOAT4X4& SynthesisMatrix,
+			const DirectX::XMFLOAT4X4& worldMatrix
 		)
 		{
 			_mesh->renderFirst(m.context, SynthesisMatrix, worldMatrix);
 		}
 		void staticMeshShadowRender2(
 			static_mesh* _mesh,
-			const DirectX::XMFLOAT4X4&SynthesisMatrix,
-			const DirectX::XMFLOAT4X4&worldMatrix,
-			const DirectX::XMFLOAT4&lightDirection,
-			const DirectX::XMFLOAT4&color,
+			const DirectX::XMFLOAT4X4& SynthesisMatrix,
+			const DirectX::XMFLOAT4X4& worldMatrix,
+			const DirectX::XMFLOAT4& lightDirection,
+			const DirectX::XMFLOAT4& color,
 			ID3D11ShaderResourceView* shadowMap,
 			bool wireFlg
 		)
@@ -751,6 +827,25 @@ namespace GameLib
 		void loadFBX(skinned_mesh* _mesh, const std::string& _fbxName)
 		{
 			_mesh->setInfo(m.device, _fbxName);
+		}
+
+		void loadShader(fbx_shader& shader, std::string vertex, std::string pixel, std::string noBoneVertex, std::string notexPS)
+		{
+			D3D11_INPUT_ELEMENT_DESC elements[] =
+			{
+				{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+				{ "NORMAL",   0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+				{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT	, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+				{ "WEIGHTS", 0, DXGI_FORMAT_R32G32B32A32_FLOAT	, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+				{ "BONES", 0, DXGI_FORMAT_R32G32B32A32_UINT	, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			};
+			UINT numElements = ARRAYSIZE(elements);
+
+			ResourceManager::LoadVertexShader(m.device, vertex, elements, numElements, &shader.vertexShader, &shader.layout);
+			ResourceManager::LoadVertexShader(m.device, noBoneVertex, elements, numElements, &shader.noBoneVS, &shader.dummylayout);
+
+			ResourceManager::LoadPixelShader(m.device, pixel, &shader.pixelShader);
+			ResourceManager::LoadPixelShader(m.device, notexPS, &shader.noTexPS);
 		}
 
 		void setLoopFlg(skinned_mesh* _mesh, const bool _is_loop)
@@ -785,16 +880,17 @@ namespace GameLib
 
 		void skinnedMeshRender(
 			skinned_mesh* _mesh,
-			const DirectX::XMFLOAT4X4&SynthesisMatrix,
-			const DirectX::XMFLOAT4X4&worldMatrix,
-			const DirectX::XMFLOAT4&camPos,
+			fbx_shader& hlsl,
+			const DirectX::XMFLOAT4X4& SynthesisMatrix,
+			const DirectX::XMFLOAT4X4& worldMatrix,
+			const DirectX::XMFLOAT4& camPos,
 			line_light& lineLight,
 			std::vector<point_light>& _point_light,
-			const DirectX::XMFLOAT4&materialColor,
+			const DirectX::XMFLOAT4& materialColor,
 			bool wireFlg
 		)
 		{
-			_mesh->render(m.context, SynthesisMatrix, worldMatrix,camPos, lineLight,_point_light, materialColor, wireFlg, m.hrTimer.time_interval());
+			_mesh->render(m.context, hlsl, SynthesisMatrix, worldMatrix, camPos, lineLight, _point_light, materialColor, wireFlg, m.hrTimer.time_interval());
 		}
 	}
 
@@ -802,36 +898,41 @@ namespace GameLib
 	{
 		DirectX::XMMATRIX GetProjectionMatrix()
 		{
-			return m.cam.GetProjectionMatrix();
+			return m.cam->GetProjectionMatrix();
 		}
 
 		DirectX::XMMATRIX GetViewMatrix()
 		{
-			return m.cam.GetViewMatrix();
+			return m.cam->GetViewMatrix();
 		}
 
 		DirectX::XMMATRIX GetLightProjectionMatrix()
 		{
-			return m.cam.GetLightProjectionMatrix();
+			return m.cam->GetLightProjectionMatrix();
 		}
 		DirectX::XMMATRIX GetLightViewMatrix(DirectX::XMFLOAT3 _pos, DirectX::XMFLOAT3 _direct)
 		{
-			return m.cam.GetLightViewMatrix(_pos, _direct);
+			return m.cam->GetLightViewMatrix(_pos, _direct);
 		}
 
 		void setPos(const DirectX::XMFLOAT3& _pos)
 		{
-			m.cam.setPosition(_pos);
+			m.cam->setPosition(_pos);
 		}
 
 		void setTarget(const DirectX::XMFLOAT3& _target)
 		{
-			m.cam.setTarget(_target);
+			m.cam->setTarget(_target);
 		}
 
 		DirectX::XMFLOAT4 getPos()
 		{
-			return m.cam.getCameraPos();
+			return m.cam->getCameraPos();
+		}
+
+		DirectX::XMFLOAT4 getTarget()
+		{
+			return m.cam->getCamTarget();
 		}
 	}
 

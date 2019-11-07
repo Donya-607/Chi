@@ -116,15 +116,15 @@ void EffectManager::Update(Donya::Vector3 pos)
 	shieldDevelopment.Update(pos);
 }
 
-void EffectManager::Render()
+void EffectManager::Render( fbx_shader &HLSL )
 {
 	/*for (int i = 0; i < MAX_SIZE; i++)
 	{
 		effect[i]->Render();
 	}*/
 
-	eruqtionEffectManager.Render();
-	shieldDevelopment.Render();
+	eruqtionEffectManager.Render( HLSL );
+	shieldDevelopment.Render( HLSL );
 }
 
 std::string GetEffectModelPath(EffectModel effectModel)
@@ -164,11 +164,11 @@ void EruptionEffectManager::Update()
 	}
 }
 
-void EruptionEffectManager::Render()
+void EruptionEffectManager::Render( fbx_shader &HLSL )
 {
 	for (int i = 0; i < MAX_SIZE; i++)
 	{
-		eruptionEffect[i].Render();
+		eruptionEffect[i].Render( HLSL );
 	}
 }
 
@@ -367,7 +367,7 @@ void EruptionEffect::Update()
 	}
 }
 
-void EruptionEffect::Render()
+void EruptionEffect::Render( fbx_shader &HLSL )
 {
 	if (activated)
 	{
@@ -391,7 +391,7 @@ void EruptionEffect::Render()
 				Donya::Vector4x4 R = Donya::Vector4x4::MakeRotationEuler(data[i].GetAngle());
 				Donya::Vector4x4 W = S * R * T;
 				Donya::Vector4x4 WVP = W * V * P;
-				FBXRender(pModel[i].get(), WVP, W);
+				FBXRender(pModel[i].get(), HLSL, WVP, W);
 			}
 
 			if (hitSphere[i].exist)
@@ -444,7 +444,7 @@ void ShieldDevelopment::Update(Donya::Vector3 pos)
 	}
 }
 
-void ShieldDevelopment::Render()
+void ShieldDevelopment::Render( fbx_shader &HLSL )
 {
 	if (data.GetExist())
 	{
@@ -456,6 +456,6 @@ void ShieldDevelopment::Render()
 		Donya::Vector4x4 R = Donya::Vector4x4::MakeRotationEuler(data.GetAngle());
 		Donya::Vector4x4 W = S * R * T;
 		Donya::Vector4x4 WVP = W * V * P;
-		FBXRender(pModel.get(), WVP, W);
+		FBXRender(pModel.get(), HLSL, WVP, W);
 	}
 }
