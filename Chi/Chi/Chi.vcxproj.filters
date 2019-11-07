@@ -126,6 +126,7 @@
     <ClInclude Include="GolemAI.h" />
     <ClInclude Include="Knight.h" />
     <ClInclude Include="KnightAI.h" />
+    <ClInclude Include="Effect.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp">
@@ -216,6 +217,7 @@
     <ClCompile Include="GolemAI.cpp" />
     <ClCompile Include="KnightAI.cpp" />
     <ClCompile Include="Knight.cpp" />
+    <ClCompile Include="Effect.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="geometric_phong_ps.hlsl">

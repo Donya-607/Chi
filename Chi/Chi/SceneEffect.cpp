@@ -5,9 +5,6 @@
 #include "GameLibFunctions.h"
 #include "Effect.h"
 
-FireFryParticle fireFryParticle;
-
-
 void SceneEffect::init()  
 {
 	isStack = false;

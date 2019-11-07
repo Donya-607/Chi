@@ -157,6 +157,7 @@
     <ClInclude Include="Donya\UseImGui.h" />
     <ClInclude Include="Donya\Vector.h" />
     <ClInclude Include="dragDrop.h" />
+    <ClInclude Include="Effect.h" />
     <ClInclude Include="font.h" />
     <ClInclude Include="frame_rate.h" />
     <ClInclude Include="gameLib.h" />
@@ -210,6 +211,7 @@
     <ClCompile Include="Donya\UseImGui.cpp" />
     <ClCompile Include="Donya\Vector.cpp" />
     <ClCompile Include="DragDrop.cpp" />
+    <ClCompile Include="Effect.cpp" />
     <ClCompile Include="font.cpp" />
     <ClCompile Include="frame_rate.cpp" />
     <ClCompile Include="gameLib.cpp" />
