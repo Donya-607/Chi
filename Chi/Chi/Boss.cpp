@@ -200,7 +200,7 @@ void Boss::Update()
 	CollideToWall();
 }
 
-void Boss::Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matProjection )
+void Boss::Draw(fbx_shader& hlsl, const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matProjection )
 {
 	const auto &PARAM = BossParam::Get();
 
@@ -214,13 +214,13 @@ void Boss::Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matPro
 	{
 	case BossAI::ActionStateNum::WAIT:
 		{
-			FBXRender( models.pIdle.get(), WVP, W );
+			FBXRender( models.pIdle.get(),hlsl, WVP, W );
 		}
 		break;
 	case BossAI::ActionStateNum::MOVE:
 		{
 		#if DEBUG_MODE
-			FBXRender( models.pAtkSwing.get(), WVP, W );
+			FBXRender( models.pAtkSwing.get(),hlsl, WVP, W );
 		#else
 			FBXRender( models.pIdle.get(), WVP, W );
 		#endif // DEBUG_MODE
@@ -228,7 +228,7 @@ void Boss::Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matPro
 		break;
 	case BossAI::ActionStateNum::ATTACK:
 		{
-			FBXRender( models.pAtkFast.get(), WVP, W );
+			FBXRender( models.pAtkFast.get(),hlsl, WVP, W );
 		}
 		break;
 	default: break;

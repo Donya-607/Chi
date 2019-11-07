@@ -77,6 +77,7 @@ public:
 CEREAL_CLASS_VERSION( BossParam, 1 )
 
 class skinned_mesh;	// With pointer. because I'm not want include this at header.
+struct fbx_shader;
 class Boss
 {
 private:
@@ -103,7 +104,7 @@ public:
 
 	void Update();
 
-	void Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matProjection );
+	void Draw(fbx_shader& hlsl, const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matProjection );
 public:
 	std::vector<Donya::OBB> GetAttackHitBoxes() const;
 private:

@@ -29,7 +29,7 @@ bool ResourceManager::LoadShaderResourceView(
 	int no = -1;
 	ResourceShaderResourceViews *find = nullptr;
 	ID3D11Resource *Resource = nullptr;
-
+	bool use_SRGB = false;
 	//	データ探索
 	for (int n = 0; n < RESOURCE_MAX; n++) {
 		ResourceShaderResourceViews *p = &SRViews[n];//	エイリアス
@@ -74,7 +74,7 @@ bool ResourceManager::LoadShaderResourceView(
 		}
 		else if (L".tga" == extension || L".vda" == extension || L".icb" == extension || L".vst" == extension)
 		{
-
+			use_SRGB = true;
 
 			DirectX::LoadFromTGAFile(filename.c_str(), &metadata, image);
 			_ASSERT_EXPR(SUCCEEDED(hr), hr_trace(hr));

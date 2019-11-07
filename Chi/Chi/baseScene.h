@@ -6,7 +6,6 @@ class baseScene
 {
 private:
 
-
 protected:
 	int timer;
 	int state;

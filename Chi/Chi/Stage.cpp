@@ -25,7 +25,7 @@ void Stage::Update()
 	// No op.
 }
 
-void Stage::Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matProjection )
+void Stage::Draw(fbx_shader& hlsl,const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matProjection )
 {
 #if DEBUG_MODE
 	Donya::Vector4x4 S = Donya::Vector4x4::MakeScaling( 1.0f );
@@ -38,7 +38,7 @@ void Stage::Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matPr
 	Donya::Vector4x4 WVP = W * matView * matProjection;
 #endif // DEBUG_MODE
 
-	FBXRender( pModel.get(), WVP, W );
+	FBXRender( pModel.get(),hlsl, WVP, W );
 }
 
 void Stage::LoadModel()

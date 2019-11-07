@@ -12,6 +12,8 @@
 #include <vector>
 #include "resourceManager.h"
 #include "light.h"
+#include "Donya/Quaternion.h"
+using namespace Donya;
 
 class static_mesh
 {
@@ -92,6 +94,7 @@ protected:
 	ID3D11RasterizerState*		rasterizeFillOut;	//塗りつぶし描画
 	ID3D11DepthStencilState*	depthStencilState;	//depthStencilState
 
+	Quaternion orientation;
 
 	int							numIndices;
 
@@ -141,11 +144,13 @@ public:
 
 	void billboardRender(
 		ID3D11DeviceContext*,		//デバイスコンテキスト
-		const DirectX::XMFLOAT4X4&,	//ワールドビュープロジェクション合成行列
-		const DirectX::XMFLOAT4X4&,	//ワールド変換行列
+		const DirectX::XMFLOAT4X4&,	//ビュープロジェクション合成行列
+		const DirectX::XMFLOAT4&,	//ポジション
+		const float,	//スケール
+		const float,	//アングル
 		const DirectX::XMFLOAT4&,	//カメラ座標
-		const DirectX::XMINT2& texpos,
-		const DirectX::XMINT2& texsize
+		const DirectX::XMFLOAT2& texpos,
+		const DirectX::XMFLOAT2& texsize
 	);
 
 	void renderFirst(

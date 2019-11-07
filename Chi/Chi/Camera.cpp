@@ -8,7 +8,7 @@ Camera::Camera()
 	state = cameraNumber::MONITORING;
 	constexpr float fov = DirectX::XMConvertToRadians(30.0f);
 	float aspect = pSystem->SCREEN_WIDTH / pSystem->SCREEN_HEIGHT;
-	SetPerspectiveMatrix(fov, aspect, 0.1f, 10000.0f);
+	SetPerspectiveMatrix(fov, aspect, 0.1f, 100000.0f);
 }
 
 void Camera::update()

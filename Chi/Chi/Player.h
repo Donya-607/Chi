@@ -109,6 +109,7 @@ public:
 CEREAL_CLASS_VERSION( PlayerParam, 4 )
 
 class skinned_mesh;	// With pointer. because I'm not want include this at header.
+struct fbx_shader;
 class Player
 {
 public:
@@ -167,7 +168,7 @@ public:
 
 	void Update( Input input );
 
-	void Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matProjection );
+	void Draw(fbx_shader& hlsl, const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matProjection );
 public:
 	/// <summary>
 	/// Returns world-space position.

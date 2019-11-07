@@ -2,15 +2,22 @@
 
 static_mesh::~static_mesh()
 {
-	constant_buffer->Release();
-	index_buffer->Release();
-	vertex_buffer->Release();
-
-	depthStencilState->Release();
-	rasterizeFillOut->Release();
-	rasterizeLine->Release();
-	ResourceManager::ReleasePixelShader(pixelShader);
-	ResourceManager::ReleaseVertexShader(vertexShader, layout);
+	if (constant_buffer)
+		constant_buffer->Release();
+	if (index_buffer)
+		index_buffer->Release();
+	if (vertex_buffer)
+		vertex_buffer->Release();
+	if (depthStencilState)
+		depthStencilState->Release();
+	if (rasterizeFillOut)
+		rasterizeFillOut->Release();
+	if (rasterizeLine)
+		rasterizeLine->Release();
+	if (pixelShader)
+		ResourceManager::ReleasePixelShader(pixelShader);
+	if (vertexShader)
+		ResourceManager::ReleaseVertexShader(vertexShader, layout);
 
 }
 
@@ -601,7 +608,7 @@ void static_mesh::createBillboard(ID3D11Device* _device, const wchar_t* _texture
 	UINT numElements = ARRAYSIZE(input_desc);
 	std::string vsName = "./Data/shader/obj_vs.cso";
 	std::string psName = "./Data/shader/obj_ps.cso";
-
+	orientation = { 0,0,-1,1 };
 	materials.emplace_back();
 	materials.back().Ka = { 0,0,0 };
 	materials.back().Kd = { 0,0,0 };
@@ -622,21 +629,22 @@ void static_mesh::createBillboard(ID3D11Device* _device, const wchar_t* _texture
 
 	int numV = 0, numI = 0;
 
-	vertices[numV + 0].position = DirectX::XMFLOAT3(-0.5f, +0.5f, +0.5f);
-	vertices[numV + 1].position = DirectX::XMFLOAT3(+0.5f, +0.5f, +0.5f);
-	vertices[numV + 2].position = DirectX::XMFLOAT3(-0.5f, +0.5f, -0.5f);
-	vertices[numV + 3].position = DirectX::XMFLOAT3(+0.5f, +0.5f, -0.5f);
+	vertices[numV + 0].position = DirectX::XMFLOAT3(-0.5f, +0.5f, 0);
+	vertices[numV + 1].position = DirectX::XMFLOAT3(+0.5f, +0.5f, 0);
+	vertices[numV + 2].position = DirectX::XMFLOAT3(-0.5f, -0.5f, 0);
+	vertices[numV + 3].position = DirectX::XMFLOAT3(+0.5f, -0.5f, 0);
 	vertices[numV + 0].normal = vertices[numV + 1].normal =
 		vertices[numV + 2].normal =
-		vertices[numV + 3].normal = DirectX::XMFLOAT3(+0.0f, +1.0f, +0.0f);
+		vertices[numV + 3].normal = DirectX::XMFLOAT3(+0.0f, +0.0f, -1.0f);
 	indices[numI + 0] = numV + 0;	indices[numI + 1] = numV + 1;	indices[numI + 2] = numV + 2;
 	indices[numI + 3] = numV + 1;	indices[numI + 4] = numV + 3;	indices[numI + 5] = numV + 2;
-
 	vertices[0].texcoord = { 0,0 };
 	vertices[1].texcoord = { 1,0 };
 	vertices[2].texcoord = { 0,1 };
 	vertices[3].texcoord = { 1,1 };
 
+	numV = 4;
+	numI = 6;
 	subsets.emplace_back();
 	subsets.back().index_count = numI;
 	subsets.back().index_start = 0;
@@ -836,9 +844,11 @@ void static_mesh::render(
 void static_mesh::billboardRender(
 	ID3D11DeviceContext* context,
 	const DirectX::XMFLOAT4X4& SynthesisMatrix,
-	const DirectX::XMFLOAT4X4& worldMatrix,
+	const DirectX::XMFLOAT4& pos,
+	const float scale,
+	const float angle,
 	const DirectX::XMFLOAT4& camPos,
-	const DirectX::XMINT2& texpos, const DirectX::XMINT2& texsize)
+	const DirectX::XMFLOAT2& texpos, const DirectX::XMFLOAT2& texsize)
 {
 	DirectX::XMINT2 tex = { (int)materials.back().tex2dDesc.Width,(int)materials.back().tex2dDesc.Height };
 	subsets.back().m_vertexes[0].texcoord = { texpos.x / tex.x * 1.0f,texpos.y / tex.y * 1.0f };
@@ -846,9 +856,36 @@ void static_mesh::billboardRender(
 	subsets.back().m_vertexes[2].texcoord = { texpos.x / tex.x * 1.0f,(texpos.y + texsize.y) / tex.y * 1.0f };
 	subsets.back().m_vertexes[3].texcoord = { (texpos.x + texsize.x) / tex.x * 1.0f,(texpos.y + texsize.y) / tex.y * 1.0f };
 
+	//transformVertex
+	{
+		DirectX::XMFLOAT3 direction = { camPos.x - pos.x,camPos.y - pos.y,camPos.z - pos.z };
+		float size = sqrtf(direction.x * direction.x + direction.y * direction.y + direction.z * direction.z);
+		direction = { direction.x / size,direction.y / size,direction.z / size };
+
+
+		orientation = Quaternion::LookAt(orientation, direction);
+
+	}
+	DirectX::XMMATRIX S, R, T, world;
+	T = DirectX::XMMatrixTranslation(pos.x, pos.y, pos.z);
+
+	//	Šg‘åEk¬
+	S = DirectX::XMMatrixScaling(scale, scale, 1);
+
+	//	‰ñ“]
+	R = DirectX::XMLoadFloat4x4(&orientation.RequireRotationMatrix());
+
+	world = S * R * T;
+
+	DirectX::XMMATRIX viewProjection = DirectX::XMLoadFloat4x4(&SynthesisMatrix);
+	DirectX::XMFLOAT4X4 WVP, W;
+	//	Matrix -> Float4x4 •ÏŠ·
+	DirectX::XMStoreFloat4x4(&WVP, world * viewProjection);
+	DirectX::XMStoreFloat4x4(&W, world);
+
 	cbuffer cb;
-	cb.world_view_projection = SynthesisMatrix;
-	cb.world = worldMatrix;
+	cb.world_view_projection = WVP;
+	cb.world = W;
 	cb.camPos = camPos;
 	cb.lineLight.color = { 0,0,0,0 };
 	cb.lineLight.direction = { 0,0,0,0 };

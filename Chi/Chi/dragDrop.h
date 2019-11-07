@@ -35,5 +35,5 @@ public:
 	void signUpFileName(wchar_t* _file_name);
 	void createDirectory(const wchar_t* _directory_name);
 	void deleteDirectory(const wchar_t* _directory_name);
-	void moveFile(HWND _hwnd);
+	void moveFile(HWND _hwnd,bool& flg);
 };

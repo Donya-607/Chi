@@ -21,7 +21,7 @@
 #include "frame_rate.h"
 #include "system.h"
 #include "Camera.h"
-
+#include "bloom.h"
 #include "XinputPad.h"
 #include "keyInput.h"
 namespace GameLib
@@ -51,16 +51,26 @@ namespace GameLib
 	bool resetRendertarget();
 
 	//シャドウマップ周り　
-	bool createShadowRT(ID3D11RenderTargetView** _renderTarget);
-	bool createShadowSRV(ID3D11ShaderResourceView* _shaderResource);
+	bool createRT(ID3D11RenderTargetView** _renderTarget);
+	bool createSRV(ID3D11ShaderResourceView** _shaderResource,ID3D11RenderTargetView** RT);
 
 
 	//画面を指定色にクリア
 	void clear(const DirectX::XMFLOAT4&);
+	void clearRT(ID3D11RenderTargetView* RT, const DirectX::XMFLOAT4& color);
 
 
 	//ドラッグ＆ドロップ関連
 	void loadFile(LPWSTR _filename);
+
+
+	void postEffect_Bloom_SRV(ID3D11ShaderResourceView** _shaderResource, DirectX::XMFLOAT4 _judge_color);
+	void postEffect_Bloom(ID3D11ShaderResourceView** _shaderResource,float _blur_value,DirectX::XMFLOAT4 _judge_color);
+	
+	//other
+	std::wstring getLoadedFileName();
+	int getLoadedFileCount();
+	bool getLoadFlg();
 
 	namespace blend
 	{
@@ -261,11 +271,12 @@ namespace GameLib
 		void createCube(static_mesh*);
 		void createSphere(static_mesh*, u_int, u_int);
 		void createPlane(static_mesh*, u_int, u_int);
-
+		void createBillboard(static_mesh*, const wchar_t* _textureName);
 		void loadMesh(static_mesh* _mesh, const wchar_t* objName);
 		void loadMeshMTL(static_mesh* _mesh, const wchar_t* objName, const wchar_t* mtlName);
 		static_mesh::primitive_material& getPrimitiveMaterial(static_mesh* _mesh);
 		void staticMeshRender(static_mesh* _mesh, const DirectX::XMFLOAT4X4&, const DirectX::XMFLOAT4X4&, const DirectX::XMFLOAT4&, line_light& _line_light, std::vector<point_light>& _point_light, const DirectX::XMFLOAT4&, bool);
+		void builboradRender(static_mesh* _mesh,const DirectX::XMFLOAT4X4&,const DirectX::XMFLOAT4&,const float,const float,const DirectX::XMFLOAT4&,const DirectX::XMFLOAT2& texpos,const DirectX::XMFLOAT2& texsize);
 		void staticMeshShadowRender1(static_mesh* _mesh, const DirectX::XMFLOAT4X4&, const DirectX::XMFLOAT4X4&);
 		void staticMeshShadowRender2(static_mesh* _mesh, const DirectX::XMFLOAT4X4&, const DirectX::XMFLOAT4X4&, const DirectX::XMFLOAT4&,const DirectX::XMFLOAT4&,ID3D11ShaderResourceView* ,bool);
 	}
@@ -275,9 +286,11 @@ namespace GameLib
 	{
 		void loadFBX(skinned_mesh*, const std::string& _fbxName);
 
+		void loadShader(fbx_shader& shader, std::string vertex, std::string pixel, std::string noBoneVertex, std::string notexPS);
+
 		void setLoopFlg(skinned_mesh* _mesh, const bool _is_loop);
 		void setStopAnimation(skinned_mesh* _mesh, const bool _is_stop);
-		void setStopTime(skinned_mesh* _mesh, const int _stop_time);
+		void setStopTime(skinned_mesh* _mesh, const float _stop_time);
 		void setAnimFlame(skinned_mesh* _mesh, const int _anim_flame);
 		const int getAnimFlame(skinned_mesh*);
 
@@ -286,6 +299,7 @@ namespace GameLib
 
 		void skinnedMeshRender(
 			skinned_mesh* _mesh,
+			fbx_shader& hlsl,
 			const DirectX::XMFLOAT4X4&SynthesisMatrix,
 			const DirectX::XMFLOAT4X4&worldMatrix,
 			const DirectX::XMFLOAT4&camPos,
@@ -325,6 +339,7 @@ namespace GameLib
 		void setPos(const DirectX::XMFLOAT3& _pos);
 		void setTarget(const DirectX::XMFLOAT3& _target);
 		DirectX::XMFLOAT4 getPos();
+		DirectX::XMFLOAT4 getTarget();
 	}
 
 	//デバック

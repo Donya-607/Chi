@@ -229,7 +229,7 @@ void Player::Update( Input input )
 	CollideToWall();
 }
 
-void Player::Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matProjection )
+void Player::Draw(fbx_shader& hlsl, const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matProjection )
 {
 	Donya::Vector4x4 W = CalcWorldMatrix();
 	Donya::Vector4x4 WVP = W * matView * matProjection;
@@ -238,22 +238,22 @@ void Player::Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matP
 	{
 	case Player::State::Idle:
 		{
-			FBXRender( models.pIdle.get(), WVP, W );
+			FBXRender( models.pIdle.get(),hlsl, WVP, W );
 		}
 		break;
 	case Player::State::Run:
 		{
-			FBXRender( models.pIdle.get(), WVP, W );
+			FBXRender( models.pIdle.get(),hlsl, WVP, W );
 		}
 		break;
 	case Player::State::Defend:
 		{
-			FBXRender( models.pIdle.get(), WVP, W );
+			FBXRender( models.pIdle.get(),hlsl, WVP, W );
 		}
 		break;
 	case Player::State::Attack:
 		{
-			FBXRender( models.pAttack.get(), WVP, W );
+			FBXRender( models.pAttack.get(),hlsl, WVP, W );
 		}
 		break;
 	default: break;

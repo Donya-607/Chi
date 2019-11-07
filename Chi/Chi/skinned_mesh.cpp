@@ -1,5 +1,7 @@
 #include "skinned_mesh.h"
 #include <iostream>
+//#undef max
+//#undef min
 //#include <cereal\cereal.hpp>
 //#include <cereal\archives\binary.hpp>
 //#include <cereal\archives\json.hpp>
@@ -316,93 +318,58 @@ void skinned_mesh::setInfo(ID3D11Device* _device, const std::string& _fbxFileNam
 
 
 	//if (&copy == INVALID_HANDLE_VALUE)
-	{
-		D3D11_INPUT_ELEMENT_DESC elements[] =
-		{
-			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-			{ "NORMAL",   0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT	, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-			{ "WEIGHTS", 0, DXGI_FORMAT_R32G32B32A32_FLOAT	, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-			{ "BONES", 0, DXGI_FORMAT_R32G32B32A32_UINT	, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		};
-		UINT numElements = ARRAYSIZE(elements);
-		have_uv = false;
-		have_material = 0;
-		have_born = false;
-		HRESULT hr;
-		D3D11_SAMPLER_DESC sampler_desc;
-		sampler_desc.Filter = D3D11_FILTER_ANISOTROPIC; //UNIT.06
-		sampler_desc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-		sampler_desc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-		sampler_desc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-		sampler_desc.MipLODBias = 0;
-		sampler_desc.MaxAnisotropy = 16;
-		sampler_desc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
-		DirectX::XMFLOAT4 dummy(0.0f, 0.0f, 0.0f, 0.0f);
-		memcpy(sampler_desc.BorderColor, &dummy, sizeof(DirectX::XMFLOAT4));
-		sampler_desc.MinLOD = 0;
-		sampler_desc.MaxLOD = D3D11_FLOAT32_MAX;
-		hr = _device->CreateSamplerState(&sampler_desc, &sampleState);
-		_ASSERT_EXPR(SUCCEEDED(hr), hr_trace(hr));
+	//{
+
+	have_uv = false;
+	have_material = 0;
+	have_born = false;
+	HRESULT hr;
+	D3D11_SAMPLER_DESC sampler_desc;
+	sampler_desc.Filter = D3D11_FILTER_ANISOTROPIC; //UNIT.06
+	sampler_desc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampler_desc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampler_desc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampler_desc.MipLODBias = 0;
+	sampler_desc.MaxAnisotropy = 16;
+	sampler_desc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+	DirectX::XMFLOAT4 dummy(0.0f, 0.0f, 0.0f, 0.0f);
+	memcpy(sampler_desc.BorderColor, &dummy, sizeof(DirectX::XMFLOAT4));
+	sampler_desc.MinLOD = 0;
+	sampler_desc.MaxLOD = D3D11_FLOAT32_MAX;
+	hr = _device->CreateSamplerState(&sampler_desc, &sampleState);
+	_ASSERT_EXPR(SUCCEEDED(hr), hr_trace(hr));
 
 
-		fbxInit(_device, _fbxFileName);
+	fbxInit(_device, _fbxFileName);
 
-		if (have_born)
-		{
-			vsName = "./Data/shader/skinned_mesh_has_born_vs.cso";
-		}
-		else
-		{
-			vsName = "./Data/shader/skinned_mesh_vs.cso";
-		}
+	init(_device);
 
-		if (have_uv)
-		{
-			psName = "./Data/shader/skinned_mesh_ps.cso";
-		}
-		else
-		{
-			psName = "./Data/shader/skinned_mesh_no_uv_ps.cso";
 
-		}
-		init(_device, vsName, elements, numElements, psName);
-		vsName = "./Data/shader/geometric_primitive_vs.cso";
-		psName = "./Data/shader/skinned_mesh_no_uv_ps.cso";
+	//	std::ofstream ofs;
+	//	ofs.open(json_file_name, std::ios::binary);
 
-		ResourceManager::LoadVertexShader(_device, vsName, elements, numElements, &noTexVS, &noTexLayout);
-		ResourceManager::LoadPixelShader(_device, psName, &noTexPS);
-
-		//std::ofstream ofs;
-		//ofs.open(json_file_name, std::ios::binary);
-
-		//cereal::JSONOutputArchive o_archive(ofs);
-		//std::string file_name(std::string(json_file_name.begin(), json_file_name.end()));
-		//o_archive(cereal::make_nvp(file_name, *this));
-	}
+	//	cereal::JSONOutputArchive o_archive(ofs);
+	//	std::string file_name(std::string(json_file_name.begin(), json_file_name.end()));
+	//	o_archive(cereal::make_nvp(file_name, *this));
+	//}
 	//else
 	//{
-		//std::ifstream ifs;
-		//ifs.open(json_file_name, std::ios::binary);
+	//	std::ifstream ifs;
+	//	ifs.open(json_file_name, std::ios::binary);
 
-		//cereal::JSONInputArchive i_archive(ifs);
-		//std::string file_name(std::string(json_file_name.begin(), json_file_name.end()));
-		//i_archive(cereal::make_nvp(file_name, *this));
-
+	//	cereal::JSONInputArchive i_archive(ifs);
+	//	std::string file_name(std::string(json_file_name.begin(), json_file_name.end()));
+	//	i_archive(cereal::make_nvp(file_name, *this));
 
 	//}
 
 }
 
-void skinned_mesh::init(ID3D11Device* device, std::string vsName, D3D11_INPUT_ELEMENT_DESC* inputElementDescs, int numElement, std::string psName)
+void skinned_mesh::init(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
 	//vertexShader
 
-	ResourceManager::LoadVertexShader(device, vsName, inputElementDescs, numElement, &vertexShader, &layout);
-
-	//pixelShader
-	ResourceManager::LoadPixelShader(device, psName, &pixelShader);
 
 	//rasterizerLine
 	D3D11_RASTERIZER_DESC line_desc;
@@ -444,16 +411,7 @@ void skinned_mesh::init(ID3D11Device* device, std::string vsName, D3D11_INPUT_EL
 	//Zテストの条件
 	depthStencil_desc.DepthFunc = D3D11_COMPARISON_LESS;
 	depthStencil_desc.StencilEnable = FALSE;
-	//depthStencil_desc.StencilReadMask = 0xFF;
-	//depthStencil_desc.StencilWriteMask = 0xFF;
-	//depthStencil_desc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
-	//depthStencil_desc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR;
-	//depthStencil_desc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
-	//depthStencil_desc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
-	//depthStencil_desc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
-	//depthStencil_desc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR;
-	//depthStencil_desc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
-	//depthStencil_desc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+
 
 	hr = device->CreateDepthStencilState(&depthStencil_desc, &depthStencilState);
 	_ASSERT_EXPR(SUCCEEDED(hr), hr_trace(hr));
@@ -518,6 +476,7 @@ bool skinned_mesh::createBuffer(int index_mesh, ID3D11Device* device, vertex* ve
 
 void skinned_mesh::render(
 	ID3D11DeviceContext* context,
+	fbx_shader& hlsl,
 	const DirectX::XMFLOAT4X4& SynthesisMatrix,
 	const DirectX::XMFLOAT4X4& worldMatrix,
 	const DirectX::XMFLOAT4& camPos,
@@ -634,17 +593,17 @@ void skinned_mesh::render(
 				else		context->RSSetState(rasterizeLine);
 
 				//	入力レイアウトのバインド
-				context->IASetInputLayout(layout);
+				context->IASetInputLayout(hlsl.layout);
 				//	シェーダー(2種)の設定
-				context->VSSetShader(vertexShader, nullptr, 0);
+				context->VSSetShader(hlsl.vertexShader, nullptr, 0);
 
 				if (p.diffuse.shader_resource_view)
 				{
-					context->PSSetShader(pixelShader, nullptr, 0);
+					context->PSSetShader(hlsl.pixelShader, nullptr, 0);
 				}
 				else
 				{
-					context->PSSetShader(noTexPS, nullptr, 0);
+					context->PSSetShader(hlsl.noTexPS, nullptr, 0);
 				}
 
 				//	深度テストの設定
@@ -710,15 +669,15 @@ void skinned_mesh::render(
 			context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 			//	入力レイアウトのバインド
-			context->IASetInputLayout(layout);
+			context->IASetInputLayout(hlsl.layout);
 
 			//	ラスタライザーの設定
 			if (!wireFlg)	context->RSSetState(rasterizeFillOut);
 			else		context->RSSetState(rasterizeLine);
 
 			//	シェーダー(2種)の設定
-			context->VSSetShader(vertexShader, nullptr, 0);
-			context->PSSetShader(pixelShader, nullptr, 0);
+			context->VSSetShader(hlsl.noBoneVS, nullptr, 0);
+			context->PSSetShader(hlsl.pixelShader, nullptr, 0);
 
 
 			//	深度テストの設定
@@ -735,12 +694,6 @@ void skinned_mesh::render(
 
 void skinned_mesh::release()
 {
-	vertexShader->Release();
-	pixelShader->Release();
-	layout->Release();
-	noTexVS->Release();
-	noTexPS->Release();
-	noTexLayout->Release();
 	constant_buffer->Release();
 	rasterizeLine->Release();
 	rasterizeFillOut->Release();
@@ -884,7 +837,7 @@ bool skinned_mesh::calcTransformedPosBySpecifyMesh(DirectX::XMFLOAT3& _local_pos
 	std::vector<bone>& skeletal = _mesh->skeletal_animation.at(animation_flame);
 	size_t number_of_bones = skeletal.size();
 	_ASSERT_EXPR(number_of_bones < MAX_BONES, L"'the number_of_bones' exceeds MAX_BONES.");
-	DirectX::XMFLOAT4 pos = { _mesh->pos.x+_local_pos.x,_mesh->pos.y + _local_pos.y,_mesh->pos.z + _local_pos.z,_mesh->pos.w };
+	DirectX::XMFLOAT4 pos = { _mesh->pos.x + _local_pos.x,_mesh->pos.y + _local_pos.y,_mesh->pos.z + _local_pos.z,_mesh->pos.w };
 	DirectX::XMFLOAT3 _p = { 0,0,0 };
 
 	for (size_t i = 0; i < 4; i++)
