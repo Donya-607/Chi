@@ -116,6 +116,10 @@ private:
 	struct Models
 	{
 		std::unique_ptr<skinned_mesh> pIdle{ nullptr };
+		std::unique_ptr<skinned_mesh> pRunFront{ nullptr };
+		std::unique_ptr<skinned_mesh> pAtkExpl{ nullptr };
+		std::unique_ptr<skinned_mesh> pAtkSwing{ nullptr };
+		std::unique_ptr<skinned_mesh> pAtkRaid{ nullptr };
 	};
 private:
 	KnightAI::ActionState	status;
@@ -150,6 +154,8 @@ private:
 	void LoadModel();
 
 	float CalcNormalizedDistance( Donya::Vector3 wsTargetPos );
+
+	Donya::Vector4x4 CalcWorldMatrix() const;
 private:
 	void ChangeStatus( TargetStatus target );
 	void UpdateCurrentStatus( TargetStatus target );

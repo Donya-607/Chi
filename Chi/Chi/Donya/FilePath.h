@@ -26,6 +26,10 @@ enum class ModelAttribute
 	GolemAtkFast,
 	GolemAtkRotate,
 	KnightIdle,
+	KnightRunFront,
+	KnightAtkExplosion,
+	KnightAtkSwing,
+	KnightAtkRaid,
 };
 
 std::string GetModelPath( ModelAttribute modelAttribute );

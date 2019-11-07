@@ -191,6 +191,10 @@ Knight::Knight() :
 	std::vector<std::unique_ptr<skinned_mesh> *> modelRefs
 	{
 		&models.pIdle,
+		&models.pRunFront,
+		&models.pAtkExpl,
+		&models.pAtkSwing,
+		&models.pAtkRaid,
 	};
 	for ( auto &it : modelRefs )
 	{
@@ -261,16 +265,16 @@ void Knight::Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matP
 		FBXRender( models.pIdle.get(), WVP, W );
 		break;
 	case KnightAI::ActionState::MOVE:
-		FBXRender( models.pIdle.get(), WVP, W );
+		FBXRender( models.pRunFront.get(), WVP, W );
 		break;
 	case KnightAI::ActionState::ATTACK_EXPLOSION:
-		FBXRender( models.pIdle.get(), WVP, W );
+		FBXRender( models.pAtkExpl.get(), WVP, W );
 		break;
 	case KnightAI::ActionState::ATTACK_SWING:
-		FBXRender( models.pIdle.get(), WVP, W );
+		FBXRender( models.pAtkSwing.get(), WVP, W );
 		break;
 	case KnightAI::ActionState::ATTACK_RAID:
-		FBXRender( models.pIdle.get(), WVP, W );
+		FBXRender( models.pAtkRaid.get(), WVP, W );
 		break;
 	default: break;
 	}
@@ -392,7 +396,20 @@ void Knight::SetFieldRadius( float newFieldRadius )
 
 void Knight::LoadModel()
 {
+	Donya::OutputDebugStr( "Begin Knight::LoadModel.\n" );
+
 	loadFBX( models.pIdle.get(), GetModelPath( ModelAttribute::KnightIdle ) );
+	Donya::OutputDebugStr( "Done KnightModel.Idle.\n" );
+	loadFBX( models.pRunFront.get(), GetModelPath( ModelAttribute::KnightRunFront ) );
+	Donya::OutputDebugStr( "Done KnightModel.RunFront.\n" );
+	loadFBX( models.pAtkExpl.get(), GetModelPath( ModelAttribute::KnightAtkExplosion ) );
+	Donya::OutputDebugStr( "Done KnightModel.Attack.Explosion.\n" );
+	loadFBX( models.pAtkSwing.get(), GetModelPath( ModelAttribute::KnightAtkSwing ) );
+	Donya::OutputDebugStr( "Done KnightModel.Attack.Swing.\n" );
+	loadFBX( models.pAtkRaid.get(), GetModelPath( ModelAttribute::KnightAtkRaid ) );
+	Donya::OutputDebugStr( "Done KnightModel.Attack.Raid.\n" );
+
+	Donya::OutputDebugStr( "End Knight::LoadModel.\n" );
 }
 
 float Knight::CalcNormalizedDistance( Donya::Vector3 wsTargetPos )
@@ -401,6 +418,18 @@ float Knight::CalcNormalizedDistance( Donya::Vector3 wsTargetPos )
 	return ( ZeroEqual( fieldRadius ) )
 	? fieldRadius
 	: distance / fieldRadius;
+}
+
+Donya::Vector4x4 Knight::CalcWorldMatrix() const
+{
+	Donya::Vector4x4 S = Donya::Vector4x4::MakeScaling( KnightParam::Open().scale );
+	Donya::Vector4x4 R = orientation.RequireRotationMatrix();
+	Donya::Vector4x4 T = Donya::Vector4x4::MakeTranslation( GetPos() );
+#if DEBUG_MODE
+	if ( status == decltype( status )::END ) { R = Donya::Quaternion::Make( Donya::Vector3::Front(), ToRadian( 180.0f ) ).RequireRotationMatrix(); };
+#endif // DEBUG_MODE
+
+	return S * R * T;
 }
 
 void Knight::ChangeStatus( TargetStatus target )
@@ -474,7 +503,7 @@ void Knight::MoveInit( TargetStatus target )
 
 	slerpFactor = KnightParam::Get().SlerpFactor( status );
 
-	setAnimFlame( models.pIdle.get(), 0 );
+	setAnimFlame( models.pRunFront.get(), 0 );
 }
 void Knight::MoveUpdate( TargetStatus target )
 {
@@ -505,7 +534,7 @@ void Knight::MoveUpdate( TargetStatus target )
 }
 void Knight::MoveUninit()
 {
-	setAnimFlame( models.pIdle.get(), 0 );
+	setAnimFlame( models.pRunFront.get(), 0 );
 }
 
 void Knight::AttackExplosionInit( TargetStatus target )
@@ -514,7 +543,7 @@ void Knight::AttackExplosionInit( TargetStatus target )
 
 	slerpFactor = KnightParam::Get().SlerpFactor( status );
 
-	// setAnimFlame( models.pAtkFast.get(), 0 );
+	setAnimFlame( models.pAtkExpl.get(), 0 );
 }
 void Knight::AttackExplosionUpdate( TargetStatus target )
 {
@@ -522,7 +551,7 @@ void Knight::AttackExplosionUpdate( TargetStatus target )
 }
 void Knight::AttackExplosionUninit()
 {
-	// setAnimFlame( models.pAtkFast.get(), 0 );
+	setAnimFlame( models.pAtkExpl.get(), 0 );
 }
 
 void Knight::AttackSwingInit( TargetStatus target )
@@ -531,7 +560,7 @@ void Knight::AttackSwingInit( TargetStatus target )
 	slerpFactor	= KnightParam::Get().SlerpFactor( status );
 	velocity	= 0.0f;
 
-	// setAnimFlame( models.pAtkSwing.get(), 0 );
+	setAnimFlame( models.pAtkSwing.get(), 0 );
 }
 void Knight::AttackSwingUpdate( TargetStatus target )
 {
@@ -541,7 +570,7 @@ void Knight::AttackSwingUninit()
 {
 	timer = 0;
 
-	// setAnimFlame( models.pAtkSwing.get(), 0 );
+	setAnimFlame( models.pAtkSwing.get(), 0 );
 }
 
 void Knight::AttackRaidInit( TargetStatus target )
@@ -551,7 +580,7 @@ void Knight::AttackRaidInit( TargetStatus target )
 	slerpFactor = KnightParam::Get().SlerpFactor( status );
 	extraOffset = 0.0f;
 
-	// setAnimFlame( models.pAtkRotate.get(), 0 );
+	setAnimFlame( models.pAtkRaid.get(), 0 );
 }
 void Knight::AttackRaidUpdate( TargetStatus target )
 {
@@ -565,7 +594,7 @@ void Knight::AttackRaidUninit()
 
 	extraOffset = 0.0f;
 
-	// setAnimFlame( models.pAtkRotate.get(), 0 );
+	setAnimFlame( models.pAtkRaid.get(), 0 );
 }
 
 void Knight::ApplyVelocity( TargetStatus target )

@@ -55,7 +55,15 @@ std::string GetModelPath( ModelAttribute modelAttribute )
 	case ModelAttribute::GolemAtkRotate:
 		return "./Data/model/Boss/MDL_Boss03_Attack_Rotate.fbx";		// break;
 	case ModelAttribute::KnightIdle:
-		return "./Data/model/Boss/MDL_Boss02_TPose.fbx";				// break;
+		return "./Data/model/Boss/MDL_Boss02_Wait.fbx";					// break;
+	case ModelAttribute::KnightRunFront:
+		return "./Data/model/Boss/MDL_Boss02_Walk_Forward.fbx";			// break;
+	case ModelAttribute::KnightAtkExplosion:
+		return "./Data/model/Boss/MDL_Boss02_Attack_Explosion.fbx";		// break;
+	case ModelAttribute::KnightAtkSwing:
+		return "./Data/model/Boss/MDL_Boss02_Attack_Swing.fbx";			// break;
+	case ModelAttribute::KnightAtkRaid:
+		return "./Data/model/Boss/MDL_Boss02_Attack_JampAttack.fbx";	// break;
 	default:
 		assert( !"Error : Specified unexpect model type." ); break;
 		break;

@@ -41,8 +41,8 @@ public:
 	Lights			lights;
 	Player			player;
 	Stage			stage;
-	Golem			boss;
-	// Knight			boss;
+	// Golem			boss;
+	Knight			boss;
 public:
 	Impl() :
 		fieldRadius(), cameraLeaveDistance(),
@@ -233,8 +233,8 @@ public:
 		};
 		player.Update( MakePlayerInput( Donya::Vector4x4::FromMatrix( GameLib::camera::GetViewMatrix() ) ) );
 
-		Golem::TargetStatus bossTarget{};
-		// Knight::TargetStatus bossTarget{};
+		// Golem::TargetStatus bossTarget{};
+		Knight::TargetStatus bossTarget{};
 		bossTarget.pos = player.GetPosition();
 		boss.Update( bossTarget );
 		
@@ -443,72 +443,72 @@ public:
 		const Donya::OBB playerShieldBox = player.GetShieldHitBox();
 		const Donya::OBB playerAttackBox = player.CalcAttackHitBox();
 
-		// BossAttacks VS Player(and Player's Shield)
-		{
-			bool wasHitToShield = false;
+		//// BossAttacks VS Player(and Player's Shield)
+		//{
+		//	bool wasHitToShield = false;
 
-		#if FETCH_BOXES_THEN_JUDGE
+		//#if FETCH_BOXES_THEN_JUDGE
 
-			const auto attackBoxes = boss.RequireAttackHitBoxesOBB();
-			for ( const auto &it : attackBoxes )
-			{
-				if ( Donya::OBB::IsHitOBB( playerShieldBox, it ) )
-				{
-					wasHitToShield = true;
-					player.SucceededDefence();
-				}
-				if ( !wasHitToShield && Donya::OBB::IsHitOBB( playerBodyBox, it ) )
-				{
-					player.ReceiveImpact();
-				}
+		//	const auto attackBoxes = boss.RequireAttackHitBoxesOBB();
+		//	for ( const auto &it : attackBoxes )
+		//	{
+		//		if ( Donya::OBB::IsHitOBB( playerShieldBox, it ) )
+		//		{
+		//			wasHitToShield = true;
+		//			player.SucceededDefence();
+		//		}
+		//		if ( !wasHitToShield && Donya::OBB::IsHitOBB( playerBodyBox, it ) )
+		//		{
+		//			player.ReceiveImpact();
+		//		}
 
-				wasHitToShield = false;
-			}
+		//		wasHitToShield = false;
+		//	}
 
-			const auto attackSpheres = boss.RequireAttackHitBoxesSphere();
-			for ( const auto &it : attackSpheres )
-			{
-				if ( Donya::OBB::IsHitSphere( playerShieldBox, it ) )
-				{
-					wasHitToShield = true;
-					player.SucceededDefence();
-				}
-				if ( !wasHitToShield && Donya::OBB::IsHitSphere( playerBodyBox, it ) )
-				{
-					player.ReceiveImpact();
-				}
-			}
+		//	const auto attackSpheres = boss.RequireAttackHitBoxesSphere();
+		//	for ( const auto &it : attackSpheres )
+		//	{
+		//		if ( Donya::OBB::IsHitSphere( playerShieldBox, it ) )
+		//		{
+		//			wasHitToShield = true;
+		//			player.SucceededDefence();
+		//		}
+		//		if ( !wasHitToShield && Donya::OBB::IsHitSphere( playerBodyBox, it ) )
+		//		{
+		//			player.ReceiveImpact();
+		//		}
+		//	}
 
-		#else
+		//#else
 
-			bool shieldCollided = boss.IsCollideAttackHitBoxes( playerShieldBox, /* disableCollidingHitBoxes = */ true );
-			if ( shieldCollided )
-			{
-				wasHitToShield = true;
-				player.SucceededDefence();
-			}
+		//	bool shieldCollided = boss.IsCollideAttackHitBoxes( playerShieldBox, /* disableCollidingHitBoxes = */ true );
+		//	if ( shieldCollided )
+		//	{
+		//		wasHitToShield = true;
+		//		player.SucceededDefence();
+		//	}
 
-			bool bodyCollided = ( shieldCollided ) ? false : boss.IsCollideAttackHitBoxes( playerBodyBox, /* disableCollidingHitBoxes = */ false );
-			if ( bodyCollided )
-			{
-				player.ReceiveImpact();
-			}
+		//	bool bodyCollided = ( shieldCollided ) ? false : boss.IsCollideAttackHitBoxes( playerBodyBox, /* disableCollidingHitBoxes = */ false );
+		//	if ( bodyCollided )
+		//	{
+		//		player.ReceiveImpact();
+		//	}
 
-		#endif // FETCH_BOXES_THEN_JUDGE
-		}
-		
-		// PlayerAttack VS BossBodies
-		{
-			const auto pBossBodies = boss.GetBodyHitBoxes();
-			for ( const auto &it : pBossBodies )
-			{
-				if ( Donya::OBB::IsHitOBB( playerAttackBox, it ) )
-				{
-					boss.ReceiveImpact();
-					break;
-				}
-			}
-		}
+		//#endif // FETCH_BOXES_THEN_JUDGE
+		//}
+		//
+		//// PlayerAttack VS BossBodies
+		//{
+		//	const auto pBossBodies = boss.GetBodyHitBoxes();
+		//	for ( const auto &it : pBossBodies )
+		//	{
+		//		if ( Donya::OBB::IsHitOBB( playerAttackBox, it ) )
+		//		{
+		//			boss.ReceiveImpact();
+		//			break;
+		//		}
+		//	}
+		//}
 		
 	}
 public:
