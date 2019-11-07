@@ -45,7 +45,7 @@ void KnightAI::Update()
 
 		// Repeat wait-status <-> attack-status.
 
-		if ( NowStatusAction() )
+		if ( IsAction( status ) )
 		{
 			LotteryWaitState();
 		}
@@ -154,18 +154,6 @@ void KnightAI::LotteryAttackState()
 	}
 }
 
-bool KnightAI::NowStatusAction() const
-{
-	switch ( status )
-	{
-	case ActionState::ATTACK_EXPLOSION:	return true;	break;
-	case ActionState::ATTACK_SWING:		return true;	break;
-	case ActionState::ATTACK_RAID:		return true;	break;
-	default: break;
-	}
-
-	return false;
-}
 KnightAI::ActionState KnightAI::GetGapAttack() const
 {
 	return ActionState::ATTACK_EXPLOSION;

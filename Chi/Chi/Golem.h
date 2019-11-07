@@ -277,6 +277,9 @@ public:
 
 	void Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matProjection );
 public:
+	bool IsCollideAttackHitBoxes( const Donya::AABB   judgeOther, bool disableCollidingHitBoxes );
+	bool IsCollideAttackHitBoxes( const Donya::OBB    judgeOther, bool disableCollidingHitBoxes );
+	bool IsCollideAttackHitBoxes( const Donya::Sphere judgeOther, bool disableCollidingHitBoxes );
 	std::vector<Donya::OBB>		RequireAttackHitBoxesOBB() const;
 	std::vector<Donya::Sphere>	RequireAttackHitBoxesSphere() const;
 	std::vector<Donya::OBB>		GetBodyHitBoxes() const;
@@ -290,6 +293,8 @@ private:
 	void LoadModel();
 
 	float CalcNormalizedDistance( Donya::Vector3 wsTargetPos );
+
+	Donya::Vector4x4 CalcWorldMatrix() const;
 private:
 	void ChangeStatus( TargetStatus target );
 	void UpdateCurrentStatus( TargetStatus target );

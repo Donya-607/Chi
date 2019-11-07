@@ -19,7 +19,7 @@
 #include "gameLib.h"
 #include "light.h"
 
-// #include "Golem.h"
+#include "Golem.h"
 #include "Knight.h"
 #include "Player.h"
 #include "Stage.h"
@@ -41,8 +41,8 @@ public:
 	Lights			lights;
 	Player			player;
 	Stage			stage;
-	// Golem			boss;
-	Knight			boss;
+	Golem			boss;
+	// Knight			boss;
 public:
 	Impl() :
 		fieldRadius(), cameraLeaveDistance(),
@@ -114,19 +114,24 @@ public:
 		constexpr int STAGE_NO = NULL;
 	#endif // DEBUG_MODE
 
-		OutputDebugStr( "Begin Player::Init.\n" );
+		Donya::OutputDebugStr( "Begin Objects initialize.\n" );
+		Donya::OutputDebugStr( "Objects count : 3\n" );
+
+		Donya::OutputDebugStr( "No.1 Begin Player::Init.\n" );
 		player.Init();
 		player.SetFieldRadius( fieldRadius );
-		OutputDebugStr( "End Player::Init.\n" );
+		Donya::OutputDebugStr( "No.1 End Player::Init.\n" );
 
-		OutputDebugStr( "Begin Stage::Init.\n" );
+		Donya::OutputDebugStr( "No.2 Begin Stage::Init.\n" );
 		stage.Init( STAGE_NO );
-		OutputDebugStr( "End Stage::Init.\n" );
+		Donya::OutputDebugStr( "No.2 End Stage::Init.\n" );
 
-		OutputDebugStr( "Begin Boss::Init.\n" );
+		Donya::OutputDebugStr( "No.3 Begin Boss::Init.\n" );
 		boss.Init( STAGE_NO );
 		boss.SetFieldRadius( fieldRadius );
-		OutputDebugStr( "End Boss::Init.\n" );
+		Donya::OutputDebugStr( "No.3 End Boss::Init.\n" );
+
+		Donya::OutputDebugStr( "End Objects initialize.\n" );
 
 		// Set camera's position and focus.
 		CameraUpdate();
@@ -228,8 +233,8 @@ public:
 		};
 		player.Update( MakePlayerInput( Donya::Vector4x4::FromMatrix( GameLib::camera::GetViewMatrix() ) ) );
 
-		// Golem::TargetStatus bossTarget{};
-		Knight::TargetStatus bossTarget{};
+		Golem::TargetStatus bossTarget{};
+		// Knight::TargetStatus bossTarget{};
 		bossTarget.pos = player.GetPosition();
 		boss.Update( bossTarget );
 		
@@ -322,13 +327,6 @@ public:
 	}
 
 public:
-	void OutputDebugStr( const std::string &str )
-	{
-	#if DEBUG_MODE
-		Donya::OutputDebugStr( str.c_str() );
-	#endif // DEBUG_MODE
-	}
-
 	bool LoadSounds() const
 	{
 		struct Bundle
@@ -441,14 +439,16 @@ public:
 
 	void ProcessCollision()
 	{
-		/*
-		Donya::OBB playerBodyBox   = player.GetHurtBox();
-		Donya::OBB playerShieldBox = player.GetShieldHitBox();
-		Donya::OBB playerAttackBox = player.CalcAttackHitBox();
+		const Donya::OBB playerBodyBox   = player.GetHurtBox();
+		const Donya::OBB playerShieldBox = player.GetShieldHitBox();
+		const Donya::OBB playerAttackBox = player.CalcAttackHitBox();
 
 		// BossAttacks VS Player(and Player's Shield)
 		{
 			bool wasHitToShield = false;
+
+		#if FETCH_BOXES_THEN_JUDGE
+
 			const auto attackBoxes = boss.RequireAttackHitBoxesOBB();
 			for ( const auto &it : attackBoxes )
 			{
@@ -478,6 +478,23 @@ public:
 					player.ReceiveImpact();
 				}
 			}
+
+		#else
+
+			bool shieldCollided = boss.IsCollideAttackHitBoxes( playerShieldBox, /* disableCollidingHitBoxes = */ true );
+			if ( shieldCollided )
+			{
+				wasHitToShield = true;
+				player.SucceededDefence();
+			}
+
+			bool bodyCollided = ( shieldCollided ) ? false : boss.IsCollideAttackHitBoxes( playerBodyBox, /* disableCollidingHitBoxes = */ false );
+			if ( bodyCollided )
+			{
+				player.ReceiveImpact();
+			}
+
+		#endif // FETCH_BOXES_THEN_JUDGE
 		}
 		
 		// PlayerAttack VS BossBodies
@@ -492,7 +509,7 @@ public:
 				}
 			}
 		}
-		*/
+		
 	}
 public:
 	void LoadParameter( bool isBinary = true )

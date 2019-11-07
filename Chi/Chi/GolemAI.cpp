@@ -45,7 +45,7 @@ void GolemAI::Update()
 
 		// Repeat wait-status <-> attack-status.
 
-		if ( NowStatusAction() )
+		if ( IsAction( status ) )
 		{
 			LotteryWaitState();
 		}
@@ -154,18 +154,6 @@ void GolemAI::LotteryAttackState()
 	}
 }
 
-bool GolemAI::NowStatusAction() const
-{
-	switch ( status )
-	{
-	case ActionState::ATTACK_SWING:		return true;	break;
-	case ActionState::ATTACK_FAST:		return true;	break;
-	case ActionState::ATTACK_ROTATE:	return true;	break;
-	default: break;
-	}
-
-	return false;
-}
 GolemAI::ActionState GolemAI::GetGapAttack() const
 {
 	return ActionState::ATTACK_SWING;

@@ -174,6 +174,11 @@ namespace Donya
 
 	// TODO:Rename the box class, and apply Donya::Vector to position, and size.
 
+	/*
+		The exist flag is mainly use "exist" flag.
+		But in case of "exist is there, but not enable", we thinks needs more flag.
+	*/
+
 	class Sphere;
 
 	/// <summary>
@@ -188,6 +193,7 @@ namespace Donya
 		Donya::Vector3 pos;		// Center-position. the belong space is world-space when checking collision method.
 		Donya::Vector3 size;	// Half-size(like radius). the left is pos.x - size.x. please set to only positive value.
 		bool exist;				// Is enable collision ?
+		bool enable{ true };	// Prioritize enable flag than exist flag.
 	private:
 		friend class cereal::access;
 		template<class Archive>
@@ -241,9 +247,10 @@ namespace Donya
 	class Sphere
 	{
 	public:
-		Donya::Vector3	pos;		// Center-position. the belong space is world-space when checking collision method.
-		float			radius;		// Radius of sphere in world-space. please set to only positive value.
-		bool			exist;		// Is enable collision ?
+		Donya::Vector3	pos;			// Center-position. the belong space is world-space when checking collision method.
+		float			radius;			// Radius of sphere in world-space. please set to only positive value.
+		bool			exist;			// Is enable collision ?
+		bool			enable{ true };	// Prioritize enable flag than exist flag.
 	private:
 		friend class cereal::access;
 		template<class Archive>
@@ -288,6 +295,7 @@ namespace Donya
 		Donya::Vector3		size;		// Half-size.
 		Donya::Quaternion	orientation;
 		bool exist{ true };
+		bool enable{ true };			// Prioritize enable flag than exist flag.
 	private:
 		friend class cereal::access;
 		template<class Archive>
@@ -384,8 +392,8 @@ namespace Donya
 	struct OBBFrame
 	{
 		int currentFrame{};
-		int enableFrameStart{};	// WIll be serialize. Contain start frame.
-		int enableFrameLast{};	// WIll be serialize. Contain last frame.
+		int enableFrameStart{};			// WIll be serialize. Contain start frame.
+		int enableFrameLast{};			// WIll be serialize. Contain last frame.
 		OBB OBB{};
 	private:
 		friend class cereal::access;

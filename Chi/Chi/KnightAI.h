@@ -27,6 +27,18 @@ public:
 		END
 	};
 	static constexpr int ACTION_STATE_COUNT = static_cast<int>( ActionState::END );
+	static constexpr bool IsAction( ActionState status )
+	{
+		switch ( status )
+		{
+		case ActionState::ATTACK_EXPLOSION:	return true;	// break;
+		case ActionState::ATTACK_SWING:		return true;	// break;
+		case ActionState::ATTACK_RAID:		return true;	// break;
+		default: break;
+		}
+
+		return false;
+	}
 private:
 	/// <summary>
 	/// Only cool-time behavior.
@@ -99,7 +111,6 @@ private:
 	void LotteryWaitState();
 	void LotteryAttackState();
 
-	bool NowStatusAction() const;
 	ActionState GetGapAttack() const;
 private:
 	void LoadParameter( bool isBinary = true );

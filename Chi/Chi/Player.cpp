@@ -329,7 +329,7 @@ void Player::Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matP
 		if ( status == State::Defend )
 		{
 			constexpr Donya::Vector4 SHIELD_COLOR{ 0.2f, 0.8f, 0.2f, 0.6f };
-			constexpr Donya::Vector4 SHIELD_COLOR_SUCCEEDED{ 0.6f, 1.0f, 0.6f, 0.6f };
+			constexpr Donya::Vector4 SHIELD_COLOR_SUCCEEDED{ 0.8f, 1.0f, 1.0f, 0.6f };
 			const auto SHIELD = PARAM.HitBoxShield();
 			Donya::Vector4 color = ( wasSucceededDefence ) ? SHIELD_COLOR_SUCCEEDED : SHIELD_COLOR;
 			DrawCube( SHIELD.pos, SHIELD.size, color );
@@ -452,13 +452,13 @@ void Player::LoadModel()
 	Donya::OutputDebugStr( "Begin Player::LoadModel.\n" );
 
 	loadFBX( models.pIdle.get(),	GetModelPath( ModelAttribute::PlayerIdle	) );
-	Donya::OutputDebugStr( "Done PlayerMode.Wait\n" );
+	Donya::OutputDebugStr( "Done PlayerModel.Wait\n" );
 	loadFBX( models.pRun.get(),		GetModelPath( ModelAttribute::PlayerRun		) );
-	Donya::OutputDebugStr( "Done PlayerMode.Run\n" );
+	Donya::OutputDebugStr( "Done PlayerModel.Run\n" );
 	loadFBX( models.pDefend.get(),	GetModelPath( ModelAttribute::PlayerDefend	) );
-	Donya::OutputDebugStr( "Done PlayerMode.Defend\n" );
+	Donya::OutputDebugStr( "Done PlayerModel.Defend\n" );
 	loadFBX( models.pAttack.get(),	GetModelPath( ModelAttribute::PlayerAtk		) );
-	Donya::OutputDebugStr( "Done PlayerMode.Attack\n" );
+	Donya::OutputDebugStr( "Done PlayerModel.Attack\n" );
 
 	Donya::OutputDebugStr( "End Player::LoadModel.\n" );
 }

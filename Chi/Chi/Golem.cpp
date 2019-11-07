@@ -454,6 +454,7 @@ void ResetCurrentOBBFrames( std::vector<Donya::OBBFrame> *pOBBFs )
 	{
 		auto &OBBF = pOBBFs->at( i );
 		OBBF.currentFrame = 0;
+		OBBF.OBB.enable = true;
 	}
 }
 void ResetCurrentSphereFrames( std::vector<Donya::SphereFrame> *pSphereFs )
@@ -463,6 +464,7 @@ void ResetCurrentSphereFrames( std::vector<Donya::SphereFrame> *pSphereFs )
 	{
 		auto &sphereF = pSphereFs->at( i );
 		sphereF.currentFrame = 0;
+		sphereF.collision.enable = true;
 	}
 }
 void ResetCurrentOBBFNames( std::vector<GolemParam::OBBFrameWithName> *pOBBFNs )
@@ -472,6 +474,7 @@ void ResetCurrentOBBFNames( std::vector<GolemParam::OBBFrameWithName> *pOBBFNs )
 	{
 		auto &OBBFN = pOBBFNs->at( i );
 		OBBFN.OBBF.currentFrame = 0;
+		OBBFN.OBBF.OBB.enable = true;
 	}
 }
 
@@ -552,13 +555,7 @@ void Golem::Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matPr
 	const Donya::Vector3 drawOffset = PARAM.GetDrawOffset( stageNo );
 	const Donya::Vector4x4 DRAW_OFFSET = Donya::Vector4x4::MakeTranslation( drawOffset );
 
-	Donya::Vector4x4 S = Donya::Vector4x4::MakeScaling( PARAM.Scale() );
-	Donya::Vector4x4 R = orientation.RequireRotationMatrix();
-	Donya::Vector4x4 T = Donya::Vector4x4::MakeTranslation( GetPos() );
-#if DEBUG_MODE
-	if ( status == decltype( status )::END ) { R = Donya::Quaternion::Make( Donya::Vector3::Front(), ToRadian( 180.0f ) ).RequireRotationMatrix(); };
-#endif // DEBUG_MODE
-	Donya::Vector4x4 W = S * R * T * DRAW_OFFSET;
+	Donya::Vector4x4 W = CalcWorldMatrix() * DRAW_OFFSET;
 	Donya::Vector4x4 WVP = W * matView * matProjection;
 
 	switch ( status )
@@ -600,7 +597,7 @@ void Golem::Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matPr
 	static std::shared_ptr<static_mesh> pSphere	= GenerateSphere();
 
 	// Except DRAW_OFFSET matrix. because I wanna draw collisions to actual position.
-	W = S * R * T;
+	W = CalcWorldMatrix();
 
 	auto DrawCube	= [&]( const Donya::Vector3 &cubeOffset, const Donya::Vector3 &cubeScale, const Donya::Quaternion &orientation, const Donya::Vector4 &color )
 	{
@@ -712,6 +709,181 @@ void Golem::Draw( const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matPr
 #endif // DEBUG_MODE
 }
 
+bool Golem::IsCollideAttackHitBoxes( const Donya::AABB   other, bool disableCollidingHitBoxes )
+{
+	if ( !GolemAI::IsAction( status ) || !other.enable || !other.exist ) { return false; }
+	// else
+
+	const Donya::OBB otherOBB
+	{
+		other.pos,
+		other.size,
+		Donya::Quaternion::Identity(),
+		/* exist  = */ true,
+		/* enable = */ true
+	};
+	return IsCollideAttackHitBoxes( otherOBB, disableCollidingHitBoxes );
+}
+bool Golem::IsCollideAttackHitBoxes( const Donya::OBB    other, bool disableCollidingHitBoxes )
+{
+	if ( !GolemAI::IsAction( status ) || !other.enable || !other.exist ) { return false; }
+	// else
+
+	auto ToWorldOBB = [&]( Donya::OBB obb )
+	{
+		obb.pos += GetPos();
+		obb.orientation.RotateBy( orientation );
+		return obb;
+	};
+	auto ToWorldSphere = [&]( Donya::Sphere sphere )
+	{
+		sphere.pos += GetPos();
+		return sphere;
+	};
+
+	auto &PARAM = GolemParam::Get();
+
+	bool wasCollided = false;
+
+	switch ( status )
+	{
+	case GolemAI::ActionState::ATTACK_SWING:
+		{
+			auto *pOBBFs = PARAM.OBBAtksSwing();
+			const size_t COUNT = pOBBFs->size();
+			for ( size_t i = 0; i < COUNT; ++i )
+			{
+				auto &OBBF = pOBBFs->at( i );
+				if ( Donya::OBB::IsHitOBB( ToWorldOBB( OBBF.OBB ), other ) )
+				{
+					wasCollided = true;
+
+					if ( disableCollidingHitBoxes ) { OBBF.OBB.enable = false; }
+				}
+			}
+		}
+		break;
+	case GolemAI::ActionState::ATTACK_FAST:
+		{
+			const Donya::Vector4x4 W = CalcWorldMatrix();
+
+			Donya::OBB hitBox{};
+			auto *pOBBFNs = PARAM.OBBFAtksFast();
+			const size_t COUNT = pOBBFNs->size();
+			for ( size_t i = 0; i < COUNT; ++i )
+			{
+				auto &OBBFN = pOBBFNs->at( i );
+				hitBox = OBBFN.CalcTransformedOBB( models.pAtkFast.get(), W );
+				if ( Donya::OBB::IsHitOBB( hitBox, other ) )
+				{
+					wasCollided = true;
+
+					if ( disableCollidingHitBoxes ) { OBBFN.OBBF.OBB.enable = false; }
+				}
+			}
+		}
+		break;
+	case GolemAI::ActionState::ATTACK_ROTATE:
+		{
+			auto *pRotateAtks = PARAM.RotateAtkCollisions();
+			const size_t COUNT = pRotateAtks->size();
+			for ( size_t i = 0; i < COUNT; ++i )
+			{
+				auto &sphereF = pRotateAtks->at( i );
+				if ( Donya::OBB::IsHitSphere( other, ToWorldSphere( sphereF.collision ) ) )
+				{
+					wasCollided = true;
+
+					if ( disableCollidingHitBoxes ) { sphereF.collision.enable = false; }
+				}
+			}
+		}
+		break;
+	default: break;
+	}
+
+	return wasCollided;
+}
+bool Golem::IsCollideAttackHitBoxes( const Donya::Sphere other, bool disableCollidingHitBoxes )
+{
+	if ( !GolemAI::IsAction( status ) || !other.enable || !other.exist ) { return false; }
+	// else
+
+	auto ToWorldOBB		= [&]( Donya::OBB obb )
+	{
+		obb.pos += GetPos();
+		obb.orientation.RotateBy( orientation );
+		return obb;
+	};
+	auto ToWorldSphere	= [&]( Donya::Sphere sphere )
+	{
+		sphere.pos += GetPos();
+		return sphere;
+	};
+
+	auto &PARAM = GolemParam::Get();
+
+	bool wasCollided = false;
+
+	switch ( status )
+	{
+	case GolemAI::ActionState::ATTACK_SWING:
+		{
+			auto *pOBBFs = PARAM.OBBAtksSwing();
+			const size_t COUNT = pOBBFs->size();
+			for ( size_t i = 0; i < COUNT; ++i )
+			{
+				auto &OBBF = pOBBFs->at( i );
+				if ( Donya::OBB::IsHitSphere( ToWorldOBB( OBBF.OBB ), other ) )
+				{
+					wasCollided = true;
+
+					if ( disableCollidingHitBoxes ) { OBBF.OBB.enable = false; }
+				}
+			}
+		}
+		break;
+	case GolemAI::ActionState::ATTACK_FAST:
+		{
+			const Donya::Vector4x4 W = CalcWorldMatrix();
+
+			Donya::OBB hitBox{};
+			auto *pOBBFNs = PARAM.OBBFAtksFast();
+			const size_t COUNT = pOBBFNs->size();
+			for ( size_t i = 0; i < COUNT; ++i )
+			{
+				auto &OBBFN = pOBBFNs->at( i );
+				hitBox = OBBFN.CalcTransformedOBB( models.pAtkFast.get(), W );
+				if ( Donya::OBB::IsHitSphere( hitBox, other ) )
+				{
+					wasCollided = true;
+
+					if ( disableCollidingHitBoxes ) { OBBFN.OBBF.OBB.enable = false; }
+				}
+			}
+		}
+		break;
+	case GolemAI::ActionState::ATTACK_ROTATE:
+		{
+			auto *pRotateAtks = PARAM.RotateAtkCollisions();
+			const size_t COUNT = pRotateAtks->size();
+			for ( size_t i = 0; i < COUNT; ++i )
+			{
+				auto &sphereF = pRotateAtks->at( i );
+				if ( Donya::Sphere::IsHitSphere( ToWorldSphere( sphereF.collision ), other ) )
+				{
+					wasCollided = true;
+
+					if ( disableCollidingHitBoxes ) { sphereF.collision.enable = false; }
+				}
+			}
+		}
+		break;
+	default: break;
+	}
+
+	return wasCollided;
+}
 std::vector<Donya::OBB> Golem::RequireAttackHitBoxesOBB() const
 {
 	const auto &PARAM = GolemParam::Get();
@@ -723,14 +895,6 @@ std::vector<Donya::OBB> Golem::RequireAttackHitBoxesOBB() const
 		obb.orientation.RotateBy( orientation );
 		return obb;
 	};
-
-	Donya::Vector4x4 S = Donya::Vector4x4::MakeScaling( PARAM.Scale() );
-	Donya::Vector4x4 R = orientation.RequireRotationMatrix();
-	Donya::Vector4x4 T = Donya::Vector4x4::MakeTranslation( GetPos() );
-#if DEBUG_MODE
-	if ( status == decltype( status )::END ) { R = Donya::Quaternion::Make( Donya::Vector3::Front(), ToRadian( 180.0f ) ).RequireRotationMatrix(); };
-#endif // DEBUG_MODE
-	Donya::Vector4x4 W = S * R * T;
 
 	switch ( status )
 	{
@@ -754,6 +918,8 @@ std::vector<Donya::OBB> Golem::RequireAttackHitBoxesOBB() const
 		break;
 	case GolemAI::ActionState::ATTACK_FAST:
 		{
+			const Donya::Vector4x4 W = CalcWorldMatrix();
+
 			auto  *pOBBFs  = PARAM.OBBFAtksFast();
 			const size_t COUNT  = pOBBFs->size();
 			for ( size_t i = 0; i < COUNT; ++i )
@@ -831,10 +997,18 @@ void Golem::SetFieldRadius( float newFieldRadius )
 
 void Golem::LoadModel()
 {
+	Donya::OutputDebugStr( "Begin Golem::LoadModel.\n" );
+
 	loadFBX( models.pIdle.get(),		GetModelPath( ModelAttribute::GolemIdle		) );
+	Donya::OutputDebugStr( "Done GolemModel.Idle.\n" );
 	loadFBX( models.pAtkSwing.get(),	GetModelPath( ModelAttribute::GolemAtkSwing	) );
+	Donya::OutputDebugStr( "Done GolemModel.Attack.Swing.\n" );
 	loadFBX( models.pAtkFast.get(),		GetModelPath( ModelAttribute::GolemAtkFast	) );
+	Donya::OutputDebugStr( "Done GolemModel.Attack.Fast.\n" );
 	loadFBX( models.pAtkRotate.get(),	GetModelPath( ModelAttribute::GolemAtkRotate	) );
+	Donya::OutputDebugStr( "Done GolemModel.Attack.Rotate.\n" );
+
+	Donya::OutputDebugStr( "End Golem::LoadModel.\n" );
 }
 
 float Golem::CalcNormalizedDistance( Donya::Vector3 wsTargetPos )
@@ -843,6 +1017,18 @@ float Golem::CalcNormalizedDistance( Donya::Vector3 wsTargetPos )
 	return ( ZeroEqual( fieldRadius ) )
 	? fieldRadius
 	: distance / fieldRadius;
+}
+
+Donya::Vector4x4 Golem::CalcWorldMatrix() const
+{
+	Donya::Vector4x4 S = Donya::Vector4x4::MakeScaling( GolemParam::Get().Scale() );
+	Donya::Vector4x4 R = orientation.RequireRotationMatrix();
+	Donya::Vector4x4 T = Donya::Vector4x4::MakeTranslation( GetPos() );
+#if DEBUG_MODE
+	if ( status == decltype( status )::END ) { R = Donya::Quaternion::Make( Donya::Vector3::Front(), ToRadian( 180.0f ) ).RequireRotationMatrix(); };
+#endif // DEBUG_MODE
+
+	return S * R * T;
 }
 
 void Golem::ChangeStatus( TargetStatus target )
