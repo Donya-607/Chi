@@ -13,15 +13,15 @@
         },
         "waitPercents": {
             "value0": 10,
-            "value1": 30
+            "value1": 50
         },
         "attackPercents": {
-            "value0": 10,
+            "value0": 23,
             "value1": 10
         },
         "gapIntervals": [
-            2,
-            1
+            5,
+            3
         ]
     }
 }

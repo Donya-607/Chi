@@ -13,12 +13,12 @@
         "m.swingMoveSpeed": 0.0,
         "m.swingSlerpFactor": 0.0,
         "m.raidMoveSpeed": 0.0,
-        "m.raidSlerpFactor": 0.0,
+        "m.raidSlerpFactor": 0.004999999888241291,
         "m.initPos": {
             "cereal_class_version": 0,
             "x": 10.0,
             "y": 0.0,
-            "z": 93.0
+            "z": 313.0
         },
         "m.drawOffset": {
             "x": 0.0,
@@ -63,7 +63,7 @@
                         "y": 0.0,
                         "z": 0.0
                     },
-                    "radius": 80.0,
+                    "radius": 96.0,
                     "exist": false
                 }
             },

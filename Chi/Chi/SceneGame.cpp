@@ -134,7 +134,7 @@ public:
 		Donya::OutputDebugStr( "No.1 End Player::Init.\n" );
 
 		Donya::OutputDebugStr( "No.2 Begin Stage::Init.\n" );
-		//stage.Init( stageNo );
+		stage.Init( stageNo );
 		Donya::OutputDebugStr( "No.2 End Stage::Init.\n" );
 
 		Donya::OutputDebugStr( "No.3 Begin Boss::Init.\n" );
@@ -328,7 +328,7 @@ public:
 		Donya::Vector4x4 V = Donya::Vector4x4::FromMatrix( getViewMatrix() );
 		Donya::Vector4x4 P = Donya::Vector4x4::FromMatrix( getProjectionMatrix() );
 
-		// stage.Draw( shader, V, P );
+		stage.Draw( shader, V, P );
 
 		player.Draw( shader, V, P );
 
