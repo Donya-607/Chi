@@ -25,24 +25,48 @@ class KnightParam final : public Donya::Singleton<KnightParam>
 {
 	friend Donya::Singleton<KnightParam>;
 public:
+	struct SphereFrameWithName
+	{
+		Donya::SphereFrame sphereF{};
+		std::string meshName{};
+	private:
+		friend class cereal::access;
+		template<class Archive>
+		void serialize( Archive &archive, std::uint32_t version )
+		{
+			archive
+			(
+				CEREAL_NVP( sphereF ),
+				CEREAL_NVP( meshName )
+			);
+
+			if ( 1 <= version )
+			{
+				// archive( CEREAL_NVP( x ) );
+			}
+		}
+	public:
+		Donya::Sphere CalcTransformedOBB( skinned_mesh *pMesh, const Donya::Vector4x4 &parentSpaceMatrix ) const;
+	};
 	struct Member
 	{
-		float			scale{};			// Usually 1.0f.
-		float			stageBodyRadius{};	// Using for collision to stage's wall.
-		float			targetDistNear{};	// 0.0f ~ 1.0f.
-		float			targetDistFar{};	// 0.0f ~ 1.0f.
-		float			idleSlerpFactor{};	// 0.0 ~ 1.0. Use when status is idle.
-		float			moveMoveSpeed{};	// Use when status is move.
-		float			moveSlerpFactor{};	// 0.0 ~ 1.0. Use when status is move.
-		float			explMoveSpeed{};	// Use when status is explosion.
-		float			explSlerpFactor{};	// 0.0 ~ 1.0. Use when status is explosion.
-		float			swingMoveSpeed{};	// Use when status is swing.
-		float			swingSlerpFactor{};	// 0.0 ~ 1.0. Use when status is swing.
-		float			raidMoveSpeed{};	// Use when status is raid.
-		float			raidSlerpFactor{};	// 0.0 ~ 1.0. Use when status is raid.
-		Donya::Vector3	initPos{};			// The index(stage number) is 1-based. 0 is tutorial.
-		Donya::Vector3	drawOffset{};		// The index(stage number) is 1-based. 0 is tutorial.
-		Donya::Sphere	hitBoxBody{};		// Body's hit boxes.
+		float				scale{};			// Usually 1.0f.
+		float				stageBodyRadius{};	// Using for collision to stage's wall.
+		float				targetDistNear{};	// 0.0f ~ 1.0f.
+		float				targetDistFar{};	// 0.0f ~ 1.0f.
+		float				idleSlerpFactor{};	// 0.0 ~ 1.0. Use when status is idle.
+		float				moveMoveSpeed{};	// Use when status is move.
+		float				moveSlerpFactor{};	// 0.0 ~ 1.0. Use when status is move.
+		float				explMoveSpeed{};	// Use when status is explosion.
+		float				explSlerpFactor{};	// 0.0 ~ 1.0. Use when status is explosion.
+		float				swingMoveSpeed{};	// Use when status is swing.
+		float				swingSlerpFactor{};	// 0.0 ~ 1.0. Use when status is swing.
+		float				raidMoveSpeed{};	// Use when status is raid.
+		float				raidSlerpFactor{};	// 0.0 ~ 1.0. Use when status is raid.
+		Donya::Vector3		initPos{};			// The index(stage number) is 1-based. 0 is tutorial.
+		Donya::Vector3		drawOffset{};		// The index(stage number) is 1-based. 0 is tutorial.
+		Donya::Sphere		hitBoxBody{};		// Body's hit boxes.
+		SphereFrameWithName	hitBoxSwing{};		// Attack of swing hit box.
 	};
 private:
 	Member m{};
@@ -77,6 +101,13 @@ private:
 
 		if ( 1 <= version )
 		{
+			archive
+			(
+				CEREAL_NVP( m.hitBoxSwing )
+			);
+		}
+		if ( 2 <= version )
+		{
 			// archive( CEREAL_NVP( x ) );
 		}
 	}
@@ -89,6 +120,9 @@ public:
 	float MoveSpeed( KnightAI::ActionState status );
 	Member Content() const { return m; }
 	static Member Open();
+
+	SphereFrameWithName &HitBoxSwing() { return m.hitBoxSwing; }
+	const SphereFrameWithName &HitBoxSwing() const { return m.hitBoxSwing; }
 public:
 	void LoadParameter( bool isBinary = true );
 
@@ -100,7 +134,7 @@ public:
 
 #endif // USE_IMGUI
 };
-CEREAL_CLASS_VERSION( KnightParam, 0 )
+CEREAL_CLASS_VERSION( KnightParam, 1 )
 
 struct fbx_shader; // Use for argument.
 /// <summary>

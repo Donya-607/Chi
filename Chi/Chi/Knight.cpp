@@ -1,5 +1,7 @@
 #include "Knight.h"
 
+#include <array>
+
 #include "Donya/Easing.h"
 #include "Donya/FilePath.h"
 #include "Donya/Useful.h"		// For IsShowCollision().
@@ -137,7 +139,32 @@ void KnightParam::UseImGui()
 					ImGui::Checkbox( ( prefix + ".ExistCollision" ).c_str(), &pOBB->exist );
 				};
 				
+				auto ShowSphereF = [&ShowSphere]( const std::string &prefix, Donya::SphereFrame *pSphereF )
+				{
+					ImGui::DragInt( ( prefix + ".EnableFrame.Start" ).c_str(), &pSphereF->enableFrameStart );
+					ImGui::DragInt( ( prefix + ".EnableFrame.Last" ).c_str(), &pSphereF->enableFrameLast );
+
+					bool oldExistFlag = pSphereF->collision.exist;
+					ShowSphere( prefix, &pSphereF->collision );
+					pSphereF->collision.exist = oldExistFlag;
+				};
+				
 				ShowSphere( "Body.HurtBox", &m.hitBoxBody );
+
+				if ( ImGui::TreeNode( "Attack.Swing" ) )
+				{
+					static std::array<char, 512U> followMeshName{};
+					std::string elementCaption = "MeshName";
+					ImGui::InputText( elementCaption.c_str(), followMeshName.data(), followMeshName.size() );
+					if ( ImGui::Button( ( "Apply." + elementCaption ).c_str() ) )
+					{
+						m.hitBoxSwing.meshName = followMeshName.data();
+					}
+
+					ShowSphereF( "", &m.hitBoxSwing.sphereF );
+
+					ImGui::TreePop();
+				}
 
 				ImGui::TreePop();
 			}
@@ -172,6 +199,12 @@ void KnightParam::UseImGui()
 }
 
 #endif // USE_IMGUI
+
+void ResetCurrentSphereFN( KnightParam::SphereFrameWithName *pSphereFN )
+{
+	pSphereFN->sphereF.currentFrame = 0;
+	pSphereFN->sphereF.collision.enable = true;
+}
 
 Knight::Knight() :
 	status( KnightAI::ActionState::WAIT ),
@@ -357,6 +390,12 @@ void Knight::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Dony
 		case KnightAI::ActionState::ATTACK_EXPLOSION:
 			break;
 		case KnightAI::ActionState::ATTACK_SWING:
+			{
+				const auto &hitBox = KnightParam::Get().HitBoxSwing();
+				const auto &sphere = hitBox.sphereF.collision;
+				Donya::Vector4 color = ( sphere.enable && sphere.exist ) ? COLOR_VALID : COLOR_INVALID;
+				DrawSphere( sphere.pos, sphere.radius, color );
+			}
 			break;
 		case KnightAI::ActionState::ATTACK_RAID:
 			break;
@@ -543,11 +582,13 @@ void Knight::AttackExplosionInit( TargetStatus target )
 
 	slerpFactor = KnightParam::Get().SlerpFactor( status );
 
+	velocity = 0.0f;
+
 	setAnimFlame( models.pAtkExpl.get(), 0 );
 }
 void Knight::AttackExplosionUpdate( TargetStatus target )
 {
-	velocity = orientation.LocalFront() * KnightParam::Get().MoveSpeed( status );
+	// velocity = orientation.LocalFront() * KnightParam::Get().MoveSpeed( status );
 }
 void Knight::AttackExplosionUninit()
 {
@@ -560,16 +601,19 @@ void Knight::AttackSwingInit( TargetStatus target )
 	slerpFactor	= KnightParam::Get().SlerpFactor( status );
 	velocity	= 0.0f;
 
+	ResetCurrentSphereFN( &KnightParam::Get().HitBoxSwing() );
 	setAnimFlame( models.pAtkSwing.get(), 0 );
 }
 void Knight::AttackSwingUpdate( TargetStatus target )
 {
-
+	auto &hitBox = KnightParam::Get().HitBoxSwing();
+	hitBox.sphereF.Update();
 }
 void Knight::AttackSwingUninit()
 {
 	timer = 0;
 
+	ResetCurrentSphereFN( &KnightParam::Get().HitBoxSwing() );
 	setAnimFlame( models.pAtkSwing.get(), 0 );
 }
 

@@ -35,6 +35,13 @@ constexpr int SE_ID  = 'SE';
 struct SceneGame::Impl
 {
 public:
+	enum AppearStage
+	{
+		GolemNo  = 0,
+		KnightNo = 1,
+	};
+public:
+	int				stageNo;
 	float			fieldRadius;
 	float			cameraLeaveDistance;	// Leave from player.
 	Donya::Vector3	cameraPos;				// The Y will be serialize.
@@ -42,16 +49,17 @@ public:
 	Lights			lights;
 	Player			player;
 	Stage			stage;
-	Golem			boss;
-	// Knight			boss;
+	Golem			golem;
+	Knight			knight;
 	fbx_shader		shader;
 public:
 	Impl() :
+		stageNo( NULL ),
 		fieldRadius(), cameraLeaveDistance(),
 		cameraPos(), cameraFocusOffset(),
 		player(),
 		stage(),
-		boss(),
+		golem(), knight(),
 		lights(),
 		shader()
 	{}
@@ -114,7 +122,7 @@ public:
 	#if DEBUG_MODE
 		loadShader(shader, "./Data/shader/skinned_mesh_has_born_vs.cso", "./Data/shader/skinned_mesh_ps.cso", "./Data/shader/skinned_mesh_vs.cso", "./Data/shader/skinned_mesh_no_uv_ps.cso");
 
-		constexpr int STAGE_NO = NULL;
+		stageNo = AppearStage::KnightNo;
 	#endif // DEBUG_MODE
 
 		Donya::OutputDebugStr( "Begin Objects initialize.\n" );
@@ -126,12 +134,17 @@ public:
 		Donya::OutputDebugStr( "No.1 End Player::Init.\n" );
 
 		Donya::OutputDebugStr( "No.2 Begin Stage::Init.\n" );
-		stage.Init( STAGE_NO );
+		stage.Init( stageNo );
 		Donya::OutputDebugStr( "No.2 End Stage::Init.\n" );
 
 		Donya::OutputDebugStr( "No.3 Begin Boss::Init.\n" );
-		boss.Init( STAGE_NO );
-		boss.SetFieldRadius( fieldRadius );
+		Donya::Vector3 cameraTarget{};
+		switch ( stageNo )
+		{
+		case GolemNo:	golem.Init( stageNo );		golem.SetFieldRadius( fieldRadius );		cameraTarget = golem.GetPos();	break;
+		case KnightNo:	knight.Init( stageNo );		knight.SetFieldRadius( fieldRadius );		cameraTarget = knight.GetPos();	break;
+		default:		Donya::OutputDebugStr( "Error : The boss does not initialize !\n" );	break;
+		}
 		Donya::OutputDebugStr( "No.3 End Boss::Init.\n" );
 		
 		Donya::OutputDebugStr( "No.4 Begin Effect::Init.\n" );
@@ -141,13 +154,19 @@ public:
 		Donya::OutputDebugStr( "End Objects initialize.\n" );
 
 		// Set camera's position and focus.
-		CameraUpdate();
+		CameraUpdate( cameraTarget );
 	}
 	void Uninit()
 	{
 		stage.Uninit();
 		player.Uninit();
-		boss.Uninit();
+		
+		switch ( stageNo )
+		{
+		case GolemNo:	golem.Uninit();		break;
+		case KnightNo:	knight.Uninit();	break;
+		default:		Donya::OutputDebugStr( "Error : The boss does not uninitialize !\n" );	break;
+		}
 
 		EffectManager::GetInstance()->UnInit();
 	}
@@ -242,12 +261,33 @@ public:
 		};
 		player.Update( MakePlayerInput( Donya::Vector4x4::FromMatrix( GameLib::camera::GetViewMatrix() ) ) );
 
-		Golem::TargetStatus bossTarget{};
-		// Knight::TargetStatus bossTarget{};
-		bossTarget.pos = player.GetPosition();
-		boss.Update( bossTarget );
-		
-		CameraUpdate();
+		switch ( stageNo )
+		{
+		case GolemNo:
+			{
+				Golem::TargetStatus target{};
+				target.pos = player.GetPosition();
+				golem.Update();
+			}
+			break;
+		case KnightNo:
+			{
+				Knight::TargetStatus target{};
+				target.pos = player.GetPosition();
+				knight.Update();
+			}
+			break;
+		default: Donya::OutputDebugStr( "Error : The boss does not update !\n" ); break;
+		}
+
+		Donya::Vector3 cameraTarget{};
+		switch ( stageNo )
+		{
+		case GolemNo:	cameraTarget = golem.GetPos();		break;
+		case KnightNo:	cameraTarget = knight.GetPos();		break;
+		default:		Donya::OutputDebugStr( "Error : The target of camera is not valid !\n" );	break;
+		}
+		CameraUpdate( cameraTarget );
 
 		EffectManager::GetInstance()->Update();
 
@@ -292,7 +332,12 @@ public:
 
 		player.Draw( shader, V, P );
 
-		boss.Draw( shader, V, P );
+		switch ( stageNo )
+		{
+		case GolemNo:	golem.Draw( shader, V, P );		break;
+		case KnightNo:	knight.Draw( shader, V, P );	break;
+		default:		Donya::OutputDebugStr( "Error : The boss does not draw !\n" );	break;
+		}
 
 		EffectManager::GetInstance()->Render( shader );
 
@@ -366,7 +411,7 @@ public:
 		return successed;
 	}
 
-	void CameraUpdate()
+	void CameraUpdate( const Donya::Vector3 &targetPosition )
 	{
 	#if 0
 		DirectX::XMFLOAT3 originVec( 0.0f, 0.0f, 1.0f );
@@ -407,7 +452,7 @@ public:
 		cameraPos.z = boss_Player_Vec_N.z * ( boss_Player_Vec.Length() + add_length );
 	#else
 		Donya::Vector3 playerPos = player.GetPosition();
-		Donya::Vector3 targetPos = boss.GetPos();
+		Donya::Vector3 targetPos = targetPosition;
 
 		// DirectX::XMFLOAT3 player_to_target_vec = DirectX::XMFLOAT3( targetPos.x - playerPos.x, targetPos.y - playerPos.y, targetPos.z - playerPos.z );
 		Donya::Vector3 player_to_target_vec = targetPos - playerPos;
@@ -448,6 +493,15 @@ public:
 
 	void ProcessCollision()
 	{
+		switch ( stageNo )
+		{
+		case GolemNo:	VS_Golem();		break;
+		case KnightNo:	VS_Knight();	break;
+		default:		Donya::OutputDebugStr( "Error : The boss does not uninitialize !\n" );	break;
+		}
+	}
+	void VS_Golem()
+	{
 		const Donya::OBB playerBodyBox   = player.GetHurtBox();
 		const Donya::OBB playerShieldBox = player.GetShieldHitBox();
 		const Donya::OBB playerAttackBox = player.CalcAttackHitBox();
@@ -458,7 +512,7 @@ public:
 
 		#if FETCH_BOXES_THEN_JUDGE
 
-			const auto attackBoxes = boss.RequireAttackHitBoxesOBB();
+			const auto attackBoxes = golem.RequireAttackHitBoxesOBB();
 			for ( const auto &it : attackBoxes )
 			{
 				if ( Donya::OBB::IsHitOBB( playerShieldBox, it ) )
@@ -474,7 +528,7 @@ public:
 				wasHitToShield = false;
 			}
 
-			const auto attackSpheres = boss.RequireAttackHitBoxesSphere();
+			const auto attackSpheres = golem.RequireAttackHitBoxesSphere();
 			for ( const auto &it : attackSpheres )
 			{
 				if ( Donya::OBB::IsHitSphere( playerShieldBox, it ) )
@@ -510,14 +564,14 @@ public:
 				}
 			}
 
-			bool shieldCollided = boss.IsCollideAttackHitBoxes( playerShieldBox, /* disableCollidingHitBoxes = */ true );
+			bool shieldCollided = golem.IsCollideAttackHitBoxes( playerShieldBox, /* disableCollidingHitBoxes = */ true );
 			if ( shieldCollided )
 			{
 				wasHitToShield = true;
 				player.SucceededDefence();
 			}
 
-			bool bodyCollided = ( shieldCollided ) ? false : boss.IsCollideAttackHitBoxes( playerBodyBox, /* disableCollidingHitBoxes = */ false );
+			bool bodyCollided = ( shieldCollided ) ? false : golem.IsCollideAttackHitBoxes( playerBodyBox, /* disableCollidingHitBoxes = */ false );
 			if ( bodyCollided )
 			{
 				player.ReceiveImpact();
@@ -525,20 +579,51 @@ public:
 
 		#endif // FETCH_BOXES_THEN_JUDGE
 		}
-		//
-		//// PlayerAttack VS BossBodies
-		//{
-		//	const auto pBossBodies = boss.GetBodyHitBoxes();
-		//	for ( const auto &it : pBossBodies )
-		//	{
-		//		if ( Donya::OBB::IsHitOBB( playerAttackBox, it ) )
-		//		{
-		//			boss.ReceiveImpact();
-		//			break;
-		//		}
-		//	}
-		//}
 		
+		// PlayerAttack VS BossBodies
+		{
+			const auto pBossBodies = golem.GetBodyHitBoxes();
+			for ( const auto &it : pBossBodies )
+			{
+				if ( Donya::OBB::IsHitOBB( playerAttackBox, it ) )
+				{
+					golem.ReceiveImpact();
+					break;
+				}
+			}
+		}
+	}
+	void VS_Knight()
+	{
+		const Donya::OBB playerBodyBox		= player.GetHurtBox();
+		const Donya::OBB playerShieldBox	= player.GetShieldHitBox();
+		const Donya::OBB playerAttackBox	= player.CalcAttackHitBox();
+
+		// BossAttacks VS Player(and Player's Shield)
+		{
+			bool wasHitToShield = false;
+
+			//bool shieldCollided = knight.IsCollideAttackHitBoxes( playerShieldBox, /* disableCollidingHitBoxes = */ true );
+			//if ( shieldCollided )
+			//{
+			//	wasHitToShield = true;
+			//	player.SucceededDefence();
+			//}
+
+			//bool bodyCollided = ( shieldCollided ) ? false : knight.IsCollideAttackHitBoxes( playerBodyBox, /* disableCollidingHitBoxes = */ false );
+			//if ( bodyCollided )
+			//{
+			//	player.ReceiveImpact();
+			//}
+		}
+		
+		// PlayerAttack VS BossBodies
+		{
+			if ( Donya::OBB::IsHitSphere( playerAttackBox, knight.GetBodyHitBoxes() ) )
+			{
+				knight.ReceiveImpact();
+			}
+		}
 	}
 public:
 	void LoadParameter(bool isBinary = true)
