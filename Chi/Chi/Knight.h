@@ -63,9 +63,12 @@ public:
 		float				swingSlerpFactor{};	// 0.0 ~ 1.0. Use when status is swing.
 		float				raidMoveSpeed{};	// Use when status is raid.
 		float				raidSlerpFactor{};	// 0.0 ~ 1.0. Use when status is raid.
+		float				explScaleStart{};	// Use when status is explosion.
+		float				explScaleEnd{};		// Use when status is explosion.
 		Donya::Vector3		initPos{};			// The index(stage number) is 1-based. 0 is tutorial.
 		Donya::Vector3		drawOffset{};		// The index(stage number) is 1-based. 0 is tutorial.
 		Donya::Sphere		hitBoxBody{};		// Body's hit boxes.
+		Donya::SphereFrame	hitBoxExpl{};		// Attack of explosion hit box.
 		SphereFrameWithName	hitBoxSwing{};		// Attack of swing hit box.
 		SphereFrameWithName	hitBoxRaid{};		// Attack of raid hit box.
 	};
@@ -110,6 +113,15 @@ private:
 		}
 		if ( 3 <= version )
 		{
+			archive
+			(
+				CEREAL_NVP( m.explScaleStart ),
+				CEREAL_NVP( m.explScaleEnd ),
+				CEREAL_NVP( m.hitBoxExpl )
+			);
+		}
+		if ( 4 <= version )
+		{
 			// archive( CEREAL_NVP( x ) );
 		}
 	}
@@ -138,7 +150,7 @@ public:
 
 #endif // USE_IMGUI
 };
-CEREAL_CLASS_VERSION( KnightParam, 2 )
+CEREAL_CLASS_VERSION( KnightParam, 3 )
 
 struct fbx_shader; // Use for argument.
 /// <summary>

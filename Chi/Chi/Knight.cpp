@@ -200,6 +200,13 @@ void KnightParam::UseImGui()
 				
 				ShowSphere( "Body.HurtBox", &m.hitBoxBody );
 
+				if ( ImGui::TreeNode( "Attack.Explosion" ) )
+				{
+					ImGui::DragFloat( "Scale.Start",	&m.explScaleStart, 0.2f );
+					ImGui::DragFloat( "Scale.End",		&m.explScaleEnd,   0.2f );
+					ShowSphereF( "Collision", &m.hitBoxExpl );
+				}
+				
 				static std::array<char, 512U> swingMeshNameBuffer{};
 				ShowSphereFN( "Attack.Swing", &m.hitBoxSwing, &swingMeshNameBuffer );
 
