@@ -15,6 +15,34 @@
 
 #define scast static_cast
 
+Donya::Sphere KnightParam::SphereFrameWithName::CalcTransformedSphere( skinned_mesh *pMesh, const Donya::Vector4x4 &parentSpaceMatrix ) const
+{
+	const Donya::Sphere &sphere = sphereF.collision;
+
+	// To local space from mesh's mesh space.
+	Donya::Vector4x4 meshMatrix{};
+	{
+		// Input:offset in local-space. Output:transformed position.
+		Donya::Vector3 outputPos = sphere.pos;
+		bool succeeded = calcTransformedPosBySpecifyMesh( pMesh, outputPos, meshName );
+		if ( !succeeded )
+		{
+			_ASSERT_EXPR( 0, L"Error : specified mesh name was not found !" );
+			return Donya::Sphere::Nil();
+		}
+		Donya::Vector4x4 T = Donya::Vector4x4::MakeTranslation( outputPos );
+
+		// Convert to world space from local space.
+		meshMatrix = T * parentSpaceMatrix;
+	}
+
+	Donya::Sphere resultSphere = sphere;
+	resultSphere.pos.x = meshMatrix._41;
+	resultSphere.pos.y = meshMatrix._42;
+	resultSphere.pos.z = meshMatrix._43;
+	return resultSphere;
+}
+
 KnightParam::KnightParam() :
 	m()
 {}
@@ -333,21 +361,25 @@ void Knight::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Dony
 	// Except DRAW_OFFSET matrix. because I wanna draw collisions to actual position.
 	W = S * R * T;
 
-	auto DrawCube = [&]( const Donya::Vector3 &cubeOffset, const Donya::Vector3 &cubeScale, const Donya::Quaternion &orientation, const Donya::Vector4 &color )
+	auto DrawCube = [&]( const Donya::Vector3 &cubeOffset, const Donya::Vector3 &cubeScale, const Donya::Quaternion &orientation, const Donya::Vector4 &color, bool applyParentMatrix = true, bool applyParentDrawOffset = false )
 	{
 		Donya::Vector4x4 CS = Donya::Vector4x4::MakeScaling( cubeScale * 2.0f ); // Half size->Whole size.
 		Donya::Vector4x4 CR = orientation.RequireRotationMatrix();
 		Donya::Vector4x4 CT = Donya::Vector4x4::MakeTranslation( cubeOffset );
-		Donya::Vector4x4 CW = ( CS * CR * CT ) * W;
+		Donya::Vector4x4 CW = ( CS * CR * CT );
+		if ( applyParentMatrix ) { CW *= W; }
+		if ( applyParentDrawOffset ) { CW *= DRAW_OFFSET; }
 		Donya::Vector4x4 CWVP = CW * matView * matProjection;
 
 		OBJRender( pCube.get(), CWVP, CW, color );
 	};
-	auto DrawSphere = [&]( const Donya::Vector3 &sphereOffset, float sphereScale, const Donya::Vector4 &color )
+	auto DrawSphere = [&]( const Donya::Vector3 &sphereOffset, float sphereScale, const Donya::Vector4 &color, bool applyParentMatrix = true, bool applyParentDrawOffset = false )
 	{
 		Donya::Vector4x4 CS = Donya::Vector4x4::MakeScaling( sphereScale * 2.0f ); // Half size->Whole size.
 		Donya::Vector4x4 CT = Donya::Vector4x4::MakeTranslation( sphereOffset );
-		Donya::Vector4x4 CW = ( CS * CT ) * W;
+		Donya::Vector4x4 CW = ( CS * CT );
+		if ( applyParentMatrix ) { CW *= W; }
+		if ( applyParentDrawOffset ) { CW *= DRAW_OFFSET; }
 		Donya::Vector4x4 CWVP = CW * matView * matProjection;
 
 		OBJRender( pSphere.get(), CWVP, CW, color );
@@ -391,10 +423,9 @@ void Knight::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Dony
 			break;
 		case KnightAI::ActionState::ATTACK_SWING:
 			{
-				const auto &hitBox = KnightParam::Get().HitBoxSwing();
-				const auto &sphere = hitBox.sphereF.collision;
+				const auto &sphere = CalcAttackHitBoxSwing();
 				Donya::Vector4 color = ( sphere.enable && sphere.exist ) ? COLOR_VALID : COLOR_INVALID;
-				DrawSphere( sphere.pos, sphere.radius, color );
+				DrawSphere( sphere.pos, sphere.radius, color, /* applyParentMatrix = */ false );
 			}
 			break;
 		case KnightAI::ActionState::ATTACK_RAID:
@@ -404,6 +435,57 @@ void Knight::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Dony
 	}
 
 #endif // DEBUG_MODE
+}
+
+bool Knight::IsCollideAttackHitBoxes( const Donya::AABB   other, bool disableCollidingHitBoxes )
+{
+	if ( !KnightAI::IsAction( status ) || !other.enable || !other.exist ) { return false; }
+	// else
+
+	const Donya::OBB otherOBB
+	{
+		other.pos,
+		other.size,
+		Donya::Quaternion::Identity(),
+		/* exist  = */ true,
+		/* enable = */ true
+	};
+	return IsCollideAttackHitBoxes( otherOBB, disableCollidingHitBoxes );
+}
+bool Knight::IsCollideAttackHitBoxes( const Donya::OBB    other, bool disableCollidingHitBoxes )
+{
+	if ( !KnightAI::IsAction( status ) || !other.enable || !other.exist ) { return false; }
+	// else
+
+	bool wasCollided = false;
+
+	switch ( status )
+	{
+	case KnightAI::ActionState::ATTACK_EXPLOSION:
+		{
+
+		}
+		break;
+	case KnightAI::ActionState::ATTACK_SWING:
+		{
+			const auto &wsSphere = CalcAttackHitBoxSwing();
+			if ( Donya::OBB::IsHitSphere( other, wsSphere ) )
+			{
+				wasCollided = true;
+				if ( disableCollidingHitBoxes )
+				{ KnightParam::Get().HitBoxSwing().sphereF.collision.enable = false; }
+			}
+		}
+		break;
+	case KnightAI::ActionState::ATTACK_RAID:
+		{
+
+		}
+		break;
+	default: break;
+	}
+
+	return wasCollided;
 }
 
 static Donya::OBB MakeOBB( const Donya::AABB &AABB, const Donya::Vector3 &wsPos, const Donya::Quaternion &orientation )
@@ -420,6 +502,14 @@ Donya::Sphere Knight::GetBodyHitBoxes() const
 	Donya::Sphere wsBody = KnightParam::Open().hitBoxBody;
 	wsBody.pos += GetPos();
 	return wsBody;
+}
+Donya::Sphere Knight::CalcAttackHitBoxSwing() const
+{
+	return KnightParam::Get().HitBoxSwing().CalcTransformedSphere
+	(
+		models.pAtkSwing.get(),
+		CalcWorldMatrix()
+	);
 }
 
 void Knight::ReceiveImpact()

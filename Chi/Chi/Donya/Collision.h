@@ -268,6 +268,14 @@ namespace Donya
 			}
 		}
 	public:
+		static Sphere Nil()
+		{
+			return Sphere
+			{
+				{}, 0.0f, false, false
+			};
+		}
+
 		/// <summary>
 		/// Sphere vs Point, assumes that these belong in world-space when collision checking.<para></para>
 		/// The "ignoreExistFlag" is specify disable of exist flag.

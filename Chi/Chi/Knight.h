@@ -46,7 +46,7 @@ public:
 			}
 		}
 	public:
-		Donya::Sphere CalcTransformedOBB( skinned_mesh *pMesh, const Donya::Vector4x4 &parentSpaceMatrix ) const;
+		Donya::Sphere CalcTransformedSphere( skinned_mesh *pMesh, const Donya::Vector4x4 &parentSpaceMatrix ) const;
 	};
 	struct Member
 	{
@@ -178,7 +178,11 @@ public:
 
 	void Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matProjection );
 public:
-	Donya::Sphere	GetBodyHitBoxes() const;
+	bool IsCollideAttackHitBoxes( const Donya::AABB   judgeOther, bool disableCollidingHitBoxes );
+	bool IsCollideAttackHitBoxes( const Donya::OBB    judgeOther, bool disableCollidingHitBoxes );
+
+	Donya::Sphere GetBodyHitBoxes() const;
+	Donya::Sphere CalcAttackHitBoxSwing() const;
 
 	void ReceiveImpact();
 

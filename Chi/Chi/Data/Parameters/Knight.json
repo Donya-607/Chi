@@ -39,19 +39,19 @@
             "cereal_class_version": 0,
             "sphereF": {
                 "cereal_class_version": 0,
-                "enableFrameStart": 18,
-                "enableFrameLast": 83,
+                "enableFrameStart": 45,
+                "enableFrameLast": 70,
                 "collision": {
                     "pos": {
                         "x": 0.0,
                         "y": 0.0,
                         "z": 0.0
                     },
-                    "radius": 64.0,
+                    "radius": 80.0,
                     "exist": false
                 }
             },
-            "meshName": ""
+            "meshName": "MDL_Ax"
         }
     }
 }

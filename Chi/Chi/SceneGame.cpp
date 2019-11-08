@@ -134,7 +134,7 @@ public:
 		Donya::OutputDebugStr( "No.1 End Player::Init.\n" );
 
 		Donya::OutputDebugStr( "No.2 Begin Stage::Init.\n" );
-		stage.Init( stageNo );
+		//stage.Init( stageNo );
 		Donya::OutputDebugStr( "No.2 End Stage::Init.\n" );
 
 		Donya::OutputDebugStr( "No.3 Begin Boss::Init.\n" );
@@ -148,7 +148,7 @@ public:
 		Donya::OutputDebugStr( "No.3 End Boss::Init.\n" );
 		
 		Donya::OutputDebugStr( "No.4 Begin Effect::Init.\n" );
-		EffectManager::GetInstance()->Init();
+		// EffectManager::GetInstance()->Init();
 		Donya::OutputDebugStr( "No.4 End Effect::Init.\n" );
 
 		Donya::OutputDebugStr( "End Objects initialize.\n" );
@@ -289,7 +289,7 @@ public:
 		}
 		CameraUpdate( cameraTarget );
 
-		EffectManager::GetInstance()->Update();
+		//EffectManager::GetInstance()->Update();
 
 		ProcessCollision();
 		
@@ -322,13 +322,13 @@ public:
 
 	void Draw()
 	{
-		clearWindow( 0.1f, 0.1f, 0.1f, 1.0f );
+		clearWindow( 0.5f, 0.5f, 0.5f, 1.0f );
 		setBlendMode_ALPHA( 1.0f );
 
 		Donya::Vector4x4 V = Donya::Vector4x4::FromMatrix( getViewMatrix() );
 		Donya::Vector4x4 P = Donya::Vector4x4::FromMatrix( getProjectionMatrix() );
 
-		stage.Draw( shader, V, P );
+		// stage.Draw( shader, V, P );
 
 		player.Draw( shader, V, P );
 
@@ -339,7 +339,7 @@ public:
 		default:		Donya::OutputDebugStr( "Error : The boss does not draw !\n" );	break;
 		}
 
-		EffectManager::GetInstance()->Render( shader );
+		// EffectManager::GetInstance()->Render( shader );
 
 	#if DEBUG_MODE
 		/*
@@ -603,18 +603,18 @@ public:
 		{
 			bool wasHitToShield = false;
 
-			//bool shieldCollided = knight.IsCollideAttackHitBoxes( playerShieldBox, /* disableCollidingHitBoxes = */ true );
-			//if ( shieldCollided )
-			//{
-			//	wasHitToShield = true;
-			//	player.SucceededDefence();
-			//}
+			bool shieldCollided = knight.IsCollideAttackHitBoxes( playerShieldBox, /* disableCollidingHitBoxes = */ true );
+			if ( shieldCollided )
+			{
+				wasHitToShield = true;
+				player.SucceededDefence();
+			}
 
-			//bool bodyCollided = ( shieldCollided ) ? false : knight.IsCollideAttackHitBoxes( playerBodyBox, /* disableCollidingHitBoxes = */ false );
-			//if ( bodyCollided )
-			//{
-			//	player.ReceiveImpact();
-			//}
+			bool bodyCollided = ( shieldCollided ) ? false : knight.IsCollideAttackHitBoxes( playerBodyBox, /* disableCollidingHitBoxes = */ false );
+			if ( bodyCollided )
+			{
+				player.ReceiveImpact();
+			}
 		}
 		
 		// PlayerAttack VS BossBodies
