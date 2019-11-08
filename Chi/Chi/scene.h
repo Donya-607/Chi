@@ -53,7 +53,7 @@ private:
 	static_mesh builborad;
 	DirectX::XMFLOAT4 builboard_pos;
 	float builborad_angle;
-	float builborad_size;
+	DirectX::XMFLOAT2 builborad_size;
 	DirectX::XMFLOAT2 texpos;
 	DirectX::XMFLOAT2 texsize;
 

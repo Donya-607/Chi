@@ -146,7 +146,7 @@ public:
 		ID3D11DeviceContext*,		//デバイスコンテキスト
 		const DirectX::XMFLOAT4X4&,	//ビュープロジェクション合成行列
 		const DirectX::XMFLOAT4&,	//ポジション
-		const float,	//スケール
+		const DirectX::XMFLOAT2,	//スケール
 		const float,	//アングル
 		const DirectX::XMFLOAT4&,	//カメラ座標
 		const DirectX::XMFLOAT2& texpos,

@@ -28,7 +28,7 @@ void sceneTitle::init()
 	createBillboard(&builborad, L"./Data/SpeedRing.png");
 	builboard_pos = { 0,0,0,1 };
 	builborad_angle = 0;
-	builborad_size = 1.0f;
+	builborad_size = { 1.0f,1.0f };
 	texpos = { 0,0 };
 	texsize = { 64,64 };
 }
@@ -248,34 +248,37 @@ void sceneTitle::imGui()
 	static int index_tex = 0;
 	static float dragPower_tex = { 1.0f };
 
-	//billboard ImGui
-	if (ImGui::TreeNode("billboard"))
-	{
-		ImGui::DragFloat("x##position", &builboard_pos.x);
-		ImGui::DragFloat("y##position", &builboard_pos.y);
-		ImGui::DragFloat("z##position", &builboard_pos.z);
-		ImGui::NewLine();
-
-		ImGui::DragFloat("scale", &builborad_size);
-		ImGui::DragFloat("angle", &builborad_angle);
-		ImGui::NewLine();
-
-		ImGui::Text("texpos");
-		ImGui::DragFloat("x##texpos", &texpos.x);
-		ImGui::DragFloat("y##texpos", &texpos.y);
-		ImGui::NewLine();
-		ImGui::Text("texsize");
-		ImGui::DragFloat("x##texsize", &texsize.x);
-		ImGui::DragFloat("y##texsize", &texsize.y);
-		ImGui::TreePop();
-	}
-	//model ImGui
+	//inported info ImGui
 	{
 		ImGui::SetNextWindowSize(ImVec2(500.0f, getWindowSize().y / 2.0f), ImGuiSetCond_Once);
 		ImGui::SetNextWindowPos(ImVec2(getWindowSize().x - 500.0f, .0f), ImGuiSetCond_Once);
 		ImGui::Begin("model", NULL, ImGuiWindowFlags_MenuBar);
 
+		//billboard ImGui
+		if (ImGui::TreeNode("billboard"))
+		{
+			ImGui::DragFloat("x##position", &builboard_pos.x);
+			ImGui::DragFloat("y##position", &builboard_pos.y);
+			ImGui::DragFloat("z##position", &builboard_pos.z);
+			ImGui::NewLine();
 
+			ImGui::Text("scale");
+			ImGui::DragFloat("x##scale", &builborad_size.x);
+			ImGui::DragFloat("y##scale", &builborad_size.y);
+			ImGui::DragFloat("angle", &builborad_angle);
+			ImGui::NewLine();
+
+			ImGui::Text("texpos");
+			ImGui::DragFloat("x##texpos", &texpos.x);
+			ImGui::DragFloat("y##texpos", &texpos.y);
+			ImGui::NewLine();
+			ImGui::Text("texsize");
+			ImGui::DragFloat("x##texsize", &texsize.x);
+			ImGui::DragFloat("y##texsize", &texsize.y);
+			ImGui::TreePop();
+		}
+
+		//model ImGui
 		if (ImGui::TreeNode("model"))
 		{
 			if (!models.empty())
