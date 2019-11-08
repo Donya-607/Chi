@@ -128,6 +128,7 @@
     <ClInclude Include="KnightAI.h" />
     <ClInclude Include="Effect.h" />
     <ClInclude Include="bloom.h" />
+    <ClInclude Include="AssetLoader.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp">
@@ -220,6 +221,7 @@
     <ClCompile Include="Knight.cpp" />
     <ClCompile Include="Effect.cpp" />
     <ClCompile Include="bloom.cpp" />
+    <ClCompile Include="AssetLoader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="geometric_phong_ps.hlsl">

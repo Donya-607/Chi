@@ -63,7 +63,7 @@ std::string GetModelPath( ModelAttribute modelAttribute )
 	case ModelAttribute::KnightAtkSwing:
 		return "./Data/model/Boss/MDL_Boss02_Attack_Swing.fbx";			// break;
 	case ModelAttribute::KnightAtkRaid:
-		return "./Data/model/Boss/MDL_Boss02_Attack_JampAttack.fbx";	// break;
+		return "./Data/model/Boss/MDL_Boss02_Attack_JumpAttack.fbx";	// break;
 	default:
 		assert( !"Error : Specified unexpect model type." ); break;
 		break;
