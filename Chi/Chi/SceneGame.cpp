@@ -267,14 +267,14 @@ public:
 			{
 				Golem::TargetStatus target{};
 				target.pos = player.GetPosition();
-				golem.Update();
+				golem.Update( target );
 			}
 			break;
 		case KnightNo:
 			{
 				Knight::TargetStatus target{};
 				target.pos = player.GetPosition();
-				knight.Update();
+				knight.Update( target );
 			}
 			break;
 		default: Donya::OutputDebugStr( "Error : The boss does not update !\n" ); break;

@@ -1,6 +1,6 @@
 {
     "Knight": {
-        "cereal_class_version": 0,
+        "cereal_class_version": 1,
         "m.scale": 1.0,
         "m.stageBodyRadius": 320.0,
         "m.targetDistNear": 0.30000001192092898,
@@ -34,6 +34,24 @@
             },
             "radius": 10.0,
             "exist": true
+        },
+        "m.hitBoxSwing": {
+            "cereal_class_version": 0,
+            "sphereF": {
+                "cereal_class_version": 0,
+                "enableFrameStart": 18,
+                "enableFrameLast": 83,
+                "collision": {
+                    "pos": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "radius": 64.0,
+                    "exist": false
+                }
+            },
+            "meshName": ""
         }
     }
 }
