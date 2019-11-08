@@ -67,6 +67,7 @@ public:
 		Donya::Vector3		drawOffset{};		// The index(stage number) is 1-based. 0 is tutorial.
 		Donya::Sphere		hitBoxBody{};		// Body's hit boxes.
 		SphereFrameWithName	hitBoxSwing{};		// Attack of swing hit box.
+		SphereFrameWithName	hitBoxRaid{};		// Attack of raid hit box.
 	};
 private:
 	Member m{};
@@ -101,12 +102,13 @@ private:
 
 		if ( 1 <= version )
 		{
-			archive
-			(
-				CEREAL_NVP( m.hitBoxSwing )
-			);
+			archive( CEREAL_NVP( m.hitBoxSwing ) );
 		}
 		if ( 2 <= version )
+		{
+			archive( CEREAL_NVP( m.hitBoxRaid ) );
+		}
+		if ( 3 <= version )
 		{
 			// archive( CEREAL_NVP( x ) );
 		}
@@ -123,6 +125,8 @@ public:
 
 	SphereFrameWithName &HitBoxSwing() { return m.hitBoxSwing; }
 	const SphereFrameWithName &HitBoxSwing() const { return m.hitBoxSwing; }
+	SphereFrameWithName &HitBoxRaid() { return m.hitBoxRaid; }
+	const SphereFrameWithName &HitBoxRaid() const { return m.hitBoxRaid; }
 public:
 	void LoadParameter( bool isBinary = true );
 
@@ -134,7 +138,7 @@ public:
 
 #endif // USE_IMGUI
 };
-CEREAL_CLASS_VERSION( KnightParam, 1 )
+CEREAL_CLASS_VERSION( KnightParam, 2 )
 
 struct fbx_shader; // Use for argument.
 /// <summary>

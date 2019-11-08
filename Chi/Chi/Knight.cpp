@@ -167,7 +167,7 @@ void KnightParam::UseImGui()
 					ImGui::Checkbox( ( prefix + ".ExistCollision" ).c_str(), &pOBB->exist );
 				};
 				
-				auto ShowSphereF = [&ShowSphere]( const std::string &prefix, Donya::SphereFrame *pSphereF )
+				auto ShowSphereF  = [&ShowSphere]( const std::string &prefix, Donya::SphereFrame *pSphereF )
 				{
 					ImGui::DragInt( ( prefix + ".EnableFrame.Start" ).c_str(), &pSphereF->enableFrameStart );
 					ImGui::DragInt( ( prefix + ".EnableFrame.Last" ).c_str(), &pSphereF->enableFrameLast );
@@ -176,23 +176,29 @@ void KnightParam::UseImGui()
 					ShowSphere( prefix, &pSphereF->collision );
 					pSphereF->collision.exist = oldExistFlag;
 				};
+				auto ShowSphereFN = [&ShowSphereF]( const std::string &prefix, SphereFrameWithName *pSphereFN, std::array<char, 512> *pMeshName )
+				{
+					if ( ImGui::TreeNode( prefix.c_str() ) )
+					{
+						ImGui::InputText( "MeshName", pMeshName->data(), pMeshName->size() );
+						if ( ImGui::Button( "Apply.MeshName" ) )
+						{
+							pSphereFN->meshName = pMeshName->data();
+						}
+
+						ShowSphereF( prefix, &pSphereFN->sphereF );
+
+						ImGui::TreePop();
+					}
+				};
 				
 				ShowSphere( "Body.HurtBox", &m.hitBoxBody );
 
-				if ( ImGui::TreeNode( "Attack.Swing" ) )
-				{
-					static std::array<char, 512U> followMeshName{};
-					std::string elementCaption = "MeshName";
-					ImGui::InputText( elementCaption.c_str(), followMeshName.data(), followMeshName.size() );
-					if ( ImGui::Button( ( "Apply." + elementCaption ).c_str() ) )
-					{
-						m.hitBoxSwing.meshName = followMeshName.data();
-					}
+				static std::array<char, 512U> swingMeshNameBuffer{};
+				ShowSphereFN( "Attack.Swing", &m.hitBoxSwing, &swingMeshNameBuffer );
 
-					ShowSphereF( "", &m.hitBoxSwing.sphereF );
-
-					ImGui::TreePop();
-				}
+				static std::array<char, 512U> raidMeshNameBuffer{};
+				ShowSphereFN( "Attack.Raid", &m.hitBoxRaid, &raidMeshNameBuffer );
 
 				ImGui::TreePop();
 			}
