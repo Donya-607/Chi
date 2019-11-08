@@ -1,13 +1,13 @@
 {
     "Knight": {
-        "cereal_class_version": 1,
+        "cereal_class_version": 2,
         "m.scale": 1.0,
         "m.stageBodyRadius": 320.0,
-        "m.targetDistNear": 0.30000001192092898,
-        "m.targetDistFar": 0.699999988079071,
+        "m.targetDistNear": 0.05000000074505806,
+        "m.targetDistFar": 0.17000000178813935,
         "m.idleSlerpFactor": 0.10000000149011612,
         "m.moveMoveSpeed": 8.0,
-        "m.moveSlerpFactor": 0.05000000074505806,
+        "m.moveSlerpFactor": 0.009999999776482582,
         "m.explMoveSpeed": 0.0,
         "m.explSlerpFactor": 0.0,
         "m.swingMoveSpeed": 0.0,
@@ -41,6 +41,22 @@
                 "cereal_class_version": 0,
                 "enableFrameStart": 45,
                 "enableFrameLast": 70,
+                "collision": {
+                    "pos": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "radius": 80.0,
+                    "exist": false
+                }
+            },
+            "meshName": "MDL_Ax"
+        },
+        "m.hitBoxRaid": {
+            "sphereF": {
+                "enableFrameStart": 70,
+                "enableFrameLast": 120,
                 "collision": {
                     "pos": {
                         "x": 0.0,

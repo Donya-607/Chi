@@ -187,6 +187,7 @@ public:
 
 	Donya::Sphere GetBodyHitBoxes() const;
 	Donya::Sphere CalcAttackHitBoxSwing() const;
+	Donya::Sphere CalcAttackHitBoxRaid() const;
 
 	void ReceiveImpact();
 

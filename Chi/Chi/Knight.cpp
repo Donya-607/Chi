@@ -130,11 +130,17 @@ void KnightParam::UseImGui()
 			ImGui::SliderFloat( "Distance.ThinkTo\"Far\"",  &m.targetDistFar,  0.0f, 0.99f );
 			ImGui::Text( "" );
 
-			ImGui::DragFloat( "MoveSpeed.\"Move\"State", &m.moveMoveSpeed );
+			ImGui::DragFloat( "MoveSpeed.\"Move\"State",			&m.moveMoveSpeed );
+			ImGui::DragFloat( "MoveSpeed.\"Atk.Explosion\"State",	&m.explMoveSpeed );
+			ImGui::DragFloat( "MoveSpeed.\"Atk.Swing\"State",		&m.swingMoveSpeed );
+			ImGui::DragFloat( "MoveSpeed.\"Atk.Raid\"State",		&m.raidMoveSpeed );
 			ImGui::Text( "" );
 
-			ImGui::SliderFloat( "SlerpFactor.\"Idle\"State", &m.idleSlerpFactor, 0.0f, 1.0f );
-			ImGui::SliderFloat( "SlerpFactor.\"Move\"State", &m.moveSlerpFactor, 0.0f, 1.0f );
+			ImGui::SliderFloat( "SlerpFactor.\"Idle\"State",			&m.idleSlerpFactor, 0.0f, 1.0f );
+			ImGui::SliderFloat( "SlerpFactor.\"Move\"State",			&m.moveSlerpFactor, 0.0f, 1.0f );
+			ImGui::SliderFloat( "SlerpFactor.\"Atk.Explosion\"State",	&m.explSlerpFactor, 0.0f, 1.0f );
+			ImGui::SliderFloat( "SlerpFactor.\"Atk.Swing\"State",		&m.swingSlerpFactor, 0.0f, 1.0f );
+			ImGui::SliderFloat( "SlerpFactor.\"Atk.Raid\"State",		&m.raidSlerpFactor, 0.0f, 1.0f );
 			ImGui::Text( "" );
 
 			ImGui::DragFloat3( "Initialize.Position", &m.initPos.x    );
@@ -435,6 +441,11 @@ void Knight::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Dony
 			}
 			break;
 		case KnightAI::ActionState::ATTACK_RAID:
+			{
+				const auto &sphere = CalcAttackHitBoxRaid();
+				Donya::Vector4 color = ( sphere.enable && sphere.exist ) ? COLOR_VALID : COLOR_INVALID;
+				DrawSphere( sphere.pos, sphere.radius, color, /* applyParentMatrix = */ false );
+			}
 			break;
 		default: break;
 		}
@@ -485,7 +496,13 @@ bool Knight::IsCollideAttackHitBoxes( const Donya::OBB    other, bool disableCol
 		break;
 	case KnightAI::ActionState::ATTACK_RAID:
 		{
-
+			const auto &wsSphere = CalcAttackHitBoxRaid();
+			if ( Donya::OBB::IsHitSphere( other, wsSphere ) )
+			{
+				wasCollided = true;
+				if ( disableCollidingHitBoxes )
+				{ KnightParam::Get().HitBoxRaid().sphereF.collision.enable = false; }
+			}
 		}
 		break;
 	default: break;
@@ -514,6 +531,14 @@ Donya::Sphere Knight::CalcAttackHitBoxSwing() const
 	return KnightParam::Get().HitBoxSwing().CalcTransformedSphere
 	(
 		models.pAtkSwing.get(),
+		CalcWorldMatrix()
+	);
+}
+Donya::Sphere Knight::CalcAttackHitBoxRaid() const
+{
+	return KnightParam::Get().HitBoxRaid().CalcTransformedSphere
+	(
+		models.pAtkRaid.get(),
 		CalcWorldMatrix()
 	);
 }
@@ -717,9 +742,11 @@ void Knight::AttackRaidInit( TargetStatus target )
 {
 	status = KnightAI::ActionState::ATTACK_RAID;
 
-	slerpFactor = KnightParam::Get().SlerpFactor( status );
-	extraOffset = 0.0f;
+	slerpFactor	= KnightParam::Get().SlerpFactor( status );
+	extraOffset	= 0.0f;
+	velocity	= 0.0f;
 
+	ResetCurrentSphereFN( &KnightParam::Get().HitBoxRaid() );
 	setAnimFlame( models.pAtkRaid.get(), 0 );
 }
 void Knight::AttackRaidUpdate( TargetStatus target )
@@ -727,6 +754,9 @@ void Knight::AttackRaidUpdate( TargetStatus target )
 #if DEBUG_MODE
 	extraOffset = orientation.LocalFront() * KnightParam::Get().MoveSpeed( status );
 #endif // DEBUG_MODE
+
+	auto &hitBox = KnightParam::Get().HitBoxRaid();
+	hitBox.sphereF.Update();
 }
 void Knight::AttackRaidUninit()
 {
@@ -734,6 +764,7 @@ void Knight::AttackRaidUninit()
 
 	extraOffset = 0.0f;
 
+	ResetCurrentSphereFN( &KnightParam::Get().HitBoxRaid() );
 	setAnimFlame( models.pAtkRaid.get(), 0 );
 }
 
