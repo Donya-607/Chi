@@ -95,8 +95,8 @@ public:
 	void Update();
 	void Render( fbx_shader &HLSL );
 
-	bool GetActivated() { return activated; }
-	std::vector<Donya::Sphere> GetHitSphereVector() { return hitSphere; }
+	bool GetActivated() const { return activated; }
+	std::vector<Donya::Sphere> GetHitSphereVector() const { return hitSphere; }
 
 private:
 	bool CollideToWall(Donya::Vector3& pos);

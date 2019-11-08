@@ -177,13 +177,13 @@ Player::Player() :
 	models(),
 	wasSucceededDefence( false )
 {
-	auto InitializeModel = []( std::unique_ptr<skinned_mesh> *ppMesh )
+	auto InitializeModel = []( std::shared_ptr<skinned_mesh> *ppMesh )
 	{
-		*ppMesh = std::make_unique<skinned_mesh>();
+		*ppMesh = std::make_shared<skinned_mesh>();
 		setAnimFlame( ppMesh->get(), 0 );
 	};
 
-	std::vector<std::unique_ptr<skinned_mesh> *> modelRefs
+	std::vector<std::shared_ptr<skinned_mesh> *> modelRefs
 	{
 		&models.pIdle,
 		&models.pRun,
@@ -195,7 +195,7 @@ Player::Player() :
 		InitializeModel( it );
 	}
 
-	std::vector<std::unique_ptr<skinned_mesh> *> dontLoopModels
+	std::vector<std::shared_ptr<skinned_mesh> *> dontLoopModels
 	{
 		&models.pDefend,
 		&models.pAttack,
@@ -223,8 +223,10 @@ void Player::Uninit()
 {
 	PlayerParam::Get().Uninit();
 
-	models.pIdle.reset( nullptr );
-	models.pAttack.reset( nullptr );
+	models.pIdle.reset();
+	models.pRun.reset();
+	models.pDefend.reset();
+	models.pAttack.reset();
 }
 
 void Player::Update( Input input )

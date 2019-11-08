@@ -182,13 +182,13 @@ Knight::Knight() :
 	orientation(),
 	models()
 {
-	auto InitializeModel = []( std::unique_ptr<skinned_mesh> *ppMesh )
+	auto InitializeModel = []( std::shared_ptr<skinned_mesh> *ppMesh )
 	{
-		*ppMesh = std::make_unique<skinned_mesh>();
+		*ppMesh = std::make_shared<skinned_mesh>();
 		setAnimFlame( ppMesh->get(), 0 );
 	};
 
-	std::vector<std::unique_ptr<skinned_mesh> *> modelRefs
+	std::vector<std::shared_ptr<skinned_mesh> *> modelRefs
 	{
 		&models.pIdle,
 		&models.pRunFront,

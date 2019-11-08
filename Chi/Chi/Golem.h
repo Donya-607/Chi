@@ -248,10 +248,10 @@ public:
 private:
 	struct Models
 	{
-		std::unique_ptr<skinned_mesh> pIdle{ nullptr };
-		std::unique_ptr<skinned_mesh> pAtkFast{ nullptr };
-		std::unique_ptr<skinned_mesh> pAtkSwing{ nullptr };
-		std::unique_ptr<skinned_mesh> pAtkRotate{ nullptr };
+		std::shared_ptr<skinned_mesh> pIdle{ nullptr };
+		std::shared_ptr<skinned_mesh> pAtkFast{ nullptr };
+		std::shared_ptr<skinned_mesh> pAtkSwing{ nullptr };
+		std::shared_ptr<skinned_mesh> pAtkRotate{ nullptr };
 	};
 private:
 	GolemAI::ActionState		status;

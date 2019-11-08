@@ -116,11 +116,11 @@ public:
 private:
 	struct Models
 	{
-		std::unique_ptr<skinned_mesh> pIdle{ nullptr };
-		std::unique_ptr<skinned_mesh> pRunFront{ nullptr };
-		std::unique_ptr<skinned_mesh> pAtkExpl{ nullptr };
-		std::unique_ptr<skinned_mesh> pAtkSwing{ nullptr };
-		std::unique_ptr<skinned_mesh> pAtkRaid{ nullptr };
+		std::shared_ptr<skinned_mesh> pIdle{ nullptr };
+		std::shared_ptr<skinned_mesh> pRunFront{ nullptr };
+		std::shared_ptr<skinned_mesh> pAtkExpl{ nullptr };
+		std::shared_ptr<skinned_mesh> pAtkSwing{ nullptr };
+		std::shared_ptr<skinned_mesh> pAtkRaid{ nullptr };
 	};
 private:
 	KnightAI::ActionState	status;

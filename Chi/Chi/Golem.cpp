@@ -8,6 +8,8 @@
 #include "gameLibFunctions.h"	// Use FBXRender().
 #include "skinned_mesh.h"
 
+#include "Effect.h"
+
 #undef max
 #undef min
 
@@ -487,13 +489,13 @@ Golem::Golem() :
 	orientation(),
 	models()
 {
-	auto InitializeModel = []( std::unique_ptr<skinned_mesh> *ppMesh )
+	auto InitializeModel = []( std::shared_ptr<skinned_mesh> *ppMesh )
 	{
-		*ppMesh = std::make_unique<skinned_mesh>();
+		*ppMesh = std::make_shared<skinned_mesh>();
 		setAnimFlame( ppMesh->get(), 0 );
 	};
 
-	std::vector<std::unique_ptr<skinned_mesh> *> modelRefs
+	std::vector<std::shared_ptr<skinned_mesh> *> modelRefs
 	{
 		&models.pIdle,
 		&models.pAtkFast,
@@ -1164,6 +1166,12 @@ void Golem::AttackSwingUpdate( TargetStatus target )
 			{
 				setStopAnimation( models.pAtkSwing.get(), /* is_stop = */ true );
 			}
+
+			EffectManager::GetInstance()->Set
+			(
+				EffectManager::EffectType::ERUPTION,
+				pos
+			);
 		}
 	}
 	else // When stopping and spawn effects.
@@ -1175,6 +1183,8 @@ void Golem::AttackSwingUpdate( TargetStatus target )
 			// Finish stop and spawn effects.
 			swingTimer = 0;
 			setStopAnimation( models.pAtkSwing.get(), /* is_stop = */ false );
+
+			// EffectManager::GetInstance()->ReSet( EffectManager::EffectType::ERUPTION );
 		}
 	}
 	else // When finish attacking status.

@@ -144,10 +144,10 @@ public:
 private:
 	struct Models
 	{
-		std::unique_ptr<skinned_mesh> pIdle{ nullptr };
-		std::unique_ptr<skinned_mesh> pRun{ nullptr };
-		std::unique_ptr<skinned_mesh> pDefend{ nullptr };
-		std::unique_ptr<skinned_mesh> pAttack{ nullptr };
+		std::shared_ptr<skinned_mesh> pIdle{ nullptr };
+		std::shared_ptr<skinned_mesh> pRun{ nullptr };
+		std::shared_ptr<skinned_mesh> pDefend{ nullptr };
+		std::shared_ptr<skinned_mesh> pAttack{ nullptr };
 	};
 	enum class State
 	{

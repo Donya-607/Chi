@@ -19,6 +19,7 @@
 #include "gameLib.h"
 #include "light.h"
 
+#include "Effect.h"
 #include "Golem.h"
 #include "Knight.h"
 #include "Player.h"
@@ -41,8 +42,8 @@ public:
 	Lights			lights;
 	Player			player;
 	Stage			stage;
-	// Golem			boss;
-	Knight			boss;
+	Golem			boss;
+	// Knight			boss;
 	fbx_shader		shader;
 public:
 	Impl() :
@@ -117,7 +118,7 @@ public:
 	#endif // DEBUG_MODE
 
 		Donya::OutputDebugStr( "Begin Objects initialize.\n" );
-		Donya::OutputDebugStr( "Objects count : 3\n" );
+		Donya::OutputDebugStr( "Objects count : 4\n" );
 
 		Donya::OutputDebugStr( "No.1 Begin Player::Init.\n" );
 		player.Init();
@@ -132,6 +133,10 @@ public:
 		boss.Init( STAGE_NO );
 		boss.SetFieldRadius( fieldRadius );
 		Donya::OutputDebugStr( "No.3 End Boss::Init.\n" );
+		
+		Donya::OutputDebugStr( "No.4 Begin Effect::Init.\n" );
+		EffectManager::GetInstance()->Init();
+		Donya::OutputDebugStr( "No.4 End Effect::Init.\n" );
 
 		Donya::OutputDebugStr( "End Objects initialize.\n" );
 
@@ -143,6 +148,8 @@ public:
 		stage.Uninit();
 		player.Uninit();
 		boss.Uninit();
+
+		EffectManager::GetInstance()->UnInit();
 	}
 
 	void Update()
@@ -235,12 +242,14 @@ public:
 		};
 		player.Update( MakePlayerInput( Donya::Vector4x4::FromMatrix( GameLib::camera::GetViewMatrix() ) ) );
 
-		// Golem::TargetStatus bossTarget{};
-		Knight::TargetStatus bossTarget{};
+		Golem::TargetStatus bossTarget{};
+		// Knight::TargetStatus bossTarget{};
 		bossTarget.pos = player.GetPosition();
 		boss.Update( bossTarget );
 		
 		CameraUpdate();
+
+		EffectManager::GetInstance()->Update();
 
 		ProcessCollision();
 		
@@ -284,6 +293,8 @@ public:
 		player.Draw( shader, V, P );
 
 		boss.Draw( shader, V, P );
+
+		EffectManager::GetInstance()->Render( shader );
 
 	#if DEBUG_MODE
 		/*
@@ -441,59 +452,79 @@ public:
 		const Donya::OBB playerShieldBox = player.GetShieldHitBox();
 		const Donya::OBB playerAttackBox = player.CalcAttackHitBox();
 
-		//// BossAttacks VS Player(and Player's Shield)
-		//{
-		//	bool wasHitToShield = false;
+		// BossAttacks VS Player(and Player's Shield)
+		{
+			bool wasHitToShield = false;
 
-		//#if FETCH_BOXES_THEN_JUDGE
+		#if FETCH_BOXES_THEN_JUDGE
 
-		//	const auto attackBoxes = boss.RequireAttackHitBoxesOBB();
-		//	for ( const auto &it : attackBoxes )
-		//	{
-		//		if ( Donya::OBB::IsHitOBB( playerShieldBox, it ) )
-		//		{
-		//			wasHitToShield = true;
-		//			player.SucceededDefence();
-		//		}
-		//		if ( !wasHitToShield && Donya::OBB::IsHitOBB( playerBodyBox, it ) )
-		//		{
-		//			player.ReceiveImpact();
-		//		}
+			const auto attackBoxes = boss.RequireAttackHitBoxesOBB();
+			for ( const auto &it : attackBoxes )
+			{
+				if ( Donya::OBB::IsHitOBB( playerShieldBox, it ) )
+				{
+					wasHitToShield = true;
+					player.SucceededDefence();
+				}
+				if ( !wasHitToShield && Donya::OBB::IsHitOBB( playerBodyBox, it ) )
+				{
+					player.ReceiveImpact();
+				}
 
-		//		wasHitToShield = false;
-		//	}
+				wasHitToShield = false;
+			}
 
-		//	const auto attackSpheres = boss.RequireAttackHitBoxesSphere();
-		//	for ( const auto &it : attackSpheres )
-		//	{
-		//		if ( Donya::OBB::IsHitSphere( playerShieldBox, it ) )
-		//		{
-		//			wasHitToShield = true;
-		//			player.SucceededDefence();
-		//		}
-		//		if ( !wasHitToShield && Donya::OBB::IsHitSphere( playerBodyBox, it ) )
-		//		{
-		//			player.ReceiveImpact();
-		//		}
-		//	}
+			const auto attackSpheres = boss.RequireAttackHitBoxesSphere();
+			for ( const auto &it : attackSpheres )
+			{
+				if ( Donya::OBB::IsHitSphere( playerShieldBox, it ) )
+				{
+					wasHitToShield = true;
+					player.SucceededDefence();
+				}
+				if ( !wasHitToShield && Donya::OBB::IsHitSphere( playerBodyBox, it ) )
+				{
+					player.ReceiveImpact();
+				}
+			}
 
-		//#else
+		#else
 
-		//	bool shieldCollided = boss.IsCollideAttackHitBoxes( playerShieldBox, /* disableCollidingHitBoxes = */ true );
-		//	if ( shieldCollided )
-		//	{
-		//		wasHitToShield = true;
-		//		player.SucceededDefence();
-		//	}
+			const auto eruptionEffects = EffectManager::GetInstance()->GetEruptionEffectVector();
+			for ( const auto &effect : eruptionEffects )
+			{
+				const auto hitBoxes = effect.GetHitSphereVector();
+				for ( const auto &it : hitBoxes )
+				{
+					if ( Donya::OBB::IsHitSphere( playerShieldBox, it ) )
+					{
+						wasHitToShield = true;
+						player.SucceededDefence();
+					}
+					if ( !wasHitToShield && Donya::OBB::IsHitSphere( playerBodyBox, it ) )
+					{
+						player.ReceiveImpact();
+					}
 
-		//	bool bodyCollided = ( shieldCollided ) ? false : boss.IsCollideAttackHitBoxes( playerBodyBox, /* disableCollidingHitBoxes = */ false );
-		//	if ( bodyCollided )
-		//	{
-		//		player.ReceiveImpact();
-		//	}
+					wasHitToShield = false;
+				}
+			}
 
-		//#endif // FETCH_BOXES_THEN_JUDGE
-		//}
+			bool shieldCollided = boss.IsCollideAttackHitBoxes( playerShieldBox, /* disableCollidingHitBoxes = */ true );
+			if ( shieldCollided )
+			{
+				wasHitToShield = true;
+				player.SucceededDefence();
+			}
+
+			bool bodyCollided = ( shieldCollided ) ? false : boss.IsCollideAttackHitBoxes( playerBodyBox, /* disableCollidingHitBoxes = */ false );
+			if ( bodyCollided )
+			{
+				player.ReceiveImpact();
+			}
+
+		#endif // FETCH_BOXES_THEN_JUDGE
+		}
 		//
 		//// PlayerAttack VS BossBodies
 		//{
