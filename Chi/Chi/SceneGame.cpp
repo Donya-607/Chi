@@ -285,12 +285,6 @@ public:
 
 		boss.Draw( shader, V, P );
 
-		stage.Draw( shader, V, P );
-
-		player.Draw( shader, V, P );
-
-		boss.Draw( shader, V, P );
-
 	#if DEBUG_MODE
 		/*
 		if ( 0 )
