@@ -109,6 +109,7 @@ void SceneEffect::update()
 	bossAI.Update();
 //	eruptionEffect.Update(Donya::Vector3(0.0f, 0.0f, 0.0f), Donya::Vector3(0.0f, 0.0f, -1.0f));
 	EffectManager::GetInstance()->Update();
+	EffectManager::GetInstance()->Update(Donya::Vector3(0.0f, 0.0f, 0.0f));
 
 	if (obb1.JudgeOBB(&obb2))
 	{
