@@ -619,7 +619,7 @@ public:
 		
 		// PlayerAttack VS BossBodies
 		{
-			if ( Donya::OBB::IsHitSphere( playerAttackBox, knight.GetBodyHitBoxes() ) )
+			if ( Donya::OBB::IsHitSphere( playerAttackBox, knight.GetBodyHitBox() ) )
 			{
 				knight.ReceiveImpact();
 			}

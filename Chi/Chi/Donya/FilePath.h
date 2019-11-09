@@ -30,6 +30,7 @@ enum class ModelAttribute
 	KnightAtkExplosion,
 	KnightAtkSwing,
 	KnightAtkRaid,
+	KnightFxExplosion,
 };
 
 std::string GetModelPath( ModelAttribute modelAttribute );

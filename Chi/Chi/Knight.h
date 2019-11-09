@@ -50,27 +50,31 @@ public:
 	};
 	struct Member
 	{
-		float				scale{};			// Usually 1.0f.
-		float				stageBodyRadius{};	// Using for collision to stage's wall.
-		float				targetDistNear{};	// 0.0f ~ 1.0f.
-		float				targetDistFar{};	// 0.0f ~ 1.0f.
-		float				idleSlerpFactor{};	// 0.0 ~ 1.0. Use when status is idle.
-		float				moveMoveSpeed{};	// Use when status is move.
-		float				moveSlerpFactor{};	// 0.0 ~ 1.0. Use when status is move.
-		float				explMoveSpeed{};	// Use when status is explosion.
-		float				explSlerpFactor{};	// 0.0 ~ 1.0. Use when status is explosion.
-		float				swingMoveSpeed{};	// Use when status is swing.
-		float				swingSlerpFactor{};	// 0.0 ~ 1.0. Use when status is swing.
-		float				raidMoveSpeed{};	// Use when status is raid.
-		float				raidSlerpFactor{};	// 0.0 ~ 1.0. Use when status is raid.
-		float				explScaleStart{};	// Use when status is explosion.
-		float				explScaleEnd{};		// Use when status is explosion.
-		Donya::Vector3		initPos{};			// The index(stage number) is 1-based. 0 is tutorial.
-		Donya::Vector3		drawOffset{};		// The index(stage number) is 1-based. 0 is tutorial.
-		Donya::Sphere		hitBoxBody{};		// Body's hit boxes.
-		Donya::SphereFrame	hitBoxExpl{};		// Attack of explosion hit box.
-		SphereFrameWithName	hitBoxSwing{};		// Attack of swing hit box.
-		SphereFrameWithName	hitBoxRaid{};		// Attack of raid hit box.
+		float				scale{};				// Usually 1.0f.
+		float				stageBodyRadius{};		// Using for collision to stage's wall.
+		float				targetDistNear{};		// 0.0f ~ 1.0f.
+		float				targetDistFar{};		// 0.0f ~ 1.0f.
+		float				idleSlerpFactor{};		// 0.0 ~ 1.0. Use when status is idle.
+		float				moveMoveSpeed{};		// Use when status is move.
+		float				moveSlerpFactor{};		// 0.0 ~ 1.0. Use when status is move.
+		float				explMoveSpeed{};		// Use when status is explosion.
+		float				explSlerpFactor{};		// 0.0 ~ 1.0. Use when status is explosion.
+		float				swingMoveSpeed{};		// Use when status is swing.
+		float				swingSlerpFactor{};		// 0.0 ~ 1.0. Use when status is swing.
+		float				raidMoveSpeed{};		// Use when status is raid.
+		float				raidSlerpFactor{};		// 0.0 ~ 1.0. Use when status is raid.
+		float				explRotationSpeed{};	// Use when status is explosion.
+		float				explScaleStart{};		// Use when status is explosion.
+		float				explScaleLast{};		// Use when status is explosion.
+		int					explScalingFrame{};		// Take time(frame) of scaling.
+		int					explChargeFrame{};		// Take time(frame) of charge. use before the explosion and the animation will stop.
+		int					explReviveColFrame{};	// Take time(frame) of revive the collision of explosion, since hit to anything.
+		Donya::Vector3		initPos{};				// The index(stage number) is 1-based. 0 is tutorial.
+		Donya::Vector3		drawOffset{};			// The index(stage number) is 1-based. 0 is tutorial.
+		Donya::Sphere		hitBoxBody{};			// Body's hit boxes.
+		Donya::SphereFrame	hitBoxExpl{};			// Attack of explosion hit box.
+		SphereFrameWithName	hitBoxSwing{};			// Attack of swing hit box.
+		SphereFrameWithName	hitBoxRaid{};			// Attack of raid hit box.
 	};
 private:
 	Member m{};
@@ -115,8 +119,12 @@ private:
 		{
 			archive
 			(
+				CEREAL_NVP( m.explRotationSpeed ),
 				CEREAL_NVP( m.explScaleStart ),
-				CEREAL_NVP( m.explScaleEnd ),
+				CEREAL_NVP( m.explScaleLast ),
+				CEREAL_NVP( m.explScalingFrame ),
+				CEREAL_NVP( m.explChargeFrame ),
+				CEREAL_NVP( m.explReviveColFrame ),
 				CEREAL_NVP( m.hitBoxExpl )
 			);
 		}
@@ -135,10 +143,12 @@ public:
 	Member Content() const { return m; }
 	static Member Open();
 
-	SphereFrameWithName &HitBoxSwing() { return m.hitBoxSwing; }
-	const SphereFrameWithName &HitBoxSwing() const { return m.hitBoxSwing; }
-	SphereFrameWithName &HitBoxRaid() { return m.hitBoxRaid; }
-	const SphereFrameWithName &HitBoxRaid() const { return m.hitBoxRaid; }
+	Donya::SphereFrame			&HitBoxExplosion()			{ return m.hitBoxExpl; }
+	const Donya::SphereFrame	&HitBoxExplosion()	const	{ return m.hitBoxExpl; }
+	SphereFrameWithName			&HitBoxSwing()				{ return m.hitBoxSwing; }
+	const SphereFrameWithName	&HitBoxSwing()		const	{ return m.hitBoxSwing; }
+	SphereFrameWithName			&HitBoxRaid()				{ return m.hitBoxRaid; }
+	const SphereFrameWithName	&HitBoxRaid()		const	{ return m.hitBoxRaid; }
 public:
 	void LoadParameter( bool isBinary = true );
 
@@ -171,16 +181,18 @@ private:
 		std::shared_ptr<skinned_mesh> pAtkExpl{ nullptr };
 		std::shared_ptr<skinned_mesh> pAtkSwing{ nullptr };
 		std::shared_ptr<skinned_mesh> pAtkRaid{ nullptr };
+		std::shared_ptr<skinned_mesh> pFxExpl{ nullptr };
 	};
 private:
 	KnightAI::ActionState	status;
 	KnightAI				AI;
-	int						timer;			// Recycle between each state.
-	float					fieldRadius;	// For collision to wall. the field is perfect-circle, so I can detect collide to wall by distance.
-	float					slerpFactor;	// 0.0f ~ 1.0f. Use orientation's rotation.
-	Donya::Vector3			pos;			// Contain world space position. actual position is "pos + extraOffset".
+	int						timer;				// Recycle between each state.
+	int						reviveCollisionTime;// Use when disable collision.
+	float					fieldRadius;		// For collision to wall. the field is perfect-circle, so I can detect collide to wall by distance.
+	float					slerpFactor;		// 0.0f ~ 1.0f. Use orientation's rotation.
+	Donya::Vector3			pos;				// Contain world space position. actual position is "pos + extraOffset".
 	Donya::Vector3			velocity;
-	Donya::Vector3			extraOffset;	// Actual position is "pos + extraOffset".
+	Donya::Vector3			extraOffset;		// Actual position is "pos + extraOffset".
 	Donya::Quaternion		orientation;
 	Models					models;
 public:
@@ -197,8 +209,21 @@ public:
 	bool IsCollideAttackHitBoxes( const Donya::AABB   judgeOther, bool disableCollidingHitBoxes );
 	bool IsCollideAttackHitBoxes( const Donya::OBB    judgeOther, bool disableCollidingHitBoxes );
 
-	Donya::Sphere GetBodyHitBoxes() const;
+	/// <summary>
+	/// Returns world space hit-box of body.
+	/// </summary>
+	Donya::Sphere GetBodyHitBox() const;
+	/// <summary>
+	/// Returns world space hit-box of attack of explosion.
+	/// </summary>
+	Donya::Sphere CalcAttackHitBoxExplosion() const;
+	/// <summary>
+	/// Returns world space hit-box of attack of swing.
+	/// </summary>
 	Donya::Sphere CalcAttackHitBoxSwing() const;
+	/// <summary>
+	/// Returns world space hit-box of attack of raid.
+	/// </summary>
 	Donya::Sphere CalcAttackHitBoxRaid() const;
 
 	void ReceiveImpact();

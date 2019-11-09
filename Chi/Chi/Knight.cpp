@@ -202,9 +202,15 @@ void KnightParam::UseImGui()
 
 				if ( ImGui::TreeNode( "Attack.Explosion" ) )
 				{
-					ImGui::DragFloat( "Scale.Start",	&m.explScaleStart, 0.2f );
-					ImGui::DragFloat( "Scale.End",		&m.explScaleEnd,   0.2f );
+					ImGui::DragFloat( "Rotate.Speed",	&m.explRotationSpeed,	0.02f );
+					ImGui::DragFloat( "Scale.Start",	&m.explScaleStart,		0.2f );
+					ImGui::DragFloat( "Scale.Last",		&m.explScaleLast,		0.2f );
+					ImGui::SliderInt( "Scaling.Length(Frame)",	&m.explScalingFrame,	1, 300  );
+					ImGui::SliderInt( "Charge.Length(Frame)",	&m.explChargeFrame,		1, 300  );
+					ImGui::SliderInt( "ReviveCollisionFrame",	&m.explReviveColFrame,	1, 300  );
 					ShowSphereF( "Collision", &m.hitBoxExpl );
+
+					ImGui::TreePop();
 				}
 				
 				static std::array<char, 512U> swingMeshNameBuffer{};
@@ -247,6 +253,11 @@ void KnightParam::UseImGui()
 
 #endif // USE_IMGUI
 
+void ResetCurrentSphereF( Donya::SphereFrame *pSphereF )
+{
+	pSphereF->currentFrame = 0;
+	pSphereF->collision.enable = true;
+}
 void ResetCurrentSphereFN( KnightParam::SphereFrameWithName *pSphereFN )
 {
 	pSphereFN->sphereF.currentFrame = 0;
@@ -256,7 +267,7 @@ void ResetCurrentSphereFN( KnightParam::SphereFrameWithName *pSphereFN )
 Knight::Knight() :
 	status( KnightAI::ActionState::WAIT ),
 	AI(),
-	timer(),
+	timer(), reviveCollisionTime(),
 	fieldRadius(), slerpFactor( 1.0f ),
 	pos(), velocity(), extraOffset(),
 	orientation(),
@@ -275,6 +286,7 @@ Knight::Knight() :
 		&models.pAtkExpl,
 		&models.pAtkSwing,
 		&models.pAtkRaid,
+		&models.pFxExpl,
 	};
 	for ( auto &it : modelRefs )
 	{
@@ -348,7 +360,19 @@ void Knight::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Dony
 		FBXRender( models.pRunFront.get(), HLSL, WVP, W );
 		break;
 	case KnightAI::ActionState::ATTACK_EXPLOSION:
-		FBXRender( models.pAtkExpl.get(), HLSL, WVP, W );
+		{
+			FBXRender( models.pAtkExpl.get(), HLSL, WVP, W );
+
+			Donya::Vector4x4 FX_R = Donya::Quaternion::Make
+			(
+				Donya::Vector3::Up(),
+				KnightParam::Open().explRotationSpeed * timer
+			).RequireRotationMatrix();
+
+			Donya::Vector4x4 FX_W = FX_R * ( S * R * T )/* Except draw offset from parent world matrix.*/;
+			Donya::Vector4x4 FX_WVP = FX_W * matView * matProjection;
+			FBXRender( models.pFxExpl.get(), HLSL, FX_WVP, FX_W );
+		}
 		break;
 	case KnightAI::ActionState::ATTACK_SWING:
 		FBXRender( models.pAtkSwing.get(), HLSL, WVP, W );
@@ -439,19 +463,24 @@ void Knight::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Dony
 		case KnightAI::ActionState::MOVE:
 			break;
 		case KnightAI::ActionState::ATTACK_EXPLOSION:
+			{
+				const auto &wsSphere = CalcAttackHitBoxExplosion();
+				Donya::Vector4 color = ( wsSphere.enable && wsSphere.exist ) ? COLOR_VALID : COLOR_INVALID;
+				DrawSphere( wsSphere.pos, wsSphere.radius, color, /* applyParentMatrix = */ false );
+			}
 			break;
 		case KnightAI::ActionState::ATTACK_SWING:
 			{
-				const auto &sphere = CalcAttackHitBoxSwing();
-				Donya::Vector4 color = ( sphere.enable && sphere.exist ) ? COLOR_VALID : COLOR_INVALID;
-				DrawSphere( sphere.pos, sphere.radius, color, /* applyParentMatrix = */ false );
+				const auto &wsSphere = CalcAttackHitBoxSwing();
+				Donya::Vector4 color = ( wsSphere.enable && wsSphere.exist ) ? COLOR_VALID : COLOR_INVALID;
+				DrawSphere( wsSphere.pos, wsSphere.radius, color, /* applyParentMatrix = */ false );
 			}
 			break;
 		case KnightAI::ActionState::ATTACK_RAID:
 			{
-				const auto &sphere = CalcAttackHitBoxRaid();
-				Donya::Vector4 color = ( sphere.enable && sphere.exist ) ? COLOR_VALID : COLOR_INVALID;
-				DrawSphere( sphere.pos, sphere.radius, color, /* applyParentMatrix = */ false );
+				const auto &wsSphere = CalcAttackHitBoxRaid();
+				Donya::Vector4 color = ( wsSphere.enable && wsSphere.exist ) ? COLOR_VALID : COLOR_INVALID;
+				DrawSphere( wsSphere.pos, wsSphere.radius, color, /* applyParentMatrix = */ false );
 			}
 			break;
 		default: break;
@@ -487,7 +516,16 @@ bool Knight::IsCollideAttackHitBoxes( const Donya::OBB    other, bool disableCol
 	{
 	case KnightAI::ActionState::ATTACK_EXPLOSION:
 		{
-
+			const auto &wsSphere = CalcAttackHitBoxExplosion();
+			if ( Donya::OBB::IsHitSphere( other, wsSphere ) )
+			{
+				wasCollided = true;
+				if ( disableCollidingHitBoxes )
+				{
+					KnightParam::Get().HitBoxExplosion().collision.enable = false;
+					reviveCollisionTime = KnightParam::Open().explReviveColFrame;
+				}
+			}
 		}
 		break;
 	case KnightAI::ActionState::ATTACK_SWING:
@@ -527,11 +565,17 @@ static Donya::OBB MakeOBB( const Donya::AABB &AABB, const Donya::Vector3 &wsPos,
 	OBB.exist = AABB.exist;
 	return OBB;
 }
-Donya::Sphere Knight::GetBodyHitBoxes() const
+Donya::Sphere Knight::GetBodyHitBox() const
 {
 	Donya::Sphere wsBody = KnightParam::Open().hitBoxBody;
 	wsBody.pos += GetPos();
 	return wsBody;
+}
+Donya::Sphere Knight::CalcAttackHitBoxExplosion() const
+{
+	Donya::SphereFrame wsHitBoxF = KnightParam::Open().hitBoxExpl;
+	wsHitBoxF.collision.pos += GetPos();
+	return wsHitBoxF.collision;
 }
 Donya::Sphere Knight::CalcAttackHitBoxSwing() const
 {
@@ -575,6 +619,8 @@ void Knight::LoadModel()
 	Donya::OutputDebugStr( "Done KnightModel.Attack.Swing.\n" );
 	loadFBX( models.pAtkRaid.get(), GetModelPath( ModelAttribute::KnightAtkRaid ) );
 	Donya::OutputDebugStr( "Done KnightModel.Attack.Raid.\n" );
+	loadFBX( models.pFxExpl.get(), GetModelPath( ModelAttribute::KnightFxExplosion ) );
+	Donya::OutputDebugStr( "Done KnightModel.Fx.Explosion.\n" );
 
 	Donya::OutputDebugStr( "End Knight::LoadModel.\n" );
 }
@@ -706,20 +752,74 @@ void Knight::MoveUninit()
 
 void Knight::AttackExplosionInit( TargetStatus target )
 {
-	status = KnightAI::ActionState::ATTACK_EXPLOSION;
+	status		= KnightAI::ActionState::ATTACK_EXPLOSION;
+	timer		= 0;
+	reviveCollisionTime = 0;
+	slerpFactor	= KnightParam::Get().SlerpFactor( status );
+	velocity	= 0.0f;
 
-	slerpFactor = KnightParam::Get().SlerpFactor( status );
+	Donya::SphereFrame &hitBox = KnightParam::Get().HitBoxExplosion();
+	ResetCurrentSphereF( &hitBox );
+	hitBox.collision.radius = 0.0f;
 
-	velocity = 0.0f;
-
+	setStopAnimation( models.pAtkExpl.get(), /* is_stop = */ true );
 	setAnimFlame( models.pAtkExpl.get(), 0 );
 }
 void Knight::AttackExplosionUpdate( TargetStatus target )
 {
-	// velocity = orientation.LocalFront() * KnightParam::Get().MoveSpeed( status );
+	const int CHARGE_LENGTH  = KnightParam::Open().explChargeFrame;
+	const int SCALING_LENGTH = KnightParam::Open().explScalingFrame;
+
+	auto &explHitBox = KnightParam::Get().HitBoxExplosion();
+
+	timer++;
+	if ( timer == CHARGE_LENGTH )
+	{
+		// When finish stop the animation, and start explosion.
+		explHitBox.collision.radius = KnightParam::Open().explScaleStart;
+		setStopAnimation( models.pAtkExpl.get(), /* is_stop = */ false );
+
+	}
+	else
+	if ( CHARGE_LENGTH < timer )
+	{
+		const float RADIUS_MIN = KnightParam::Open().explScaleStart;
+		const float RADIUS_MAX = KnightParam::Open().explScaleLast;
+
+		if ( CHARGE_LENGTH + SCALING_LENGTH <= timer )
+		{
+			explHitBox.collision.radius = RADIUS_MAX;
+		}
+		else
+		{
+			const float scalingPercent = scast<float>( timer ) / scast<float>( CHARGE_LENGTH + SCALING_LENGTH );
+			const float difference = RADIUS_MAX - RADIUS_MIN;
+
+			explHitBox.collision.radius = RADIUS_MIN + ( RADIUS_MAX * scalingPercent );
+		}
+	}
+
+	if ( 0 < reviveCollisionTime )
+	{
+		reviveCollisionTime--;
+		if ( reviveCollisionTime <= 0 )
+		{
+			reviveCollisionTime = 0;
+			explHitBox.collision.enable = true;
+		}
+	}
+
+	explHitBox.Update();
 }
 void Knight::AttackExplosionUninit()
 {
+	timer = 0;
+	reviveCollisionTime = 0;
+
+	Donya::SphereFrame &hitBox = KnightParam::Get().HitBoxExplosion();
+	ResetCurrentSphereF( &hitBox );
+	hitBox.collision.radius = 0.0f;
+
 	setAnimFlame( models.pAtkExpl.get(), 0 );
 }
 
