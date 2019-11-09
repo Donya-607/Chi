@@ -205,9 +205,11 @@ void KnightParam::UseImGui()
 					ImGui::DragFloat( "Rotate.Speed",	&m.explRotationSpeed,	0.02f );
 					ImGui::DragFloat( "Scale.Start",	&m.explScaleStart,		0.2f );
 					ImGui::DragFloat( "Scale.Last",		&m.explScaleLast,		0.2f );
+					ImGui::DragFloat( "Scale.Draw",		&m.explScaleDraw,		0.2f );
 					ImGui::SliderInt( "Scaling.Length(Frame)",	&m.explScalingFrame,	1, 300  );
 					ImGui::SliderInt( "Charge.Length(Frame)",	&m.explChargeFrame,		1, 300  );
 					ImGui::SliderInt( "ReviveCollisionFrame",	&m.explReviveColFrame,	1, 300  );
+					ImGui::SliderFloat( "After.HideSpeed",		&m.explHideSpeed,		0.00001f, 1.0f  );
 					ShowSphereF( "Collision", &m.hitBoxExpl );
 
 					ImGui::TreePop();
@@ -363,15 +365,22 @@ void Knight::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Dony
 		{
 			FBXRender( models.pAtkExpl.get(), HLSL, WVP, W );
 
+			float drawScale = KnightParam::Get().HitBoxExplosion().collision.radius * PARAM.explScaleDraw;
+			Donya::Vector4x4 FX_S = Donya::Vector4x4::MakeScaling( drawScale );
 			Donya::Vector4x4 FX_R = Donya::Quaternion::Make
 			(
 				Donya::Vector3::Up(),
-				KnightParam::Open().explRotationSpeed * timer
+				PARAM.explRotationSpeed * timer
 			).RequireRotationMatrix();
-
-			Donya::Vector4x4 FX_W = FX_R * ( S * R * T )/* Except draw offset from parent world matrix.*/;
+			
+			Donya::Vector4x4 FX_W = ( FX_S * FX_R ) * ( S * R * T )/* Except draw offset from parent world matrix.*/;
 			Donya::Vector4x4 FX_WVP = FX_W * matView * matProjection;
-			FBXRender( models.pFxExpl.get(), HLSL, FX_WVP, FX_W );
+
+			const int VIVID_TIME = KnightParam::Open().explChargeFrame + KnightParam::Get().HitBoxExplosion().enableFrameLast;
+			float drawAlpha = ( VIVID_TIME <= timer )
+			? 1.0f - ( KnightParam::Open().explHideSpeed * ( timer - VIVID_TIME ) )
+			: 1.0f;
+			FBXRender( models.pFxExpl.get(), HLSL, FX_WVP, FX_W, { 1.0f, 1.0f, 1.0f, drawAlpha } );
 		}
 		break;
 	case KnightAI::ActionState::ATTACK_SWING:
@@ -404,7 +413,7 @@ void Knight::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Dony
 	// Except DRAW_OFFSET matrix. because I wanna draw collisions to actual position.
 	W = S * R * T;
 
-	auto DrawCube = [&]( const Donya::Vector3 &cubeOffset, const Donya::Vector3 &cubeScale, const Donya::Quaternion &orientation, const Donya::Vector4 &color, bool applyParentMatrix = true, bool applyParentDrawOffset = false )
+	auto DrawCube	= [&]( const Donya::Vector3 &cubeOffset, const Donya::Vector3 &cubeScale, const Donya::Quaternion &orientation, const Donya::Vector4 &color, bool applyParentMatrix = true, bool applyParentDrawOffset = false )
 	{
 		Donya::Vector4x4 CS = Donya::Vector4x4::MakeScaling( cubeScale * 2.0f ); // Half size->Whole size.
 		Donya::Vector4x4 CR = orientation.RequireRotationMatrix();
@@ -416,7 +425,7 @@ void Knight::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Dony
 
 		OBJRender( pCube.get(), CWVP, CW, color );
 	};
-	auto DrawSphere = [&]( const Donya::Vector3 &sphereOffset, float sphereScale, const Donya::Vector4 &color, bool applyParentMatrix = true, bool applyParentDrawOffset = false )
+	auto DrawSphere	= [&]( const Donya::Vector3 &sphereOffset, float sphereScale, const Donya::Vector4 &color, bool applyParentMatrix = true, bool applyParentDrawOffset = false )
 	{
 		Donya::Vector4x4 CS = Donya::Vector4x4::MakeScaling( sphereScale * 2.0f ); // Half size->Whole size.
 		Donya::Vector4x4 CT = Donya::Vector4x4::MakeTranslation( sphereOffset );
@@ -427,7 +436,7 @@ void Knight::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Dony
 
 		OBJRender( pSphere.get(), CWVP, CW, color );
 	};
-	auto DrawOBB = [&]( const Donya::OBB &OBB, const Donya::Vector4 &color, bool applyParentMatrix = true, bool applyParentDrawOffset = false )
+	auto DrawOBB	= [&]( const Donya::OBB &OBB, const Donya::Vector4 &color, bool applyParentMatrix = true, bool applyParentDrawOffset = false )
 	{
 		Donya::Vector4x4 CS = Donya::Vector4x4::MakeScaling( OBB.size * 2.0f ); // Half size->Whole size.
 		Donya::Vector4x4 CR = OBB.orientation.RequireRotationMatrix();

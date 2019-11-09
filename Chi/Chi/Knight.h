@@ -66,9 +66,11 @@ public:
 		float				explRotationSpeed{};	// Use when status is explosion.
 		float				explScaleStart{};		// Use when status is explosion.
 		float				explScaleLast{};		// Use when status is explosion.
+		float				explScaleDraw{};		// Use when status is explosion.
 		int					explScalingFrame{};		// Take time(frame) of scaling.
 		int					explChargeFrame{};		// Take time(frame) of charge. use before the explosion and the animation will stop.
 		int					explReviveColFrame{};	// Take time(frame) of revive the collision of explosion, since hit to anything.
+		float				explHideSpeed{};		// Use when status is explosion.
 		Donya::Vector3		initPos{};				// The index(stage number) is 1-based. 0 is tutorial.
 		Donya::Vector3		drawOffset{};			// The index(stage number) is 1-based. 0 is tutorial.
 		Donya::Sphere		hitBoxBody{};			// Body's hit boxes.
@@ -130,6 +132,14 @@ private:
 		}
 		if ( 4 <= version )
 		{
+			archive( CEREAL_NVP( m.explScaleDraw ) );
+		}
+		if ( 5 <= version )
+		{
+			archive( CEREAL_NVP( m.explHideSpeed ) );
+		}
+		if ( 6 <= version )
+		{
 			// archive( CEREAL_NVP( x ) );
 		}
 	}
@@ -160,7 +170,7 @@ public:
 
 #endif // USE_IMGUI
 };
-CEREAL_CLASS_VERSION( KnightParam, 3 )
+CEREAL_CLASS_VERSION( KnightParam, 4 )
 
 struct fbx_shader; // Use for argument.
 /// <summary>

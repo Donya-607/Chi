@@ -568,6 +568,13 @@ void skinned_mesh::render(
 					cb.pntLight[i] = _point_light[i].getInfo();
 				}
 				cb.ambient = p.ambient.color;
+				{
+					// Insert by Donya.
+					cb.ambient.x *= materialColor.x;
+					cb.ambient.y *= materialColor.y;
+					cb.ambient.z *= materialColor.z;
+					cb.ambient.w *= materialColor.w;
+				}
 				cb.diffuse = p.diffuse.color;
 				cb.specular = p.specular.color;
 

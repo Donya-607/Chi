@@ -120,7 +120,14 @@ public:
 		}
 
 	#if DEBUG_MODE
-		loadShader(shader, "./Data/shader/skinned_mesh_has_born_vs.cso", "./Data/shader/skinned_mesh_ps.cso", "./Data/shader/skinned_mesh_vs.cso", "./Data/shader/skinned_mesh_no_uv_ps.cso");
+		loadShader
+		(
+			shader,
+			"./Data/shader/skinned_mesh_has_born_vs.cso",
+			"./Data/shader/skinned_mesh_ps.cso",
+			"./Data/shader/skinned_mesh_vs.cso",
+			"./Data/shader/skinned_mesh_no_uv_ps.cso"
+		);
 
 		stageNo = AppearStage::KnightNo;
 	#endif // DEBUG_MODE

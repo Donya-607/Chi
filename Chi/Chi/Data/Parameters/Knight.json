@@ -1,6 +1,6 @@
 {
     "Knight": {
-        "cereal_class_version": 3,
+        "cereal_class_version": 4,
         "m.scale": 1.0,
         "m.stageBodyRadius": 320.0,
         "m.targetDistNear": 0.05000000074505806,
@@ -69,7 +69,7 @@
             },
             "meshName": "MDL_Ax"
         },
-        "m.explRotationSpeed": 1.0,
+        "m.explRotationSpeed": 0.07999999821186066,
         "m.explScaleStart": 0.0010000000474974514,
         "m.explScaleLast": 600.0,
         "m.explScalingFrame": 120,
@@ -84,9 +84,10 @@
                     "y": 0.0,
                     "z": 0.0
                 },
-                "radius": 0.0,
-                "exist": true
+                "radius": 600.0,
+                "exist": false
             }
-        }
+        },
+        "m.explScaleDraw": 100.0
     }
 }
