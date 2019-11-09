@@ -376,7 +376,7 @@ void Knight::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Dony
 			Donya::Vector4x4 FX_W = ( FX_S * FX_R ) * ( S * R * T )/* Except draw offset from parent world matrix.*/;
 			Donya::Vector4x4 FX_WVP = FX_W * matView * matProjection;
 
-			const int VIVID_TIME = KnightParam::Open().explChargeFrame + KnightParam::Get().HitBoxExplosion().enableFrameLast;
+			const int VIVID_TIME = KnightParam::Get().HitBoxExplosion().enableFrameLast;
 			float drawAlpha = ( VIVID_TIME <= timer )
 			? 1.0f - ( KnightParam::Open().explHideSpeed * ( timer - VIVID_TIME ) )
 			: 1.0f;

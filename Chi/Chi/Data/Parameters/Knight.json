@@ -1,6 +1,6 @@
 {
     "Knight": {
-        "cereal_class_version": 4,
+        "cereal_class_version": 5,
         "m.scale": 1.0,
         "m.stageBodyRadius": 320.0,
         "m.targetDistNear": 0.05000000074505806,
@@ -88,6 +88,7 @@
                 "exist": false
             }
         },
-        "m.explScaleDraw": 100.0
+        "m.explScaleDraw": 100.0,
+        "m.explHideSpeed": 0.03500000014901161
     }
 }

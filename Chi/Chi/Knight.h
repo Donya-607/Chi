@@ -170,7 +170,7 @@ public:
 
 #endif // USE_IMGUI
 };
-CEREAL_CLASS_VERSION( KnightParam, 4 )
+CEREAL_CLASS_VERSION( KnightParam, 5 )
 
 struct fbx_shader; // Use for argument.
 /// <summary>
