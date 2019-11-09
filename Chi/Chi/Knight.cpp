@@ -199,6 +199,7 @@ void KnightParam::UseImGui()
 				};
 				
 				ShowSphere( "Body.HurtBox", &m.hitBoxBody );
+				ImGui::Text( "" );
 
 				if ( ImGui::TreeNode( "Attack.Explosion" ) )
 				{
@@ -215,11 +216,37 @@ void KnightParam::UseImGui()
 					ImGui::TreePop();
 				}
 				
-				static std::array<char, 512U> swingMeshNameBuffer{};
-				ShowSphereFN( "Attack.Swing", &m.hitBoxSwing, &swingMeshNameBuffer );
+				if ( ImGui::TreeNode( "Attack.Swing" ) )
+				{
+					static std::array<char, 512U> swingMeshNameBuffer{};
+					ShowSphereFN( "Swing", &m.hitBoxSwing, &swingMeshNameBuffer );
 
-				static std::array<char, 512U> raidMeshNameBuffer{};
-				ShowSphereFN( "Attack.Raid", &m.hitBoxRaid, &raidMeshNameBuffer );
+					ImGui::TreePop();
+				}
+
+				if ( ImGui::TreeNode( "Attack.Raid" ) )
+				{
+					ImGui::DragInt( "Jump.StartFrame",			&m.raidJumpStartFrame	);	m.raidJumpStartFrame	= std::max( 0,    m.raidJumpStartFrame );
+					ImGui::DragInt( "Jump.LandingFrame",		&m.raidJumpLastFrame	);	m.raidJumpLastFrame		= std::max( 0,    m.raidJumpLastFrame  );
+					ImGui::DragFloat( "Jump.Length(distance)",	&m.raidJumpDistance		);	m.raidJumpDistance		= std::max( 0.0f, m.raidJumpDistance   );
+
+					// Easing parameter.
+					{
+						using namespace Donya;
+						constexpr int KIND_COUNT = Easing::GetKindCount();
+						constexpr int TYPE_COUNT = Easing::GetTypeCount();
+						ImGui::SliderInt( "Jump.EasingKind", &m.raidEaseKind, 0, KIND_COUNT - 1 );
+						ImGui::SliderInt( "Jump.EasingType", &m.raidEaseType, 0, TYPE_COUNT - 1 );
+						std::string strKind = Easing::KindName( m.raidEaseKind );
+						std::string strType = Easing::TypeName( m.raidEaseType );
+						ImGui::Text( ( "Easing : " + strKind + "." + strType ).c_str() );
+					}
+
+					static std::array<char, 512U> raidMeshNameBuffer{};
+					ShowSphereFN( "Raid", &m.hitBoxRaid, &raidMeshNameBuffer );
+
+					ImGui::TreePop();
+				}
 
 				ImGui::TreePop();
 			}
@@ -856,8 +883,8 @@ void Knight::AttackSwingUninit()
 
 void Knight::AttackRaidInit( TargetStatus target )
 {
-	status = KnightAI::ActionState::ATTACK_RAID;
-
+	status		= KnightAI::ActionState::ATTACK_RAID;
+	timer		= 0;
 	slerpFactor	= KnightParam::Get().SlerpFactor( status );
 	extraOffset	= 0.0f;
 	velocity	= 0.0f;
@@ -867,18 +894,62 @@ void Knight::AttackRaidInit( TargetStatus target )
 }
 void Knight::AttackRaidUpdate( TargetStatus target )
 {
-#if DEBUG_MODE
-	extraOffset = orientation.LocalFront() * KnightParam::Get().MoveSpeed( status );
-#endif // DEBUG_MODE
+	const int START_TIME	= KnightParam::Open().raidJumpStartFrame;
+	const int LANDING_TIME	= KnightParam::Open().raidJumpLastFrame;
+	
+	auto ApplyExtraOffset	= [&]()->void
+	{
+		// Apply movement and reset extraOffset.
+		pos += extraOffset;
+		extraOffset = 0.0f;
+	};
+
+	timer++;
+
+	if ( timer <= START_TIME )
+	{
+		// Before jump. move to front slowly.
+
+		extraOffset += orientation.LocalFront() * KnightParam::Get().MoveSpeed( status );
+
+		if ( timer == START_TIME )
+		{
+			ApplyExtraOffset();
+		}
+	}
+	else
+	if ( timer <= START_TIME + LANDING_TIME )
+	{
+		// Before landing. move to front with easing.
+		
+		float percent	= scast<float>( timer - START_TIME ) / scast<float>( LANDING_TIME );
+		float ease		= Donya::Easing::Ease
+		(
+			scast<Donya::Easing::Kind>( KnightParam::Open().raidEaseKind ),
+			scast<Donya::Easing::Type>( KnightParam::Open().raidEaseType ),
+			percent
+		);
+
+		extraOffset = orientation.LocalFront() * ( KnightParam::Open().raidJumpDistance * ease );
+
+		if ( timer == START_TIME + LANDING_TIME )
+		{
+			ApplyExtraOffset();
+		}
+	}
+	else
+	{
+		// No op.
+	}
 
 	auto &hitBox = KnightParam::Get().HitBoxRaid();
 	hitBox.sphereF.Update();
 }
 void Knight::AttackRaidUninit()
 {
-	pos += extraOffset;
-
-	extraOffset = 0.0f;
+	timer		= 0;
+	extraOffset	= 0.0f;
+	velocity	= 0.0f;
 
 	ResetCurrentSphereFN( &KnightParam::Get().HitBoxRaid() );
 	setAnimFlame( models.pAtkRaid.get(), 0 );

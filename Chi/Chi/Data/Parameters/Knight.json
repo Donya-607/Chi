@@ -1,6 +1,6 @@
 {
     "Knight": {
-        "cereal_class_version": 5,
+        "cereal_class_version": 6,
         "m.scale": 1.0,
         "m.stageBodyRadius": 320.0,
         "m.targetDistNear": 0.05000000074505806,
@@ -12,7 +12,7 @@
         "m.explSlerpFactor": 0.0,
         "m.swingMoveSpeed": 0.0,
         "m.swingSlerpFactor": 0.0,
-        "m.raidMoveSpeed": 0.0,
+        "m.raidMoveSpeed": 8.0,
         "m.raidSlerpFactor": 0.004999999888241291,
         "m.initPos": {
             "cereal_class_version": 0,
@@ -89,6 +89,11 @@
             }
         },
         "m.explScaleDraw": 100.0,
-        "m.explHideSpeed": 0.03500000014901161
+        "m.explHideSpeed": 0.03500000014901161,
+        "m.raidJumpStartFrame": 20,
+        "m.raidJumpLastFrame": 80,
+        "m.raidJumpDistance": 666.0,
+        "m.raidEaseKind": 7,
+        "m.raidEaseType": 1
     }
 }

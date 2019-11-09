@@ -61,8 +61,13 @@ public:
 		float				explSlerpFactor{};		// 0.0 ~ 1.0. Use when status is explosion.
 		float				swingMoveSpeed{};		// Use when status is swing.
 		float				swingSlerpFactor{};		// 0.0 ~ 1.0. Use when status is swing.
-		float				raidMoveSpeed{};		// Use when status is raid.
+		float				raidMoveSpeed{};		// Use when status is raid. speed of before jump.
 		float				raidSlerpFactor{};		// 0.0 ~ 1.0. Use when status is raid.
+		int					raidJumpStartFrame{};	// Use when status is raid.
+		int					raidJumpLastFrame{};	// Use when status is raid.
+		float				raidJumpDistance{};		// Use when status is raid. whole distance of long-jump's.
+		int					raidEaseKind{};			// Use when status is raid.
+		int					raidEaseType{};			// Use when status is raid.
 		float				explRotationSpeed{};	// Use when status is explosion.
 		float				explScaleStart{};		// Use when status is explosion.
 		float				explScaleLast{};		// Use when status is explosion.
@@ -140,6 +145,17 @@ private:
 		}
 		if ( 6 <= version )
 		{
+			archive
+			(
+				CEREAL_NVP( m.raidJumpStartFrame ),
+				CEREAL_NVP( m.raidJumpLastFrame ),
+				CEREAL_NVP( m.raidJumpDistance ),
+				CEREAL_NVP( m.raidEaseKind ),
+				CEREAL_NVP( m.raidEaseType )
+			);
+		}
+		if ( 7 <= version )
+		{
 			// archive( CEREAL_NVP( x ) );
 		}
 	}
@@ -170,7 +186,7 @@ public:
 
 #endif // USE_IMGUI
 };
-CEREAL_CLASS_VERSION( KnightParam, 5 )
+CEREAL_CLASS_VERSION( KnightParam, 6 )
 
 struct fbx_shader; // Use for argument.
 /// <summary>

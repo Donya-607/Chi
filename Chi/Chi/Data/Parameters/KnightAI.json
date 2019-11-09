@@ -17,11 +17,11 @@
         },
         "attackPercents": {
             "value0": 23,
-            "value1": 10
+            "value1": 1024
         },
         "gapIntervals": [
-            0,
-            0
+            16,
+            16
         ]
     }
 }
