@@ -167,7 +167,7 @@ static_mesh::primitive_material& getPrimitiveMaterial(static_mesh* _mesh);
 
 void OBJRender(static_mesh* staticMesh, const DirectX::XMFLOAT4X4& SynthesisMatrix, const DirectX::XMFLOAT4X4& worldMatrix, const DirectX::XMFLOAT4& materialColor = { 1.0f,1.0f,1.0f,1.0f }, bool wireFlg = false);
 
-void billboardRender(static_mesh* _mesh, const DirectX::XMFLOAT4X4&, const DirectX::XMFLOAT4&, const float, const float, const DirectX::XMFLOAT4&, const DirectX::XMFLOAT2& texpos, const DirectX::XMFLOAT2& texsize);
+void billboardRender(static_mesh* _mesh, const DirectX::XMFLOAT4X4&, const DirectX::XMFLOAT4&, const DirectX::XMFLOAT2, const float, const DirectX::XMFLOAT4&, const DirectX::XMFLOAT2& texpos, const DirectX::XMFLOAT2& texsize);
 
 
 //skinned_mesh//
@@ -179,7 +179,7 @@ void setLoopFlg(skinned_mesh* _mesh, const bool _is_loop);
 
 void setStopAnimation(skinned_mesh* _mesh, const bool _is_stop);
 
-void setStopTime(skinned_mesh* _mesh, const float _stop_time);
+void setStopTime(skinned_mesh* _mesh, const float _stop_time_per_second);
 
 void setAnimFlame(skinned_mesh* _mesh, const int _anim_flame);
 
@@ -194,7 +194,7 @@ void FBXRender(skinned_mesh* skinnedMesh, fbx_shader& hlsl,const DirectX::XMFLOA
 int getState();
 
 /// <summary>
-/// -1 : —£‚µ‚½uŠÔ@0 : ‰Ÿ‚µ‚Ä‚È‚¢@1 : ‰Ÿ‚µ‚½uŠÔ @2 : ‰Ÿ‚µ‚Á‚Ï‚È‚µ
+/// -1 : —£‚µ‚½uŠÔ 0 : ‰Ÿ‚µ‚Ä‚È‚¢ 1 : ‰Ÿ‚µ‚½uŠÔ  2 : ‰Ÿ‚µ‚Á‚Ï‚È‚µ
 /// </summary>
 int pressedButtons(int _padNum, int _button);
 
@@ -205,7 +205,7 @@ DirectX::XMINT2 getThumbR(int _padNum);
 //keyborad
 
 /// <summary>
-/// -1 : —£‚µ‚½uŠÔ@0 : ‰Ÿ‚µ‚Ä‚È‚¢@1 : ‰Ÿ‚µ‚½uŠÔ @2 : ‰Ÿ‚µ‚Á‚Ï‚È‚µ
+/// -1 : —£‚µ‚½uŠÔ 0 : ‰Ÿ‚µ‚Ä‚È‚¢ 1 : ‰Ÿ‚µ‚½uŠÔ  2 : ‰Ÿ‚µ‚Á‚Ï‚È‚µ
 /// </summary>
 int getKeyState(int _keyNum);
 

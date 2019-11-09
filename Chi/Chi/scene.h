@@ -10,8 +10,13 @@
 
 #include "Sprite.h"
 #include "Particle.h"
-#include "BossAI.h"
+#include "GolemAI.h"
 #include "OBB.h"
+#include "Effect.h"
+#include "Stage.h"
+#include "light.h"
+#include "Donya/ChiUtility.h"
+
 #include "Mouse.h"
 
 using namespace DirectX;
@@ -48,7 +53,7 @@ private:
 	static_mesh builborad;
 	DirectX::XMFLOAT4 builboard_pos;
 	float builborad_angle;
-	float builborad_size;
+	DirectX::XMFLOAT2 builborad_size;
 	DirectX::XMFLOAT2 texpos;
 	DirectX::XMFLOAT2 texsize;
 
@@ -112,20 +117,34 @@ class SceneEffect : public baseScene
 private:
 	FlashParticle flashParticle;
 	BubbleParticle bubbleParticle;
-	BossAI bossAI;
+	GolemAI bossAI;
 	int keyCnt;
+	int keyCnt2;
 
 	std::shared_ptr<static_mesh> pCube1;
 	std::shared_ptr<static_mesh> pCube2;
-	OBB obb1;
-	OBB obb2;
+	::OBB obb1;
+	::OBB obb2;
 	DirectX::XMFLOAT4 color1;
 	DirectX::XMFLOAT4 color2;
 	float angle1[3];
 	float angle2[3];
+	bool exist1;
+	bool exist2;
+
+//	EruptionEffect eruptionEffect;
+	Stage stage;
+
+	Donya::Vector3 cameraPos;
+	Donya::Vector3 cameraFocusOffset;
+	Lights	lights;
+
+	Donya::Vector3 originPos;
+
+	fbx_shader shader;
 
 public:
-	SceneEffect() {}
+	SceneEffect() : stage(), cameraPos(), cameraFocusOffset(), lights(), shader(){}
 	~SceneEffect()
 	{
 		uninit();

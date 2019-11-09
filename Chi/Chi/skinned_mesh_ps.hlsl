@@ -90,7 +90,7 @@ float4 main(VS_OUT pin) : SV_TARGET
 			continue;
 
 		L = pntLight[i].pos.xyz - pin.posw.xyz;
-		D = length(L);S
+		D = length(L);
 		L = normalize(L);
 		A = saturate(1.0f / (pntLight[i].attenuate.x + pntLight[i].attenuate.y * D + pntLight[i].attenuate.z * D * D));
 

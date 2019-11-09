@@ -1,0 +1,27 @@
+{
+    "KnightAI": {
+        "cereal_class_version": 0,
+        "wholeFrame": {
+            "value0": 105,
+            "value1": 207,
+            "value2": 339
+        },
+        "coolTimeFrame": {
+            "value0": 60,
+            "value1": 60,
+            "value2": 60
+        },
+        "waitPercents": {
+            "value0": 10,
+            "value1": 30
+        },
+        "attackPercents": {
+            "value0": 10,
+            "value1": 10
+        },
+        "gapIntervals": [
+            2,
+            1
+        ]
+    }
+}

@@ -7,7 +7,7 @@ Camera::Camera()
 	target = DirectX::XMFLOAT3(.0f, .0f, .0f);
 	state = cameraNumber::MONITORING;
 	constexpr float fov = DirectX::XMConvertToRadians(30.0f);
-	float aspect = pSystem->SCREEN_WIDTH / pSystem->SCREEN_HEIGHT;
+	float aspect = static_cast<float>( pSystem->SCREEN_WIDTH ) / static_cast<float>( pSystem->SCREEN_HEIGHT );
 	SetPerspectiveMatrix(fov, aspect, 0.1f, 100000.0f);
 }
 

@@ -516,7 +516,7 @@ void skinned_mesh::render(
 				{
 
 					//現在のアニメーションフレームの算出
-					animation_flame = (it.skeletal_animation.animation_tick / it.skeletal_animation.sampling_time);
+					animation_flame = static_cast<int>(it.skeletal_animation.animation_tick / it.skeletal_animation.sampling_time);
 
 					//ループ用
 					if (loop_flg)

@@ -1,0 +1,226 @@
+{
+    "Golem": {
+        "cereal_class_version": 9,
+        "scale": 1.0,
+        "hitBoxesBody": [
+            {
+                "cereal_class_version": 0,
+                "pos": {
+                    "cereal_class_version": 0,
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 8.0
+                },
+                "size": {
+                    "x": 100.0,
+                    "y": 200.0,
+                    "z": 80.0
+                },
+                "exist": true
+            },
+            {
+                "pos": {
+                    "x": 160.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "size": {
+                    "x": 50.0,
+                    "y": 100.0,
+                    "z": 50.0
+                },
+                "exist": true
+            },
+            {
+                "pos": {
+                    "x": -160.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "size": {
+                    "x": 50.0,
+                    "y": 100.0,
+                    "z": 50.0
+                },
+                "exist": true
+            }
+        ],
+        "initPosPerStage": [
+            {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 295.0
+            },
+            {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 191.0
+            },
+            {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 124.0
+            }
+        ],
+        "drawOffsetsPerStage": [
+            {
+                "x": 0.0,
+                "y": -60.0,
+                "z": 0.0
+            },
+            {
+                "x": 0.0,
+                "y": -60.0,
+                "z": 0.0
+            },
+            {
+                "x": 0.0,
+                "y": -60.0,
+                "z": 0.0
+            }
+        ],
+        "OBBAttacksSwing": [
+            {
+                "cereal_class_version": 0,
+                "enableFrameStart": -1,
+                "enableFrameLast": -1,
+                "OBB": {
+                    "cereal_class_version": 0,
+                    "pos": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 100.0,
+                        "y": 100.0,
+                        "z": 100.0
+                    },
+                    "orientation": {
+                        "cereal_class_version": 0,
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0,
+                        "w": 1.0
+                    },
+                    "exist": false
+                }
+            }
+        ],
+        "OBBFAttacksFast": [
+            {
+                "cereal_class_version": 0,
+                "OBBF": {
+                    "enableFrameStart": 38,
+                    "enableFrameLast": 62,
+                    "OBB": {
+                        "pos": {
+                            "x": 0.0,
+                            "y": -60.0,
+                            "z": -60.0
+                        },
+                        "size": {
+                            "x": 100.0,
+                            "y": 128.0,
+                            "z": 128.0
+                        },
+                        "orientation": {
+                            "x": 0.0,
+                            "y": 0.4794255495071411,
+                            "z": 0.0,
+                            "w": 0.8775825500488281
+                        },
+                        "exist": false
+                    }
+                },
+                "meshName": "MDL_HandL"
+            },
+            {
+                "OBBF": {
+                    "enableFrameStart": 115,
+                    "enableFrameLast": 130,
+                    "OBB": {
+                        "pos": {
+                            "x": 0.0,
+                            "y": -60.0,
+                            "z": -60.0
+                        },
+                        "size": {
+                            "x": 100.0,
+                            "y": 128.0,
+                            "z": 128.0
+                        },
+                        "orientation": {
+                            "x": 0.0,
+                            "y": -0.4794255495071411,
+                            "z": 0.0,
+                            "w": 0.8775825500488281
+                        },
+                        "exist": false
+                    }
+                },
+                "meshName": "MDL_HandR"
+            },
+            {
+                "OBBF": {
+                    "enableFrameStart": 200,
+                    "enableFrameLast": 215,
+                    "OBB": {
+                        "pos": {
+                            "x": 0.0,
+                            "y": -60.0,
+                            "z": -60.0
+                        },
+                        "size": {
+                            "x": 100.0,
+                            "y": 128.0,
+                            "z": 128.0
+                        },
+                        "orientation": {
+                            "x": 0.0,
+                            "y": 0.4794255495071411,
+                            "z": 0.0,
+                            "w": 0.8775825500488281
+                        },
+                        "exist": false
+                    }
+                },
+                "meshName": "MDL_HandL"
+            }
+        ],
+        "stageBodyRadius": -29.0,
+        "targetDistNear": 0.20000000298023225,
+        "targetDistFar": 0.44999998807907107,
+        "moveMoveSpeed": 6.0,
+        "attackFastMoveSpeed": 6.0,
+        "idleSlerpFactor": 0.30000001192092898,
+        "moveSlerpFactor": 0.15000000596046449,
+        "attackFastSlerpFactor": 0.009999999776482582,
+        "attackRotateMoveSpeed": 0.0,
+        "attackRotateSlerpFactor": 1.0,
+        "rotateAttackCollisions": [
+            {
+                "cereal_class_version": 0,
+                "enableFrameStart": 45,
+                "enableFrameLast": 100,
+                "collision": {
+                    "cereal_class_version": 0,
+                    "pos": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "radius": 230.0,
+                    "exist": true
+                }
+            }
+        ],
+        "rotLeaveEaseKind": 8,
+        "rotLeaveEaseType": 1,
+        "rotLeaveStartFrame": 70,
+        "rotLeaveWholeFrame": 60,
+        "rotLeaveDistance": 666.0,
+        "swingStopFrame": 105,
+        "swingStopLength": 0.699999988079071
+    }
+}

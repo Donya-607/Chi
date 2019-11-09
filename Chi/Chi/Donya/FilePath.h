@@ -17,11 +17,29 @@ std::wstring GetSpritePath( SpriteAttribute spriteAttribute );
 enum class ModelAttribute
 {
 	PlayerIdle,
+	PlayerRun,
 	PlayerAtk,
+	PlayerDefend,
 	Stage,
-	BossIdle,
-	BossAtkFast,
-	BossAtkSwing,
+	GolemIdle,
+	GolemAtkSwing,
+	GolemAtkFast,
+	GolemAtkRotate,
+	KnightIdle,
+	KnightRunFront,
+	KnightAtkExplosion,
+	KnightAtkSwing,
+	KnightAtkRaid,
 };
 
 std::string GetModelPath( ModelAttribute modelAttribute );
+
+enum class MusicAttribute
+{
+	PlayerDefend,
+	PlayerProtected,
+
+	MUSIC_COUNT
+};
+
+std::string GetMusicPath( MusicAttribute musicAttribute );

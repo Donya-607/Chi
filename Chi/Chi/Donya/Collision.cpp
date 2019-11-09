@@ -283,7 +283,7 @@ namespace Donya
 
 	bool AABB::IsHitPoint	( const AABB &L, const Donya::Vector3 &R, bool ignoreExistFlag )
 	{
-		if ( !ignoreExistFlag && !L.exist ) { return false; }
+		if ( !ignoreExistFlag && !L.enable || !L.exist ) { return false; }
 		// else
 
 		constexpr size_t AXIS_COUNT = 3;
@@ -303,7 +303,7 @@ namespace Donya
 	}
 	bool AABB::IsHitAABB	( const AABB &L, const AABB &R, bool ignoreExistFlag )
 	{
-		if ( !ignoreExistFlag && ( !L.exist || !R.exist ) ) { return false; }
+		if ( !ignoreExistFlag && ( !L.enable || !R.enable || !L.exist || !R.exist ) ) { return false; }
 		// else
 
 		// Judge by "AABB of extended by size of other" vs "position of other".
@@ -318,7 +318,7 @@ namespace Donya
 	}
 	bool AABB::IsHitSphere	( const AABB &L, const Sphere &R, bool ignoreExistFlag )
 	{
-		if ( !ignoreExistFlag && ( !L.exist || !R.exist ) ) { return false; }
+		if ( !ignoreExistFlag && ( !L.enable || !R.enable || !L.exist || !R.exist ) ) { return false; }
 		// else
 
 		auto CalcShortestDistanceSq = []( const AABB &L, const Donya::Vector3 &R )->float
@@ -354,7 +354,7 @@ namespace Donya
 
 	bool Sphere::IsHitPoint	( const Sphere &L, const Donya::Vector3 &R, bool ignoreExistFlag )
 	{
-		if ( !ignoreExistFlag && !L.exist ) { return false; }
+		if ( !ignoreExistFlag && !L.enable || !L.exist ) { return false; }
 		// else
 
 		Donya::Vector3 d = R - L.pos;
@@ -362,7 +362,7 @@ namespace Donya
 	}
 	bool Sphere::IsHitSphere( const Sphere &L, const Sphere &R, bool ignoreExistFlag )
 	{
-		if ( !ignoreExistFlag && ( !L.exist || !R.exist ) ) { return false; }
+		if ( !ignoreExistFlag && ( !L.enable || !R.enable || !L.exist || !R.exist ) ) { return false; }
 		// else
 
 		float r = L.radius + R.radius;
@@ -372,7 +372,7 @@ namespace Donya
 	}
 	bool Sphere::IsHitAABB	( const Sphere &L, const AABB &R, bool ignoreExistFlag )
 	{
-		if ( !ignoreExistFlag && ( !L.exist || !R.exist ) ) { return false; }
+		if ( !ignoreExistFlag && ( !L.enable || !R.enable || !L.exist || !R.exist ) ) { return false; }
 		// else
 
 		return AABB::IsHitSphere( R, L );
@@ -380,7 +380,7 @@ namespace Donya
 
 	bool OBB::JudgeOBB( const OBB *obb, bool ignoreExistFlag ) const
 	{
-		if ( !ignoreExistFlag && ( !exist || !obb->exist ) ) { return false; }
+		if ( !ignoreExistFlag && ( !enable || !obb->enable || !exist || !obb->exist ) ) { return false; }
 		// else
 
 		DirectX::XMFLOAT3 Nv1_1;
@@ -661,6 +661,72 @@ namespace Donya
 
 
 		return true;
+	}
+
+	float CalcShortestDistance( const OBB &L, const Donya::Vector3 &point )
+	{
+		// see http://marupeke296.com/COL_3D_No12_OBBvsPoint.html
+
+		enum IntAxis{ X = 0, Y, Z, END };
+		auto ExtractHalfLength  = []( const OBB &OBB, IntAxis axisIndex )->float
+		{
+			_ASSERT_EXPR( 0 <= axisIndex && axisIndex < END, L"Error : Passed index out of range !" );
+
+			switch ( axisIndex )
+			{
+			case X: return OBB.size.x; // break;
+			case Y: return OBB.size.y; // break;
+			case Z: return OBB.size.z; // break;
+			default: break;
+			}
+
+			return NULL;
+		};
+		auto ExtractRotatedAxis = []( const OBB &OBB, IntAxis axisIndex )->Donya::Vector3
+		{
+			_ASSERT_EXPR( 0 <= axisIndex && axisIndex < END, L"Error : Passed index out of range !" );
+
+			Donya::Vector3 axis{};
+			switch ( axisIndex )
+			{
+			case X: axis = Donya::Vector3{ 1.0f, 0.0f, 0.0f }; break;
+			case Y: axis = Donya::Vector3{ 0.0f, 1.0f, 0.0f }; break;
+			case Z: axis = Donya::Vector3{ 0.0f, 0.0f, 1.0f }; break;
+			default: return {};
+			}
+
+			return OBB.orientation.RotateVector( axis );
+		};
+
+		Donya::Vector3 protrudedSum{};
+
+		for ( int i = 0; i < END; ++i )
+		{
+			Donya::Vector3 axis	= ExtractRotatedAxis( L, static_cast<IntAxis>( i ) );
+			float halfLength	= ExtractHalfLength ( L, static_cast<IntAxis>( i ) );
+
+			if ( halfLength <= 0 ) { continue; } // This case can not calculate.
+			// else
+
+			float magni = Donya::Vector3::Dot( ( point - L.pos ), axis ) / halfLength;
+			magni = fabsf( magni );
+
+			if ( 1.0f < magni )
+			{
+				protrudedSum += ( 1.0f - magni ) * halfLength * axis;
+			}
+		}
+
+		return protrudedSum.Length();
+	}
+
+	bool OBB::IsHitSphere( const OBB &L, const Sphere &R, bool ignoreExistFlag )
+	{
+		if ( !ignoreExistFlag && ( !L.enable || !R.enable || !L.exist || !R.exist ) ) { return false; }
+		// else
+
+		float distance = CalcShortestDistance( L, R.pos );
+		return ( distance <= R.radius ) ? true : false;
 	}
 
 	bool operator == ( const Box	&L, const Box		&R )

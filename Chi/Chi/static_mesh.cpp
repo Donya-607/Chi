@@ -351,9 +351,9 @@ bool static_mesh::createBuffer(ID3D11Device* device, vertex* vertices, int numV,
 	HRESULT hr;
 	D3D11_BUFFER_DESC vertexBuffer_desc;
 	vertexBuffer_desc.ByteWidth = numV * sizeof(vertex);
-	vertexBuffer_desc.Usage = D3D11_USAGE_IMMUTABLE;
+	vertexBuffer_desc.Usage = D3D11_USAGE_DYNAMIC;
 	vertexBuffer_desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;	//ÉoÉCÉìÉhéûÇÃéØï 
-	vertexBuffer_desc.CPUAccessFlags = 0;
+	vertexBuffer_desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	vertexBuffer_desc.MiscFlags = 0;
 	vertexBuffer_desc.StructureByteStride = 0;
 
@@ -608,7 +608,7 @@ void static_mesh::createBillboard(ID3D11Device* _device, const wchar_t* _texture
 	UINT numElements = ARRAYSIZE(input_desc);
 	std::string vsName = "./Data/shader/obj_vs.cso";
 	std::string psName = "./Data/shader/obj_ps.cso";
-	orientation = { 0,0,-1,1 };
+	orientation = Donya::Quaternion::Make(Donya::Vector3::Up(), 0);
 	materials.emplace_back();
 	materials.back().Ka = { 0,0,0 };
 	materials.back().Kd = { 0,0,0 };
@@ -845,35 +845,57 @@ void static_mesh::billboardRender(
 	ID3D11DeviceContext* context,
 	const DirectX::XMFLOAT4X4& SynthesisMatrix,
 	const DirectX::XMFLOAT4& pos,
-	const float scale,
+	const DirectX::XMFLOAT2 scale,
 	const float angle,
 	const DirectX::XMFLOAT4& camPos,
 	const DirectX::XMFLOAT2& texpos, const DirectX::XMFLOAT2& texsize)
 {
+
+	HRESULT hr = S_OK;
+	D3D11_MAP map = D3D11_MAP_WRITE_DISCARD;
+	D3D11_MAPPED_SUBRESOURCE mapped_buffer;
+	hr = context->Map(vertex_buffer, 0, map, 0, &mapped_buffer);
+	_ASSERT_EXPR(SUCCEEDED(hr), hr_trace(hr));
+
+	vertex* vertices = static_cast<vertex*>(mapped_buffer.pData);
+
 	DirectX::XMINT2 tex = { (int)materials.back().tex2dDesc.Width,(int)materials.back().tex2dDesc.Height };
-	subsets.back().m_vertexes[0].texcoord = { texpos.x / tex.x * 1.0f,texpos.y / tex.y * 1.0f };
-	subsets.back().m_vertexes[1].texcoord = { (texpos.x + texsize.x) / tex.x * 1.0f,texpos.y / tex.y * 1.0f };
-	subsets.back().m_vertexes[2].texcoord = { texpos.x / tex.x * 1.0f,(texpos.y + texsize.y) / tex.y * 1.0f };
-	subsets.back().m_vertexes[3].texcoord = { (texpos.x + texsize.x) / tex.x * 1.0f,(texpos.y + texsize.y) / tex.y * 1.0f };
+	vertices[0].texcoord = { texpos.x / tex.x * 1.0f,texpos.y / tex.y * 1.0f };
+	vertices[1].texcoord = { (texpos.x + texsize.x) / tex.x * 1.0f,texpos.y / tex.y * 1.0f };
+	vertices[2].texcoord = { texpos.x / tex.x * 1.0f,(texpos.y + texsize.y) / tex.y * 1.0f };
+	vertices[3].texcoord = { (texpos.x + texsize.x) / tex.x * 1.0f,(texpos.y + texsize.y) / tex.y * 1.0f };
+
+	vertices[0].position = DirectX::XMFLOAT3(-0.5f, +0.5f, 0);
+	vertices[1].position = DirectX::XMFLOAT3(+0.5f, +0.5f, 0);
+	vertices[2].position = DirectX::XMFLOAT3(-0.5f, -0.5f, 0);
+	vertices[3].position = DirectX::XMFLOAT3(+0.5f, -0.5f, 0);
+
+
+	vertices[0].normal = vertices[1].normal =
+		vertices[2].normal = vertices[3].normal = DirectX::XMFLOAT3(+0.0f, +0.0f, -1.0f);
+
+	context->Unmap(vertex_buffer, 0);
 
 	//transformVertex
-	{
-		DirectX::XMFLOAT3 direction = { camPos.x - pos.x,camPos.y - pos.y,camPos.z - pos.z };
-		float size = sqrtf(direction.x * direction.x + direction.y * direction.y + direction.z * direction.z);
-		direction = { direction.x / size,direction.y / size,direction.z / size };
 
+	DirectX::XMFLOAT3 direction = { camPos.x - pos.x,camPos.y - pos.y,camPos.z - pos.z };
+	float size = sqrtf(direction.x * direction.x + direction.y * direction.y + direction.z * direction.z);
+	direction = { -direction.x / size,-direction.y / size,-direction.z / size };
 
-		orientation = Quaternion::LookAt(orientation, direction);
+	orientation = Quaternion::LookAt(orientation, direction).Normalized();
+	Quaternion front = Donya::Quaternion::Make(orientation.LocalFront(), angle * 3.14f / 180.0f);
+	Quaternion rotate = orientation;
+	rotate.RotateBy(front);
+	rotate.Normalized();
 
-	}
 	DirectX::XMMATRIX S, R, T, world;
 	T = DirectX::XMMatrixTranslation(pos.x, pos.y, pos.z);
 
 	//	ägëÂÅEèkè¨
-	S = DirectX::XMMatrixScaling(scale, scale, 1);
+	S = DirectX::XMMatrixScaling(scale.x, scale.y, 1);
 
 	//	âÒì]
-	R = DirectX::XMLoadFloat4x4(&orientation.RequireRotationMatrix());
+	R = DirectX::XMLoadFloat4x4(&rotate.RequireRotationMatrix());
 
 	world = S * R * T;
 

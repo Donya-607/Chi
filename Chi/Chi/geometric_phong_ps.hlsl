@@ -72,8 +72,8 @@ float4 main(VS_OUT pin) : SV_TARGET
 
 	color = material.ambient.xyz;
 
-	_color = material.ambient.xyz * HalfLambart_L(N, _L, line_light.color.xyz,material.diffuse.xyz) +
-		BlinnPhong_L(N, _L, line_light.color.xyz,V, material.specular.xyz, material.specular.w);
+	_color = material.ambient.xyz * HalfLambart_L(N, _L.xyz, line_light.color.xyz,material.diffuse.xyz) +
+		BlinnPhong_L(N, _L.xyz, line_light.color.xyz,V, material.specular.xyz, material.specular.w);
 
 
 	for (int i = 0; i < 5; i++)

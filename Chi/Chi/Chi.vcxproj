@@ -141,16 +141,16 @@
     <ClInclude Include="baseScene.h" />
     <ClInclude Include="blend.h" />
     <ClInclude Include="bloom.h" />
-    <ClInclude Include="Boss.h" />
-    <ClInclude Include="BossAI.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Donya\AudioSystem.h" />
     <ClInclude Include="Donya\ChiUtility.h" />
     <ClInclude Include="Donya\Collision.h" />
     <ClInclude Include="Donya\Constant.h" />
+    <ClInclude Include="Donya\Easing.h" />
     <ClInclude Include="Donya\FilePath.h" />
     <ClInclude Include="Donya\Keyboard.h" />
     <ClInclude Include="Donya\Quaternion.h" />
+    <ClInclude Include="Donya\Random.h" />
     <ClInclude Include="Donya\Serializer.h" />
     <ClInclude Include="Donya\Sound.h" />
     <ClInclude Include="Donya\Template.h" />
@@ -158,12 +158,17 @@
     <ClInclude Include="Donya\UseImGui.h" />
     <ClInclude Include="Donya\Vector.h" />
     <ClInclude Include="dragDrop.h" />
+    <ClInclude Include="Effect.h" />
     <ClInclude Include="font.h" />
     <ClInclude Include="frame_rate.h" />
     <ClInclude Include="gameLib.h" />
     <ClInclude Include="GameLibFunctions.h" />
+    <ClInclude Include="Golem.h" />
+    <ClInclude Include="GolemAI.h" />
     <ClInclude Include="high_resolution_timer.h" />
     <ClInclude Include="keyInput.h" />
+    <ClInclude Include="Knight.h" />
+    <ClInclude Include="KnightAI.h" />
     <ClInclude Include="liblary\imgui\imconfig.h" />
     <ClInclude Include="liblary\imgui\imgui.h" />
     <ClInclude Include="liblary\imgui\imgui_impl_dx11.h" />
@@ -195,8 +200,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="bloom.cpp" />
-    <ClCompile Include="Boss.cpp" />
-    <ClCompile Include="BossAI.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Donya\AudioSystem.cpp" />
     <ClCompile Include="Donya\ChiUtility.cpp" />
@@ -204,15 +207,21 @@
     <ClCompile Include="Donya\FilePath.cpp" />
     <ClCompile Include="Donya\Keyboard.cpp" />
     <ClCompile Include="Donya\Quaternion.cpp" />
+    <ClCompile Include="Donya\Random.cpp" />
     <ClCompile Include="Donya\Sound.cpp" />
     <ClCompile Include="Donya\Useful.cpp" />
     <ClCompile Include="Donya\UseImGui.cpp" />
     <ClCompile Include="Donya\Vector.cpp" />
     <ClCompile Include="DragDrop.cpp" />
+    <ClCompile Include="Effect.cpp" />
     <ClCompile Include="font.cpp" />
     <ClCompile Include="frame_rate.cpp" />
     <ClCompile Include="gameLib.cpp" />
     <ClCompile Include="gameLibFunctions.cpp" />
+    <ClCompile Include="Golem.cpp" />
+    <ClCompile Include="GolemAI.cpp" />
+    <ClCompile Include="Knight.cpp" />
+    <ClCompile Include="KnightAI.cpp" />
     <ClCompile Include="liblary\imgui\imgui.cpp" />
     <ClCompile Include="liblary\imgui\imgui_demo.cpp" />
     <ClCompile Include="liblary\imgui\imgui_draw.cpp" />

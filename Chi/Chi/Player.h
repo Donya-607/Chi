@@ -21,6 +21,7 @@ class PlayerParam final : public Donya::Singleton<PlayerParam>
 	friend Donya::Singleton<PlayerParam>;
 private:
 	int		frameUnfoldableDefence;	// 1 ~ N. Use when State::Defend.
+	int		shieldsRecastFrame;		// Frame of reuse shield.
 	int		frameCancelableAttack;	// 1 ~ "frameWholeAttacking". Use when State::Attack.
 	int		frameWholeAttacking;	// 1 ~ N. this whole frame is irrelevant by "frameCancelableAttack". Use when State::Attack.
 	float	scale;					// Usually 1.0f.
@@ -75,6 +76,10 @@ private:
 		}
 		if ( 5 <= version )
 		{
+			archive( CEREAL_NVP( shieldsRecastFrame ) );
+		}
+		if ( 6 <= version )
+		{
 			// archive( CEREAL_NVP( x ) );
 		}
 	}
@@ -84,6 +89,7 @@ public:
 	void Uninit();
 public:
 	int		FrameWholeDefence()		const { return frameUnfoldableDefence; }
+	int		FrameReuseShield()		const { return shieldsRecastFrame; }
 	int		FrameCancelableAttack()	const { return frameCancelableAttack; }
 	int		FrameWholeAttacking()	const { return frameWholeAttacking; }
 	float	Scale()					const { return scale; }
@@ -106,10 +112,10 @@ public:
 
 #endif // USE_IMGUI
 };
-CEREAL_CLASS_VERSION( PlayerParam, 4 )
+CEREAL_CLASS_VERSION( PlayerParam, 5 )
 
-class skinned_mesh;	// With pointer. because I'm not want include this at header.
-struct fbx_shader;
+class  skinned_mesh;	// With pointer. because I'm not want include this at header.
+struct fbx_shader;		// Use for argument.
 class Player
 {
 public:
@@ -138,8 +144,10 @@ public:
 private:
 	struct Models
 	{
-		std::unique_ptr<skinned_mesh> pIdle{ nullptr };
-		std::unique_ptr<skinned_mesh> pAttack{ nullptr };
+		std::shared_ptr<skinned_mesh> pIdle{ nullptr };
+		std::shared_ptr<skinned_mesh> pRun{ nullptr };
+		std::shared_ptr<skinned_mesh> pDefend{ nullptr };
+		std::shared_ptr<skinned_mesh> pAttack{ nullptr };
 	};
 	enum class State
 	{
@@ -147,17 +155,18 @@ private:
 		Run,
 		Defend,
 		Attack,
+		Dead,
 	};
 private:
 	State				status;
 	int					timer;				// Recycle between each state.
+	int					shieldsRecastTime;	// I can defend when this time is zero.
 	float				fieldRadius;		// For collision to wall. the field is perfect-circle, so I can detect collide to wall by distance.
 	Donya::Vector3		pos;				// In world space.
 	Donya::Vector3		velocity;			// In world space.
 	Donya::Vector3		lookDirection;		// In world space.
 	Donya::Quaternion	orientation;
 	Models				models;
-	bool				isHoldingDefence;	// Prevent user keeped holded defence button. true when hold defence button, false when detected release the button.
 	bool				wasSucceededDefence;
 public:
 	Player();
@@ -168,7 +177,7 @@ public:
 
 	void Update( Input input );
 
-	void Draw(fbx_shader& hlsl, const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matProjection );
+	void Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matProjection );
 public:
 	/// <summary>
 	/// Returns world-space position.
@@ -186,12 +195,14 @@ public:
 	/// <summary>
 	/// Returns world space hit-box of attack.
 	/// </summary>
-	Donya::OBB GetAttackHitBox() const;
+	Donya::OBB CalcAttackHitBox() const;
 
 	/// <summary>
 	/// Please call when succeeded defence by enemy's attack.
 	/// </summary>
 	void SucceededDefence();
+
+	void ReceiveImpact();
 
 	void SetFieldRadius( float fieldRadius );
 private:

@@ -3,6 +3,7 @@
 #include <array>
 
 #include "Donya/FilePath.h"
+#include "Donya/Sound.h"
 #include "Donya/Useful.h"		// Use convert character-code function.
 #include "Donya/UseImGui.h"
 
@@ -21,7 +22,7 @@
 #define scast static_cast
 
 PlayerParam::PlayerParam() :
-	frameUnfoldableDefence( 1 ), frameCancelableAttack( 1 ), frameWholeAttacking( 1 ),
+	frameUnfoldableDefence( 1 ), shieldsRecastFrame( 1 ), frameCancelableAttack( 1 ), frameWholeAttacking( 1 ),
 	scale( 1.0f ), runSpeed( 1.0f ), rotSlerpFactor( 0.3f ),
 	hitBoxBody(), hitBoxPhysic(), hitBoxShield(), hitBoxLance(),
 	lanceMeshName()
@@ -76,6 +77,7 @@ void PlayerParam::UseImGui()
 		if ( ImGui::TreeNode( "Player.AdjustData" ) )
 		{
 			ImGui::SliderInt( "Defence.WholeExpandingFrame", &frameUnfoldableDefence, 1, 120 );
+			ImGui::SliderInt( "Defence.RecastFrame", &shieldsRecastFrame, 0, 360 );
 			ImGui::SliderInt( "Attack.CancelableFrame", &frameCancelableAttack, 1, frameWholeAttacking );
 			ImGui::SliderInt( "Attack.WholeAttackingFrame", &frameWholeAttacking, 1, 300 );
 			ImGui::Text( "" );
@@ -168,27 +170,39 @@ void PlayerParam::UseImGui()
 
 Player::Player() :
 	status( State::Idle ),
-	timer( 0 ),
+	timer( 0 ), shieldsRecastTime( 0 ),
 	fieldRadius( 0 ),
 	pos(), velocity(), lookDirection(),
 	orientation(),
 	models(),
-	isHoldingDefence( false ), wasSucceededDefence( false )
+	wasSucceededDefence( false )
 {
-	auto InitializeModel = []( std::unique_ptr<skinned_mesh> *ppMesh )
+	auto InitializeModel = []( std::shared_ptr<skinned_mesh> *ppMesh )
 	{
-		*ppMesh = std::make_unique<skinned_mesh>();
+		*ppMesh = std::make_shared<skinned_mesh>();
 		setAnimFlame( ppMesh->get(), 0 );
 	};
 
-	std::vector<std::unique_ptr<skinned_mesh> *> modelRefs
+	std::vector<std::shared_ptr<skinned_mesh> *> modelRefs
 	{
 		&models.pIdle,
+		&models.pRun,
+		&models.pDefend,
 		&models.pAttack,
 	};
 	for ( auto &it : modelRefs )
 	{
 		InitializeModel( it );
+	}
+
+	std::vector<std::shared_ptr<skinned_mesh> *> dontLoopModels
+	{
+		&models.pDefend,
+		&models.pAttack,
+	};
+	for ( auto &it : dontLoopModels )
+	{
+		setLoopFlg( it->get(), /* is_loop = */ false );
 	}
 }
 Player::~Player() = default;
@@ -199,7 +213,7 @@ void Player::Init()
 	SetFieldRadius( 0.0f ); // Set to body's radius.
 
 	LoadModel();
-
+	
 	lookDirection = Donya::Vector3::Front();
 	orientation   = Donya::Quaternion::Identity();
 
@@ -209,8 +223,10 @@ void Player::Uninit()
 {
 	PlayerParam::Get().Uninit();
 
-	models.pIdle.reset( nullptr );
-	models.pAttack.reset( nullptr );
+	models.pIdle.reset();
+	models.pRun.reset();
+	models.pDefend.reset();
+	models.pAttack.reset();
 }
 
 void Player::Update( Input input )
@@ -229,7 +245,7 @@ void Player::Update( Input input )
 	CollideToWall();
 }
 
-void Player::Draw(fbx_shader& hlsl, const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matProjection )
+void Player::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matProjection )
 {
 	Donya::Vector4x4 W = CalcWorldMatrix();
 	Donya::Vector4x4 WVP = W * matView * matProjection;
@@ -237,24 +253,16 @@ void Player::Draw(fbx_shader& hlsl, const Donya::Vector4x4 &matView, const Donya
 	switch ( status )
 	{
 	case Player::State::Idle:
-		{
-			FBXRender( models.pIdle.get(),hlsl, WVP, W );
-		}
+		FBXRender( models.pIdle.get(), HLSL, WVP, W );
 		break;
 	case Player::State::Run:
-		{
-			FBXRender( models.pIdle.get(),hlsl, WVP, W );
-		}
+		FBXRender( models.pRun.get(), HLSL,WVP, W );
 		break;
 	case Player::State::Defend:
-		{
-			FBXRender( models.pIdle.get(),hlsl, WVP, W );
-		}
+		FBXRender( models.pDefend.get(), HLSL,WVP, W );
 		break;
 	case Player::State::Attack:
-		{
-			FBXRender( models.pAttack.get(),hlsl, WVP, W );
-		}
+		FBXRender( models.pAttack.get(), HLSL, WVP, W );
 		break;
 	default: break;
 	}
@@ -313,8 +321,8 @@ void Player::Draw(fbx_shader& hlsl, const Donya::Vector4x4 &matView, const Donya
 
 		const auto &PARAM = PlayerParam::Get();
 
-		constexpr Donya::Vector4 BODY_COLOR  { 1.0f, 1.0f, 1.0f, 0.5f };
-		constexpr Donya::Vector4 PHYSIC_COLOR{ 0.0f, 0.3f, 0.8f, 0.5f };
+		constexpr Donya::Vector4 BODY_COLOR  { 1.0f, 1.0f, 1.0f, 0.6f };
+		constexpr Donya::Vector4 PHYSIC_COLOR{ 0.0f, 0.3f, 0.8f, 0.6f };
 		const auto BODY   = PARAM.HitBoxBody();
 		const auto PHYSIC = PARAM.HitBoxPhysic();
 		if ( BODY.exist   ) { DrawCube  ( BODY.pos,   BODY.size,     BODY_COLOR   ); }
@@ -322,17 +330,17 @@ void Player::Draw(fbx_shader& hlsl, const Donya::Vector4x4 &matView, const Donya
 
 		if ( status == State::Defend )
 		{
-			constexpr Donya::Vector4 SHIELD_COLOR{ 0.2f, 0.8f, 0.2f, 0.5f };
-			constexpr Donya::Vector4 SHIELD_COLOR_SUCCEEDED{ 0.6f, 1.0f, 0.6f, 0.5f };
+			constexpr Donya::Vector4 SHIELD_COLOR{ 0.2f, 0.8f, 0.2f, 0.6f };
+			constexpr Donya::Vector4 SHIELD_COLOR_SUCCEEDED{ 0.8f, 1.0f, 1.0f, 0.6f };
 			const auto SHIELD = PARAM.HitBoxShield();
 			Donya::Vector4 color = ( wasSucceededDefence ) ? SHIELD_COLOR_SUCCEEDED : SHIELD_COLOR;
 			DrawCube( SHIELD.pos, SHIELD.size, color );
 		}
 		if ( status == State::Attack )
 		{
-			constexpr Donya::Vector4 LANCE_COLOR_VALID{ 1.0f, 0.8f, 0.5f, 1.5f };
-			constexpr Donya::Vector4 LANCE_COLOR_INVALID{ 0.5f, 0.5f, 0.5f, 1.5f };
-			const Donya::OBB actualOBB = GetAttackHitBox();
+			constexpr Donya::Vector4 LANCE_COLOR_VALID{ 1.0f, 0.8f, 0.5f, 0.6f };
+			constexpr Donya::Vector4 LANCE_COLOR_INVALID{ 0.5f, 0.5f, 0.5f, 0.6f };
+			const Donya::OBB actualOBB = CalcAttackHitBox();
 			Donya::Vector4 color = ( actualOBB.exist ) ? LANCE_COLOR_VALID: LANCE_COLOR_INVALID;
 			DrawOBB( actualOBB, color, /* applyParentMatrix = */ false );
 		}
@@ -341,10 +349,10 @@ void Player::Draw(fbx_shader& hlsl, const Donya::Vector4x4 &matView, const Donya
 #endif // DEBUG_MODE
 }
 
-Donya::OBB MakeOBB( const Donya::AABB &AABB, const Donya::Quaternion &orientation )
+static Donya::OBB MakeOBB( const Donya::AABB &AABB, const Donya::Vector3 &wsPos, const Donya::Quaternion &orientation )
 {
 	Donya::OBB OBB{};
-	OBB.pos		= AABB.pos;
+	OBB.pos		= AABB.pos + wsPos;
 	OBB.size	= AABB.size;
 	OBB.orientation = orientation;
 	OBB.exist	= AABB.exist;
@@ -354,21 +362,25 @@ Donya::OBB Player::GetHurtBox() const
 {
 	const auto &HITBOX = PlayerParam::Get().HitBoxBody();
 
-	Donya::OBB wsOBB = MakeOBB( HITBOX, orientation );
+	Donya::OBB wsOBB = MakeOBB( HITBOX, pos, orientation );
 	return wsOBB;
 }
 Donya::OBB Player::GetShieldHitBox() const
 {
 	const auto &HITBOX = PlayerParam::Get().HitBoxShield();
 
-	Donya::OBB wsOBB = MakeOBB( HITBOX, orientation );
+	Donya::OBB wsOBB = MakeOBB( HITBOX, pos, orientation );
 	if ( status != State::Defend ) { wsOBB.exist = false; }
 	return wsOBB;
 }
-Donya::OBB Player::GetAttackHitBox() const
+Donya::OBB Player::CalcAttackHitBox() const
 {
 	const auto &PARAM = PlayerParam::Get();
 	const auto *pOBBF = PARAM.HitBoxAttackF();
+
+	const std::string meshName = PARAM.LanceMeshName();
+
+	Donya::OBB oldOBB = pOBBF->OBB;
 
 	// To world space from local space.
 	Donya::Vector4x4 parentMatrix = CalcWorldMatrix();
@@ -377,8 +389,7 @@ Donya::OBB Player::GetAttackHitBox() const
 	Donya::Vector4x4 lanceMatrix{};
 	{
 		// Input:offset in local-space. Output:transformed position.
-		Donya::Vector3 outputPos = pOBBF->OBB.pos;
-		std::string meshName = PlayerParam::Get().LanceMeshName();
+		Donya::Vector3 outputPos = oldOBB.pos;
 		bool succeeded = calcTransformedPosBySpecifyMesh( models.pAttack.get(), outputPos, meshName );
 		if ( !succeeded )
 		{
@@ -387,14 +398,35 @@ Donya::OBB Player::GetAttackHitBox() const
 		}
 		Donya::Vector4x4 T = Donya::Vector4x4::MakeTranslation( outputPos );
 
+		// Convert to world space from local space.
 		lanceMatrix = T * parentMatrix;
 	}
 
-	Donya::OBB resultOBB = pOBBF->OBB;
+	Donya::OBB resultOBB = oldOBB;
 	resultOBB.pos.x = lanceMatrix._41;
 	resultOBB.pos.y = lanceMatrix._42;
 	resultOBB.pos.z = lanceMatrix._43;
-	resultOBB.orientation.RotateBy( orientation );
+
+	// Rotation.
+	{
+		Donya::Vector3 localFront = oldOBB.pos + Donya::Vector3::Front();
+		calcTransformedPosBySpecifyMesh( models.pAttack.get(), localFront, meshName );
+		localFront.Normalize();
+
+		Donya::Vector4x4 LT = Donya::Vector4x4::MakeTranslation( localFront );
+		Donya::Vector4x4 M = LT * parentMatrix;
+
+		Donya::Vector3 resultFront{};
+		resultFront.x = M._41;
+		resultFront.y = M._42;
+		resultFront.z = M._43;
+
+		Donya::Vector3 dir = resultFront - resultOBB.pos;
+
+		oldOBB.orientation = Donya::Quaternion::LookAt( oldOBB.orientation, dir );
+		resultOBB.orientation = oldOBB.orientation;
+	}
+
 	// Should I also apply parent's scale ?
 	return resultOBB;
 }
@@ -402,6 +434,13 @@ Donya::OBB Player::GetAttackHitBox() const
 void Player::SucceededDefence()
 {
 	wasSucceededDefence = true;
+	Donya::Sound::Play( scast<int>( MusicAttribute::PlayerProtected ) );
+}
+
+void Player::ReceiveImpact()
+{
+	status = State::Dead;
+	velocity = 0.0f;
 }
 
 void Player::SetFieldRadius( float newFieldRadius )
@@ -412,24 +451,45 @@ void Player::SetFieldRadius( float newFieldRadius )
 
 void Player::LoadModel()
 {
-	loadFBX( models.pIdle.get(),	GetModelPath( ModelAttribute::PlayerIdle ) );
-	loadFBX( models.pAttack.get(),	GetModelPath( ModelAttribute::PlayerAtk ) );
+	Donya::OutputDebugStr( "Begin Player::LoadModel.\n" );
+
+	loadFBX( models.pIdle.get(),	GetModelPath( ModelAttribute::PlayerIdle	) );
+	Donya::OutputDebugStr( "Done PlayerModel.Wait\n" );
+	loadFBX( models.pRun.get(),		GetModelPath( ModelAttribute::PlayerRun		) );
+	Donya::OutputDebugStr( "Done PlayerModel.Run\n" );
+	loadFBX( models.pDefend.get(),	GetModelPath( ModelAttribute::PlayerDefend	) );
+	Donya::OutputDebugStr( "Done PlayerModel.Defend\n" );
+	loadFBX( models.pAttack.get(),	GetModelPath( ModelAttribute::PlayerAtk		) );
+	Donya::OutputDebugStr( "Done PlayerModel.Attack\n" );
+
+	Donya::OutputDebugStr( "End Player::LoadModel.\n" );
 }
 
 Donya::Vector4x4 Player::CalcWorldMatrix() const
 {
 	Donya::Vector4x4 S = Donya::Vector4x4::MakeScaling( PlayerParam::Get().Scale() );
 	Donya::Vector4x4 R = orientation.RequireRotationMatrix();
+#if DEBUG_MODE
+	if ( status == State::Dead ) { R = Donya::Quaternion::Make( Donya::Vector3::Front(), ToRadian( 180.0f ) ).RequireRotationMatrix(); }
+#endif // DEBUG_MODE
 	Donya::Vector4x4 T = Donya::Vector4x4::MakeTranslation( pos );
 	return S * R * T;
 }
 
 void Player::ChangeStatus( Input input )
 {
-	if ( !input.doDefend )
+#if DEBUG_MODE
+
+	if ( status == State::Dead && input.doAttack )
 	{
-		// This flag not want to false if timer lower than 0.
-		isHoldingDefence = false;
+		status = State::Idle;
+	}
+
+#endif // DEBUG_MODE
+
+	if ( 0 < shieldsRecastTime )
+	{
+		shieldsRecastTime--;
 	}
 
 	// These method is change my status if needs.
@@ -464,7 +524,7 @@ XXXUninit : call by ChangeStatusXXX when changing status. before YYYInit.
 
 void Player::ChangeStatusFromIdle( Input input )
 {
-	if ( input.doDefend && !isHoldingDefence )
+	if ( input.doDefend && !shieldsRecastTime )
 	{
 		IdleUninit();
 		DefendInit( input );
@@ -506,7 +566,7 @@ void Player::IdleUninit()
 
 void Player::ChangeStatusFromRun( Input input )
 {
-	if ( input.doDefend && !isHoldingDefence )
+	if ( input.doDefend && !shieldsRecastTime )
 	{
 		RunUninit();
 		DefendInit( input );
@@ -533,6 +593,8 @@ void Player::ChangeStatusFromRun( Input input )
 void Player::RunInit( Input input )
 {
 	status = State::Run;
+
+	setAnimFlame( models.pRun.get(), 0 );
 }
 void Player::RunUpdate( Input input )
 {
@@ -540,14 +602,32 @@ void Player::RunUpdate( Input input )
 }
 void Player::RunUninit()
 {
-	// No op.
+	setAnimFlame( models.pRun.get(), 0 );
 }
 
 void Player::ChangeStatusFromDefend( Input input )
 {
-	if ( !input.doDefend || timer <= 0 )
+	bool cancelable = wasSucceededDefence;
+	bool doCancel   = cancelable && ( !input.moveVector.IsZero() || input.doAttack );
+	if ( doCancel )
 	{
 		DefendUninit();
+
+		if ( input.doAttack )
+		{
+			AttackInit( input );
+		}
+		else
+		{
+			RunInit( input );
+		}
+	}
+	else
+	if ( timer <= 0 )
+	{
+		DefendUninit();
+
+		// If allows hold attack button, insert AttackInit() here.
 
 		if ( input.moveVector.IsZero() )
 		{
@@ -563,12 +643,15 @@ void Player::DefendInit( Input input )
 {
 	status   = State::Defend;
 	velocity = 0.0f; // Each member set to zero.
-
-	isHoldingDefence    = true;
-	wasSucceededDefence = false;
+	shieldsRecastTime	= 0;
+	wasSucceededDefence	= false;
 
 	const auto &PARAM = PlayerParam::Get();
 	timer = PARAM.FrameWholeDefence();
+
+	setAnimFlame( models.pDefend.get(), 0 );
+
+	Donya::Sound::Play( scast<int>( MusicAttribute::PlayerDefend ) );
 }
 void Player::DefendUpdate( Input input )
 {
@@ -582,15 +665,14 @@ void Player::DefendUpdate( Input input )
 void Player::DefendUninit()
 {
 	timer = 0;
-	wasSucceededDefence = false;
+	shieldsRecastTime	= ( wasSucceededDefence ) ? 0 : PlayerParam::Get().FrameReuseShield();
+	wasSucceededDefence	= false;
+
+	setAnimFlame( models.pDefend.get(), 0 );
 }
 
 void Player::ChangeStatusFromAttack( Input input )
 {
-	const auto &PARAM = PlayerParam::Get();
-	const int WHOLE_FRAME = PARAM.FrameWholeAttacking();
-	const int CANCELABLE  = PARAM.FrameCancelableAttack();
-
 	if ( timer <= 0 )
 	{
 		AttackUninit();
@@ -608,7 +690,11 @@ void Player::ChangeStatusFromAttack( Input input )
 	}
 	// else
 
-	if ( input.doDefend && !isHoldingDefence && ( WHOLE_FRAME - CANCELABLE ) <= timer )
+	const auto &PARAM		= PlayerParam::Get();
+	const int  WHOLE_FRAME	= PARAM.FrameWholeAttacking();
+	const int  CANCELABLE	= PARAM.FrameCancelableAttack();
+	const bool withinCancelableRange = ( WHOLE_FRAME - CANCELABLE ) <= timer;
+	if ( input.doDefend && !shieldsRecastTime && withinCancelableRange )
 	{
 		AttackUninit();
 		DefendInit( input );
@@ -619,11 +705,10 @@ void Player::ChangeStatusFromAttack( Input input )
 }
 void Player::AttackInit( Input input )
 {
-	status   = State::Attack;
-	velocity = 0.0f; // Each member set to zero.
+	status		= State::Attack;
+	velocity	= 0.0f; // Each member set to zero.
 
-	const auto &PARAM = PlayerParam::Get();
-	timer = PARAM.FrameWholeAttacking();
+	timer		= PlayerParam::Get().FrameWholeAttacking();
 
 	Donya::OBBFrame *pOBBF = PlayerParam::Get().HitBoxAttackF();
 	pOBBF->currentFrame = 0;
@@ -633,10 +718,10 @@ void Player::AttackUpdate( Input input )
 {
 	timer--;
 
-	const auto &PARAM = PlayerParam::Get();
-	const int WHOLE_FRAME = PARAM.FrameWholeAttacking();
-	const int CANCELABLE  = PARAM.FrameCancelableAttack();
-	if ( !input.moveVector.IsZero() && ( WHOLE_FRAME - CANCELABLE ) <= timer )
+	const int  WHOLE_FRAME	= PlayerParam::Get().FrameWholeAttacking();
+	const int  CANCELABLE	= PlayerParam::Get().FrameCancelableAttack();
+	const bool withinCancelableRange = ( WHOLE_FRAME - CANCELABLE ) <= timer;
+	if ( !input.moveVector.IsZero() && withinCancelableRange )
 	{
 		lookDirection = input.moveVector;
 	}
@@ -686,7 +771,7 @@ void Player::ApplyVelocity()
 void Player::CollideToWall()
 {
 	const float bodyRadius = PlayerParam::Get().HitBoxPhysic().radius;
-	const float trueFieldRadius = fieldRadius + bodyRadius;
+	const float trueFieldRadius = fieldRadius - bodyRadius;
 
 	constexpr Donya::Vector3 ORIGIN = Donya::Vector3::Zero();
 	const Donya::Vector3 currentDistance = pos - ORIGIN;
@@ -723,9 +808,10 @@ void Player::UseImGui()
 			};
 			std::string statusCaption = "Status : " + GetStatusName( status );
 			ImGui::Text( statusCaption.c_str() );
-			ImGui::Text( "Timer : %d", timer );
-			ImGui::Text( "FieldRadius : %f", fieldRadius );
-			ImGui::Text( "HoldDefence : %d", isHoldingDefence ? 1 : 0 );
+			ImGui::Text( "Timer : %d",				timer );
+			ImGui::Text( "ShieldRecast : %d",		shieldsRecastTime );
+			ImGui::Text( "ShieldSucceeded : %d",	wasSucceededDefence ? 1 : 0 );
+			ImGui::Text( "FieldRadius : %f",		fieldRadius );
 			ImGui::Text( "" );
 
 			const std::string vec3Info{ "[X:%5.3f][Y:%5.3f][Z:%5.3f]" };

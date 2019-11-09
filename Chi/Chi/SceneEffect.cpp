@@ -1,12 +1,15 @@
+#include "Particle.h"
 #include "scene.h"
 #include "sceneManager.h"
 #include "Donya/Vector.h"
-
+#include "GameLibFunctions.h"
+#include "Effect.h"
 
 void SceneEffect::init()  
 {
 	isStack = false;
 	keyCnt = 0;
+	keyCnt2 = 0;
 
 	flashParticle.Set();
 	flashParticle.ImGuiDataInit();
@@ -42,9 +45,38 @@ void SceneEffect::init()
 	angle2[0] = 0.0f;
 	angle2[1] = 0.0f;
 	angle2[2] = 0.0f;
+
+	exist1 = false;
+	exist2 = false;
+
+	stage.Init(0);
+
+	cameraPos = Donya::Vector3{ 0.0f, 256.0f, -1000.0f };
+	cameraFocusOffset = Donya::Vector3{ 0.0f, 80.0f, 0.0f };
+
+	loadShader
+	(
+		shader,
+		"./Data/shader/skinned_mesh_has_born_vs.cso",
+		"./Data/shader/skinned_mesh_ps.cso",
+		"./Data/shader/skinned_mesh_vs.cso",
+		"./Data/shader/skinned_mesh_no_uv_ps.cso"
+	);
+
+	getLineLight().setLineLight(lights.direction.direction, lights.direction.color);
+	for (const auto i : lights.points)
+	{
+		setPointLight(i);
+	}
+
+	EffectManager::GetInstance()->Init();
+	originPos = Donya::Vector3(0.0f, 0.0f, 0.0f);
 }
 void SceneEffect::update()
 {
+	GameLib::camera::setPos(cameraPos);
+	GameLib::camera::setTarget(Donya::Vector3(0.0f, 0.0f, 0.0f) + cameraFocusOffset);
+
 	if (GetKeyState('T') < 0)
 	{
 		if (keyCnt == 0)
@@ -58,9 +90,26 @@ void SceneEffect::update()
 		keyCnt = 0;
 	}
 
+	if (GetKeyState('E') < 0)
+	{
+		if (keyCnt2 == 0)
+		{
+		//	eruptionEffect.SetData();
+			EffectManager::GetInstance()->Set(EffectManager::GetInstance()->ERUPTION, originPos, 0);
+		}
+		keyCnt2++;
+	}
+	else
+	{
+		keyCnt2 = 0;
+	}
+
 	flashParticle.Emit();
 	bubbleParticle.Emit();
 	bossAI.Update();
+//	eruptionEffect.Update(Donya::Vector3(0.0f, 0.0f, 0.0f), Donya::Vector3(0.0f, 0.0f, -1.0f));
+	EffectManager::GetInstance()->Update();
+	EffectManager::GetInstance()->Update(Donya::Vector3(0.0f, 0.0f, 0.0f));
 
 	if (obb1.JudgeOBB(&obb2))
 	{
@@ -72,10 +121,28 @@ void SceneEffect::update()
 		color1.x = 0.7f;
 		color2.y = 0.7f;
 	}
+
+	stage.Update();
+
+	for (auto eruption : EffectManager::GetInstance()->GetEruptionEffectVector())
+	{
+		for (auto eruptionHitSphere : eruption.GetHitSphereVector())
+		{
+			if (eruptionHitSphere.exist)
+			{
+				Donya::Vector3 _pos = eruptionHitSphere.pos;
+			}
+			else
+			{
+				float _radius = eruptionHitSphere.radius;
+			}
+		}
+	}
 }
 void SceneEffect::render()
 {
 	clearWindow(0.5f, 0.5f, 0.5f, 1.0f);
+
 
 	Donya::Vector4x4 V = Donya::Vector4x4::FromMatrix(GameLib::camera::GetViewMatrix());
 	Donya::Vector4x4 P = Donya::Vector4x4::FromMatrix(GameLib::camera::GetProjectionMatrix());
@@ -86,7 +153,7 @@ void SceneEffect::render()
 	Donya::Vector4x4 W = S * R * T;
 	Donya::Vector4x4 WVP = W * V * P;
 
-	OBJRender(pCube1.get(), WVP, W, color1);
+	if (exist1) OBJRender(pCube1.get(), WVP, W, color1);
 
 	S = Donya::Vector4x4::MakeScaling(obb2.scale);
 	T = Donya::Vector4x4::MakeTranslation(obb2.pos);
@@ -94,7 +161,13 @@ void SceneEffect::render()
 	W = S * R * T;
 	WVP = W * V * P;
 
-	OBJRender(pCube2.get(), WVP, W, color2);
+	if (exist2) OBJRender(pCube2.get(), WVP, W, color2);
+
+
+//	eruptionEffect.Render();
+	EffectManager::GetInstance()->Render( shader );
+
+	stage.Draw( shader, V, P);
 }
 void SceneEffect::uninit()
 {
@@ -102,6 +175,66 @@ void SceneEffect::uninit()
 }
 void SceneEffect::imGui()
 {
+	ImGui::Begin("Effect");
+	if (ImGui::TreeNode("DirectionalLight"))
+	{
+		if (ImGui::Button("Shiled Development On"))
+		{
+			EffectManager::GetInstance()->Set(EffectManager::GetInstance()->SHIELD_DEVELOPMENT);
+		}
+		if (ImGui::Button("Shiled Development Off"))
+		{
+			EffectManager::GetInstance()->ReSet(EffectManager::GetInstance()->SHIELD_DEVELOPMENT);
+		}
+		ImGui::TreePop();
+	}
+	ImGui::End();
+
+	ImGui::Begin("Light");
+	if (ImGui::TreeNode("DirectionalLight"))
+	{
+		ImGui::ColorEdit4("Color", &lights.direction.color.x);
+		ImGui::SliderFloat3("Direction", &lights.direction.direction.x, -8.0f, 8.0f);
+
+		getLineLight().setLineLight(lights.direction.direction, lights.direction.color);
+
+		ImGui::TreePop();
+	}
+
+	if (ImGui::TreeNode("PointLight"))
+	{
+		constexpr size_t MAX_COUNT = 4U;
+		bool canAppend = (lights.points.size() < MAX_COUNT) ? true : false;
+		bool canPopBack = (1U <= lights.points.size()) ? true : false;
+		if (canAppend && ImGui::Button("Append"))
+		{
+			PointLight add{};
+			add.pos = { 0.0f, 0.0f, 0.0f, 1.0f };
+			add.color = { 1.0f, 1.0f, 1.0f, 1.0f };
+			lights.points.push_back(add);
+			setPointLight(add);
+		}
+		if (canPopBack && ImGui::Button("PopBack"))
+		{
+			lights.points.pop_back();
+			removePointLight(static_cast<int>(lights.points.size()));
+		}
+
+		const size_t COUNT = lights.points.size();
+		for (size_t i = 0; i < COUNT; ++i)
+		{
+			auto& point = lights.points[i];
+			ImGui::DragFloat3(std::string("Position" + std::to_string(i)).c_str(), &point.pos.x); point.pos.w = 1.0f;
+			ImGui::ColorEdit4(std::string("Color" + std::to_string(i)).c_str(), &point.color.x);
+			ImGui::SliderFloat4(std::string("Attenuate" + std::to_string(i)).c_str(), &point.attenuate.x, 0.0f, 1.0f);
+
+			setPointlightInfo(static_cast<int>(i), point);
+		}
+
+		ImGui::TreePop();
+	}
+	ImGui::End();
+
 	ImGui::Begin("Particle");
 	flashParticle.ImGui();
 	bubbleParticle.ImGui();
@@ -109,8 +242,13 @@ void SceneEffect::imGui()
 
 	flashParticle.UseImGui();
 
-	ImGui::Begin("BossAI");
+	ImGui::Begin("GolemAI");
 	bossAI.ImGui();
+	ImGui::End();
+
+	ImGui::Begin("Camera");
+	ImGui::DragFloat3("Camera.Pos", &cameraPos.x);
+	ImGui::DragFloat3("Camera.FocusOffset", &cameraFocusOffset.x);
 	ImGui::End();
 
 	float _pos[3];
@@ -134,6 +272,7 @@ void SceneEffect::imGui()
 	ImGui::Begin("cube");
 	if (ImGui::TreeNode(u8"1"))
 	{
+		ImGui::Checkbox("exist", &exist1);
 		ImGui::DragFloat3("pos",   _pos);
 		ImGui::DragFloat3("scale", _scale);
 		ImGui::SliderFloat3("orientation", angle1, 0.0f, 360.0f * 0.01745f);
@@ -141,6 +280,7 @@ void SceneEffect::imGui()
 	}
 	if (ImGui::TreeNode(u8"2"))
 	{
+		ImGui::Checkbox("exist ", &exist2);
 		ImGui::DragFloat3("pos ", _pos2);
 		ImGui::DragFloat3("scale ", _scale2);
 		ImGui::SliderFloat3("orientation ", angle2, 0.0f, 360.0f * 0.01745f);
