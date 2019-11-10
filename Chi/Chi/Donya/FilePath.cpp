@@ -66,6 +66,26 @@ std::string GetModelPath( ModelAttribute modelAttribute )
 		return "./Data/model/Boss/Boss02/MDL_Boss02_Attack_JumpAttack.fbx";	// break;
 	case ModelAttribute::KnightFxExplosion:
 		return "./Data/model/Effect/EFE_Boss02_Explosion.fbx";				// break;
+	case ModelAttribute::RivalIdle:
+		return "./Data/model/Boss/Boss04/Boss04_Wait.fbx";					// break;
+	case ModelAttribute::RivalRun:
+		return "./Data/model/Boss/Boss04/Boss04_Run.fbx";					// break;
+	case ModelAttribute::RivalBreak:
+		return "./Data/model/Boss/Boss04/Boss04_Impact.fbx";				// break;
+	case ModelAttribute::RivalDefeat:
+		return "./Data/model/Boss/Boss04/Boss04_Death.fbx";					// break;
+	case ModelAttribute::RivalAtkBarrage:
+		return "./Data/model/Boss/Boss04/Boss04_3Attack.fbx";				// break;
+	case ModelAttribute::RivalAtkLine:
+		return "./Data/model/Boss/Boss04/Boss04_LongAttack.fbx";			// break;
+	case ModelAttribute::RivalAtkRaid:
+		return "./Data/model/Boss/Boss04/Boss04_JumpAttack.fbx";			// break;
+	case ModelAttribute::RivalAtkRushPre:
+		return "./Data/model/Boss/Boss04/Boss04_RushWait.fbx";				// break;
+	case ModelAttribute::RivalAtkRushRaid:
+		return "./Data/model/Boss/Boss04/Boss04_RushWait.fbx";				// break;
+	case ModelAttribute::RivalAtkRushPost:
+		return "./Data/model/Boss/Boss04/Boss04_RushSlash.fbx";				// break;
 	default:
 		assert( !"Error : Specified unexpect model type." ); break;
 		break;

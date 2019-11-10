@@ -31,6 +31,16 @@ enum class ModelAttribute
 	KnightAtkSwing,
 	KnightAtkRaid,
 	KnightFxExplosion,
+	RivalIdle,
+	RivalRun,
+	RivalBreak,
+	RivalDefeat,
+	RivalAtkBarrage,
+	RivalAtkLine,
+	RivalAtkRaid,
+	RivalAtkRushPre,
+	RivalAtkRushRaid,
+	RivalAtkRushPost,
 };
 
 std::string GetModelPath( ModelAttribute modelAttribute );
