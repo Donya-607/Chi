@@ -20,8 +20,8 @@ INT WINAPI wWinMain(HINSTANCE instance, HINSTANCE prev_instance, LPWSTR cmd_line
 	//	| _CRTDBG_LEAK_CHECK_DF
 	//	// | _CRTDBG_CHECK_ALWAYS_DF
 	//);
-	// When memory leak detected, if you assign the output number to _crtBreakAlloc,
-	// program will be stop in that memory allocate place.
+	// When memory leak detected, if you assign the output number to "_crtBreakAlloc",
+	// program will be stop in that memory allocate place. ex : _crtBreakAlloc = 123;
 	// _crtBreakAlloc = ;
 #endif
 

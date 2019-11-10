@@ -81,7 +81,8 @@ RivalAI::ActionState RivalAI::ToActionState( AttackState attackStatus ) const
 
 	switch ( attackStatus )
 	{
-	case AttackState::SWING:	to = ActionState::ATTACK_SWING;		break;
+	case AttackState::BARRAGE:	to = ActionState::ATTACK_BARRAGE;	break;
+	case AttackState::LINE:		to = ActionState::ATTACK_LINE;		break;
 	case AttackState::RAID:		to = ActionState::ATTACK_RAID;		break;
 	default: break;
 	}
@@ -118,12 +119,12 @@ void RivalAI::LotteryAttackState()
 {
 	if ( attackTimes <= 0 )
 	{
-		status = ActionState::ATTACK_EXPLOSION;
-		timer = wholeFrame.back();
-		coolTime = coolTimeFrame.back();
+		status		= GetGapAttack();
+		timer		= wholeFrame.back();
+		coolTime	= coolTimeFrame.back();
 
-		intervalIndex = ( intervalIndex <= scast<int>( gapIntervals.size() ) - 1 ) ? 0 : intervalIndex + 1;
-		attackTimes = gapIntervals[intervalIndex];
+		intervalIndex	= ( intervalIndex <= scast<int>( gapIntervals.size() ) - 1 ) ? 0 : intervalIndex + 1;
+		attackTimes		= gapIntervals[intervalIndex];
 		return;
 	}
 	// else
@@ -156,7 +157,7 @@ void RivalAI::LotteryAttackState()
 
 RivalAI::ActionState RivalAI::GetGapAttack() const
 {
-	return ActionState::ATTACK_EXPLOSION;
+	return ActionState::ATTACK_RUSH;
 }
 
 void RivalAI::LoadParameter( bool isBinary )
@@ -194,9 +195,10 @@ void RivalAI::ImGui()
 			{
 				"Wait",
 				"Move",
-				"Attack.Explosion",
-				"Attack.Swing",
+				"Attack.Barrage",
+				"Attack.Line",
 				"Attack.Raid",
+				"Attack.Rush",
 			};
 
 			if ( ACTION_STATE_COUNT <= i ) { return "Error Name"; }
@@ -219,9 +221,10 @@ void RivalAI::ImGui()
 		{
 			constexpr std::array<const char *, ALL_ATTACK_COUNT> NAMES
 			{
-				"Attack.Swing",
+				"Attack.Line",
 				"Attack.Raid",
-				"Attack.Explosion",
+				"Attack.Rush",
+				/* Gap */ "Attack.Barrage",
 			};
 
 			if ( ALL_ATTACK_COUNT <= i ) { return "Error Name"; }

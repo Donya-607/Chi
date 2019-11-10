@@ -57,29 +57,31 @@ void RivalParam::Uninit()
 	// No op.
 }
 
-float RivalParam::SlerpFactor( RivalAI::ActionState status )
-{
-	switch ( status )
-	{
-	case RivalAI::ActionState::WAIT:				return m.idleSlerpFactor;	// break;
-	case RivalAI::ActionState::MOVE:				return m.moveSlerpFactor;	// break;
-	case RivalAI::ActionState::ATTACK_EXPLOSION:	return m.explSlerpFactor;	// break;
-	case RivalAI::ActionState::ATTACK_SWING:		return m.swingSlerpFactor;	// break;
-	case RivalAI::ActionState::ATTACK_RAID:			return m.raidSlerpFactor;	// break;
-	default: break;
-	}
-
-	return NULL;
-}
 float RivalParam::MoveSpeed( RivalAI::ActionState status )
 {
 	switch ( status )
 	{
 	case RivalAI::ActionState::WAIT:				return 0.0f;				// break;
-	case RivalAI::ActionState::MOVE:				return m.moveMoveSpeed;		// break;
-	case RivalAI::ActionState::ATTACK_EXPLOSION:	return m.explMoveSpeed;		// break;
-	case RivalAI::ActionState::ATTACK_SWING:		return m.swingMoveSpeed;	// break;
-	case RivalAI::ActionState::ATTACK_RAID:			return m.raidMoveSpeed;		// break;
+	case RivalAI::ActionState::MOVE:				return m.move.moveSpeed;	// break;
+	case RivalAI::ActionState::ATTACK_BARRAGE:		return m.barrage.moveSpeed;	// break;
+	case RivalAI::ActionState::ATTACK_LINE:			return m.line.moveSpeed;	// break;
+	case RivalAI::ActionState::ATTACK_RAID:			return m.raid.moveSpeed;	// break;
+	case RivalAI::ActionState::ATTACK_RUSH:			return m.rush.moveSpeed;	// break;
+	default: break;
+	}
+
+	return NULL;
+}
+float RivalParam::SlerpFactor( RivalAI::ActionState status )
+{
+	switch ( status )
+	{
+	case RivalAI::ActionState::WAIT:				return m.idleSlerpFactor;		// break;
+	case RivalAI::ActionState::MOVE:				return m.move.slerpFactor;		// break;
+	case RivalAI::ActionState::ATTACK_BARRAGE:		return m.barrage.slerpFactor;	// break;
+	case RivalAI::ActionState::ATTACK_LINE:			return m.line.slerpFactor;		// break;
+	case RivalAI::ActionState::ATTACK_RAID:			return m.raid.slerpFactor;		// break;
+	case RivalAI::ActionState::ATTACK_RUSH:			return m.rush.slerpFactor;		// break;
 	default: break;
 	}
 
@@ -130,17 +132,19 @@ void RivalParam::UseImGui()
 			ImGui::SliderFloat( "Distance.ThinkTo\"Far\"",  &m.targetDistFar,  0.0f, 0.99f );
 			ImGui::Text( "" );
 
-			ImGui::DragFloat( "MoveSpeed.\"Move\"State",			&m.moveMoveSpeed );
-			ImGui::DragFloat( "MoveSpeed.\"Atk.Explosion\"State",	&m.explMoveSpeed );
-			ImGui::DragFloat( "MoveSpeed.\"Atk.Swing\"State",		&m.swingMoveSpeed );
-			ImGui::DragFloat( "MoveSpeed.\"Atk.Raid\"State",		&m.raidMoveSpeed );
+			ImGui::DragFloat( "MoveSpeed.\"Move\"State",			&m.move.moveSpeed );
+			ImGui::DragFloat( "MoveSpeed.\"Atk.Barrage\"State",		&m.barrage.moveSpeed );
+			ImGui::DragFloat( "MoveSpeed.\"Atk.Line\"State",		&m.line.moveSpeed );
+			ImGui::DragFloat( "MoveSpeed.\"Atk.Raid\"State",		&m.raid.moveSpeed );
+			ImGui::DragFloat( "MoveSpeed.\"Atk.Rush\"State",		&m.rush.moveSpeed );
 			ImGui::Text( "" );
 
-			ImGui::SliderFloat( "SlerpFactor.\"Idle\"State",			&m.idleSlerpFactor, 0.0f, 1.0f );
-			ImGui::SliderFloat( "SlerpFactor.\"Move\"State",			&m.moveSlerpFactor, 0.0f, 1.0f );
-			ImGui::SliderFloat( "SlerpFactor.\"Atk.Explosion\"State",	&m.explSlerpFactor, 0.0f, 1.0f );
-			ImGui::SliderFloat( "SlerpFactor.\"Atk.Swing\"State",		&m.swingSlerpFactor, 0.0f, 1.0f );
-			ImGui::SliderFloat( "SlerpFactor.\"Atk.Raid\"State",		&m.raidSlerpFactor, 0.0f, 1.0f );
+			ImGui::SliderFloat( "SlerpFactor.\"Idle\"State",			&m.idleSlerpFactor,		0.0f, 1.0f );
+			ImGui::SliderFloat( "SlerpFactor.\"Move\"State",			&m.move.slerpFactor,	0.0f, 1.0f );
+			ImGui::SliderFloat( "SlerpFactor.\"Atk.Barrage\"State",		&m.barrage.slerpFactor,	0.0f, 1.0f );
+			ImGui::SliderFloat( "SlerpFactor.\"Atk.Line\"State",		&m.line.slerpFactor,	0.0f, 1.0f );
+			ImGui::SliderFloat( "SlerpFactor.\"Atk.Raid\"State",		&m.raid.slerpFactor,	0.0f, 1.0f );
+			ImGui::SliderFloat( "SlerpFactor.\"Atk.Rush\"State",		&m.rush.slerpFactor,	0.0f, 1.0f );
 			ImGui::Text( "" );
 
 			ImGui::DragFloat3( "Initialize.Position", &m.initPos.x    );
@@ -198,55 +202,8 @@ void RivalParam::UseImGui()
 					}
 				};
 				
-				ShowSphere( "Body.HurtBox", &m.hitBoxBody );
+				ShowAABB( "Body.HurtBox", &m.hitBoxBody );
 				ImGui::Text( "" );
-
-				if ( ImGui::TreeNode( "Attack.Explosion" ) )
-				{
-					ImGui::DragFloat( "Rotate.Speed",	&m.explRotationSpeed,	0.02f );
-					ImGui::DragFloat( "Scale.Start",	&m.explScaleStart,		0.2f );
-					ImGui::DragFloat( "Scale.Last",		&m.explScaleLast,		0.2f );
-					ImGui::DragFloat( "Scale.Draw",		&m.explScaleDraw,		0.2f );
-					ImGui::SliderInt( "Scaling.Length(Frame)",	&m.explScalingFrame,	1, 300  );
-					ImGui::SliderInt( "Charge.Length(Frame)",	&m.explChargeFrame,		1, 300  );
-					ImGui::SliderInt( "ReviveCollisionFrame",	&m.explReviveColFrame,	1, 300  );
-					ImGui::SliderFloat( "After.HideSpeed",		&m.explHideSpeed,		0.00001f, 1.0f  );
-					ShowSphereF( "Collision", &m.hitBoxExpl );
-
-					ImGui::TreePop();
-				}
-				
-				if ( ImGui::TreeNode( "Attack.Swing" ) )
-				{
-					static std::array<char, 512U> swingMeshNameBuffer{};
-					ShowSphereFN( "Swing", &m.hitBoxSwing, &swingMeshNameBuffer );
-
-					ImGui::TreePop();
-				}
-
-				if ( ImGui::TreeNode( "Attack.Raid" ) )
-				{
-					ImGui::DragInt( "Jump.StartFrame",			&m.raidJumpStartFrame	);	m.raidJumpStartFrame	= std::max( 0,    m.raidJumpStartFrame );
-					ImGui::DragInt( "Jump.LandingFrame",		&m.raidJumpLastFrame	);	m.raidJumpLastFrame		= std::max( 0,    m.raidJumpLastFrame  );
-					ImGui::DragFloat( "Jump.Length(distance)",	&m.raidJumpDistance		);	m.raidJumpDistance		= std::max( 0.0f, m.raidJumpDistance   );
-
-					// Easing parameter.
-					{
-						using namespace Donya;
-						constexpr int KIND_COUNT = Easing::GetKindCount();
-						constexpr int TYPE_COUNT = Easing::GetTypeCount();
-						ImGui::SliderInt( "Jump.EasingKind", &m.raidEaseKind, 0, KIND_COUNT - 1 );
-						ImGui::SliderInt( "Jump.EasingType", &m.raidEaseType, 0, TYPE_COUNT - 1 );
-						std::string strKind = Easing::KindName( m.raidEaseKind );
-						std::string strType = Easing::TypeName( m.raidEaseType );
-						ImGui::Text( ( "Easing : " + strKind + "." + strType ).c_str() );
-					}
-
-					static std::array<char, 512U> raidMeshNameBuffer{};
-					ShowSphereFN( "Raid", &m.hitBoxRaid, &raidMeshNameBuffer );
-
-					ImGui::TreePop();
-				}
 
 				ImGui::TreePop();
 			}
@@ -294,9 +251,9 @@ static void ResetCurrentSphereFN( RivalParam::SphereFrameWithName *pSphereFN )
 }
 
 Rival::Rival() :
-	status( RivalAI::ActionState::WAIT ),
+	status( RivalAI::ActionState::WAIT ), extraStatus( ExtraState::NONE ),
 	AI(),
-	timer(), reviveCollisionTime(),
+	timer(),
 	fieldRadius(), slerpFactor( 1.0f ),
 	pos(), velocity(), extraOffset(),
 	orientation(),
@@ -311,11 +268,14 @@ Rival::Rival() :
 	std::vector<std::shared_ptr<skinned_mesh> *> modelRefs
 	{
 		&models.pIdle,
-		&models.pRunFront,
-		&models.pAtkExpl,
-		&models.pAtkSwing,
+		&models.pRun,
+		&models.pBreak,
+		&models.pLeave,
+		&models.pDead,
+		&models.pAtkBarrage,
+		&models.pAtkLine,
 		&models.pAtkRaid,
-		&models.pFxExpl,
+		&models.pAtkRush,
 	};
 	for ( auto &it : modelRefs )
 	{
@@ -371,52 +331,49 @@ void Rival::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya
 	const Donya::Vector3 drawOffset = PARAM.drawOffset;
 	const Donya::Vector4x4 DRAW_OFFSET = Donya::Vector4x4::MakeTranslation( drawOffset );
 
-	Donya::Vector4x4 S = Donya::Vector4x4::MakeScaling( PARAM.scale );
-	Donya::Vector4x4 R = orientation.RequireRotationMatrix();
-	Donya::Vector4x4 T = Donya::Vector4x4::MakeTranslation( GetPos() );
-#if DEBUG_MODE
-	if ( status == decltype( status )::END ) { R = Donya::Quaternion::Make( Donya::Vector3::Front(), ToRadian( 180.0f ) ).RequireRotationMatrix(); };
-#endif // DEBUG_MODE
-	Donya::Vector4x4 W = S * R * T * DRAW_OFFSET;
+	Donya::Vector4x4 W = CalcWorldMatrix() * DRAW_OFFSET;
 	Donya::Vector4x4 WVP = W * matView * matProjection;
 
-	switch ( status )
+	if ( extraStatus != ExtraState::NONE )
 	{
-	case RivalAI::ActionState::WAIT:
-		FBXRender( models.pIdle.get(), HLSL, WVP, W );
-		break;
-	case RivalAI::ActionState::MOVE:
-		FBXRender( models.pRunFront.get(), HLSL, WVP, W );
-		break;
-	case RivalAI::ActionState::ATTACK_EXPLOSION:
+		switch ( extraStatus )
 		{
-			FBXRender( models.pAtkExpl.get(), HLSL, WVP, W );
-
-			float drawScale = RivalParam::Get().HitBoxExplosion().collision.radius * PARAM.explScaleDraw;
-			Donya::Vector4x4 FX_S = Donya::Vector4x4::MakeScaling( drawScale );
-			Donya::Vector4x4 FX_R = Donya::Quaternion::Make
-			(
-				Donya::Vector3::Up(),
-				PARAM.explRotationSpeed * timer
-			).RequireRotationMatrix();
-			
-			Donya::Vector4x4 FX_W = ( FX_S * FX_R ) * ( S * R * T )/* Except draw offset from parent world matrix.*/;
-			Donya::Vector4x4 FX_WVP = FX_W * matView * matProjection;
-
-			const int VIVID_TIME = RivalParam::Get().HitBoxExplosion().enableFrameLast;
-			float drawAlpha = ( VIVID_TIME <= timer )
-			? 1.0f - ( RivalParam::Open().explHideSpeed * ( timer - VIVID_TIME ) )
-			: 1.0f;
-			FBXRender( models.pFxExpl.get(), HLSL, FX_WVP, FX_W, { 1.0f, 1.0f, 1.0f, drawAlpha } );
+		case ExtraState::BREAK:
+			FBXRender( models.pBreak.get(), HLSL, WVP, W );
+			break;
+		case ExtraState::LEAVE:
+			FBXRender( models.pBreak.get(), HLSL, WVP, W );
+			break;
+		case ExtraState::DEAD:
+			FBXRender( models.pDead.get(), HLSL, WVP, W );
+			break;
+		default: break;
 		}
-		break;
-	case RivalAI::ActionState::ATTACK_SWING:
-		FBXRender( models.pAtkSwing.get(), HLSL, WVP, W );
-		break;
-	case RivalAI::ActionState::ATTACK_RAID:
-		FBXRender( models.pAtkRaid.get(), HLSL, WVP, W );
-		break;
-	default: break;
+	}
+	else
+	{
+		switch ( status )
+		{
+		case RivalAI::ActionState::WAIT:
+			FBXRender( models.pIdle.get(), HLSL, WVP, W );
+			break;
+		case RivalAI::ActionState::MOVE:
+			FBXRender( models.pRun.get(), HLSL, WVP, W );
+			break;
+		case RivalAI::ActionState::ATTACK_BARRAGE:
+			FBXRender( models.pAtkBarrage.get(), HLSL, WVP, W );
+			break;
+		case RivalAI::ActionState::ATTACK_LINE:
+			FBXRender( models.pAtkLine.get(), HLSL, WVP, W );
+			break;
+		case RivalAI::ActionState::ATTACK_RAID:
+			FBXRender( models.pAtkRaid.get(), HLSL, WVP, W );
+			break;
+		case RivalAI::ActionState::ATTACK_RUSH:
+			FBXRender( models.pAtkRush.get(), HLSL, WVP, W );
+			break;
+		default: break;
+		}
 	}
 
 	// For debug, helpers of drawing primitive. and drawing collisions.
@@ -438,7 +395,7 @@ void Rival::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya
 	static std::shared_ptr<static_mesh> pSphere = GenerateSphere();
 
 	// Except DRAW_OFFSET matrix. because I wanna draw collisions to actual position.
-	W = S * R * T;
+	W = CalcWorldMatrix();
 
 	auto DrawCube	= [&]( const Donya::Vector3 &cubeOffset, const Donya::Vector3 &cubeScale, const Donya::Quaternion &orientation, const Donya::Vector4 &color, bool applyParentMatrix = true, bool applyParentDrawOffset = false )
 	{

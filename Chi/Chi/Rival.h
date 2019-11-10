@@ -50,38 +50,125 @@ public:
 	};
 	struct Member
 	{
+		struct Move
+		{
+			float	moveSpeed{};
+			float	slerpFactor{}; // 0.0f ~ 1.0f.
+		private:
+			friend class cereal::access;
+			template<class Archive>
+			void serialize( Archive &archive, std::uint32_t version )
+			{
+				archive
+				(
+					CEREAL_NVP( moveSpeed ),
+					CEREAL_NVP( slerpFactor )
+				);
+
+				if ( 1 <= version )
+				{
+					// archive( CEREAL_NVP( x ) );
+				}
+			}
+		};
+		struct Barrage
+		{
+			float	moveSpeed{};
+			float	slerpFactor{}; // 0.0f ~ 1.0f.
+		private:
+			friend class cereal::access;
+			template<class Archive>
+			void serialize( Archive &archive, std::uint32_t version )
+			{
+				archive
+				(
+					CEREAL_NVP( moveSpeed ),
+					CEREAL_NVP( slerpFactor )
+				);
+
+				if ( 1 <= version )
+				{
+					// archive( CEREAL_NVP( x ) );
+				}
+			}
+		};
+		struct Line
+		{
+			float	moveSpeed{};
+			float	slerpFactor{}; // 0.0f ~ 1.0f.
+		private:
+			friend class cereal::access;
+			template<class Archive>
+			void serialize( Archive &archive, std::uint32_t version )
+			{
+				archive
+				(
+					CEREAL_NVP( moveSpeed ),
+					CEREAL_NVP( slerpFactor )
+				);
+
+				if ( 1 <= version )
+				{
+					// archive( CEREAL_NVP( x ) );
+				}
+			}
+		};
+		struct Raid
+		{
+			float	moveSpeed{};
+			float	slerpFactor{}; // 0.0f ~ 1.0f.
+		private:
+			friend class cereal::access;
+			template<class Archive>
+			void serialize( Archive &archive, std::uint32_t version )
+			{
+				archive
+				(
+					CEREAL_NVP( moveSpeed ),
+					CEREAL_NVP( slerpFactor )
+				);
+
+				if ( 1 <= version )
+				{
+					// archive( CEREAL_NVP( x ) );
+				}
+			}
+		};
+		struct Rush
+		{
+			float	moveSpeed{};
+			float	slerpFactor{}; // 0.0f ~ 1.0f.
+		private:
+			friend class cereal::access;
+			template<class Archive>
+			void serialize( Archive &archive, std::uint32_t version )
+			{
+				archive
+				(
+					CEREAL_NVP( moveSpeed ),
+					CEREAL_NVP( slerpFactor )
+				);
+
+				if ( 1 <= version )
+				{
+					// archive( CEREAL_NVP( x ) );
+				}
+			}
+		};
+
 		float				scale{};				// Usually 1.0f.
 		float				stageBodyRadius{};		// Using for collision to stage's wall.
 		float				targetDistNear{};		// 0.0f ~ 1.0f.
 		float				targetDistFar{};		// 0.0f ~ 1.0f.
 		float				idleSlerpFactor{};		// 0.0 ~ 1.0. Use when status is idle.
-		float				moveMoveSpeed{};		// Use when status is move.
-		float				moveSlerpFactor{};		// 0.0 ~ 1.0. Use when status is move.
-		float				explMoveSpeed{};		// Use when status is explosion.
-		float				explSlerpFactor{};		// 0.0 ~ 1.0. Use when status is explosion.
-		float				swingMoveSpeed{};		// Use when status is swing.
-		float				swingSlerpFactor{};		// 0.0 ~ 1.0. Use when status is swing.
-		float				raidMoveSpeed{};		// Use when status is raid. speed of before jump.
-		float				raidSlerpFactor{};		// 0.0 ~ 1.0. Use when status is raid.
-		int					raidJumpStartFrame{};	// Use when status is raid.
-		int					raidJumpLastFrame{};	// Use when status is raid.
-		float				raidJumpDistance{};		// Use when status is raid. whole distance of long-jump's.
-		int					raidEaseKind{};			// Use when status is raid.
-		int					raidEaseType{};			// Use when status is raid.
-		float				explRotationSpeed{};	// Use when status is explosion.
-		float				explScaleStart{};		// Use when status is explosion.
-		float				explScaleLast{};		// Use when status is explosion.
-		float				explScaleDraw{};		// Use when status is explosion.
-		int					explScalingFrame{};		// Take time(frame) of scaling.
-		int					explChargeFrame{};		// Take time(frame) of charge. use before the explosion and the animation will stop.
-		int					explReviveColFrame{};	// Take time(frame) of revive the collision of explosion, since hit to anything.
-		float				explHideSpeed{};		// Use when status is explosion.
 		Donya::Vector3		initPos{};				// The index(stage number) is 1-based. 0 is tutorial.
 		Donya::Vector3		drawOffset{};			// The index(stage number) is 1-based. 0 is tutorial.
-		Donya::Sphere		hitBoxBody{};			// Body's hit boxes.
-		Donya::SphereFrame	hitBoxExpl{};			// Attack of explosion hit box.
-		SphereFrameWithName	hitBoxSwing{};			// Attack of swing hit box.
-		SphereFrameWithName	hitBoxRaid{};			// Attack of raid hit box.
+		Donya::AABB			hitBoxBody{};			// Body's hit box.
+		Move				move{};					// Use when status is move.
+		Barrage				barrage{};				// Use when status is attack of barrage.
+		Line				line{};					// Use when status is attack of line.
+		Raid				raid{};					// Use when status is attack of raid.
+		Rush				rush{};					// Use when status is attack of rush.
 	};
 private:
 	Member m{};
@@ -101,60 +188,17 @@ private:
 			CEREAL_NVP( m.targetDistNear ),
 			CEREAL_NVP( m.targetDistFar ),
 			CEREAL_NVP( m.idleSlerpFactor ),
-			CEREAL_NVP( m.moveMoveSpeed ),
-			CEREAL_NVP( m.moveSlerpFactor ),
-			CEREAL_NVP( m.explMoveSpeed ),
-			CEREAL_NVP( m.explSlerpFactor ),
-			CEREAL_NVP( m.swingMoveSpeed ),
-			CEREAL_NVP( m.swingSlerpFactor ),
-			CEREAL_NVP( m.raidMoveSpeed ),
-			CEREAL_NVP( m.raidSlerpFactor ),
 			CEREAL_NVP( m.initPos ),
 			CEREAL_NVP( m.drawOffset ),
-			CEREAL_NVP( m.hitBoxBody )
+			CEREAL_NVP( m.hitBoxBody ),
+			CEREAL_NVP( m.move ),
+			CEREAL_NVP( m.barrage ),
+			CEREAL_NVP( m.line ),
+			CEREAL_NVP( m.raid ),
+			CEREAL_NVP( m.rush )
 		);
 
 		if ( 1 <= version )
-		{
-			archive( CEREAL_NVP( m.hitBoxSwing ) );
-		}
-		if ( 2 <= version )
-		{
-			archive( CEREAL_NVP( m.hitBoxRaid ) );
-		}
-		if ( 3 <= version )
-		{
-			archive
-			(
-				CEREAL_NVP( m.explRotationSpeed ),
-				CEREAL_NVP( m.explScaleStart ),
-				CEREAL_NVP( m.explScaleLast ),
-				CEREAL_NVP( m.explScalingFrame ),
-				CEREAL_NVP( m.explChargeFrame ),
-				CEREAL_NVP( m.explReviveColFrame ),
-				CEREAL_NVP( m.hitBoxExpl )
-			);
-		}
-		if ( 4 <= version )
-		{
-			archive( CEREAL_NVP( m.explScaleDraw ) );
-		}
-		if ( 5 <= version )
-		{
-			archive( CEREAL_NVP( m.explHideSpeed ) );
-		}
-		if ( 6 <= version )
-		{
-			archive
-			(
-				CEREAL_NVP( m.raidJumpStartFrame ),
-				CEREAL_NVP( m.raidJumpLastFrame ),
-				CEREAL_NVP( m.raidJumpDistance ),
-				CEREAL_NVP( m.raidEaseKind ),
-				CEREAL_NVP( m.raidEaseType )
-			);
-		}
-		if ( 7 <= version )
 		{
 			// archive( CEREAL_NVP( x ) );
 		}
@@ -164,17 +208,10 @@ public:
 	void Init();
 	void Uninit();
 public:
-	float SlerpFactor( RivalAI::ActionState status );
 	float MoveSpeed( RivalAI::ActionState status );
+	float SlerpFactor( RivalAI::ActionState status );
 	Member Content() const { return m; }
 	static Member Open();
-
-	Donya::SphereFrame			&HitBoxExplosion()			{ return m.hitBoxExpl; }
-	const Donya::SphereFrame	&HitBoxExplosion()	const	{ return m.hitBoxExpl; }
-	SphereFrameWithName			&HitBoxSwing()				{ return m.hitBoxSwing; }
-	const SphereFrameWithName	&HitBoxSwing()		const	{ return m.hitBoxSwing; }
-	SphereFrameWithName			&HitBoxRaid()				{ return m.hitBoxRaid; }
-	const SphereFrameWithName	&HitBoxRaid()		const	{ return m.hitBoxRaid; }
 public:
 	void LoadParameter( bool isBinary = true );
 
@@ -186,7 +223,12 @@ public:
 
 #endif // USE_IMGUI
 };
-CEREAL_CLASS_VERSION( RivalParam, 6 )
+CEREAL_CLASS_VERSION( RivalParam, 0 )
+CEREAL_CLASS_VERSION( RivalParam::Member::Move,	0 )
+CEREAL_CLASS_VERSION( RivalParam::Member::Barrage,	0 )
+CEREAL_CLASS_VERSION( RivalParam::Member::Line,		0 )
+CEREAL_CLASS_VERSION( RivalParam::Member::Raid,		0 )
+CEREAL_CLASS_VERSION( RivalParam::Member::Rush,		0 )
 
 struct fbx_shader; // Use for argument.
 /// <summary>
@@ -203,17 +245,27 @@ private:
 	struct Models
 	{
 		std::shared_ptr<skinned_mesh> pIdle{ nullptr };
-		std::shared_ptr<skinned_mesh> pRunFront{ nullptr };
-		std::shared_ptr<skinned_mesh> pAtkExpl{ nullptr };
-		std::shared_ptr<skinned_mesh> pAtkSwing{ nullptr };
+		std::shared_ptr<skinned_mesh> pRun{ nullptr };
+		std::shared_ptr<skinned_mesh> pBreak{ nullptr };
+		std::shared_ptr<skinned_mesh> pLeave{ nullptr };
+		std::shared_ptr<skinned_mesh> pDead{ nullptr };
+		std::shared_ptr<skinned_mesh> pAtkBarrage{ nullptr };
+		std::shared_ptr<skinned_mesh> pAtkLine{ nullptr };
 		std::shared_ptr<skinned_mesh> pAtkRaid{ nullptr };
-		std::shared_ptr<skinned_mesh> pFxExpl{ nullptr };
+		std::shared_ptr<skinned_mesh> pAtkRush{ nullptr };
+	};
+	enum class ExtraState
+	{
+		BREAK,
+		LEAVE,
+		DEAD,
+		NONE
 	};
 private:
 	RivalAI::ActionState	status;
+	ExtraState				extraStatus;
 	RivalAI					AI;
 	int						timer;				// Recycle between each state.
-	int						reviveCollisionTime;// Use when disable collision.
 	float					fieldRadius;		// For collision to wall. the field is perfect-circle, so I can detect collide to wall by distance.
 	float					slerpFactor;		// 0.0f ~ 1.0f. Use orientation's rotation.
 	Donya::Vector3			pos;				// Contain world space position. actual position is "pos + extraOffset".
@@ -239,19 +291,11 @@ public:
 	/// Returns world space hit-box of body.
 	/// </summary>
 	Donya::Sphere GetBodyHitBox() const;
-	/// <summary>
-	/// Returns world space hit-box of attack of explosion.
-	/// </summary>
-	Donya::Sphere CalcAttackHitBoxExplosion() const;
-	/// <summary>
-	/// Returns world space hit-box of attack of swing.
-	/// </summary>
-	Donya::Sphere CalcAttackHitBoxSwing() const;
-	/// <summary>
-	/// Returns world space hit-box of attack of raid.
-	/// </summary>
-	Donya::Sphere CalcAttackHitBoxRaid() const;
 
+	/// <summary>
+	/// Please call when defended Rival's attack.
+	/// </summary>
+	void WasDefended();
 	void ReceiveImpact();
 
 	void SetFieldRadius( float fieldRadius );
@@ -274,18 +318,22 @@ private:
 	void MoveInit( TargetStatus target );
 	void MoveUpdate( TargetStatus target );
 	void MoveUninit();
+	
+	void AttackBarrageInit( TargetStatus target );
+	void AttackBarrageUpdate( TargetStatus target );
+	void AttackBarrageUninit();
 
-	void AttackExplosionInit( TargetStatus target );
-	void AttackExplosionUpdate( TargetStatus target );
-	void AttackExplosionUninit();
-
-	void AttackSwingInit( TargetStatus target );
-	void AttackSwingUpdate( TargetStatus target );
-	void AttackSwingUninit();
+	void AttackLineInit( TargetStatus target );
+	void AttackLineUpdate( TargetStatus target );
+	void AttackLineUninit();
 
 	void AttackRaidInit( TargetStatus target );
 	void AttackRaidUpdate( TargetStatus target );
 	void AttackRaidUninit();
+
+	void AttackRushInit( TargetStatus target );
+	void AttackRushUpdate( TargetStatus target );
+	void AttackRushUninit();
 private:
 	/// <summary>
 	/// The position("pos") is only changed by this method(or CollideToWall method).

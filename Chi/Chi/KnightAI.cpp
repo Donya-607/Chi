@@ -118,12 +118,12 @@ void KnightAI::LotteryAttackState()
 {
 	if ( attackTimes <= 0 )
 	{
-		status = ActionState::ATTACK_EXPLOSION;
-		timer = wholeFrame.back();
-		coolTime = coolTimeFrame.back();
+		status		= GetGapAttack();
+		timer		= wholeFrame.back();
+		coolTime	= coolTimeFrame.back();
 
-		intervalIndex = ( intervalIndex <= scast<int>( gapIntervals.size() ) - 1 ) ? 0 : intervalIndex + 1;
-		attackTimes = gapIntervals[intervalIndex];
+		intervalIndex	= ( intervalIndex <= scast<int>( gapIntervals.size() ) - 1 ) ? 0 : intervalIndex + 1;
+		attackTimes		= gapIntervals[intervalIndex];
 		return;
 	}
 	// else
@@ -140,8 +140,8 @@ void KnightAI::LotteryAttackState()
 		for ( int i = 0; i < ATTACK_STATE_COUNT; ++i )
 		{
 			int partSum = ( i == ATTACK_STATE_COUNT - 1 )
-				? percentSum
-				: std::accumulate( attackPercents.begin(), ( attackPercents.begin() + i + 1 ), 0 );
+			? percentSum
+			: std::accumulate( attackPercents.begin(), ( attackPercents.begin() + i + 1 ), 0 );
 
 			if ( percentRand <= partSum )
 			{

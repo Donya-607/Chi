@@ -20,9 +20,10 @@ public:
 	{
 		WAIT,
 		MOVE,
-		ATTACK_EXPLOSION,
-		ATTACK_SWING,
+		ATTACK_BARRAGE,
+		ATTACK_LINE,
 		ATTACK_RAID,
+		ATTACK_RUSH,
 
 		END
 	};
@@ -31,9 +32,10 @@ public:
 	{
 		switch ( status )
 		{
-		case ActionState::ATTACK_EXPLOSION:	return true;	// break;
-		case ActionState::ATTACK_SWING:		return true;	// break;
+		case ActionState::ATTACK_BARRAGE:	return true;	// break;
+		case ActionState::ATTACK_LINE:		return true;	// break;
 		case ActionState::ATTACK_RAID:		return true;	// break;
+		case ActionState::ATTACK_RUSH:		return true;	// break;
 		default: break;
 		}
 
@@ -56,7 +58,8 @@ private:
 	/// </summary>
 	enum class AttackState
 	{
-		SWING,
+		BARRAGE,
+		LINE,
 		RAID,
 
 		END

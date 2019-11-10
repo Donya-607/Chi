@@ -371,13 +371,14 @@ void Knight::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Dony
 	const Donya::Vector3 drawOffset = PARAM.drawOffset;
 	const Donya::Vector4x4 DRAW_OFFSET = Donya::Vector4x4::MakeTranslation( drawOffset );
 
+	// S, R, T will be used here and later.
 	Donya::Vector4x4 S = Donya::Vector4x4::MakeScaling( PARAM.scale );
 	Donya::Vector4x4 R = orientation.RequireRotationMatrix();
 	Donya::Vector4x4 T = Donya::Vector4x4::MakeTranslation( GetPos() );
 #if DEBUG_MODE
 	if ( status == decltype( status )::END ) { R = Donya::Quaternion::Make( Donya::Vector3::Front(), ToRadian( 180.0f ) ).RequireRotationMatrix(); };
 #endif // DEBUG_MODE
-	Donya::Vector4x4 W = S * R * T * DRAW_OFFSET;
+	Donya::Vector4x4 W = CalcWorldMatrix() * DRAW_OFFSET;
 	Donya::Vector4x4 WVP = W * matView * matProjection;
 
 	switch ( status )
