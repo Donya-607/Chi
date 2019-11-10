@@ -1018,7 +1018,7 @@ float Golem::CalcNormalizedDistance( Donya::Vector3 wsTargetPos )
 	float distance = ( wsTargetPos - GetPos() ).Length();
 	return ( ZeroEqual( fieldRadius ) )
 	? fieldRadius
-	: distance / fieldRadius;
+	: distance / ( fieldRadius * 2.0f );
 }
 
 Donya::Vector4x4 Golem::CalcWorldMatrix() const

@@ -107,6 +107,7 @@ public:
 	void Init();
 	void Update();
 	ActionState GetState() const { return status; }
+	void OverwriteState( ActionState newState );
 private:
 	ActionState ToActionState( WaitState status ) const;
 	ActionState ToActionState( AttackState status ) const;

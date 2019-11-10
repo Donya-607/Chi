@@ -56,6 +56,11 @@ void RivalAI::Update()
 	}
 }
 
+void RivalAI::OverwriteState( ActionState newState )
+{
+	status = newState;
+}
+
 RivalAI::ActionState RivalAI::ToActionState( WaitState waitStatus ) const
 {
 	ActionState to = ActionState::END;

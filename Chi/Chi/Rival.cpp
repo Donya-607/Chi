@@ -592,7 +592,7 @@ float Rival::CalcNormalizedDistance( Donya::Vector3 wsTargetPos )
 	float distance = ( wsTargetPos - GetPos() ).Length();
 	return ( ZeroEqual( fieldRadius ) )
 	? fieldRadius
-	: distance / fieldRadius;
+	: distance / ( fieldRadius * 2.0f );
 }
 
 Donya::Vector4x4 Rival::CalcWorldMatrix() const
@@ -688,6 +688,10 @@ void Rival::MoveUpdate( TargetStatus target )
 
 	if ( distNear <= nDistance && nDistance <= distFar )
 	{
+		const auto IdleState = RivalAI::ActionState::WAIT;
+		status = IdleState;
+		AI.OverwriteState( IdleState );
+
 		velocity = 0.0f;
 		return;
 	}
