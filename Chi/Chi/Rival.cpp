@@ -271,11 +271,13 @@ Rival::Rival() :
 		&models.pRun,
 		&models.pBreak,
 		&models.pLeave,
-		&models.pDead,
+		&models.pDefeat,
 		&models.pAtkBarrage,
 		&models.pAtkLine,
 		&models.pAtkRaid,
-		&models.pAtkRush,
+		&models.pAtkRushPre,
+		&models.pAtkRushRaid,
+		&models.pAtkRushPost,
 	};
 	for ( auto &it : modelRefs )
 	{
@@ -344,8 +346,8 @@ void Rival::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya
 		case ExtraState::LEAVE:
 			FBXRender( models.pBreak.get(), HLSL, WVP, W );
 			break;
-		case ExtraState::DEAD:
-			FBXRender( models.pDead.get(), HLSL, WVP, W );
+		case ExtraState::DEFEAT:
+			FBXRender( models.pDefeat.get(), HLSL, WVP, W );
 			break;
 		default: break;
 		}
@@ -370,7 +372,7 @@ void Rival::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya
 			FBXRender( models.pAtkRaid.get(), HLSL, WVP, W );
 			break;
 		case RivalAI::ActionState::ATTACK_RUSH:
-			FBXRender( models.pAtkRush.get(), HLSL, WVP, W );
+			FBXRender( models.pAtkRushPre.get(), HLSL, WVP, W );
 			break;
 		default: break;
 		}
@@ -420,6 +422,21 @@ void Rival::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya
 
 		OBJRender( pSphere.get(), CWVP, CW, color );
 	};
+	auto DrawAABB	= [&]( const Donya::AABB &AABB, const Donya::Vector4 &color, bool applyParentMatrix = true, bool applyParentDrawOffset = false )
+	{
+		Donya::Vector4x4 CS = Donya::Vector4x4::MakeScaling( AABB.size * 2.0f ); // Half size->Whole size.
+		Donya::Vector4x4 CT = Donya::Vector4x4::MakeTranslation( AABB.pos );
+		Donya::Vector4x4 CW = ( CS * CT );
+		if ( applyParentDrawOffset )
+		{
+			Donya::Vector4x4 OFS = Donya::Vector4x4::MakeTranslation( drawOffset );
+			CW *= OFS;
+		}
+		if ( applyParentMatrix ) { CW *= W; }
+		Donya::Vector4x4 CWVP = CW * matView * matProjection;
+
+		OBJRender( pCube.get(), CWVP, CW, color );
+	};
 	auto DrawOBB	= [&]( const Donya::OBB &OBB, const Donya::Vector4 &color, bool applyParentMatrix = true, bool applyParentDrawOffset = false )
 	{
 		Donya::Vector4x4 CS = Donya::Vector4x4::MakeScaling( OBB.size * 2.0f ); // Half size->Whole size.
@@ -443,7 +460,7 @@ void Rival::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya
 
 		constexpr Donya::Vector4 COLOR_BODY{ 0.0f, 0.5f, 0.2f, 0.6f };
 
-		DrawSphere( PARAM.hitBoxBody.pos, PARAM.hitBoxBody.radius, COLOR_BODY );
+		DrawAABB( PARAM.hitBoxBody, COLOR_BODY );
 
 		constexpr Donya::Vector4 COLOR_VALID{ 1.0f, 0.5f, 0.0f, 0.6f };
 		constexpr Donya::Vector4 COLOR_INVALID{ 0.4f, 0.4f, 1.0f, 0.6f };
@@ -455,26 +472,13 @@ void Rival::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya
 			break;
 		case RivalAI::ActionState::MOVE:
 			break;
-		case RivalAI::ActionState::ATTACK_EXPLOSION:
-			{
-				const auto &wsSphere = CalcAttackHitBoxExplosion();
-				Donya::Vector4 color = ( wsSphere.enable && wsSphere.exist ) ? COLOR_VALID : COLOR_INVALID;
-				DrawSphere( wsSphere.pos, wsSphere.radius, color, /* applyParentMatrix = */ false );
-			}
+		case RivalAI::ActionState::ATTACK_BARRAGE:
 			break;
-		case RivalAI::ActionState::ATTACK_SWING:
-			{
-				const auto &wsSphere = CalcAttackHitBoxSwing();
-				Donya::Vector4 color = ( wsSphere.enable && wsSphere.exist ) ? COLOR_VALID : COLOR_INVALID;
-				DrawSphere( wsSphere.pos, wsSphere.radius, color, /* applyParentMatrix = */ false );
-			}
+		case RivalAI::ActionState::ATTACK_LINE:
 			break;
 		case RivalAI::ActionState::ATTACK_RAID:
-			{
-				const auto &wsSphere = CalcAttackHitBoxRaid();
-				Donya::Vector4 color = ( wsSphere.enable && wsSphere.exist ) ? COLOR_VALID : COLOR_INVALID;
-				DrawSphere( wsSphere.pos, wsSphere.radius, color, /* applyParentMatrix = */ false );
-			}
+			break;
+		case RivalAI::ActionState::ATTACK_RUSH:
 			break;
 		default: break;
 		}
@@ -507,41 +511,13 @@ bool Rival::IsCollideAttackHitBoxes( const Donya::OBB    other, bool disableColl
 
 	switch ( status )
 	{
-	case RivalAI::ActionState::ATTACK_EXPLOSION:
-		{
-			const auto &wsSphere = CalcAttackHitBoxExplosion();
-			if ( Donya::OBB::IsHitSphere( other, wsSphere ) )
-			{
-				wasCollided = true;
-				if ( disableCollidingHitBoxes )
-				{
-					RivalParam::Get().HitBoxExplosion().collision.enable = false;
-					reviveCollisionTime = RivalParam::Open().explReviveColFrame;
-				}
-			}
-		}
+	case RivalAI::ActionState::ATTACK_BARRAGE:
 		break;
-	case RivalAI::ActionState::ATTACK_SWING:
-		{
-			const auto &wsSphere = CalcAttackHitBoxSwing();
-			if ( Donya::OBB::IsHitSphere( other, wsSphere ) )
-			{
-				wasCollided = true;
-				if ( disableCollidingHitBoxes )
-				{ RivalParam::Get().HitBoxSwing().sphereF.collision.enable = false; }
-			}
-		}
+	case RivalAI::ActionState::ATTACK_LINE:
 		break;
 	case RivalAI::ActionState::ATTACK_RAID:
-		{
-			const auto &wsSphere = CalcAttackHitBoxRaid();
-			if ( Donya::OBB::IsHitSphere( other, wsSphere ) )
-			{
-				wasCollided = true;
-				if ( disableCollidingHitBoxes )
-				{ RivalParam::Get().HitBoxRaid().sphereF.collision.enable = false; }
-			}
-		}
+		break;
+	case RivalAI::ActionState::ATTACK_RUSH:
 		break;
 	default: break;
 	}
@@ -552,41 +528,26 @@ bool Rival::IsCollideAttackHitBoxes( const Donya::OBB    other, bool disableColl
 static Donya::OBB MakeOBB( const Donya::AABB &AABB, const Donya::Vector3 &wsPos, const Donya::Quaternion &orientation )
 {
 	Donya::OBB OBB{};
-	OBB.pos = AABB.pos + wsPos;
-	OBB.size = AABB.size;
-	OBB.orientation = orientation;
-	OBB.exist = AABB.exist;
+	OBB.pos				= AABB.pos + wsPos;
+	OBB.size			= AABB.size;
+	OBB.orientation		= orientation;
+	OBB.exist			= AABB.exist;
 	return OBB;
 }
-Donya::Sphere Rival::GetBodyHitBox() const
+Donya::AABB Rival::GetBodyHitBox() const
 {
-	Donya::Sphere wsBody = RivalParam::Open().hitBoxBody;
+	Donya::AABB wsBody = RivalParam::Open().hitBoxBody;
 	wsBody.pos += GetPos();
 	return wsBody;
 }
-Donya::Sphere Rival::CalcAttackHitBoxExplosion() const
+void Rival::WasDefended()
 {
-	Donya::SphereFrame wsHitBoxF = RivalParam::Open().hitBoxExpl;
-	wsHitBoxF.collision.pos += GetPos();
-	return wsHitBoxF.collision;
+	if ( status == RivalAI::ActionState::ATTACK_RUSH )
+	{
+		status = RivalAI::ActionState::WAIT;
+		extraStatus = ExtraState::BREAK;
+	}
 }
-Donya::Sphere Rival::CalcAttackHitBoxSwing() const
-{
-	return RivalParam::Get().HitBoxSwing().CalcTransformedSphere
-	(
-		models.pAtkSwing.get(),
-		CalcWorldMatrix()
-	);
-}
-Donya::Sphere Rival::CalcAttackHitBoxRaid() const
-{
-	return RivalParam::Get().HitBoxRaid().CalcTransformedSphere
-	(
-		models.pAtkRaid.get(),
-		CalcWorldMatrix()
-	);
-}
-
 void Rival::ReceiveImpact()
 {
 	status = decltype( status )::END;
@@ -602,18 +563,26 @@ void Rival::LoadModel()
 {
 	Donya::OutputDebugStr( "Begin Rival::LoadModel.\n" );
 
-	loadFBX( models.pIdle.get(), GetModelPath( ModelAttribute::KnightIdle ) );
-	Donya::OutputDebugStr( "Done KnightModel.Idle.\n" );
-	loadFBX( models.pRunFront.get(), GetModelPath( ModelAttribute::KnightRunFront ) );
-	Donya::OutputDebugStr( "Done KnightModel.RunFront.\n" );
-	loadFBX( models.pAtkExpl.get(), GetModelPath( ModelAttribute::KnightAtkExplosion ) );
-	Donya::OutputDebugStr( "Done KnightModel.Attack.Explosion.\n" );
-	loadFBX( models.pAtkSwing.get(), GetModelPath( ModelAttribute::KnightAtkSwing ) );
-	Donya::OutputDebugStr( "Done KnightModel.Attack.Swing.\n" );
-	loadFBX( models.pAtkRaid.get(), GetModelPath( ModelAttribute::KnightAtkRaid ) );
-	Donya::OutputDebugStr( "Done KnightModel.Attack.Raid.\n" );
-	loadFBX( models.pFxExpl.get(), GetModelPath( ModelAttribute::KnightFxExplosion ) );
-	Donya::OutputDebugStr( "Done KnightModel.Fx.Explosion.\n" );
+	loadFBX( models.pIdle.get(), GetModelPath( ModelAttribute::RivalIdle ) );
+	Donya::OutputDebugStr( "Done RivalModel.Idle.\n" );
+	loadFBX( models.pRun.get(), GetModelPath( ModelAttribute::RivalRun ) );
+	Donya::OutputDebugStr( "Done RivalModel.Run.\n" );
+	loadFBX( models.pBreak.get(), GetModelPath( ModelAttribute::RivalBreak ) );
+	Donya::OutputDebugStr( "Done RivalModel.Break.\n" );
+	loadFBX( models.pDefeat.get(), GetModelPath( ModelAttribute::RivalDefeat ) );
+	Donya::OutputDebugStr( "Done RivalModel.Defeat.\n" );
+	loadFBX( models.pAtkBarrage.get(), GetModelPath( ModelAttribute::RivalAtkBarrage ) );
+	Donya::OutputDebugStr( "Done RivalModel.Attack.Barrage.\n" );
+	loadFBX( models.pAtkLine.get(), GetModelPath( ModelAttribute::RivalAtkLine ) );
+	Donya::OutputDebugStr( "Done RivalModel.Attack.Line.\n" );
+	loadFBX( models.pAtkRaid.get(), GetModelPath( ModelAttribute::RivalAtkRaid ) );
+	Donya::OutputDebugStr( "Done RivalModel.Attack.Raid.\n" );
+	loadFBX( models.pAtkRushPre.get(), GetModelPath( ModelAttribute::RivalAtkRushPre ) );
+	Donya::OutputDebugStr( "Done RivalModel.Attack.Rush.Pre.\n" );
+	loadFBX( models.pAtkRushRaid.get(), GetModelPath( ModelAttribute::RivalAtkRushRaid ) );
+	Donya::OutputDebugStr( "Done RivalModel.Attack.Rush.Raid.\n" );
+	loadFBX( models.pAtkRushPost.get(), GetModelPath( ModelAttribute::RivalAtkRushPost ) );
+	Donya::OutputDebugStr( "Done RivalModel.Attack.Rush.Post.\n" );
 
 	Donya::OutputDebugStr( "End Rival::LoadModel.\n" );
 }
@@ -646,20 +615,22 @@ void Rival::ChangeStatus( TargetStatus target )
 
 	switch ( status )
 	{
-	case RivalAI::ActionState::WAIT:				WaitUninit();				break;
-	case RivalAI::ActionState::MOVE:				MoveUninit();				break;
-	case RivalAI::ActionState::ATTACK_EXPLOSION:	AttackExplosionUninit();	break;
-	case RivalAI::ActionState::ATTACK_SWING:		AttackSwingUninit();		break;
-	case RivalAI::ActionState::ATTACK_RAID:			AttackRaidUninit();			break;
+	case RivalAI::ActionState::WAIT:				WaitUninit();			break;
+	case RivalAI::ActionState::MOVE:				MoveUninit();			break;
+	case RivalAI::ActionState::ATTACK_BARRAGE:		AttackBarrageUninit();	break;
+	case RivalAI::ActionState::ATTACK_LINE:			AttackLineUninit();		break;
+	case RivalAI::ActionState::ATTACK_RAID:			AttackRaidUninit();		break;
+	case RivalAI::ActionState::ATTACK_RUSH:			AttackRushUninit();		break;
 	default: break;
 	}
 	switch ( lotteryStatus )
 	{
 	case RivalAI::ActionState::WAIT:				WaitInit( target );				break;
 	case RivalAI::ActionState::MOVE:				MoveInit( target );				break;
-	case RivalAI::ActionState::ATTACK_EXPLOSION:	AttackExplosionInit( target );	break;
-	case RivalAI::ActionState::ATTACK_SWING:		AttackSwingInit( target );		break;
+	case RivalAI::ActionState::ATTACK_BARRAGE:		AttackBarrageInit( target );	break;
+	case RivalAI::ActionState::ATTACK_LINE:			AttackLineInit( target );		break;
 	case RivalAI::ActionState::ATTACK_RAID:			AttackRaidInit( target );		break;
+	case RivalAI::ActionState::ATTACK_RUSH:			AttackRushInit( target );		break;
 	default: break;
 	}
 
@@ -669,11 +640,12 @@ void Rival::UpdateCurrentStatus( TargetStatus target )
 {
 	switch ( status )
 	{
-	case RivalAI::ActionState::WAIT:				WaitUpdate( target );				break;
-	case RivalAI::ActionState::MOVE:				MoveUpdate( target );				break;
-	case RivalAI::ActionState::ATTACK_EXPLOSION:	AttackExplosionUpdate( target );	break;
-	case RivalAI::ActionState::ATTACK_SWING:		AttackSwingUpdate( target );		break;
-	case RivalAI::ActionState::ATTACK_RAID:			AttackRaidUpdate( target );			break;
+	case RivalAI::ActionState::WAIT:				WaitUpdate( target );			break;
+	case RivalAI::ActionState::MOVE:				MoveUpdate( target );			break;
+	case RivalAI::ActionState::ATTACK_BARRAGE:		AttackBarrageUpdate( target );	break;
+	case RivalAI::ActionState::ATTACK_LINE:			AttackLineUpdate( target );		break;
+	case RivalAI::ActionState::ATTACK_RAID:			AttackRaidUpdate( target );		break;
+	case RivalAI::ActionState::ATTACK_RUSH:			AttackRushUpdate( target );		break;
 	default: break;
 	}
 }
@@ -686,17 +658,15 @@ XXXUninit : call by ChangeStatus when changing status. before YYYInit.
 
 void Rival::WaitInit( TargetStatus target )
 {
-	status = RivalAI::ActionState::WAIT;
-
-	slerpFactor = RivalParam::Get().SlerpFactor( status );
-
-	velocity = 0.0f;
+	status		= RivalAI::ActionState::WAIT;
+	slerpFactor	= RivalParam::Get().SlerpFactor( status );
+	velocity	= 0.0f;
 
 	setAnimFlame( models.pIdle.get(), 0 );
 }
 void Rival::WaitUpdate( TargetStatus target )
 {
-
+	// No op.
 }
 void Rival::WaitUninit()
 {
@@ -705,11 +675,10 @@ void Rival::WaitUninit()
 
 void Rival::MoveInit( TargetStatus target )
 {
-	status = RivalAI::ActionState::MOVE;
+	status		= RivalAI::ActionState::MOVE;
+	slerpFactor	= RivalParam::Get().SlerpFactor( status );
 
-	slerpFactor = RivalParam::Get().SlerpFactor( status );
-
-	setAnimFlame( models.pRunFront.get(), 0 );
+	setAnimFlame( models.pRun.get(), 0 );
 }
 void Rival::MoveUpdate( TargetStatus target )
 {
@@ -740,102 +709,41 @@ void Rival::MoveUpdate( TargetStatus target )
 }
 void Rival::MoveUninit()
 {
-	setAnimFlame( models.pRunFront.get(), 0 );
+	setAnimFlame( models.pRun.get(), 0 );
 }
 
-void Rival::AttackExplosionInit( TargetStatus target )
+void Rival::AttackBarrageInit( TargetStatus target )
 {
-	status		= RivalAI::ActionState::ATTACK_EXPLOSION;
-	timer		= 0;
-	reviveCollisionTime = 0;
+	status		= RivalAI::ActionState::ATTACK_BARRAGE;
 	slerpFactor	= RivalParam::Get().SlerpFactor( status );
 	velocity	= 0.0f;
 
-	Donya::SphereFrame &hitBox = RivalParam::Get().HitBoxExplosion();
-	ResetCurrentSphereF( &hitBox );
-	hitBox.collision.radius = 0.0f;
-
-	setStopAnimation( models.pAtkExpl.get(), /* is_stop = */ true );
-	setAnimFlame( models.pAtkExpl.get(), 0 );
+	setAnimFlame( models.pAtkBarrage.get(), 0 );
 }
-void Rival::AttackExplosionUpdate( TargetStatus target )
+void Rival::AttackBarrageUpdate( TargetStatus target )
 {
-	const int CHARGE_LENGTH  = RivalParam::Open().explChargeFrame;
-	const int SCALING_LENGTH = RivalParam::Open().explScalingFrame;
-
-	auto &explHitBox = RivalParam::Get().HitBoxExplosion();
-
-	timer++;
-	if ( timer == CHARGE_LENGTH )
-	{
-		// When finish stop the animation, and start explosion.
-		explHitBox.collision.radius = RivalParam::Open().explScaleStart;
-		setStopAnimation( models.pAtkExpl.get(), /* is_stop = */ false );
-
-	}
-	else
-	if ( CHARGE_LENGTH < timer )
-	{
-		const float RADIUS_MIN = RivalParam::Open().explScaleStart;
-		const float RADIUS_MAX = RivalParam::Open().explScaleLast;
-
-		if ( CHARGE_LENGTH + SCALING_LENGTH <= timer )
-		{
-			explHitBox.collision.radius = RADIUS_MAX;
-		}
-		else
-		{
-			const float scalingPercent = scast<float>( timer ) / scast<float>( CHARGE_LENGTH + SCALING_LENGTH );
-			const float difference = RADIUS_MAX - RADIUS_MIN;
-
-			explHitBox.collision.radius = RADIUS_MIN + ( RADIUS_MAX * scalingPercent );
-		}
-	}
-
-	if ( 0 < reviveCollisionTime )
-	{
-		reviveCollisionTime--;
-		if ( reviveCollisionTime <= 0 )
-		{
-			reviveCollisionTime = 0;
-			explHitBox.collision.enable = true;
-		}
-	}
-
-	explHitBox.Update();
+	
 }
-void Rival::AttackExplosionUninit()
+void Rival::AttackBarrageUninit()
 {
-	timer = 0;
-	reviveCollisionTime = 0;
-
-	Donya::SphereFrame &hitBox = RivalParam::Get().HitBoxExplosion();
-	ResetCurrentSphereF( &hitBox );
-	hitBox.collision.radius = 0.0f;
-
-	setAnimFlame( models.pAtkExpl.get(), 0 );
+	setAnimFlame( models.pAtkBarrage.get(), 0 );
 }
 
-void Rival::AttackSwingInit( TargetStatus target )
+void Rival::AttackLineInit( TargetStatus target )
 {
-	status		= RivalAI::ActionState::ATTACK_SWING;;
+	status		= RivalAI::ActionState::ATTACK_LINE;
 	slerpFactor	= RivalParam::Get().SlerpFactor( status );
 	velocity	= 0.0f;
 
-	ResetCurrentSphereFN( &RivalParam::Get().HitBoxSwing() );
-	setAnimFlame( models.pAtkSwing.get(), 0 );
+	setAnimFlame( models.pAtkLine.get(), 0 );
 }
-void Rival::AttackSwingUpdate( TargetStatus target )
+void Rival::AttackLineUpdate( TargetStatus target )
 {
-	auto &hitBox = RivalParam::Get().HitBoxSwing();
-	hitBox.sphereF.Update();
+	
 }
-void Rival::AttackSwingUninit()
+void Rival::AttackLineUninit()
 {
-	timer = 0;
-
-	ResetCurrentSphereFN( &RivalParam::Get().HitBoxSwing() );
-	setAnimFlame( models.pAtkSwing.get(), 0 );
+	setAnimFlame( models.pAtkLine.get(), 0 );
 }
 
 void Rival::AttackRaidInit( TargetStatus target )
@@ -846,11 +754,12 @@ void Rival::AttackRaidInit( TargetStatus target )
 	extraOffset	= 0.0f;
 	velocity	= 0.0f;
 
-	ResetCurrentSphereFN( &RivalParam::Get().HitBoxRaid() );
+	// ResetCurrentSphereFN( &RivalParam::Get().HitBoxRaid() );
 	setAnimFlame( models.pAtkRaid.get(), 0 );
 }
 void Rival::AttackRaidUpdate( TargetStatus target )
 {
+	/*
 	const int START_TIME	= RivalParam::Open().raidJumpStartFrame;
 	const int LANDING_TIME	= RivalParam::Open().raidJumpLastFrame;
 	
@@ -901,6 +810,7 @@ void Rival::AttackRaidUpdate( TargetStatus target )
 
 	auto &hitBox = RivalParam::Get().HitBoxRaid();
 	hitBox.sphereF.Update();
+	*/
 }
 void Rival::AttackRaidUninit()
 {
@@ -908,8 +818,29 @@ void Rival::AttackRaidUninit()
 	extraOffset	= 0.0f;
 	velocity	= 0.0f;
 
-	ResetCurrentSphereFN( &RivalParam::Get().HitBoxRaid() );
+	// ResetCurrentSphereFN( &RivalParam::Get().HitBoxRaid() );
 	setAnimFlame( models.pAtkRaid.get(), 0 );
+}
+
+void Rival::AttackRushInit( TargetStatus target )
+{
+	status		= RivalAI::ActionState::ATTACK_RUSH;
+	slerpFactor	= RivalParam::Get().SlerpFactor( status );
+	velocity	= 0.0f;
+
+	setAnimFlame( models.pAtkRushPre.get(), 0 );
+	setAnimFlame( models.pAtkRushRaid.get(), 0 );
+	setAnimFlame( models.pAtkRushPost.get(), 0 );
+}
+void Rival::AttackRushUpdate( TargetStatus target )
+{
+	
+}
+void Rival::AttackRushUninit()
+{
+	setAnimFlame( models.pAtkRushPre.get(), 0 );
+	setAnimFlame( models.pAtkRushRaid.get(), 0 );
+	setAnimFlame( models.pAtkRushPost.get(), 0 );
 }
 
 void Rival::ApplyVelocity( TargetStatus target )
@@ -959,9 +890,10 @@ void Rival::UseImGui()
 				{
 				case RivalAI::ActionState::WAIT:				return { "Wait" };				break;
 				case RivalAI::ActionState::MOVE:				return { "Move" };				break;
-				case RivalAI::ActionState::ATTACK_EXPLOSION:	return { "Attack.Explosion" };	break;
-				case RivalAI::ActionState::ATTACK_SWING:		return { "Attack.Swing" };		break;
+				case RivalAI::ActionState::ATTACK_BARRAGE:		return { "Attack.Barrage" };	break;
+				case RivalAI::ActionState::ATTACK_LINE:			return { "Attack.Line" };		break;
 				case RivalAI::ActionState::ATTACK_RAID:			return { "Attack.Raid" };		break;
+				case RivalAI::ActionState::ATTACK_RUSH:			return { "Attack.Rush" };		break;
 				default: break;
 				}
 

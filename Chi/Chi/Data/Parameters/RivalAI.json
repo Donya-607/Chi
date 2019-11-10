@@ -1,0 +1,30 @@
+{
+    "RivalAI": {
+        "cereal_class_version": 0,
+        "wholeFrame": {
+            "value0": 60,
+            "value1": 60,
+            "value2": 60,
+            "value3": 60
+        },
+        "coolTimeFrame": {
+            "value0": 60,
+            "value1": 60,
+            "value2": 60,
+            "value3": 60
+        },
+        "waitPercents": {
+            "value0": 10,
+            "value1": 50
+        },
+        "attackPercents": {
+            "value0": 10,
+            "value1": 10,
+            "value2": 10
+        },
+        "gapIntervals": [
+            2,
+            1
+        ]
+    }
+}

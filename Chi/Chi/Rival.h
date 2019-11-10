@@ -248,17 +248,19 @@ private:
 		std::shared_ptr<skinned_mesh> pRun{ nullptr };
 		std::shared_ptr<skinned_mesh> pBreak{ nullptr };
 		std::shared_ptr<skinned_mesh> pLeave{ nullptr };
-		std::shared_ptr<skinned_mesh> pDead{ nullptr };
+		std::shared_ptr<skinned_mesh> pDefeat{ nullptr };
 		std::shared_ptr<skinned_mesh> pAtkBarrage{ nullptr };
 		std::shared_ptr<skinned_mesh> pAtkLine{ nullptr };
 		std::shared_ptr<skinned_mesh> pAtkRaid{ nullptr };
-		std::shared_ptr<skinned_mesh> pAtkRush{ nullptr };
+		std::shared_ptr<skinned_mesh> pAtkRushPre{ nullptr };
+		std::shared_ptr<skinned_mesh> pAtkRushRaid{ nullptr };
+		std::shared_ptr<skinned_mesh> pAtkRushPost{ nullptr };
 	};
 	enum class ExtraState
 	{
 		BREAK,
 		LEAVE,
-		DEAD,
+		DEFEAT,
 		NONE
 	};
 private:
@@ -290,7 +292,7 @@ public:
 	/// <summary>
 	/// Returns world space hit-box of body.
 	/// </summary>
-	Donya::Sphere GetBodyHitBox() const;
+	Donya::AABB GetBodyHitBox() const;
 
 	/// <summary>
 	/// Please call when defended Rival's attack.

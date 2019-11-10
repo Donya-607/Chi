@@ -1,0 +1,60 @@
+{
+    "Rival": {
+        "cereal_class_version": 0,
+        "m.scale": 1.0,
+        "m.stageBodyRadius": 16.0,
+        "m.targetDistNear": 0.07999999821186066,
+        "m.targetDistFar": 0.6000000238418579,
+        "m.idleSlerpFactor": 0.10000000149011612,
+        "m.initPos": {
+            "cereal_class_version": 0,
+            "x": 0.0,
+            "y": 0.0,
+            "z": 366.0
+        },
+        "m.drawOffset": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+        },
+        "m.hitBoxBody": {
+            "cereal_class_version": 0,
+            "pos": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "size": {
+                "x": 16.0,
+                "y": 128.0,
+                "z": 16.0
+            },
+            "exist": true
+        },
+        "m.move": {
+            "cereal_class_version": 0,
+            "moveSpeed": 8.0,
+            "slerpFactor": 0.10000000149011612
+        },
+        "m.barrage": {
+            "cereal_class_version": 0,
+            "moveSpeed": 3.0,
+            "slerpFactor": 0.10000000149011612
+        },
+        "m.line": {
+            "cereal_class_version": 0,
+            "moveSpeed": 0.0,
+            "slerpFactor": 0.029999999329447748
+        },
+        "m.raid": {
+            "cereal_class_version": 0,
+            "moveSpeed": 2.0,
+            "slerpFactor": 0.05999999865889549
+        },
+        "m.rush": {
+            "cereal_class_version": 0,
+            "moveSpeed": 0.0,
+            "slerpFactor": 0.10000000149011612
+        }
+    }
+}

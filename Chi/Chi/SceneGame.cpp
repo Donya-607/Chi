@@ -677,7 +677,16 @@ public:
 		
 		// PlayerAttack VS BossBodies
 		{
-			if ( Donya::OBB::IsHitSphere( playerAttackBox, rival.GetBodyHitBox() ) )
+			Donya::OBB wsRivalBody{};
+			{
+				Donya::AABB rivalAABB	= rival.GetBodyHitBox();
+				wsRivalBody.pos			= rivalAABB.pos;
+				wsRivalBody.size		= rivalAABB.size;
+				wsRivalBody.orientation	= Donya::Quaternion::Identity();
+				wsRivalBody.exist		= rivalAABB.exist;
+				wsRivalBody.enable		= rivalAABB.enable;
+			}
+			if ( Donya::OBB::IsHitOBB( playerAttackBox, wsRivalBody ) )
 			{
 				rival.ReceiveImpact();
 			}
