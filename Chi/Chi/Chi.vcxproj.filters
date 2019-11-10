@@ -130,6 +130,7 @@
     <ClInclude Include="bloom.h" />
     <ClInclude Include="AssetLoader.h" />
     <ClInclude Include="Rival.h" />
+    <ClInclude Include="RivalAI.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp">
@@ -224,6 +225,7 @@
     <ClCompile Include="bloom.cpp" />
     <ClCompile Include="AssetLoader.cpp" />
     <ClCompile Include="Rival.cpp" />
+    <ClCompile Include="RivalAI.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="geometric_phong_ps.hlsl">

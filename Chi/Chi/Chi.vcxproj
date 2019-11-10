@@ -188,6 +188,7 @@
     <ClInclude Include="rayPick.h" />
     <ClInclude Include="resourceManager.h" />
     <ClInclude Include="Rival.h" />
+    <ClInclude Include="RivalAI.h" />
     <ClInclude Include="scene.h" />
     <ClInclude Include="sceneManager.h" />
     <ClInclude Include="skinned_mesh.h" />
@@ -239,6 +240,7 @@
     <ClCompile Include="rayPick.cpp" />
     <ClCompile Include="resourceManager.cpp" />
     <ClCompile Include="Rival.cpp" />
+    <ClCompile Include="RivalAI.cpp" />
     <ClCompile Include="SceneEffect.cpp" />
     <ClCompile Include="SceneGame.cpp" />
     <ClCompile Include="sceneManager.cpp" />
