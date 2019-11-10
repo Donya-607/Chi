@@ -666,7 +666,13 @@ void Rival::WaitInit( TargetStatus target )
 }
 void Rival::WaitUpdate( TargetStatus target )
 {
-	// No op.
+	const float distFar		= RivalParam::Open().targetDistFar;
+	const float nDistance	= CalcNormalizedDistance( target.pos );
+
+	if ( distFar <= nDistance )
+	{
+		AI.OverwriteState( RivalAI::ActionState::MOVE );
+	}
 }
 void Rival::WaitUninit()
 {
@@ -677,6 +683,7 @@ void Rival::MoveInit( TargetStatus target )
 {
 	status		= RivalAI::ActionState::MOVE;
 	slerpFactor	= RivalParam::Get().SlerpFactor( status );
+	velocity	= 0.0f;
 
 	setAnimFlame( models.pRun.get(), 0 );
 }
@@ -688,9 +695,7 @@ void Rival::MoveUpdate( TargetStatus target )
 
 	if ( distNear <= nDistance && nDistance <= distFar )
 	{
-		const auto IdleState = RivalAI::ActionState::WAIT;
-		status = IdleState;
-		AI.OverwriteState( IdleState );
+		AI.OverwriteState( RivalAI::ActionState::WAIT );
 
 		velocity = 0.0f;
 		return;
@@ -713,6 +718,7 @@ void Rival::MoveUpdate( TargetStatus target )
 }
 void Rival::MoveUninit()
 {
+	velocity = 0.0f;
 	setAnimFlame( models.pRun.get(), 0 );
 }
 
