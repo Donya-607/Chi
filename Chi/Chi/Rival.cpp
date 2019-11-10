@@ -666,6 +666,8 @@ void Rival::WaitInit( TargetStatus target )
 }
 void Rival::WaitUpdate( TargetStatus target )
 {
+
+#if GET_CLOSE
 	const float distFar		= RivalParam::Open().targetDistFar;
 	const float nDistance	= CalcNormalizedDistance( target.pos );
 
@@ -673,6 +675,8 @@ void Rival::WaitUpdate( TargetStatus target )
 	{
 		AI.OverwriteState( RivalAI::ActionState::MOVE );
 	}
+#endif // GET_CLOSE
+
 }
 void Rival::WaitUninit()
 {
