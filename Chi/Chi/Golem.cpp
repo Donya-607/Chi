@@ -449,7 +449,7 @@ Donya::OBB GolemParam::OBBFrameWithName::CalcTransformedOBB( skinned_mesh *pMesh
 	return resultOBB;
 }
 
-void ResetCurrentOBBFrames( std::vector<Donya::OBBFrame> *pOBBFs )
+static void ResetCurrentOBBFrames( std::vector<Donya::OBBFrame> *pOBBFs )
 {
 	const size_t COUNT = pOBBFs->size();
 	for ( size_t i = 0; i < COUNT; ++i )
@@ -459,7 +459,7 @@ void ResetCurrentOBBFrames( std::vector<Donya::OBBFrame> *pOBBFs )
 		OBBF.OBB.enable = true;
 	}
 }
-void ResetCurrentSphereFrames( std::vector<Donya::SphereFrame> *pSphereFs )
+static void ResetCurrentSphereFrames( std::vector<Donya::SphereFrame> *pSphereFs )
 {
 	const size_t COUNT = pSphereFs->size();
 	for ( size_t i = 0; i < COUNT; ++i )
@@ -469,7 +469,7 @@ void ResetCurrentSphereFrames( std::vector<Donya::SphereFrame> *pSphereFs )
 		sphereF.collision.enable = true;
 	}
 }
-void ResetCurrentOBBFNames( std::vector<GolemParam::OBBFrameWithName> *pOBBFNs )
+static void ResetCurrentOBBFNames( std::vector<GolemParam::OBBFrameWithName> *pOBBFNs )
 {
 	const size_t COUNT = pOBBFNs->size();
 	for ( size_t i = 0; i < COUNT; ++i )

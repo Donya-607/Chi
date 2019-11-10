@@ -23,6 +23,7 @@
 #include "Golem.h"
 #include "Knight.h"
 #include "Player.h"
+#include "Rival.h"
 #include "Stage.h"
 
 #define scast static_cast
@@ -30,6 +31,11 @@
 #if DEBUG_MODE
 constexpr int BGM_ID = 'BGM';
 constexpr int SE_ID  = 'SE';
+
+/*
+HACK : I should put-together of the bosses(golem, knight, rival) to "BaseBoss" by inheritance.
+*/
+
 #endif // DEBUG_MODE
 
 struct SceneGame::Impl
@@ -39,6 +45,7 @@ public:
 	{
 		GolemNo  = 0,
 		KnightNo = 1,
+		RivalNo  = 2,
 	};
 public:
 	int				stageNo;
@@ -51,6 +58,7 @@ public:
 	Stage			stage;
 	Golem			golem;
 	Knight			knight;
+	Rival			rival;
 	fbx_shader		shader;
 public:
 	Impl() :
@@ -59,7 +67,7 @@ public:
 		cameraPos(), cameraFocusOffset(),
 		player(),
 		stage(),
-		golem(), knight(),
+		golem(), knight(), rival(),
 		lights(),
 		shader()
 	{}
@@ -129,7 +137,7 @@ public:
 			"./Data/shader/skinned_mesh_no_uv_ps.cso"
 		);
 
-		stageNo = AppearStage::KnightNo;
+		stageNo = AppearStage::RivalNo;
 	#endif // DEBUG_MODE
 
 		Donya::OutputDebugStr( "Begin Objects initialize.\n" );
@@ -150,6 +158,7 @@ public:
 		{
 		case GolemNo:	golem.Init( stageNo );		golem.SetFieldRadius( fieldRadius );		cameraTarget = golem.GetPos();	break;
 		case KnightNo:	knight.Init( stageNo );		knight.SetFieldRadius( fieldRadius );		cameraTarget = knight.GetPos();	break;
+		case RivalNo:	rival.Init( stageNo );		rival.SetFieldRadius( fieldRadius );		cameraTarget = rival.GetPos();	break;
 		default:		Donya::OutputDebugStr( "Error : The boss does not initialize !\n" );	break;
 		}
 		Donya::OutputDebugStr( "No.3 End Boss::Init.\n" );
@@ -284,6 +293,13 @@ public:
 				knight.Update( target );
 			}
 			break;
+		case RivalNo:
+			{
+				Rival::TargetStatus target{};
+				target.pos = player.GetPosition();
+				rival.Update( target );
+			}
+			break;
 		default: Donya::OutputDebugStr( "Error : The boss does not update !\n" ); break;
 		}
 
@@ -292,6 +308,7 @@ public:
 		{
 		case GolemNo:	cameraTarget = golem.GetPos();		break;
 		case KnightNo:	cameraTarget = knight.GetPos();		break;
+		case RivalNo:	cameraTarget = rival.GetPos();		break;
 		default:		Donya::OutputDebugStr( "Error : The target of camera is not valid !\n" );	break;
 		}
 		CameraUpdate( cameraTarget );
@@ -343,6 +360,7 @@ public:
 		{
 		case GolemNo:	golem.Draw( shader, V, P );		break;
 		case KnightNo:	knight.Draw( shader, V, P );	break;
+		case RivalNo:	rival.Draw( shader, V, P );		break;
 		default:		Donya::OutputDebugStr( "Error : The boss does not draw !\n" );	break;
 		}
 
@@ -504,6 +522,7 @@ public:
 		{
 		case GolemNo:	VS_Golem();		break;
 		case KnightNo:	VS_Knight();	break;
+		case RivalNo:	VS_Rival();		break;
 		default:		Donya::OutputDebugStr( "Error : The boss does not uninitialize !\n" );	break;
 		}
 	}
@@ -629,6 +648,38 @@ public:
 			if ( Donya::OBB::IsHitSphere( playerAttackBox, knight.GetBodyHitBox() ) )
 			{
 				knight.ReceiveImpact();
+			}
+		}
+	}
+	void VS_Rival()
+	{
+		const Donya::OBB playerBodyBox		= player.GetHurtBox();
+		const Donya::OBB playerShieldBox	= player.GetShieldHitBox();
+		const Donya::OBB playerAttackBox	= player.CalcAttackHitBox();
+
+		// BossAttacks VS Player(and Player's Shield)
+		{
+			bool wasHitToShield = false;
+
+			bool shieldCollided = rival.IsCollideAttackHitBoxes( playerShieldBox, /* disableCollidingHitBoxes = */ true );
+			if ( shieldCollided )
+			{
+				wasHitToShield = true;
+				player.SucceededDefence();
+			}
+
+			bool bodyCollided = ( shieldCollided ) ? false : rival.IsCollideAttackHitBoxes( playerBodyBox, /* disableCollidingHitBoxes = */ false );
+			if ( bodyCollided )
+			{
+				player.ReceiveImpact();
+			}
+		}
+		
+		// PlayerAttack VS BossBodies
+		{
+			if ( Donya::OBB::IsHitSphere( playerAttackBox, rival.GetBodyHitBox() ) )
+			{
+				rival.ReceiveImpact();
 			}
 		}
 	}

@@ -282,12 +282,12 @@ void KnightParam::UseImGui()
 
 #endif // USE_IMGUI
 
-void ResetCurrentSphereF( Donya::SphereFrame *pSphereF )
+static void ResetCurrentSphereF( Donya::SphereFrame *pSphereF )
 {
 	pSphereF->currentFrame = 0;
 	pSphereF->collision.enable = true;
 }
-void ResetCurrentSphereFN( KnightParam::SphereFrameWithName *pSphereFN )
+static void ResetCurrentSphereFN( KnightParam::SphereFrameWithName *pSphereFN )
 {
 	pSphereFN->sphereF.currentFrame = 0;
 	pSphereFN->sphereF.collision.enable = true;
