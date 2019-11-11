@@ -15,20 +15,18 @@
 
 #define scast static_cast
 
-Donya::Sphere RivalParam::SphereFrameWithName::CalcTransformedSphere( skinned_mesh *pMesh, const Donya::Vector4x4 &parentSpaceMatrix ) const
+static Donya::Vector3 CalcBoneTransformedPosition( skinned_mesh *pMesh, const std::string &meshName, const Donya::Vector4x4 &parentSpaceMatrix, const Donya::Vector3 &transformPos )
 {
-	const Donya::Sphere &sphere = sphereF.collision;
-
 	// To local space from mesh's mesh space.
 	Donya::Vector4x4 meshMatrix{};
 	{
 		// Input:offset in local-space. Output:transformed position.
-		Donya::Vector3 outputPos = sphere.pos;
+		Donya::Vector3 outputPos = transformPos;
 		bool succeeded = calcTransformedPosBySpecifyMesh( pMesh, outputPos, meshName );
 		if ( !succeeded )
 		{
 			_ASSERT_EXPR( 0, L"Error : specified mesh name was not found !" );
-			return Donya::Sphere::Nil();
+			return Donya::Vector3::Zero();
 		}
 		Donya::Vector4x4 T = Donya::Vector4x4::MakeTranslation( outputPos );
 
@@ -36,11 +34,13 @@ Donya::Sphere RivalParam::SphereFrameWithName::CalcTransformedSphere( skinned_me
 		meshMatrix = T * parentSpaceMatrix;
 	}
 
-	Donya::Sphere resultSphere = sphere;
-	resultSphere.pos.x = meshMatrix._41;
-	resultSphere.pos.y = meshMatrix._42;
-	resultSphere.pos.z = meshMatrix._43;
-	return resultSphere;
+	Donya::Vector3 resultPos
+	{
+		meshMatrix._41,
+		meshMatrix._42,
+		meshMatrix._43
+	};
+	return resultPos;
 }
 
 RivalParam::RivalParam() :
@@ -93,6 +93,11 @@ RivalParam::Member RivalParam::Open()
 	return Get().Content();
 }
 
+void RivalParam::UpdateBarrage( int elapsedTime )
+{
+	m.barrage.Update( elapsedTime );
+}
+
 void RivalParam::LoadParameter( bool isBinary )
 {
 	Donya::Serializer::Extension ext = ( isBinary )
@@ -124,6 +129,8 @@ void RivalParam::UseImGui()
 	{
 		if ( ImGui::TreeNode( "Rival.AdjustData" ) )
 		{
+		#pragma region CommonSettings
+
 			ImGui::SliderFloat( "Scale", &m.scale, 0.0f, 8.0f );
 			ImGui::DragFloat( "BodyRadiusToStage", &m.stageBodyRadius );
 			ImGui::Text( "" );
@@ -150,6 +157,9 @@ void RivalParam::UseImGui()
 			ImGui::DragFloat3( "Initialize.Position", &m.initPos.x    );
 			ImGui::DragFloat3( "DrawPosition.Offset", &m.drawOffset.x );
 			ImGui::Text( "" );
+
+		// CommonSettings
+		#pragma endregion
 
 			if ( ImGui::TreeNode( "Collisions" ) )
 			{
@@ -186,6 +196,23 @@ void RivalParam::UseImGui()
 					ShowSphere( prefix, &pSphereF->collision );
 					pSphereF->collision.exist = oldExistFlag;
 				};
+				auto ShowSphereFs = [&ShowSphereF]( const std::string &prefix, std::vector<Donya::SphereFrame> *pSphereFs )
+				{
+					if ( ImGui::Button( ( prefix + ".Append" ).c_str() ) )
+					{
+						pSphereFs->push_back( {} );
+					}
+					if ( !pSphereFs->empty() && ImGui::Button( ( prefix + ".PopBack" ).c_str() ) )
+					{
+						pSphereFs->pop_back();
+					}
+
+					const size_t COUNT = pSphereFs->size();
+					for ( size_t i = 0; i < COUNT; ++i )
+					{
+						ShowSphereF( prefix + "[" + std::to_string( i ) + "]", &( *pSphereFs )[i] );
+					}
+				};
 				auto ShowSphereFN = [&ShowSphereF]( const std::string &prefix, SphereFrameWithName *pSphereFN, std::array<char, 512> *pMeshName )
 				{
 					if ( ImGui::TreeNode( prefix.c_str() ) )
@@ -204,6 +231,43 @@ void RivalParam::UseImGui()
 				
 				ShowAABB( "Body.HurtBox", &m.hitBoxBody );
 				ImGui::Text( "" );
+
+				if ( ImGui::TreeNode( "Attack.Barrage" ) )
+				{
+					static std::array<char, 512U> meshNameBuffer{};
+					ImGui::InputText( "MeshName", meshNameBuffer.data(), meshNameBuffer.size() );
+					if ( ImGui::Button( "Apply.MeshName" ) )
+					{
+						m.barrage.collideMeshName = meshNameBuffer.data();
+					}
+					ImGui::Text( "" );
+
+					ShowSphereFs( "Barrage", &m.barrage.collisions );
+
+					// WalkTiming.
+					{
+						auto &timings = m.barrage.walkTimings;
+
+						if ( ImGui::Button( "WalkTiming.Append" ) )
+						{
+							timings.push_back( {} );
+						}
+						if ( !timings.empty() && ImGui::Button( "WalkTiming.PopBack" ) )
+						{
+							timings.pop_back();
+						}
+
+						const size_t COUNT = timings.size();
+						for ( size_t i = 0; i < COUNT; ++i )
+						{
+							ImGui::DragInt  ( ( "[" + std::to_string( i ) + "].StartFrame" ).c_str(), &timings[i].start );
+							ImGui::DragInt  ( ( "[" + std::to_string( i ) + "].LastFrame" ).c_str(),  &timings[i].last  );
+							ImGui::DragFloat( ( "[" + std::to_string( i ) + "].WalkSpeed" ).c_str(),  &timings[i].speed );
+						}
+					}
+
+					ImGui::TreePop();
+				}
 
 				ImGui::TreePop();
 			}
@@ -243,6 +307,15 @@ static void ResetCurrentSphereF( Donya::SphereFrame *pSphereF )
 {
 	pSphereF->currentFrame = 0;
 	pSphereF->collision.enable = true;
+}
+static void ResetCurrentSphereFs( std::vector<Donya::SphereFrame> *pSphereFs )
+{
+	const size_t COUNT = pSphereFs->size();
+	for ( size_t i = 0; i < COUNT; ++i )
+	{
+		pSphereFs->at( i ).currentFrame = 0;
+		pSphereFs->at( i ).collision.enable = true;
+	}
 }
 static void ResetCurrentSphereFN( RivalParam::SphereFrameWithName *pSphereFN )
 {
@@ -473,6 +546,18 @@ void Rival::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya
 		case RivalAI::ActionState::MOVE:
 			break;
 		case RivalAI::ActionState::ATTACK_BARRAGE:
+			{
+				const auto &localHitBoxes = BarragesLocalHitBoxes();
+				for ( const auto &sphereF : localHitBoxes )
+				{
+					const auto &sphere   = sphereF.collision;
+					std::string meshName = RivalParam::Open().barrage.collideMeshName;
+					Donya::Vector3 wsPos = CalcBoneTransformedPosition( models.pAtkBarrage.get(), meshName, W, sphere.pos );
+					Donya::Vector4 color = ( sphere.enable && sphere.exist ) ? COLOR_VALID : COLOR_INVALID;
+
+					DrawSphere( wsPos, sphere.radius, color, /* applyParentMatrix = */ false );
+				}
+			}
 			break;
 		case RivalAI::ActionState::ATTACK_LINE:
 			break;
@@ -507,11 +592,37 @@ bool Rival::IsCollideAttackHitBoxes( const Donya::OBB    other, bool disableColl
 	if ( !RivalAI::IsAction( status ) || !other.enable || !other.exist ) { return false; }
 	// else
 
+	auto ToWorldSphere			= [&]( const Donya::Sphere &sphere )
+	{
+		Donya::Sphere wsSphere = sphere;
+		wsSphere.pos += GetPos();
+		return wsSphere;
+	};
+	auto TransformSphereByMesh	= [&]( Donya::Sphere sphere, skinned_mesh *pMesh, const std::string &meshName )
+	{
+		sphere.pos = CalcBoneTransformedPosition( pMesh, meshName, CalcWorldMatrix(), sphere.pos );
+		return sphere;
+	};
+
 	bool wasCollided = false;
 
 	switch ( status )
 	{
 	case RivalAI::ActionState::ATTACK_BARRAGE:
+		{
+			auto &localHitBoxes = BarragesLocalHitBoxes();
+			for ( auto &sphereF : localHitBoxes )
+			{
+				auto &sphere = sphereF.collision;
+				std::string   meshName = RivalParam::Open().barrage.collideMeshName;
+				Donya::Sphere wsSphere = TransformSphereByMesh( sphere, models.pAtkBarrage.get(), meshName );
+				if ( Donya::OBB::IsHitSphere( other, wsSphere ) )
+				{
+					wasCollided = true;
+					if ( disableCollidingHitBoxes ) { sphere.enable = false; }
+				}
+			}
+		}
 		break;
 	case RivalAI::ActionState::ATTACK_LINE:
 		break;
@@ -540,6 +651,12 @@ Donya::AABB Rival::GetBodyHitBox() const
 	wsBody.pos += GetPos();
 	return wsBody;
 }
+
+std::vector<Donya::SphereFrame> &Rival::BarragesLocalHitBoxes()
+{
+	return RivalParam::Get().BarrageHitBoxes();
+}
+
 void Rival::WasDefended()
 {
 	if ( status == RivalAI::ActionState::ATTACK_RUSH )
@@ -732,14 +849,37 @@ void Rival::AttackBarrageInit( TargetStatus target )
 	slerpFactor	= RivalParam::Get().SlerpFactor( status );
 	velocity	= 0.0f;
 
+	ResetCurrentSphereFs( &RivalParam::Get().BarrageHitBoxes() );
 	setAnimFlame( models.pAtkBarrage.get(), 0 );
 }
 void Rival::AttackBarrageUpdate( TargetStatus target )
 {
+	RivalParam::Get().UpdateBarrage();
 	
+	const auto nowBarrage = RivalParam::Open().barrage;
+
+	float walkSpeed = 0.0f;
+	for ( auto &it : nowBarrage.walkTimings )
+	{
+		if ( it.withinFrame )
+		{
+			walkSpeed = it.speed;
+			break;
+		}
+	}
+
+	if ( ZeroEqual( walkSpeed ) )
+	{
+		velocity = 0.0f;
+		return;
+	}
+	// else
+
+	velocity = orientation.LocalFront() * walkSpeed;
 }
 void Rival::AttackBarrageUninit()
 {
+	ResetCurrentSphereFs( &RivalParam::Get().BarrageHitBoxes() );
 	setAnimFlame( models.pAtkBarrage.get(), 0 );
 }
 

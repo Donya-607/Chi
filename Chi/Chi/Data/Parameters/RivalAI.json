@@ -18,13 +18,13 @@
             "value1": 50
         },
         "attackPercents": {
-            "value0": 10,
+            "value0": 1024,
             "value1": 10,
             "value2": 10
         },
         "gapIntervals": [
             2,
-            1
+            2
         ]
     }
 }

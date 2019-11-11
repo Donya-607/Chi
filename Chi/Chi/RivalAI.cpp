@@ -226,10 +226,10 @@ void RivalAI::ImGui()
 		{
 			constexpr std::array<const char *, ALL_ATTACK_COUNT> NAMES
 			{
+				"Attack.Barrage",
 				"Attack.Line",
 				"Attack.Raid",
-				"Attack.Rush",
-				/* Gap */ "Attack.Barrage",
+				/* Gap */ "Attack.Rush",
 			};
 
 			if ( ALL_ATTACK_COUNT <= i ) { return "Error Name"; }

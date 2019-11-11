@@ -37,9 +37,53 @@
             "slerpFactor": 0.10000000149011612
         },
         "m.barrage": {
-            "cereal_class_version": 0,
+            "cereal_class_version": 1,
             "moveSpeed": 3.0,
-            "slerpFactor": 0.10000000149011612
+            "slerpFactor": 0.10000000149011612,
+            "collideMeshName": "MDL_BlackSword",
+            "collisions": [
+                {
+                    "cereal_class_version": 0,
+                    "enableFrameStart": 13,
+                    "enableFrameLast": 31,
+                    "collision": {
+                        "cereal_class_version": 0,
+                        "pos": {
+                            "x": 0.0,
+                            "y": 0.0,
+                            "z": 0.0
+                        },
+                        "radius": 17.0,
+                        "exist": false
+                    }
+                },
+                {
+                    "enableFrameStart": 49,
+                    "enableFrameLast": 74,
+                    "collision": {
+                        "pos": {
+                            "x": 0.0,
+                            "y": 0.0,
+                            "z": 0.0
+                        },
+                        "radius": 17.0,
+                        "exist": false
+                    }
+                }
+            ],
+            "walkTimings": [
+                {
+                    "cereal_class_version": 0,
+                    "start": 10,
+                    "last": 25,
+                    "speed": 4.0
+                },
+                {
+                    "start": 40,
+                    "last": 55,
+                    "speed": 4.0
+                }
+            ]
         },
         "m.line": {
             "cereal_class_version": 0,

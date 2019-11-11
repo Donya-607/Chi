@@ -46,7 +46,43 @@ public:
 			}
 		}
 	public:
-		Donya::Sphere CalcTransformedSphere( skinned_mesh *pMesh, const Donya::Vector4x4 &parentSpaceMatrix ) const;
+		//Donya::Sphere CalcTransformedSphere( skinned_mesh *pMesh, const Donya::Vector4x4 &parentSpaceMatrix ) const;
+	};
+	struct IntervalSpeed
+	{
+		int		current{};
+		int		start{};	// Will be serialize.
+		int		last{};		// Will be serialize.
+		float	speed{};	// Will be serialize.
+		bool	withinFrame{ false };
+	private:
+		friend class cereal::access;
+		template<class Archive>
+		void serialize( Archive &archive, std::uint32_t version )
+		{
+			archive
+			(
+				CEREAL_NVP( start ),
+				CEREAL_NVP( last ),
+				CEREAL_NVP( speed )
+			);
+
+			if ( 1 <= version )
+			{
+				// archive( CEREAL_NVP( x ) );
+			}
+		}
+	public:
+		void Update( int elapsedTime = 1 )
+		{
+			current += elapsedTime;
+
+			withinFrame = WithinEnableFrame() ? true : false;
+		}
+		bool WithinEnableFrame() const
+		{
+			return ( start <= current && current <= last ) ? true : false;
+		}
 	};
 	struct Member
 	{
@@ -73,8 +109,12 @@ public:
 		};
 		struct Barrage
 		{
-			float	moveSpeed{};
-			float	slerpFactor{}; // 0.0f ~ 1.0f.
+		public:
+			float			moveSpeed{};
+			float			slerpFactor{}; // 0.0f ~ 1.0f.
+			std::string		collideMeshName;
+			std::vector<Donya::SphereFrame>	collisions;
+			std::vector<IntervalSpeed>		walkTimings;
 		private:
 			friend class cereal::access;
 			template<class Archive>
@@ -88,7 +128,28 @@ public:
 
 				if ( 1 <= version )
 				{
+					archive
+					(
+						CEREAL_NVP( collideMeshName ),
+						CEREAL_NVP( collisions ),
+						CEREAL_NVP( walkTimings )
+					);
+				}
+				if ( 2 <= version )
+				{
 					// archive( CEREAL_NVP( x ) );
+				}
+			}
+		public:
+			void Update( int elapsedTime = 1 )
+			{
+				for ( auto &it : collisions )
+				{
+					it.Update();
+				}
+				for ( auto &it : walkTimings )
+				{
+					it.Update();
 				}
 			}
 		};
@@ -212,6 +273,13 @@ public:
 	float SlerpFactor( RivalAI::ActionState status );
 	Member Content() const { return m; }
 	static Member Open();
+
+	/// <summary>
+	/// Update "walkTimings" and "collisions".
+	/// </summary>
+	void UpdateBarrage( int elapsedTime = 1 );
+	std::vector<Donya::SphereFrame>			&BarrageHitBoxes()			{ return m.barrage.collisions; }
+	const std::vector<Donya::SphereFrame>	&BarrageHitBoxes()	const	{ return m.barrage.collisions; }
 public:
 	void LoadParameter( bool isBinary = true );
 
@@ -224,8 +292,9 @@ public:
 #endif // USE_IMGUI
 };
 CEREAL_CLASS_VERSION( RivalParam, 0 )
-CEREAL_CLASS_VERSION( RivalParam::Member::Move,	0 )
-CEREAL_CLASS_VERSION( RivalParam::Member::Barrage,	0 )
+CEREAL_CLASS_VERSION( RivalParam::IntervalSpeed,	0 )
+CEREAL_CLASS_VERSION( RivalParam::Member::Move,		0 )
+CEREAL_CLASS_VERSION( RivalParam::Member::Barrage,	1 )
 CEREAL_CLASS_VERSION( RivalParam::Member::Line,		0 )
 CEREAL_CLASS_VERSION( RivalParam::Member::Raid,		0 )
 CEREAL_CLASS_VERSION( RivalParam::Member::Rush,		0 )
@@ -293,6 +362,8 @@ public:
 	/// Returns world space hit-box of body.
 	/// </summary>
 	Donya::AABB GetBodyHitBox() const;
+
+	std::vector<Donya::SphereFrame> &BarragesLocalHitBoxes();
 
 	/// <summary>
 	/// Please call when defended Rival's attack.
