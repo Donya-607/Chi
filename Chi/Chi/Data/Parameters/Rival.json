@@ -104,9 +104,10 @@
             ]
         },
         "m.line": {
-            "cereal_class_version": 0,
+            "cereal_class_version": 1,
             "moveSpeed": 0.0,
-            "slerpFactor": 0.029999999329447748
+            "slerpFactor": 0.10000000149011612,
+            "generateFrame": 74
         },
         "m.raid": {
             "cereal_class_version": 0,

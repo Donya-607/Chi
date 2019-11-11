@@ -287,6 +287,13 @@ void RivalParam::UseImGui()
 					ImGui::TreePop();
 				}
 
+				if ( ImGui::TreeNode( "Attack.Line" ) )
+				{
+					ImGui::DragInt( "Line.GenerateTiming(Frame)", &m.line.generateFrame );
+
+					ImGui::TreePop();
+				}
+
 				ImGui::TreePop();
 			}
 			ImGui::Text( "" );
@@ -460,7 +467,7 @@ void Rival::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya
 			FBXRender( models.pAtkLine.get(), HLSL, WVP, W );
 			break;
 		case RivalAI::ActionState::ATTACK_RAID:
-			FBXRender( models.pAtkRaid.get(), HLSL, WVP, W );
+			// FBXRender( models.pAtkRaid.get(), HLSL, WVP, W );
 			break;
 		case RivalAI::ActionState::ATTACK_RUSH:
 			FBXRender( models.pAtkRushPre.get(), HLSL, WVP, W );
@@ -702,16 +709,16 @@ void Rival::LoadModel()
 	Donya::OutputDebugStr( "Done RivalModel.Idle.\n" );
 	loadFBX( models.pRun.get(), GetModelPath( ModelAttribute::RivalRun ) );
 	Donya::OutputDebugStr( "Done RivalModel.Run.\n" );
-	loadFBX( models.pBreak.get(), GetModelPath( ModelAttribute::RivalBreak ) );
-	Donya::OutputDebugStr( "Done RivalModel.Break.\n" );
-	loadFBX( models.pDefeat.get(), GetModelPath( ModelAttribute::RivalDefeat ) );
-	Donya::OutputDebugStr( "Done RivalModel.Defeat.\n" );
+	// loadFBX( models.pBreak.get(), GetModelPath( ModelAttribute::RivalBreak ) );
+	// Donya::OutputDebugStr( "Done RivalModel.Break.\n" );
+	// loadFBX( models.pDefeat.get(), GetModelPath( ModelAttribute::RivalDefeat ) );
+	// Donya::OutputDebugStr( "Done RivalModel.Defeat.\n" );
 	loadFBX( models.pAtkBarrage.get(), GetModelPath( ModelAttribute::RivalAtkBarrage ) );
 	Donya::OutputDebugStr( "Done RivalModel.Attack.Barrage.\n" );
 	loadFBX( models.pAtkLine.get(), GetModelPath( ModelAttribute::RivalAtkLine ) );
 	Donya::OutputDebugStr( "Done RivalModel.Attack.Line.\n" );
-	loadFBX( models.pAtkRaid.get(), GetModelPath( ModelAttribute::RivalAtkRaid ) );
-	Donya::OutputDebugStr( "Done RivalModel.Attack.Raid.\n" );
+	// loadFBX( models.pAtkRaid.get(), GetModelPath( ModelAttribute::RivalAtkRaid ) );
+	// Donya::OutputDebugStr( "Done RivalModel.Attack.Raid.\n" );
 	loadFBX( models.pAtkRushPre.get(), GetModelPath( ModelAttribute::RivalAtkRushPre ) );
 	Donya::OutputDebugStr( "Done RivalModel.Attack.Rush.Pre.\n" );
 	loadFBX( models.pAtkRushRaid.get(), GetModelPath( ModelAttribute::RivalAtkRushRaid ) );
@@ -904,17 +911,30 @@ void Rival::AttackBarrageUninit()
 void Rival::AttackLineInit( TargetStatus target )
 {
 	status		= RivalAI::ActionState::ATTACK_LINE;
+	timer		= 0;
 	slerpFactor	= RivalParam::Get().SlerpFactor( status );
 	velocity	= 0.0f;
 
 	setAnimFlame( models.pAtkLine.get(), 0 );
 }
+#if DEBUG_MODE
+#include "Donya/Sound.h"
+#endif // DEBUG_MODE
 void Rival::AttackLineUpdate( TargetStatus target )
 {
-	
+	timer++;
+	if ( timer == RivalParam::Open().line.generateFrame )
+	{
+		// Generate attack effects.
+	#if DEBUG_MODE
+		Donya::Sound::Play( scast<int>( MusicAttribute::PlayerDefend ) );
+	#endif // DEBUG_MODE
+	}
 }
 void Rival::AttackLineUninit()
 {
+	timer = 0;
+
 	setAnimFlame( models.pAtkLine.get(), 0 );
 }
 

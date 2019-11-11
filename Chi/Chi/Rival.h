@@ -156,7 +156,8 @@ public:
 		struct Line
 		{
 			float	moveSpeed{};
-			float	slerpFactor{}; // 0.0f ~ 1.0f.
+			float	slerpFactor{};	// 0.0f ~ 1.0f.
+			int		generateFrame{};
 		private:
 			friend class cereal::access;
 			template<class Archive>
@@ -169,6 +170,10 @@ public:
 				);
 
 				if ( 1 <= version )
+				{
+					archive( CEREAL_NVP( generateFrame ) );
+				}
+				if ( 2 <= version )
 				{
 					// archive( CEREAL_NVP( x ) );
 				}
@@ -299,7 +304,7 @@ CEREAL_CLASS_VERSION( RivalParam, 0 )
 CEREAL_CLASS_VERSION( RivalParam::IntervalSpeed,	0 )
 CEREAL_CLASS_VERSION( RivalParam::Member::Move,		0 )
 CEREAL_CLASS_VERSION( RivalParam::Member::Barrage,	1 )
-CEREAL_CLASS_VERSION( RivalParam::Member::Line,		0 )
+CEREAL_CLASS_VERSION( RivalParam::Member::Line,		1 )
 CEREAL_CLASS_VERSION( RivalParam::Member::Raid,		0 )
 CEREAL_CLASS_VERSION( RivalParam::Member::Rush,		0 )
 
