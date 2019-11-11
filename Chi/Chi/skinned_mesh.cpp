@@ -778,23 +778,32 @@ void skinned_mesh::render(ID3D11DeviceContext* context, fbx_shader& hlsl, const 
 					{
 						animation_flame = 0;
 						it.anim.animation_tick = 0;
+						anim_fin = true;;
 					}
 					//アニメーションタイマーのインクリメント
 					if (!stop_animation && stop_time <= 0)
+					{
 						it.anim.animation_tick += elapsed_time * magnification;
+						anim_fin = false;
+					}
 				}
 				//ループ無し
 				else
 				{
 					if (static_cast<size_t>(animation_flame) > it.anim.size() - 1)
 					{
+
 						animation_flame = it.anim.at(0).size() - 1;
 						it.anim.animation_tick = 0;
+						anim_fin = true;
 					}
 
 					if (static_cast<size_t>(animation_flame) < it.anim.size() - 1)
 						if (!stop_animation && stop_time <= 0)
+						{
+							anim_fin = false;
 							it.anim.animation_tick += elapsed_time * magnification;
+						}
 				}
 			}
 

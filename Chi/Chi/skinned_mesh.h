@@ -65,7 +65,7 @@ public:
 	{
 	}
 	//読み込み周り
-	void init(ID3D11Device* _device,std::string& file_name);
+	void init(ID3D11Device* _device, std::string& file_name);
 	bool loadBinary(std::string& file_name);
 	bool find_file(std::string& file_name);
 	void loadAnimation(ID3D11Device* _device, std::string& _filename);
@@ -74,8 +74,8 @@ public:
 	void fbxamatrix_to_xmfloat4x4(const FbxAMatrix& fbxamatrix, DirectX::XMFLOAT4X4& xmfloat4x4);
 
 	//アニメーション
-	void playAnimation(float _elapsed_time,float magnification,bool _is_loop);
-	
+	void playAnimation(float _elapsed_time, float magnification, bool _is_loop);
+
 	//getter
 	int getAnimationFlame()
 	{
@@ -214,6 +214,7 @@ protected:
 	ID3D11RasterizerState* rasterizeFillOut = nullptr;	//塗りつぶし描画
 	ID3D11DepthStencilState* depthStencilState = nullptr;	//depthStencilState
 
+	bool	anim_fin;
 	bool	is_loop;
 	bool	stop_animation;
 	float	stop_time;
@@ -234,12 +235,12 @@ public:
 		return meshes[index];
 	}
 
-	skinned_mesh() : sampleState(nullptr), constant_buffer(nullptr), rasterizeFillOut(nullptr), rasterizeLine(nullptr), depthStencilState(nullptr), have_born(false), have_material(false), have_uv(false), numIndices(0), tex2dDesc(),is_loop(true),stop_animation(false),stop_time(0),animation_flame(0)
+	skinned_mesh() : sampleState(nullptr), constant_buffer(nullptr), rasterizeFillOut(nullptr), rasterizeLine(nullptr), depthStencilState(nullptr), have_born(false), have_material(false), have_uv(false), numIndices(0), tex2dDesc(), is_loop(true), stop_animation(false), stop_time(0), animation_flame(0),anim_fin(false)
 	{
 		int a = 0;
 	}
 	~skinned_mesh() {}
-	void setInfo(ID3D11Device* _device, const std::string& _objFileName,bool is_Tpose);
+	void setInfo(ID3D11Device* _device, const std::string& _objFileName, bool is_Tpose);
 	void setInfo_T_pose(ID3D11Device* _device, const std::string& _objFileName);
 
 	void init(ID3D11Device* device);
@@ -286,11 +287,19 @@ public:
 	bool calcTransformedPosBySpecifyMesh(DirectX::XMFLOAT3& _local_pos, std::string _mesh_name, bone_animation* anim);
 	bool calcTransformedPosBySpecifyMesh(DirectX::XMFLOAT3& _local_pos, std::string _mesh_name);
 
-
+	float getAnimationTime()
+	{
+		return meshes.at(0).anim.sampling_time * meshes.at(0).anim.size();
+	}
 	int getAnimFlame()
 	{
 		return animation_flame;
 	}
+	bool getAnimFinFlg()
+	{
+		return anim_fin;
+	}
+
 	void setAnimFlame(const int _animFlame)
 	{
 		for (auto& it : meshes)
