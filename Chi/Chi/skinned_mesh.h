@@ -304,7 +304,7 @@ public:
 	{
 		for (auto& it : meshes)
 		{
-			it.anim.animation_tick = animation_flame * it.anim.sampling_time;
+			it.anim.animation_tick = _animFlame * it.anim.sampling_time;
 		}
 	}
 	void setAnimStopTimer(float _stop_time)
