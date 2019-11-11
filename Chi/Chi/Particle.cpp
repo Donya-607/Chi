@@ -3,7 +3,6 @@
 #include "GameLibFunctions.h"
 #include "Donya/FilePath.h"
 #include "Donya/Useful.h"
-#include "easing.h"
 
 //#define USE_ACCEL
 
@@ -753,19 +752,10 @@ void AbsorptionParticle::Emit()
 				{
 					data[i].SetExist(false);
 					data[i].SetPos(originPos[i]);
-#ifdef USE_ACCEL
-					data[i].SetSpeed(DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f));
-#endif
 					cnt[i] = 0;
 					continue;
 				}
-#ifdef USE_ACCEL
-				DirectX::XMFLOAT3 _speed;
-				_speed.x = easing::InQuart(static_cast<float>(cnt[i]), MAX_CNT * 2.0f, data[i].GetAccel().x, 0.0f);
-				_speed.y = easing::InQuart(static_cast<float>(cnt[i]), MAX_CNT * 2.0f, data[i].GetAccel().y, 0.0f);
-				_speed.z = easing::InQuart(static_cast<float>(cnt[i]), MAX_CNT * 2.0f, data[i].GetAccel().z, 0.0f);
-				data[i].SetSpeed(_speed);
-#endif
+
 				data[i].AddPosX(data[i].GetSpeed().x);
 				data[i].AddPosY(data[i].GetSpeed().y);
 				data[i].AddPosZ(data[i].GetSpeed().z);
@@ -1181,19 +1171,10 @@ void SparkParticle::Emit()
 					data[i].SetExist(false);
 					data[i].SetPos(originPos[i]);
 					data[i].SetSpeed(originSpeed[i]);
-#ifdef USE_ACCEL
-					data[i].SetSpeed(DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f));
-#endif
 					cnt[i] = 0;
 					continue;
 				}
-#ifdef USE_ACCEL
-				DirectX::XMFLOAT3 _speed;
-				_speed.x = easing::InQuart(static_cast<float>(cnt[i]), MAX_CNT * 2.0f, data[i].GetAccel().x, 0.0f);
-				_speed.y = easing::InQuart(static_cast<float>(cnt[i]), MAX_CNT * 2.0f, data[i].GetAccel().y, 0.0f);
-				_speed.z = easing::InQuart(static_cast<float>(cnt[i]), MAX_CNT * 2.0f, data[i].GetAccel().z, 0.0f);
-				data[i].SetSpeed(_speed);
-#endif
+
 				data[i].AddSpeedX(data[i].GetAccel().x);
 				data[i].AddSpeedY(data[i].GetAccel().y);
 				data[i].AddSpeedZ(data[i].GetAccel().z);
@@ -1423,19 +1404,9 @@ void LocusParticle::Emit()
 					data[i].SetExist(false);
 					data[i].SetPos(originPos[i]);
 					data[i].SetSpeed(originSpeed[i]);
-#ifdef USE_ACCEL
-					data[i].SetSpeed(DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f));
-#endif
 					cnt[i] = 0;
 					continue;
 				}
-#ifdef USE_ACCEL
-				DirectX::XMFLOAT3 _speed;
-				_speed.x = easing::InQuart(static_cast<float>(cnt[i]), MAX_CNT * 2.0f, data[i].GetAccel().x, 0.0f);
-				_speed.y = easing::InQuart(static_cast<float>(cnt[i]), MAX_CNT * 2.0f, data[i].GetAccel().y, 0.0f);
-				_speed.z = easing::InQuart(static_cast<float>(cnt[i]), MAX_CNT * 2.0f, data[i].GetAccel().z, 0.0f);
-				data[i].SetSpeed(_speed);
-#endif
 				data[i].AddSpeedX(data[i].GetAccel().x);
 				data[i].AddSpeedY(data[i].GetAccel().y);
 				data[i].AddSpeedZ(data[i].GetAccel().z);
