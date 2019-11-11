@@ -278,6 +278,10 @@ public:
 	/// Update "walkTimings" and "collisions".
 	/// </summary>
 	void UpdateBarrage( int elapsedTime = 1 );
+	/// <summary>
+	/// Reset  "walkTimings" and "collisions".
+	/// </summary>
+	void ResetBarrage();
 	std::vector<Donya::SphereFrame>			&BarrageHitBoxes()			{ return m.barrage.collisions; }
 	const std::vector<Donya::SphereFrame>	&BarrageHitBoxes()	const	{ return m.barrage.collisions; }
 public:

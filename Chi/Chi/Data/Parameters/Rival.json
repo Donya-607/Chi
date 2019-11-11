@@ -44,29 +44,42 @@
             "collisions": [
                 {
                     "cereal_class_version": 0,
-                    "enableFrameStart": 13,
-                    "enableFrameLast": 31,
+                    "enableFrameStart": 20,
+                    "enableFrameLast": 40,
                     "collision": {
                         "cereal_class_version": 0,
                         "pos": {
                             "x": 0.0,
                             "y": 0.0,
-                            "z": 0.0
+                            "z": 32.0
                         },
-                        "radius": 17.0,
+                        "radius": 48.0,
                         "exist": false
                     }
                 },
                 {
-                    "enableFrameStart": 49,
-                    "enableFrameLast": 74,
+                    "enableFrameStart": 65,
+                    "enableFrameLast": 85,
                     "collision": {
                         "pos": {
                             "x": 0.0,
                             "y": 0.0,
-                            "z": 0.0
+                            "z": 32.0
                         },
-                        "radius": 17.0,
+                        "radius": 48.0,
+                        "exist": false
+                    }
+                },
+                {
+                    "enableFrameStart": 110,
+                    "enableFrameLast": 130,
+                    "collision": {
+                        "pos": {
+                            "x": 0.0,
+                            "y": 0.0,
+                            "z": 32.0
+                        },
+                        "radius": 48.0,
                         "exist": false
                     }
                 }
@@ -74,14 +87,19 @@
             "walkTimings": [
                 {
                     "cereal_class_version": 0,
-                    "start": 10,
-                    "last": 25,
-                    "speed": 4.0
+                    "start": 20,
+                    "last": 40,
+                    "speed": 9.0
                 },
                 {
-                    "start": 40,
-                    "last": 55,
-                    "speed": 4.0
+                    "start": 65,
+                    "last": 85,
+                    "speed": 9.0
+                },
+                {
+                    "start": 110,
+                    "last": 130,
+                    "speed": 9.0
                 }
             ]
         },

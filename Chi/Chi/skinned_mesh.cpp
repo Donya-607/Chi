@@ -793,7 +793,7 @@ void skinned_mesh::render(ID3D11DeviceContext* context, fbx_shader& hlsl, const 
 					if (static_cast<size_t>(animation_flame) > it.anim.size() - 1)
 					{
 
-						animation_flame = it.anim.at(0).size() - 1;
+						animation_flame = it.anim.size() - 1;
 						it.anim.animation_tick = 0;
 						anim_fin = true;
 					}
@@ -1356,8 +1356,7 @@ bool skinned_mesh::calcTransformedPosBySpecifyMesh(DirectX::XMFLOAT3& _local_pos
 		if (p->node_name != _mesh_name)
 			continue;
 		_mesh = p;
-		break;
-
+		
 		if (_mesh == nullptr)
 			return false;
 
@@ -1383,6 +1382,7 @@ bool skinned_mesh::calcTransformedPosBySpecifyMesh(DirectX::XMFLOAT3& _local_pos
 		}
 
 		_local_pos = { _p.x,_p.y,_p.z };
+		break;
 	}
 	return true;
 }

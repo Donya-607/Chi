@@ -97,6 +97,20 @@ void RivalParam::UpdateBarrage( int elapsedTime )
 {
 	m.barrage.Update( elapsedTime );
 }
+void RivalParam::ResetBarrage()
+{
+	for ( auto &it : m.barrage.collisions )
+	{
+		it.currentFrame		= 0;
+		it.collision.enable	= true;
+	}
+	
+	for ( auto &it : m.barrage.walkTimings )
+	{
+		it.current		= 0;
+		it.withinFrame	= false;
+	}
+}
 
 void RivalParam::LoadParameter( bool isBinary )
 {
@@ -228,10 +242,13 @@ void RivalParam::UseImGui()
 						ImGui::TreePop();
 					}
 				};
+		
+				if ( ImGui::TreeNode( "Body" ) )
+				{
+					ShowAABB( "Body.HurtBox", &m.hitBoxBody );
+					ImGui::TreePop();
+				}
 				
-				ShowAABB( "Body.HurtBox", &m.hitBoxBody );
-				ImGui::Text( "" );
-
 				if ( ImGui::TreeNode( "Attack.Barrage" ) )
 				{
 					static std::array<char, 512U> meshNameBuffer{};
@@ -263,6 +280,7 @@ void RivalParam::UseImGui()
 							ImGui::DragInt  ( ( "[" + std::to_string( i ) + "].StartFrame" ).c_str(), &timings[i].start );
 							ImGui::DragInt  ( ( "[" + std::to_string( i ) + "].LastFrame" ).c_str(),  &timings[i].last  );
 							ImGui::DragFloat( ( "[" + std::to_string( i ) + "].WalkSpeed" ).c_str(),  &timings[i].speed );
+							ImGui::Text( "" );
 						}
 					}
 
@@ -849,7 +867,7 @@ void Rival::AttackBarrageInit( TargetStatus target )
 	slerpFactor	= RivalParam::Get().SlerpFactor( status );
 	velocity	= 0.0f;
 
-	ResetCurrentSphereFs( &RivalParam::Get().BarrageHitBoxes() );
+	RivalParam::Get().ResetBarrage();
 	setAnimFlame( models.pAtkBarrage.get(), 0 );
 }
 void Rival::AttackBarrageUpdate( TargetStatus target )
@@ -879,7 +897,7 @@ void Rival::AttackBarrageUpdate( TargetStatus target )
 }
 void Rival::AttackBarrageUninit()
 {
-	ResetCurrentSphereFs( &RivalParam::Get().BarrageHitBoxes() );
+	RivalParam::Get().ResetBarrage();
 	setAnimFlame( models.pAtkBarrage.get(), 0 );
 }
 
