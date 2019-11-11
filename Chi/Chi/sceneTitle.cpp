@@ -24,6 +24,20 @@ void sceneTitle::init()
 	cam_angle = 90;
 	models.clear();
 	loadShader(shader, "./Data/shader/skinned_mesh_has_born_vs.cso", "./Data/shader/skinned_mesh_ps.cso", "./Data/shader/skinned_mesh_vs.cso", "./Data/shader/skinned_mesh_no_uv_ps.cso");
+	models.emplace_back();
+	loadFBX(&models.back().mesh, "./Data/Boss04_3Attack.fbx");
+	models.back().model_pos = { 0,0,0 };
+	models.back().model_angle = { 0,0,0 };
+	models.back().model_scale = { 0.1f,0.1f,0.1f };
+	models.back().is_enable = true;
+	for (int i = 0; i < models.back().mesh.getMeshCount(); i++)
+	{
+		for (auto& p : models.back().mesh.getMesh(i).subsets)
+		{
+			models.back().tex_SRV.emplace_back();
+			models.back().tex_SRV.back() = (void*)p.diffuse.shader_resource_view;
+		}
+	}
 
 	createBillboard(&builborad, L"./Data/SpeedRing.png");
 	builboard_pos = { 0,0,0,1 };
@@ -35,6 +49,7 @@ void sceneTitle::init()
 
 void sceneTitle::update()
 {
+
 	//model loading
 	while (GameLib::getLoadFlg())
 	{
@@ -208,7 +223,7 @@ void sceneTitle::render()
 			DirectX::XMStoreFloat4x4(&W, worldM);
 
 
-			FBXRender(&p->mesh, shader, WVP, W);
+			FBXRender(&p->mesh, shader,WVP, W);
 		}
 
 	DirectX::XMFLOAT4X4 view_projection;

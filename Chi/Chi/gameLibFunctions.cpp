@@ -530,9 +530,9 @@ void billboardRender(static_mesh* _mesh, const DirectX::XMFLOAT4X4& view_project
 
 
 //skinned_mesh//
-void loadFBX(skinned_mesh* skinnedMesh, const std::string& FBXName)
+void loadFBX(skinned_mesh* skinnedMesh, const std::string& FBXName,bool isTpose)
 {
-	GameLib::skinnedMesh::loadFBX(skinnedMesh, FBXName);
+	GameLib::skinnedMesh::loadFBX(skinnedMesh, FBXName,isTpose);
 }
 
 void loadShader(fbx_shader& shader, std::string vertex, std::string pixel, std::string noBoneVertex, std::string notexPS)
@@ -540,10 +540,11 @@ void loadShader(fbx_shader& shader, std::string vertex, std::string pixel, std::
 	GameLib::skinnedMesh::loadShader(shader, vertex, pixel, noBoneVertex, notexPS);
 }
 
-void setLoopFlg(skinned_mesh* _mesh, const bool _is_loop)
+void setLoopFlg(skinned_mesh* _mesh, const bool _loop_flg)
 {
-	GameLib::skinnedMesh::setLoopFlg(_mesh, _is_loop);
+	GameLib::skinnedMesh::setLoopanimation(_mesh,_loop_flg);
 }
+
 void setStopAnimation(skinned_mesh* _mesh, const bool _is_stop)
 {
 	GameLib::skinnedMesh::setStopAnimation(_mesh, _is_stop);
@@ -559,7 +560,7 @@ void setAnimFlame(skinned_mesh* _mesh, const int _anim_flame)
 	GameLib::skinnedMesh::setAnimFlame(_mesh, _anim_flame);
 }
 
-const int getAnimFlame(skinned_mesh* _mesh)
+const int getAnimFlame(skinned_mesh*_mesh)
 {
 	return GameLib::skinnedMesh::getAnimFlame(_mesh);
 }
@@ -569,10 +570,52 @@ bool calcTransformedPosBySpecifyMesh(skinned_mesh* _mesh, DirectX::XMFLOAT3& _po
 	return GameLib::skinnedMesh::calcTransformedPosBySpecifyMesh(_mesh, _pos, _mesh_name);
 }
 
-void FBXRender(skinned_mesh* skinnedMesh, fbx_shader& hlsl,const DirectX::XMFLOAT4X4&SynthesisMatrix, const DirectX::XMFLOAT4X4&worldMatrix, const DirectX::XMFLOAT4&materialColor, bool wireFlg)
+bool calcTransformedPosBySpecifyMesh(skinned_mesh* _mesh, DirectX::XMFLOAT3& _pos, std::string _mesh_name,bone_animation* anim)
 {
-	GameLib::skinnedMesh::skinnedMeshRender(skinnedMesh,hlsl, SynthesisMatrix, worldMatrix,getCamPos(),getLineLight(),getPointLight(), materialColor, wireFlg);
+	return GameLib::skinnedMesh::calcTransformedPosBySpecifyMesh(_mesh, _pos, _mesh_name,anim);
 }
+
+void FBXRender(skinned_mesh* _mesh, fbx_shader& hlsl, const DirectX::XMFLOAT4X4& SynthesisMatrix, const DirectX::XMFLOAT4X4& worldMatrix,float magnification, const DirectX::XMFLOAT4& materialColor, bool wireFlg)
+{
+	GameLib::skinnedMesh::skinnedMeshRender(_mesh, hlsl, magnification, SynthesisMatrix, worldMatrix, getCamPos(), getLineLight(), getPointLight(), materialColor, wireFlg);
+}
+
+void FBXRender(skinned_mesh* skinnedMesh, fbx_shader& hlsl,bone_animation* anim,const DirectX::XMFLOAT4X4&SynthesisMatrix, const DirectX::XMFLOAT4X4&worldMatrix, const DirectX::XMFLOAT4&materialColor, bool wireFlg)
+{
+	GameLib::skinnedMesh::skinnedMeshRender(skinnedMesh,hlsl,anim, SynthesisMatrix, worldMatrix,getCamPos(),getLineLight(),getPointLight(), materialColor, wireFlg);
+}
+
+
+void loadAnimation(bone_animation* _anim, std::string _anim_name)
+{
+	GameLib::skinnedMesh::loadAnimation(_anim, _anim_name);
+}
+
+void playAnimation(bone_animation* _anim,float magnification, bool _is_loop)
+{
+	GameLib::skinnedMesh::playAnimation(_anim, magnification, _is_loop);
+}
+
+void setStopAnimation(bone_animation* _anim, const bool _is_stop)
+{
+	GameLib::skinnedMesh::setStopAnimation(_anim, _is_stop);
+}
+
+void setStopTime(bone_animation* _anim, const float _stop_time)
+{
+	GameLib::skinnedMesh::setStopTime(_anim, _stop_time);
+}
+
+void setAnimFlame(bone_animation* _anim, const int _anim_flame)
+{
+	GameLib::skinnedMesh::setAnimFlame(_anim, _anim_flame);
+}
+
+const int getAnimFlame(bone_animation* _anim)
+{
+	return GameLib::skinnedMesh::getAnimFlame(_anim);
+}
+
 
 
 //Xinput_pad

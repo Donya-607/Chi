@@ -42,7 +42,11 @@ class bloom
 
 public:
 	bloom() {}
-	~bloom() {}
+	~bloom() 
+	{
+		ResourceManager::ReleasePixelShader(m_pixel);
+		ResourceManager::ReleasePixelShader(m_pixel_SRV);
+	}
 	void init(ID3D11Device* _device);
 	void Render(ID3D11DeviceContext* _dContext, ID3D11ShaderResourceView** _SRV,
 		float _blur_value, DirectX::XMFLOAT4 _judge_color) const;

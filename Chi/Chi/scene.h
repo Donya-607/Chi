@@ -47,7 +47,6 @@ private:
 	DirectX::XMINT2 mousePos, prevMPos, moveVol;
 	bool mouse_right;
 	fbx_shader shader;
-
 	std::vector<model> models;
 
 	static_mesh builborad;
@@ -56,7 +55,6 @@ private:
 	DirectX::XMFLOAT2 builborad_size;
 	DirectX::XMFLOAT2 texpos;
 	DirectX::XMFLOAT2 texsize;
-
 
 public:
 	sceneTitle(){}
