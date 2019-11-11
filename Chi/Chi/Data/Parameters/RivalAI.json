@@ -2,16 +2,16 @@
     "RivalAI": {
         "cereal_class_version": 0,
         "wholeFrame": {
-            "value0": 120,
+            "value0": 200,
             "value1": 120,
             "value2": 120,
             "value3": 120
         },
         "coolTimeFrame": {
-            "value0": 120,
-            "value1": 120,
-            "value2": 120,
-            "value3": 120
+            "value0": 60,
+            "value1": 60,
+            "value2": 60,
+            "value3": 60
         },
         "waitPercents": {
             "value0": 10,
