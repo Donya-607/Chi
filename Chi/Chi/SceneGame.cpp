@@ -215,20 +215,14 @@ public:
 		{
 			Player::Input input{};
 
-		#if DEBUG_MODE
-			
-			if ( Donya::Keyboard::Press( VK_UP    ) ) { input.moveVector.z = +1.0f; }
-			if ( Donya::Keyboard::Press( VK_DOWN  ) ) { input.moveVector.z = -1.0f; }
-			if ( Donya::Keyboard::Press( VK_LEFT  ) ) { input.moveVector.x = -1.0f; }
-			if ( Donya::Keyboard::Press( VK_RIGHT ) ) { input.moveVector.x = +1.0f; }
-
-			if ( Donya::Keyboard::Trigger( 'Z' ) ) { input.doDefend = true; }
-			if ( Donya::Keyboard::Trigger( 'X' ) ) { input.doAttack = true; }
-			
-			// XINPUT_GAMEPAD : https://docs.microsoft.com/ja-jp/windows/win32/api/xinput/ns-xinput-xinput_gamepad
-
+		#if !DEBUG_MODE
 			// TODO : コントローラーがあるか判定する
+			constexpr bool IS_CONTROLLER_CONNECTED = true;
+			if ( IS_CONTROLLER_CONNECTED )
+		#endif // !DEBUG_MODE
 			{
+				// XINPUT_GAMEPAD : https://docs.microsoft.com/ja-jp/windows/win32/api/xinput/ns-xinput-xinput_gamepad
+
 				constexpr int   PAD_NO = 0;
 				constexpr float STICK_RANGE_MAX = 32768.0f;
 				const auto leftStick = GameLib::input::xInput::getThumbL( PAD_NO );
@@ -239,8 +233,20 @@ public:
 				if ( GameLib::input::xInput::pressedButtons( PAD_NO, XboxPad_Button::RIGHT_SHOULDER ) == TRIGGER_FLAG ) { input.doDefend = true; }
 				if ( GameLib::input::xInput::pressedButtons( PAD_NO, XboxPad_Button::X              ) == TRIGGER_FLAG ) { input.doAttack = true; }
 			}
+		#if !DEBUG_MODE
+			// else
+		#endif // !DEBUG_MODE
+			{
+				if ( Donya::Keyboard::Press( VK_UP		) ) { input.moveVector.z = +1.0f; }
+				if ( Donya::Keyboard::Press( VK_DOWN	) ) { input.moveVector.z = -1.0f; }
+				if ( Donya::Keyboard::Press( VK_LEFT	) ) { input.moveVector.x = -1.0f; }
+				if ( Donya::Keyboard::Press( VK_RIGHT	) ) { input.moveVector.x = +1.0f; }
 
-		#endif // DEBUG_MODE
+				if ( Donya::Keyboard::Trigger( 'Z' ) ) { input.doDefend = true; }
+				if ( Donya::Keyboard::Trigger( 'X' ) ) { input.doAttack = true; }
+			}
+
+			input.moveVector.Normalize();
 
 			// Transform to camera space from world space.
 			{
