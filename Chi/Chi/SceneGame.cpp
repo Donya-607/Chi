@@ -75,22 +75,22 @@ public:
 private:
 	friend class cereal::access;
 	template<class Archive>
-	void serialize(Archive& archive, std::uint32_t version)
+	void serialize( Archive &archive, std::uint32_t version )
 	{
 		archive
 		(
-			CEREAL_NVP(fieldRadius)
+			CEREAL_NVP( fieldRadius )
 		);
 
-		if (1 <= version)
+		if ( 1 <= version )
 		{
-			archive(CEREAL_NVP(lights));
+			archive( CEREAL_NVP( lights ) );
 		}
-		if (2 <= version)
+		if ( 2 <= version )
 		{
-			archive(CEREAL_NVP(cameraFocusOffset));
+			archive( CEREAL_NVP( cameraFocusOffset ) );
 		}
-		if (3 <= version)
+		if ( 3 <= version )
 		{
 			archive
 			(
@@ -176,7 +176,7 @@ public:
 	{
 		stage.Uninit();
 		player.Uninit();
-		
+
 		switch ( stageNo )
 		{
 		case GolemNo:	golem.Uninit();		break;

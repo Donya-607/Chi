@@ -284,22 +284,37 @@ namespace GameLib
 	//skinned_mesh
 	namespace skinnedMesh
 	{
-		void loadFBX(skinned_mesh*, const std::string& _fbxName);
+		void loadFBX(skinned_mesh*, const std::string& _fbxName,bool is_Tpose);
 
 		void loadShader(fbx_shader& shader, std::string vertex, std::string pixel, std::string noBoneVertex, std::string notexPS);
 
-		void setLoopFlg(skinned_mesh* _mesh, const bool _is_loop);
+		void setLoopanimation(skinned_mesh* _mesh, const bool _loop_flg);
 		void setStopAnimation(skinned_mesh* _mesh, const bool _is_stop);
 		void setStopTime(skinned_mesh* _mesh, const float _stop_time);
 		void setAnimFlame(skinned_mesh* _mesh, const int _anim_flame);
 		const int getAnimFlame(skinned_mesh*);
 
 		bool calcTransformedPosBySpecifyMesh(skinned_mesh* _mesh, DirectX::XMFLOAT3& _pos, std::string _mesh_name);
+		bool calcTransformedPosBySpecifyMesh(skinned_mesh* _mesh, DirectX::XMFLOAT3& _pos, std::string _mesh_name, bone_animation* anim);
+
+		void skinnedMeshRender(
+			skinned_mesh* _mesh,
+			fbx_shader& hlsl,
+			float magnification,
+			const DirectX::XMFLOAT4X4& SynthesisMatrix,
+			const DirectX::XMFLOAT4X4& worldMatrix,
+			const DirectX::XMFLOAT4& camPos,
+			line_light& lineLight,
+			std::vector<point_light>& _point_light,
+			const DirectX::XMFLOAT4& materialColor,
+			bool wireFlg
+		);
 
 
 		void skinnedMeshRender(
 			skinned_mesh* _mesh,
 			fbx_shader& hlsl,
+			bone_animation* anim,
 			const DirectX::XMFLOAT4X4&SynthesisMatrix,
 			const DirectX::XMFLOAT4X4&worldMatrix,
 			const DirectX::XMFLOAT4&camPos,
@@ -308,6 +323,14 @@ namespace GameLib
 			const DirectX::XMFLOAT4&materialColor,
 			bool wireFlg
 		);
+
+		void loadAnimation(bone_animation*, std::string _anim_name);
+		void playAnimation(bone_animation* anim, float magnification = 1.0f, bool _is_loop = true);
+
+		void setStopAnimation(bone_animation* _mesh, const bool _is_stop);
+		void setStopTime(bone_animation* _mesh, const float _stop_time);
+		void setAnimFlame(bone_animation* _mesh, const int _anim_flame);
+		const int getAnimFlame(bone_animation*);
 
 	}
 

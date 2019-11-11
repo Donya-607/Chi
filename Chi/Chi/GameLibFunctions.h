@@ -171,23 +171,37 @@ void billboardRender(static_mesh* _mesh, const DirectX::XMFLOAT4X4&, const Direc
 
 
 //skinned_mesh//
-void loadFBX(skinned_mesh* skinnedMesh, const std::string& FBXName);
+void loadFBX(skinned_mesh* skinnedMesh, const std::string& FBXName,bool isTpose = false);
 
 void loadShader(fbx_shader& shader, std::string vertex, std::string pixel, std::string noBoneVertex, std::string notexPS);
 
-void setLoopFlg(skinned_mesh* _mesh, const bool _is_loop);
 
+
+void setLoopFlg(skinned_mesh* _mesh, const bool _loop_flg);
 void setStopAnimation(skinned_mesh* _mesh, const bool _is_stop);
-
-void setStopTime(skinned_mesh* _mesh, const float _stop_time_per_second);
+void setStopTime(skinned_mesh* _mesh, const float _stop_time_per_second );
 
 void setAnimFlame(skinned_mesh* _mesh, const int _anim_flame);
-
 const int getAnimFlame(skinned_mesh*);
 
 bool calcTransformedPosBySpecifyMesh(skinned_mesh* _mesh, DirectX::XMFLOAT3& _pos, std::string _mesh_name);
+bool calcTransformedPosBySpecifyMesh(skinned_mesh* _mesh, DirectX::XMFLOAT3& _pos, std::string _mesh_name, bone_animation* anim);
 
-void FBXRender(skinned_mesh* skinnedMesh, fbx_shader& hlsl,const DirectX::XMFLOAT4X4& SynthesisMatrix, const DirectX::XMFLOAT4X4& worldMatrix, const DirectX::XMFLOAT4& materialColor = { 1.0f,1.0f,1.0f,1.0f }, bool wireFlg = false);
+void FBXRender(skinned_mesh* _mesh,fbx_shader& hlsl,const DirectX::XMFLOAT4X4& SynthesisMatrix,const DirectX::XMFLOAT4X4& worldMatrix, float magnification = 1.0f, const DirectX::XMFLOAT4& materialColor = {1.0f,1.0f,1.0f,1.0f}, bool wireFlg = false);
+
+void FBXRender(skinned_mesh* skinnedMesh, fbx_shader& hlsl, bone_animation* anim, const DirectX::XMFLOAT4X4& SynthesisMatrix, const DirectX::XMFLOAT4X4& worldMatrix, const DirectX::XMFLOAT4& materialColor = { 1.0f,1.0f,1.0f,1.0f }, bool wireFlg = false);
+
+void loadAnimation(bone_animation* _anim, std::string _anim_name);
+
+void playAnimation(bone_animation* _anim, float magnification = 1.0f, bool _is_loop = true);
+
+void setStopAnimation(bone_animation* _anim, const bool _is_stop);
+
+void setStopTime(bone_animation* _anim, const float _stop_time_per_second);
+
+void setAnimFlame(bone_animation* _anim, const int _anim_flame);
+
+const int getAnimFlame(bone_animation*);
 
 
 //Xinput_Pad

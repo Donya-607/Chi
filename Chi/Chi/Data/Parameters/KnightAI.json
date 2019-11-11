@@ -13,6 +13,7 @@
         },
         "waitPercents": {
             "value0": 10,
+<<<<<<< HEAD
             "value1": 50
         },
         "attackPercents": {
@@ -22,6 +23,17 @@
         "gapIntervals": [
             16,
             16
+=======
+            "value1": 30
+        },
+        "attackPercents": {
+            "value0": 10,
+            "value1": 10
+        },
+        "gapIntervals": [
+            2,
+            1
+>>>>>>> origin/kai
         ]
     }
 }
