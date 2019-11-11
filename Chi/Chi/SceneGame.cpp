@@ -236,8 +236,8 @@ public:
 				if ( leftStick.y != 0 ) { input.moveVector.z = scast<float>( leftStick.y ) / STICK_RANGE_MAX; }
 
 				constexpr int TRIGGER_FLAG = 1;
-				if ( GameLib::input::xInput::pressedButtons( PAD_NO, XboxPad_Button::RIGHT_THUMB ) == TRIGGER_FLAG ) { input.doDefend = true; }
-				if ( GameLib::input::xInput::pressedButtons( PAD_NO, XboxPad_Button::X           ) == TRIGGER_FLAG ) { input.doAttack = true; }
+				if ( GameLib::input::xInput::pressedButtons( PAD_NO, XboxPad_Button::RIGHT_SHOULDER ) == TRIGGER_FLAG ) { input.doDefend = true; }
+				if ( GameLib::input::xInput::pressedButtons( PAD_NO, XboxPad_Button::X              ) == TRIGGER_FLAG ) { input.doAttack = true; }
 			}
 
 		#endif // DEBUG_MODE
