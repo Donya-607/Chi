@@ -576,14 +576,15 @@ public:
 
 		#else
 
-			const auto eruptionEffects = EffectManager::GetInstance()->GetEruptionEffectVector();
-			for ( const auto &effect : eruptionEffects )
+			auto &eruptionEffects = EffectManager::GetInstance()->GetEruptionEffectVector();
+			for ( auto &effect : eruptionEffects )
 			{
-				const auto hitBoxes = effect.GetHitSphereVector();
-				for ( const auto &it : hitBoxes )
+				auto &hitBoxes = effect.GetHitSphereVector();
+				for ( auto &it : hitBoxes )
 				{
 					if ( Donya::OBB::IsHitSphere( playerShieldBox, it ) )
 					{
+						it.enable = false;
 						wasHitToShield = true;
 						player.SucceededDefence();
 					}
