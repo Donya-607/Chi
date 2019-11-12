@@ -164,7 +164,7 @@ public:
 		Donya::OutputDebugStr( "No.3 End Boss::Init.\n" );
 		
 		Donya::OutputDebugStr( "No.4 Begin Effect::Init.\n" );
-		//EffectManager::GetInstance()->Init();
+		EffectManager::GetInstance()->Init();
 		Donya::OutputDebugStr( "No.4 End Effect::Init.\n" );
 
 		Donya::OutputDebugStr( "End Objects initialize.\n" );
@@ -319,7 +319,7 @@ public:
 		}
 		CameraUpdate( cameraTarget );
 
-		//EffectManager::GetInstance()->Update();
+		EffectManager::GetInstance()->Update();
 
 		ProcessCollision();
 		
@@ -370,7 +370,7 @@ public:
 		default:		Donya::OutputDebugStr( "Error : The boss does not draw !\n" );	break;
 		}
 
-		//EffectManager::GetInstance()->Render( shader );
+		EffectManager::GetInstance()->Render( shader );
 
 	#if DEBUG_MODE
 		/*
@@ -680,6 +680,30 @@ public:
 			if ( bodyCollided )
 			{
 				player.ReceiveImpact();
+			}
+
+			wasHitToShield = false;
+
+			auto &effects = EffectManager::GetInstance()->GetLongAttackEffectVector();
+			for ( auto &effect : effects )
+			{
+				auto &hitBoxes = effect.GetHitSphereVector();
+				for ( auto &it : hitBoxes )
+				{
+					if ( Donya::OBB::IsHitSphere( playerShieldBox, it ) )
+					{
+						it.enable		= false;
+						wasHitToShield	= true;
+						player.SucceededDefence();
+						// rival.WasDefended(); // Unnecessary.
+					}
+					if ( !wasHitToShield && Donya::OBB::IsHitSphere( playerBodyBox, it ) )
+					{
+						player.ReceiveImpact();
+					}
+
+					wasHitToShield = false;
+				}
 			}
 		}
 		

@@ -4,11 +4,14 @@
 
 #include "Donya/Easing.h"
 #include "Donya/FilePath.h"
+#include "Donya/Sound.h"
 #include "Donya/Useful.h"		// For IsShowCollision().
 
 #include "gameLib.h"
 #include "gameLibFunctions.h"	// Use FBXRender().
 #include "skinned_mesh.h"
+
+#include "Effect.h"
 
 #undef max
 #undef min
@@ -1088,20 +1091,32 @@ void Rival::AttackLineInit( TargetStatus target )
 	slerpFactor	= RivalParam::Get().SlerpFactor( status );
 	velocity	= 0.0f;
 
+	// Revive the effects collision flags.
+	{
+		auto &effects = EffectManager::GetInstance()->GetLongAttackEffectVector();
+		for ( auto &effect : effects )
+		{
+			auto &hitBoxes = effect.GetHitSphereVector();
+			for ( auto &it : hitBoxes )
+			{
+				it.enable = true;
+			}
+		}
+	}
+
 	setAnimFlame( models.pAtkLine.get(), 0 );
 }
-#if DEBUG_MODE
-#include "Donya/Sound.h"
-#endif // DEBUG_MODE
 void Rival::AttackLineUpdate( TargetStatus target )
 {
 	timer++;
 	if ( timer == RivalParam::Open().line.generateFrame )
 	{
-		// Generate attack effects.
-	#if DEBUG_MODE
-		Donya::Sound::Play( scast<int>( MusicAttribute::PlayerDefend ) );
-	#endif // DEBUG_MODE
+		EffectManager::GetInstance()->Set
+		(
+			EffectManager::EffectType::LONG_ATTACK,
+			target.pos,
+			pos
+		);
 	}
 }
 void Rival::AttackLineUninit()
