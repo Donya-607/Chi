@@ -1011,7 +1011,7 @@ void DustParticle::Draw()
 		if (data[i].GetExist())
 		{
 			setBlendMode_ALPHA(data[i].GetColor().w);
-			billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
+			billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize(), data[i].GetColor().w);
 			setBlendMode_ALPHA(1.0f);
 		}
 	}
@@ -1219,7 +1219,7 @@ void SparkParticle::Draw()
 		{
 			if (data[i].GetExist())
 			{
-				billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
+				billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize(), data[i].GetColor().w);
 				//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
 				//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
 				//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
@@ -1451,7 +1451,7 @@ void LocusParticle::Draw()
 		{
 			if (data[i].GetExist())
 			{
-				billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
+				billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize(), data[i].GetColor().w);
 				//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
 				//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
 				//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
@@ -1505,6 +1505,238 @@ void LocusParticle::SaveParameter()
 }
 
 void LocusParticle::UseImGui()
+{
+	if (ImGui::BeginIfAllowed())
+	{
+		if (ImGui::TreeNode("FireFryParticle.AdjustData"))
+		{
+			/*ImGui::SliderFloat("Scale", &scale, 0.0f, 8.0f);
+			ImGui::DragFloat("Running Speed", &runSpeed);
+			ImGui::SliderFloat("SlerpPercent of Rotation", &rotSlerpFactor, 0.05f, 1.0f);*/
+
+			if (ImGui::TreeNode("File.I/O"))
+			{
+				static bool isBinary = true;
+				if (ImGui::RadioButton("Binary", isBinary)) { isBinary = true; }
+				if (ImGui::RadioButton("JSON", !isBinary)) { isBinary = false; }
+				std::string loadStr{ "Load " };
+				loadStr += (isBinary) ? "Binary" : "JSON";
+
+				if (ImGui::Button("Save"))
+				{
+					SaveParameter();
+				}
+				// if ( ImGui::Button( Donya::MultiToUTF8( loadStr ).c_str() ) )
+				if (ImGui::Button(loadStr.c_str()))
+				{
+					LoadParameter(isBinary);
+				}
+
+				ImGui::TreePop();
+			}
+
+			ImGui::TreePop();
+		}
+
+		ImGui::End();
+	}
+}
+
+#endif // USE_IMGUI
+
+
+void AccelParticle::Set(DirectX::XMFLOAT3 _pos, DirectX::XMFLOAT3 _dir)
+{
+	ImGuiDataInit();
+
+	DirectX::XMFLOAT3 originVec(0.0f, 0.0f, 1.0f);
+	DirectX::XMFLOAT3 boss_Player_Vec = _dir;
+	DirectX::XMFLOAT3 _boss_Player_Vec = boss_Player_Vec;
+
+	float l1, l2;
+	l1 = sqrtf((originVec.x * originVec.x) + (originVec.y * originVec.y) + (originVec.z * originVec.z));
+	l2 = sqrtf((boss_Player_Vec.x * boss_Player_Vec.x) + 0.0f + (boss_Player_Vec.z * boss_Player_Vec.z));
+	boss_Player_Vec.x /= l2;
+	boss_Player_Vec.y /= l2;
+	boss_Player_Vec.z /= l2;
+
+	float dot = 0.0f;
+	float angle = 0.0f;
+	l2 = sqrtf((boss_Player_Vec.x * boss_Player_Vec.x) + 0.0f + (boss_Player_Vec.z * boss_Player_Vec.z));
+	dot = (originVec.x * boss_Player_Vec.x) + 0.0f + (originVec.z * boss_Player_Vec.z);
+	angle = acos(dot / (l1 * l2)) / (3.141592f / 180.0f);
+
+	if (_boss_Player_Vec.x < 0)
+	{
+		angle *= -1;
+	}
+
+	angle += 90;
+	for (int i = 0; i < MAX_SIZE; i++)
+	{
+		data[i].Init(DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f), DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f), DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f),
+			DirectX::XMFLOAT2(7.5f, 7.5f), DirectX::XMFLOAT2(0.0f, 780.0f), DirectX::XMFLOAT2(142.0f, 142.0f), true);
+
+		data[i].SetPos(DirectX::XMFLOAT4(_pos.x, _pos.y, _pos.z, 1.0f));
+		originPos[i] = data[i].GetPos();
+
+		int radiusRand = 65 + rand() % 35;
+		float angleRand = static_cast<float>(-10 + rand() % 20);
+		DirectX::XMFLOAT3 nextPos = DirectX::XMFLOAT3(_pos.x + radiusRand * cosf((angle + angleRand) * 0.01745f),
+			_pos.y + (-50 + rand() % 100),
+			_pos.z + radiusRand * sinf((angle + angleRand) * 0.01745f));
+
+		DirectX::XMFLOAT3 vec;
+		vec.x = nextPos.x - _pos.x;
+		vec.y = nextPos.y - _pos.y;
+		vec.z = nextPos.z - _pos.z;
+
+		data[i].SetSpeed(DirectX::XMFLOAT3(vec.x / MAX_CNT * 2.0f, vec.y / MAX_CNT * 2.0f, vec.z / MAX_CNT * 2.0f));
+		data[i].SetAccel(DirectX::XMFLOAT3(vec.x / MAX_CNT / 100000.0f, vec.y, vec.x / MAX_CNT / 100000.0f));
+
+		originSpeed[i] = data[i].GetSpeed();
+
+		cnt[i] = 0;
+		//	alive[i] = false;
+	}
+	emitting = true;
+}
+
+void AccelParticle::ImGuiDataInit()
+{
+	LoadParameter();
+
+	imguiData.speed[0] = 0;
+	imguiData.speed[1] = 0;
+	imguiData.speed[2] = 0;
+	//imguiData.accel[0] = 0;
+	//imguiData.accel[1] = 0;
+	//imguiData.accel[2] = 0;
+	imguiData.accelStart[0] = 0;
+	imguiData.accelStart[1] = 0;
+	imguiData.accelStart[2] = 0;
+	imguiData.accelStage[0] = 0;
+	imguiData.accelStage[1] = 0;
+	imguiData.accelStage[2] = 0;
+	//	imguiData.radius = 100.0f;
+}
+
+void AccelParticle::Emit()
+{
+	if (emitting)
+	{
+		int numCnt = 0;
+		while (numCnt < 2)
+		{
+			int num = rand() % MAX_SIZE;
+			if (!data[num].GetExist() && !alive[num])
+			{
+				data[num].SetExist(true);
+				alive[num] = true;
+				break;
+			}
+			numCnt++;
+		}
+
+	//	bool end = false;
+		for (int i = 0; i < MAX_SIZE; i++)
+		{
+			if (data[i].GetExist())
+			{
+				if (MAX_CNT < cnt[i])
+				{
+					data[i].SetExist(false);
+					data[i].SetPos(originPos[i]);
+					data[i].SetSpeed(originSpeed[i]);
+					cnt[i] = 0;
+					continue;
+				}
+				data[i].AddSpeedX(data[i].GetAccel().x);
+				data[i].AddSpeedY(data[i].GetAccel().y);
+				data[i].AddSpeedZ(data[i].GetAccel().z);
+				data[i].AddPosX(data[i].GetSpeed().x);
+				data[i].AddPosY(data[i].GetSpeed().y);
+				data[i].AddPosZ(data[i].GetSpeed().z);
+
+				data[i].SetAlpha(1.0f - (static_cast<float>(cnt[i]) / static_cast<float>(MAX_CNT)));
+
+			//	end = true;
+				cnt[i]++;
+			}
+		}
+
+	/*	if (!end)
+		{
+			emitting = false;
+		}*/
+	}
+}
+
+void AccelParticle::Draw()
+{
+	if (emitting)
+	{
+		setBlendMode_ADD(1.0f);
+		DirectX::XMFLOAT4X4 viewProjection;
+		DirectX::XMStoreFloat4x4(&viewProjection, getViewMatrix() * getProjectionMatrix());
+		for (int i = 0; i < MAX_SIZE; i++)
+		{
+			if (data[i].GetExist())
+			{
+				billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize(), data[i].GetColor().w);
+				//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
+				//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
+				//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
+			}
+		}
+		setBlendMode_ALPHA(1.0f);
+	}
+}
+
+void AccelParticle::ImGui()
+{
+	if (ImGui::TreeNode(u8"FireFry"))
+	{
+#if 0
+		ImGui::InputInt3("speed", imguiData.speed);
+		//ImGui::InputInt3("accel", imguiData.accel);
+		ImGui::InputInt3("accelStart", imguiData.accelStart);
+		ImGui::InputInt3("accelStage", imguiData.accelStage);
+#else
+		ImGui::DragInt3("speed", imguiData.speed);
+		ImGui::DragInt3("accelStart", imguiData.accelStart);
+		ImGui::DragInt3("accelStage", imguiData.accelStage);
+#endif
+		ImGui::TreePop();
+	}
+}
+
+void AccelParticle::LoadParameter(bool isBinary)
+{
+	Donya::Serializer::Extension ext = (isBinary)
+		? Donya::Serializer::Extension::BINARY
+		: Donya::Serializer::Extension::JSON;
+	std::string filePath = GenerateSerializePath(SERIAL_ID, ext);
+
+	Donya::Serializer seria;
+	seria.Load(ext, filePath.c_str(), SERIAL_ID, *this);
+}
+
+#if USE_IMGUI
+
+void AccelParticle::SaveParameter()
+{
+	Donya::Serializer::Extension bin = Donya::Serializer::Extension::BINARY;
+	Donya::Serializer::Extension json = Donya::Serializer::Extension::JSON;
+	std::string binPath = GenerateSerializePath(SERIAL_ID, bin);
+	std::string jsonPath = GenerateSerializePath(SERIAL_ID, json);
+
+	Donya::Serializer seria;
+	seria.Save(bin, binPath.c_str(), SERIAL_ID, *this);
+	seria.Save(json, jsonPath.c_str(), SERIAL_ID, *this);
+}
+
+void AccelParticle::UseImGui()
 {
 	if (ImGui::BeginIfAllowed())
 	{

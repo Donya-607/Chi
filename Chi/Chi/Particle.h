@@ -650,3 +650,88 @@ public:
 	int GetMaxSize() { return MAX_SIZE; }
 };
 CEREAL_CLASS_VERSION(LocusParticle, 0)
+
+
+class AccelParticle
+{
+private:
+	struct ParticleImGuiData
+	{
+		int speed[3];
+		//int accel[3];
+		int accelStart[3];
+		int accelStage[3];
+		float radius;
+	};
+
+private:
+	static const int MAX_SIZE = 25;
+	static const int MAX_CNT = 30;
+
+	bool emitting;
+	int state;
+	Particle data[MAX_SIZE];
+	ParticleImGuiData imguiData;
+	DirectX::XMFLOAT4 originPos[MAX_SIZE];		// 放出源の座標
+	DirectX::XMFLOAT3 originSpeed[MAX_SIZE];
+	int cnt[MAX_SIZE];
+	bool alive[MAX_SIZE];
+	//	int totalCnt;
+
+	//	std::shared_ptr<static_mesh> billboard;
+
+public:
+	AccelParticle() : emitting(false)
+	{
+		for (int i = 0; i < MAX_SIZE; i++)
+		{
+			createBillboard(&data[i].pMesh, L"./Data/Images/particle.png");
+		}
+	}
+	~AccelParticle() {}
+
+private:
+	friend class cereal::access;
+	template<class Archive>
+	void serialize(Archive& archive, std::uint32_t version)
+	{
+		archive
+		(
+			CEREAL_NVP(imguiData.speed),
+			CEREAL_NVP(imguiData.accelStart),
+			CEREAL_NVP(imguiData.accelStage),
+			CEREAL_NVP(imguiData.radius)
+		);
+
+		if (1 <= version)
+		{
+			// archive( CEREAL_NVP( x ) );
+		}
+	}
+	static constexpr const char* SERIAL_ID = "Absorption";
+
+	void LoadParameter(bool isBinary = true);
+
+#if USE_IMGUI
+
+	void SaveParameter();
+
+public:
+	void UseImGui();
+
+#endif // USE_IMGUI
+
+public:
+	void Set(DirectX::XMFLOAT3 _pos, DirectX::XMFLOAT3 _dir);
+	void Emit();
+	void Draw();
+	void ImGuiDataInit();
+	void ImGui();
+
+	// 放出位置の設定関数
+//	void SetOriginPos(DirectX::XMFLOAT3 _originPos) { originPos = _originPos; }
+
+	// パーティクルの最大サイズ
+	int GetMaxSize() { return MAX_SIZE; }
+};
+CEREAL_CLASS_VERSION(AccelParticle, 0)

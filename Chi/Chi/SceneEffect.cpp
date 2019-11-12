@@ -4,6 +4,9 @@
 #include "Donya/Vector.h"
 #include "GameLibFunctions.h"
 #include "Effect.h"
+#include "GameLibFunctions.h"
+#include "UI.h"
+
 
 void SceneEffect::init()  
 {
@@ -11,43 +14,43 @@ void SceneEffect::init()
 	keyCnt = 0;
 	keyCnt2 = 0;
 
-	flashParticle.Set();
-	flashParticle.ImGuiDataInit();
+//	flashParticle.Set();
+//	flashParticle.ImGuiDataInit();
 
-	bubbleParticle.Set();
-	bubbleParticle.ImGuiDataInit();
+//	bubbleParticle.Set();
+//	bubbleParticle.ImGuiDataInit();
 
-	bossAI.Init();
+//	bossAI.Init();
 
-	auto GenerateCube = []()->std::shared_ptr<static_mesh>
-	{
-		std::shared_ptr<static_mesh> tmpCube = std::make_shared<static_mesh>();
-		createCube(tmpCube.get());
-		return tmpCube;
-	};
+	//auto GenerateCube = []()->std::shared_ptr<static_mesh>
+	//{
+	//	std::shared_ptr<static_mesh> tmpCube = std::make_shared<static_mesh>();
+	//	createCube(tmpCube.get());
+	//	return tmpCube;
+	//};
 
-	pCube1 = GenerateCube();
-	pCube2 = GenerateCube();
+	//pCube1 = GenerateCube();
+	//pCube2 = GenerateCube();
 
-	obb1.pos = Donya::Vector3(5.0f, 0.0f, 0.0f);
-	obb2.pos = Donya::Vector3(-5.0f, 0.0f, 0.0f);
-	obb1.scale = Donya::Vector3(25.0f, 20.0f, 15.0f);
-	obb2.scale = Donya::Vector3(25.0f, 20.0f, 15.0f);
-	obb1.orientation.Identity();
-	obb2.orientation.Identity();
+	//obb1.pos = Donya::Vector3(5.0f, 0.0f, 0.0f);
+	//obb2.pos = Donya::Vector3(-5.0f, 0.0f, 0.0f);
+	//obb1.scale = Donya::Vector3(25.0f, 20.0f, 15.0f);
+	//obb2.scale = Donya::Vector3(25.0f, 20.0f, 15.0f);
+	//obb1.orientation.Identity();
+	//obb2.orientation.Identity();
 
-	color1 = DirectX::XMFLOAT4(0.7f, 0.7f, 0.7f, 1.0f);
-	color2 = DirectX::XMFLOAT4(0.7f, 0.7f, 0.7f, 1.0f);
+	//color1 = DirectX::XMFLOAT4(0.7f, 0.7f, 0.7f, 1.0f);
+	//color2 = DirectX::XMFLOAT4(0.7f, 0.7f, 0.7f, 1.0f);
 
-	angle1[0] = 0.0f;
-	angle1[1] = 0.0f;
-	angle1[2] = 0.0f;
-	angle2[0] = 0.0f;
-	angle2[1] = 0.0f;
-	angle2[2] = 0.0f;
+	//angle1[0] = 0.0f;
+	//angle1[1] = 0.0f;
+	//angle1[2] = 0.0f;
+	//angle2[0] = 0.0f;
+	//angle2[1] = 0.0f;
+	//angle2[2] = 0.0f;
 
-	exist1 = false;
-	exist2 = false;
+	/*exist1 = false;
+	exist2 = false;*/
 
 	stage.Init(0);
 
@@ -63,14 +66,19 @@ void SceneEffect::init()
 		"./Data/shader/skinned_mesh_no_uv_ps.cso"
 	);
 
+	lights.direction.color = Donya::Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 	getLineLight().setLineLight(lights.direction.direction, lights.direction.color);
 	for (const auto i : lights.points)
 	{
 		setPointLight(i);
 	}
 
-	EffectManager::GetInstance()->Init();
-	originPos = Donya::Vector3(0.0f, 0.0f, 0.0f);
+//	EffectManager::GetInstance()->Init();
+//	originPos = Donya::Vector3(0.0f, 0.0f, 0.0f);
+
+	createBillboard(&data.pMesh, L"./Data/Images/particle.png");
+
+	UIManager::GetInstance()->Init();
 }
 void SceneEffect::update()
 {
@@ -95,7 +103,7 @@ void SceneEffect::update()
 		if (keyCnt2 == 0)
 		{
 		//	eruptionEffect.SetData();
-			EffectManager::GetInstance()->Set(EffectManager::GetInstance()->ERUPTION, originPos, 0);
+		//	EffectManager::GetInstance()->Set(EffectManager::GetInstance()->ERUPTION, originPos, 0);
 		}
 		keyCnt2++;
 	}
@@ -104,40 +112,48 @@ void SceneEffect::update()
 		keyCnt2 = 0;
 	}
 
-	flashParticle.Emit();
-	bubbleParticle.Emit();
-	bossAI.Update();
+//	flashParticle.Emit();
+//	bubbleParticle.Emit();
+//	bossAI.Update();
 //	eruptionEffect.Update(Donya::Vector3(0.0f, 0.0f, 0.0f), Donya::Vector3(0.0f, 0.0f, -1.0f));
 	EffectManager::GetInstance()->Update();
-	EffectManager::GetInstance()->Update(Donya::Vector3(0.0f, 0.0f, 0.0f));
+//	EffectManager::GetInstance()->Update(Donya::Vector3(0.0f, 0.0f, 0.0f));
 
-	if (obb1.JudgeOBB(&obb2))
-	{
-		color1.x = 1.0f;
-		color2.y = 1.0f;
-	}
-	else
-	{
-		color1.x = 0.7f;
-		color2.y = 0.7f;
-	}
+	//if (obb1.JudgeOBB(&obb2))
+	//{
+	//	color1.x = 1.0f;
+	//	color2.y = 1.0f;
+	//}
+	//else
+	//{
+	//	color1.x = 0.7f;
+	//	color2.y = 0.7f;
+	//}
 
 	stage.Update();
 
-	for (auto eruption : EffectManager::GetInstance()->GetEruptionEffectVector())
-	{
-		for (auto eruptionHitSphere : eruption.GetHitSphereVector())
-		{
-			if (eruptionHitSphere.exist)
-			{
-				Donya::Vector3 _pos = eruptionHitSphere.pos;
-			}
-			else
-			{
-				float _radius = eruptionHitSphere.radius;
-			}
-		}
-	}
+	//for (auto eruption : EffectManager::GetInstance()->GetEruptionEffectVector())
+	//{
+	//	for (auto eruptionHitSphere : eruption.GetHitSphereVector())
+	//	{
+	//		if (eruptionHitSphere.exist)
+	//		{
+	//			Donya::Vector3 _pos = eruptionHitSphere.pos;
+	//		}
+	//		else
+	//		{
+	//			float _radius = eruptionHitSphere.radius;
+	//		}
+	//	}
+	//}
+
+	eruqtionParticle.Emit();
+	absorptionParticle.Emit();
+	dustParticle.Emit();
+	sparkParticle.Emit();
+	locusParticle.Emit();
+
+	UIManager::GetInstance()->Update(Donya::Vector3(0.0f, 0.0f, 0.0f));
 }
 void SceneEffect::render()
 {
@@ -147,27 +163,39 @@ void SceneEffect::render()
 	Donya::Vector4x4 V = Donya::Vector4x4::FromMatrix(GameLib::camera::GetViewMatrix());
 	Donya::Vector4x4 P = Donya::Vector4x4::FromMatrix(GameLib::camera::GetProjectionMatrix());
 
-	Donya::Vector4x4 S = Donya::Vector4x4::MakeScaling(obb1.scale);
-	Donya::Vector4x4 T = Donya::Vector4x4::MakeTranslation(obb1.pos);
-	Donya::Vector4x4 R = obb1.orientation.RequireRotationMatrix();
-	Donya::Vector4x4 W = S * R * T;
-	Donya::Vector4x4 WVP = W * V * P;
+	//Donya::Vector4x4 S = Donya::Vector4x4::MakeScaling(obb1.scale);
+	//Donya::Vector4x4 T = Donya::Vector4x4::MakeTranslation(obb1.pos);
+	//Donya::Vector4x4 R = obb1.orientation.RequireRotationMatrix();
+	//Donya::Vector4x4 W = S * R * T;
+	//Donya::Vector4x4 WVP = W * V * P;
 
-	if (exist1) OBJRender(pCube1.get(), WVP, W, color1);
+//	if (exist1) OBJRender(pCube1.get(), WVP, W, color1);
 
-	S = Donya::Vector4x4::MakeScaling(obb2.scale);
-	T = Donya::Vector4x4::MakeTranslation(obb2.pos);
-	R = obb2.orientation.RequireRotationMatrix();
-	W = S * R * T;
-	WVP = W * V * P;
+	//S = Donya::Vector4x4::MakeScaling(obb2.scale);
+	//T = Donya::Vector4x4::MakeTranslation(obb2.pos);
+	//R = obb2.orientation.RequireRotationMatrix();
+	//W = S * R * T;
+	//WVP = W * V * P;
 
-	if (exist2) OBJRender(pCube2.get(), WVP, W, color2);
+//	if (exist2) OBJRender(pCube2.get(), WVP, W, color2);
 
 
 //	eruptionEffect.Render();
 	EffectManager::GetInstance()->Render( shader );
 
-	stage.Draw( shader, V, P);
+	stage.Draw( shader, V, P );
+
+	eruqtionParticle.Draw();
+	absorptionParticle.Draw();
+	dustParticle.Draw();
+	sparkParticle.Draw();
+	locusParticle.Draw();
+
+	DirectX::XMFLOAT4X4 viewProjection;
+	DirectX::XMStoreFloat4x4(&viewProjection, getViewMatrix() * getProjectionMatrix());
+	billboardRender(&data.pMesh, viewProjection, data.pos, data.scale, data.angle, getCamPos(), data.texPos, data.texSize);
+
+	UIManager::GetInstance()->Draw();
 }
 void SceneEffect::uninit()
 {
@@ -175,6 +203,7 @@ void SceneEffect::uninit()
 }
 void SceneEffect::imGui()
 {
+	UIManager::GetInstance()->Imgui();
 	ImGui::Begin("Effect");
 	if (ImGui::TreeNode("DirectionalLight"))
 	{
@@ -185,6 +214,92 @@ void SceneEffect::imGui()
 		if (ImGui::Button("Shiled Development Off"))
 		{
 			EffectManager::GetInstance()->ReSet(EffectManager::GetInstance()->SHIELD_DEVELOPMENT);
+		}
+		ImGui::TreePop();
+	}
+	if (ImGui::TreeNode("BillBoard Test Draw Parametor"))
+	{
+		ImGui::DragFloat3("pos", &data.pos.x);
+		ImGui::DragFloat2("scale", &data.scale.x);
+		ImGui::DragFloat2("texPos", &data.texPos.x);
+		ImGui::DragFloat2("texSize", &data.texSize.x);
+		ImGui::TreePop();
+	}
+	if (ImGui::TreeNode("Eruqtion Particle Emit"))
+	{
+		if (ImGui::Button("Emit"))
+		{
+			eruqtionParticle.Set(DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f));
+		}
+		ImGui::TreePop();
+	}
+	if (ImGui::TreeNode("Dust Particle Emit"))
+	{
+		static int stageNum = 1;
+		ImGui::InputInt("stageNum", &stageNum);
+		if (ImGui::Button("Emit"))
+		{
+			dustParticle.Set(DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f), stageNum);
+		}
+		ImGui::TreePop();
+	}
+	if (ImGui::TreeNode("Jump Particle Emit"))
+	{
+		static int stageNum = 1;
+		ImGui::InputInt("stageNum", &stageNum);
+		if (ImGui::Button("Emit"))
+		{
+			eruqtionParticle.Set(DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f));
+			dustParticle.Set(DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f), stageNum);
+		}
+		ImGui::TreePop();
+	}
+	if (ImGui::TreeNode("Absorption Particle Emit"))
+	{
+		static DirectX::XMFLOAT3 _pos = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0);
+		ImGui::DragFloat3("emit pos", &_pos.x);
+		if (ImGui::Button("Set"))
+		{
+			absorptionParticle.Set(_pos);
+		}
+		if (ImGui::Button("ReSet"))
+		{
+			absorptionParticle.ReSet();
+		}
+		ImGui::TreePop();
+	}
+	if (ImGui::TreeNode("SparkParticle Particle Emit"))
+	{
+		static DirectX::XMFLOAT3 pos = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0);
+		ImGui::DragFloat3("emit pos ", &pos.x);
+		if (ImGui::Button("Emit"))
+		{
+			sparkParticle.Set(pos);
+		}
+		ImGui::TreePop();
+	}
+	if (ImGui::TreeNode("LocusParticle Particle Emit"))
+	{
+		static DirectX::XMFLOAT3 pos = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0);
+		static DirectX::XMFLOAT3 dir = DirectX::XMFLOAT3(0.0f, 0.0f, -1.0);
+		ImGui::DragFloat3("emit pos  ", &pos.x);
+		ImGui::DragFloat3("emit direction", &dir.x);
+		if (ImGui::Button("Emit"))
+		{
+			locusParticle.Set(pos, dir);
+		}
+		ImGui::TreePop();
+	}
+	if (ImGui::TreeNode("Boss4 LongAttack Effect"))
+	{
+		static DirectX::XMFLOAT3 playerPos = DirectX::XMFLOAT3(0.0f, 0.0f, -750.0);
+		static DirectX::XMFLOAT3 bossPos = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0);
+		//ImGui::InputFloat("size", &size);
+		ImGui::DragFloat3("player pos", &playerPos.x);
+		ImGui::DragFloat3("boss pos", &bossPos.x);
+		if (ImGui::Button("On"))
+		{
+			EffectManager::GetInstance()->Set(EffectManager::GetInstance()->LONG_ATTACK, playerPos, bossPos);
 		}
 		ImGui::TreePop();
 	}
