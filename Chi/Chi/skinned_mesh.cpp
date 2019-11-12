@@ -1397,7 +1397,6 @@ bool skinned_mesh::calcTransformedPosBySpecifyMesh(DirectX::XMFLOAT3& _local_pos
 		if (p->node_name != _mesh_name)
 			continue;
 		_mesh = p;
-		break;
 
 		if (_mesh == nullptr)
 			return false;
@@ -1424,6 +1423,7 @@ bool skinned_mesh::calcTransformedPosBySpecifyMesh(DirectX::XMFLOAT3& _local_pos
 		}
 
 		_local_pos = { _p.x,_p.y,_p.z };
+		break;
 	}
 	return true;
 }

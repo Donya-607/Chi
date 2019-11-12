@@ -32,7 +32,7 @@ public:
 		hr = device->CreateBlendState(&blend_desc, &states[BS_NONE]);
 		_ASSERT_EXPR(SUCCEEDED(hr), hr_trace(hr));
 		// BS_ALPHA
-		blend_desc.AlphaToCoverageEnable = FALSE;
+		blend_desc.AlphaToCoverageEnable = TRUE;
 		blend_desc.IndependentBlendEnable = FALSE;
 		blend_desc.RenderTarget[0].BlendEnable = TRUE;
 		blend_desc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
