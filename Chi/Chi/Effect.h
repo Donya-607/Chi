@@ -10,6 +10,7 @@ enum class EffectModel
 {
 	ERUPTION,
 	SHIELD_DEVELOPMENT,
+	LONG_ATTACK
 };
 
 std::string GetEffectModelPath(EffectModel effectModel);
@@ -57,11 +58,11 @@ class EruptionEffect
 public:
 	static const int MAX_SIZE = 20;
 	//	Donya::Sphere hitSphere[ORIGIN_MAX_SIZE];
+	std::shared_ptr<skinned_mesh> pModel[MAX_SIZE];
 
 private:
 	static const int MAX_ANIM_FRAME = 20; // TODO : 仮の経過時間
 
-	std::shared_ptr<skinned_mesh> pModel[MAX_SIZE];
 	EffectData data[MAX_SIZE];
 	std::vector<Donya::Sphere> hitSphere;
 
@@ -96,7 +97,13 @@ public:
 	void Render( fbx_shader &HLSL );
 
 	bool GetActivated() const { return activated; }
-	std::vector<Donya::Sphere> GetHitSphereVector() const { return hitSphere; }
+	std::vector<Donya::Sphere> &GetHitSphereVector() { return hitSphere; }
+	void SetEnable(int num, bool _enable = false)
+	{
+		if (MAX_SIZE <= num) return;
+
+		hitSphere[num].enable = _enable;
+	}
 
 private:
 	bool CollideToWall(Donya::Vector3& pos);
@@ -140,6 +147,21 @@ public:
 	EruptionEffectManager()
 	{
 		eruptionEffect.resize(MAX_SIZE);
+
+		/*auto GenerateFBX = []()->std::shared_ptr<skinned_mesh>
+		{
+			std::shared_ptr<skinned_mesh> tmpFBX = std::make_shared<skinned_mesh>();
+			loadFBX(tmpFBX.get(), GetEffectModelPath(EffectModel::ERUPTION));
+			return tmpFBX;
+		};
+		for(int i = 0;i < eruptionEffect.size();i++)
+		{
+			for (int j = 0; j < eruptionEffect[i].MAX_SIZE; j++)
+			{
+				eruptionEffect[i].pModel[j] = std::make_unique<skinned_mesh>();
+				eruptionEffect[i].pModel[j] = GenerateFBX();
+			}
+		}*/
 	}
 	~EruptionEffectManager() {}
 
@@ -154,7 +176,7 @@ public:
 	void Update();
 	void Render( fbx_shader &HLSL );
 
-	std::vector<EruptionEffect> GetEruptionEffectVector() { return eruptionEffect; }
+	std::vector<EruptionEffect> &GetEruptionEffectVector() { return eruptionEffect; }
 };
 
 class ShieldDevelopment/* : public EffectReader*/
@@ -177,20 +199,137 @@ public:
 	void Render( fbx_shader &HLSL );
 };
 
+class LongAttackEffect
+{
+public:
+	static const int MAX_SIZE = 10;
+	//	Donya::Sphere hitSphere[ORIGIN_MAX_SIZE];
+	std::shared_ptr<skinned_mesh> pModel[MAX_SIZE];
+
+private:
+	static const int MAX_ANIM_FRAME = 20; // TODO : 仮の経過時間
+	static constexpr float SIZE = 275.0f;
+
+	EffectData data[MAX_SIZE];
+	std::vector<Donya::Sphere> hitSphere;
+
+
+	int state;
+	DirectX::XMFLOAT3 pos;			// 出現位置
+	bool activated;					// 出現中フラグ
+	int timer;						// 経過時間
+	int startTimer;					// 出現し始める時間
+	int aliveMaxNum;
+	int aliveNum;					// 出現中の番号
+
+public:
+	LongAttackEffect();
+	~LongAttackEffect() {}
+
+public:
+	void Init();
+	void UnInit()
+	{
+		// no
+	}
+
+	// _pos : 出現位置, _startTimer : 更新され始める時間
+	void SetData(Donya::Vector3 _playerPos, Donya::Vector3 _bossPos, int _startTimer = 0);
+
+	void Update();
+	void Render(fbx_shader& HLSL);
+
+	bool GetActivated() const { return activated; }
+	std::vector<Donya::Sphere>& GetHitSphereVector() { return hitSphere; }
+	void SetEnable(int num, bool _enable = false)
+	{
+		if (MAX_SIZE <= num) return;
+
+		hitSphere[num].enable = _enable;
+	}
+
+private:
+	bool CollideToWall(Donya::Vector3& pos);
+};
+
+class LongAttackEffectManager/* : public EffectReader*/
+{
+private:
+	static const int MAX_SIZE = 5;
+	//	EruptionEffect eruptionEffect[MAX_SIZE];
+
+	std::vector<LongAttackEffect> longAttackEffect;
+
+public:
+	LongAttackEffectManager()
+	{
+		longAttackEffect.resize(MAX_SIZE);
+
+		auto GenerateFBX = []()->std::shared_ptr<skinned_mesh>
+		{
+			std::shared_ptr<skinned_mesh> tmpFBX = std::make_shared<skinned_mesh>();
+			loadFBX(tmpFBX.get(), GetEffectModelPath(EffectModel::LONG_ATTACK));
+			return tmpFBX;
+		};
+		for (size_t i = 0; i < longAttackEffect.size(); i++)
+		{
+			for (int j = 0; j < longAttackEffect[i].MAX_SIZE; j++)
+			{
+				longAttackEffect[i].pModel[j] = std::make_shared<skinned_mesh>();
+				longAttackEffect[i].pModel[j] = GenerateFBX();
+			}
+		}
+
+
+		/*std::shared_ptr<skinned_mesh> tmpFBX = std::make_shared<skinned_mesh>();
+		loadFBX(tmpFBX.get(), GetEffectModelPath(EffectModel::LONG_ATTACK));
+
+		SetModels(tmpFBX);*/
+	}
+	~LongAttackEffectManager() {}
+
+public:
+	void Init() {}
+	void UnInit() {}
+
+	void SetModels(std::shared_ptr<skinned_mesh>& _pModel)
+	{
+		for (size_t i = 0; i < longAttackEffect.size(); i++)
+		{
+			for (int j = 0; j < longAttackEffect[i].MAX_SIZE; j++)
+			{
+				longAttackEffect[i].pModel[j] = std::make_shared<skinned_mesh>();
+				longAttackEffect[i].pModel[j] = _pModel;
+			}
+		}
+	}
+
+	// _pos : 出現位置, _startTimer : 更新され始める時間
+	void SetData(Donya::Vector3 _playerPos, Donya::Vector3 _bossPos, int _startTimer = 0);
+
+	// _bossPos : ボス座標, _playerPos : プレイヤー座標,
+	void Update();
+	void Render(fbx_shader& HLSL);
+
+	std::vector<LongAttackEffect>& GetLongAttackEffectVector() { return longAttackEffect; }
+};
+
 class EffectManager
 {
 private:
 	static const int MAX_SIZE = 2;
 
 	//std::vector<std::unique_ptr<EffectReader>> effect;
-	EruptionEffectManager	eruqtionEffectManager;
+	EruptionEffectManager	eruptionEffectManager;
 	ShieldDevelopment		shieldDevelopment;
+	LongAttackEffectManager longAttackEffectManager;
 
 public:
 	enum EffectType
 	{
 		ERUPTION, // 岩噴火
 		SHIELD_DEVELOPMENT, // 盾ガード中
+		LONG_ATTACK // ボス4 遠距離攻撃
 	};
 
 public:
@@ -214,12 +353,18 @@ public:
 	// effectType : エフェクト番号(EffectType参照), pos : 出現位置, startTime : 関数がコールされてから動き始める時間
 	void Set(EffectType effectType, Donya::Vector3 pos, int startTime = 0);
 
+	void Set(EffectType effectType, Donya::Vector3 playerPos, Donya::Vector3 bossPos);
+
 	// effectType : エフェクト番号(EffectType参照)
 	void Set(EffectType effectType);
 	void ReSet(EffectType effectType);
 
-	std::vector<EruptionEffect> GetEruptionEffectVector()
+	std::vector<EruptionEffect> &GetEruptionEffectVector()
 	{
-		return eruqtionEffectManager.GetEruptionEffectVector();
+		return eruptionEffectManager.GetEruptionEffectVector();
+	}
+	std::vector<LongAttackEffect> &GetLongAttackEffectVector()
+	{
+		return longAttackEffectManager.GetLongAttackEffectVector();
 	}
 };

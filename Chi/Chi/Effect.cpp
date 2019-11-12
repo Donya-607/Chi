@@ -69,7 +69,18 @@ void EffectManager::Set(EffectType effectType, Donya::Vector3 pos, int startTime
 	switch (effectType)
 	{
 	case EffectManager::ERUPTION:
-		eruqtionEffectManager.SetData(pos, startTime);
+		eruptionEffectManager.SetData(pos, startTime);
+		break;
+		// TODO : add effect
+	}
+}
+
+void EffectManager::Set(EffectType effectType, Donya::Vector3 playerPos, Donya::Vector3 bossPos)
+{
+	switch (effectType)
+	{
+	case EffectManager::LONG_ATTACK:
+		longAttackEffectManager.SetData(playerPos, bossPos);
 		break;
 		// TODO : add effect
 	}
@@ -108,7 +119,8 @@ void EffectManager::Update()
 		effect[i]->Update();
 	}*/
 
-	eruqtionEffectManager.Update();
+	eruptionEffectManager.Update();
+	longAttackEffectManager.Update();
 }
 
 void EffectManager::Update(Donya::Vector3 pos)
@@ -123,8 +135,9 @@ void EffectManager::Render( fbx_shader &HLSL )
 		effect[i]->Render();
 	}*/
 
-	eruqtionEffectManager.Render( HLSL );
+	eruptionEffectManager.Render( HLSL );
 	shieldDevelopment.Render( HLSL );
+	longAttackEffectManager.Render( HLSL );
 }
 
 std::string GetEffectModelPath(EffectModel effectModel)
@@ -136,6 +149,8 @@ std::string GetEffectModelPath(EffectModel effectModel)
 		return "./Data/model/Effect/EFE_Boss03_Attack.fbx";		// break;
 	case EffectModel::SHIELD_DEVELOPMENT:
 		return "./Data/model/Effect/EFE_Player_Shield.fbx";		// break;
+	case EffectModel::LONG_ATTACK:
+		return "./Data/model/Effect/EFE_Boss04_LongAttack.fbx";	// break;
 	default:
 		assert(!"Error : Specified unexpect model type."); break;
 		break;
@@ -174,18 +189,8 @@ void EruptionEffectManager::Render( fbx_shader &HLSL )
 
 EruptionEffect::EruptionEffect()
 {
-	/*pModel.resize(MAX_SIZE);
-	data.resize(MAX_SIZE);*/
-	auto GenerateFBX = []()->std::shared_ptr<skinned_mesh>
-	{
-		std::shared_ptr<skinned_mesh> tmpFBX = std::make_shared<skinned_mesh>();
-		loadFBX(tmpFBX.get(), GetEffectModelPath(EffectModel::ERUPTION));
-		return tmpFBX;
-	};
 	for (int i = 0; i < MAX_SIZE; i++)
 	{
-		pModel[i] = std::make_unique<skinned_mesh>();
-		pModel[i] = GenerateFBX();
 		data[i].SetPos(DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f));
 		lengthData[i] = 0;
 		angleData[i] = 0;
@@ -457,5 +462,228 @@ void ShieldDevelopment::Render( fbx_shader &HLSL )
 		Donya::Vector4x4 W = S * R * T;
 		Donya::Vector4x4 WVP = W * V * P;
 		FBXRender(pModel.get(), HLSL, WVP, W);
+	}
+}
+
+void LongAttackEffectManager::SetData(Donya::Vector3 _playerPos, Donya::Vector3 _bossPos, int _startTimer)
+{
+	for (int i = 0; i < MAX_SIZE; i++)
+	{
+		if (!longAttackEffect[i].GetActivated())
+		{
+			longAttackEffect[i].SetData(_playerPos, _bossPos, _startTimer);
+			break;
+		}
+	}
+}
+
+void LongAttackEffectManager::Update()
+{
+	for (int i = 0; i < MAX_SIZE; i++)
+	{
+		longAttackEffect[i].Update();
+	}
+}
+
+void LongAttackEffectManager::Render(fbx_shader& HLSL)
+{
+	for (int i = 0; i < MAX_SIZE; i++)
+	{
+		longAttackEffect[i].Render(HLSL);
+	}
+}
+
+LongAttackEffect::LongAttackEffect()
+{
+	/*pModel.resize(MAX_SIZE);
+	data.resize(MAX_SIZE);*/
+	for (int i = 0; i < MAX_SIZE; i++)
+	{
+		data[i].SetPos(DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f));
+	}
+	state = 0;
+	activated = false;
+}
+
+void LongAttackEffect::Init()
+{
+	activated = true;
+	state = 0;
+	timer = 0;
+	state = 0;
+}
+
+void LongAttackEffect::SetData(Donya::Vector3 _playerPos, Donya::Vector3 _bossPos, int _startTimer)
+{
+	startTimer = _startTimer;
+	Donya::Vector3 playerPos;
+	Donya::Vector3 bossPos;
+	playerPos = _playerPos;
+	bossPos = _bossPos;
+
+	Donya::Vector3 dir = playerPos - bossPos;
+	float dis = sqrtf(powf(dir.x, 2.0f) + powf(dir.y, 2.0f) + powf(dir.z, 2.0f));
+	dir.Normalize();
+
+	aliveMaxNum = static_cast<int>(dis / SIZE);
+	hitSphere.resize(aliveMaxNum);
+
+	for (int i = 0; i < aliveMaxNum; i++)
+	{
+		Donya::Vector3 _pos = _bossPos + (dir * (SIZE * (i + 1)));
+		data[i].SetPos(_pos);
+		data[i].SetTime(20 * i);
+		data[i].SetExist(false);
+		hitSphere[i].pos.x = _pos.x;
+		hitSphere[i].pos.y = _pos.y + 25.0f;
+		hitSphere[i].pos.z = _pos.z;
+		hitSphere[i].radius = SIZE - 75.0f;
+		hitSphere[i].exist = false;
+	}
+
+	aliveNum = 0;
+	Init();
+}
+
+bool LongAttackEffect::CollideToWall(Donya::Vector3& pos)
+{
+	const float bodyRadius = PlayerParam::Get().HitBoxPhysic().radius;
+	const float trueFieldRadius = 1420.0f - 50.0f;
+
+	constexpr Donya::Vector3 ORIGIN = Donya::Vector3::Zero();
+	const Donya::Vector3 currentDistance = pos - ORIGIN;
+	const float currentLength = currentDistance.Length();
+
+	if (trueFieldRadius < currentLength)
+	{
+		/*float diff = currentLength - trueFieldRadius;
+		const Donya::Vector3 direction = currentDistance.Normalized();
+		pos = ORIGIN + (direction * (currentLength - diff));*/
+		return true;
+	}
+
+	return false;
+}
+
+void LongAttackEffect::Update()
+{
+	if (activated)
+	{
+		if (startTimer <= timer)
+		{
+			/*switch (state)
+			{
+			case 0:
+				data[0].SetExist(true);
+				setAnimFlame(pModel[0].get(), 1);
+
+				state++;
+				break;
+			case 1:
+				for (int i = 0; i < MAX_SIZE; i++)
+				{
+					if (getAnimFlame(pModel[i].get()) == 107)
+					{
+						hitSphere[i].exist = true;
+					}
+					if (getAnimFlame(pModel[i].get()) == 213)
+					{
+						hitSphere[i].exist = false;
+					}
+					if (getAnimFlame(pModel[i].get()) == 0)
+					{
+						data[i].SetExist(false);
+					}
+				}
+				if (aliveNum < MAX_SIZE && data[aliveNum].GetTime() <= timer - startTimer)
+				{
+					data[aliveNum].SetExist(true);
+					setAnimFlame(pModel[aliveNum].get(), 1);
+					aliveNum++;
+				}
+				break;
+			default:
+				break;
+			}*/
+
+			for (int i = 0; i < aliveMaxNum; i++)
+			{
+				if (getAnimFlame(pModel[i].get()) == 62)
+				{
+					hitSphere[i].exist = true;
+				}
+				if (getAnimFlame(pModel[i].get()) == 79)
+				{
+					hitSphere[i].exist = false;
+				}
+				if (getAnimFlame(pModel[i].get()) == 0)
+				{
+					data[i].SetExist(false);
+				}
+			}
+			if (aliveNum < aliveMaxNum && data[aliveNum].GetTime() <= timer - startTimer)
+			{
+				data[aliveNum].SetExist(true);
+				setAnimFlame(pModel[aliveNum].get(), 1);
+				aliveNum++;
+			}
+
+			bool exists = false;
+			for (int i = 0; i < aliveMaxNum; i++)
+			{
+				if (data[i].GetExist())
+				{
+					exists = true;
+				}
+			}
+			if (!exists)
+			{
+				activated = false;
+				state = 0;
+				timer = 0;
+			}
+		}
+		timer++;
+	}
+}
+
+void LongAttackEffect::Render(fbx_shader& HLSL)
+{
+	if (activated)
+	{
+		Donya::Vector4x4 V = Donya::Vector4x4::FromMatrix(GameLib::camera::GetViewMatrix());
+		Donya::Vector4x4 P = Donya::Vector4x4::FromMatrix(GameLib::camera::GetProjectionMatrix());
+
+		auto GenerateSphere = []()->std::shared_ptr<static_mesh>
+		{
+			std::shared_ptr<static_mesh> tmpSphere = std::make_shared<static_mesh>();
+			createSphere(tmpSphere.get(), 6, 12);
+			return tmpSphere;
+		};
+		static std::shared_ptr<static_mesh> pSphere = GenerateSphere();
+
+		for (int i = 0; i < aliveMaxNum; i++)
+		{
+			if (data[i].GetExist())
+			{
+				Donya::Vector4x4 S = Donya::Vector4x4::MakeScaling(1.0f);
+				Donya::Vector4x4 T = Donya::Vector4x4::MakeTranslation(data[i].GetPos());
+				Donya::Vector4x4 R = Donya::Vector4x4::MakeRotationEuler(data[i].GetAngle());
+				Donya::Vector4x4 W = S * R * T;
+				Donya::Vector4x4 WVP = W * V * P;
+				FBXRender(pModel[i].get(), HLSL, WVP, W);
+			}
+
+			if (hitSphere[i].exist)
+			{
+				Donya::Vector4x4 CS = Donya::Vector4x4::MakeScaling(hitSphere[i].radius); // Half size->Whole size.
+				Donya::Vector4x4 CR = Donya::Vector4x4::MakeRotationEuler(Donya::Vector3(0.0f, 0.0f, 0.0f));
+				Donya::Vector4x4 CT = Donya::Vector4x4::MakeTranslation(hitSphere[i].pos);
+				Donya::Vector4x4 CW = CS * CR * CT;
+				Donya::Vector4x4 CWVP = CW * V * P;
+
+				OBJRender(pSphere.get(), CWVP, CW, Donya::Vector4(0.0f, 0.3f, 0.3f, 0.6f));
+			}
+		}
 	}
 }
