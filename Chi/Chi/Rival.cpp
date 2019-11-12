@@ -313,7 +313,7 @@ void RivalParam::UseImGui()
 					ImGui::DragFloat( "Jump.Length(Distance)", &m.raid.jumpDistance );
 
 					static std::array<char, 512U> meshNameBuffer{};
-					ShowSphereFN( "Raid", &m.raid.hitBox, &meshNameBuffer );
+					ShowSphereFN( "HitBox", &m.raid.hitBox, &meshNameBuffer );
 
 					ImGui::TreePop();
 				}
@@ -1042,6 +1042,7 @@ void Rival::AttackRaidUpdate( TargetStatus target )
 		if ( timer == START_TIME )
 		{
 			ApplyExtraOffset();
+			slerpFactor = 0.0f;
 		}
 	}
 	else

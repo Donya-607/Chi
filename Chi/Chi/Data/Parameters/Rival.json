@@ -121,15 +121,15 @@
             "hitBox": {
                 "cereal_class_version": 0,
                 "sphereF": {
-                    "enableFrameStart": 0,
-                    "enableFrameLast": 0,
+                    "enableFrameStart": 40,
+                    "enableFrameLast": 80,
                     "collision": {
                         "pos": {
                             "x": 0.0,
                             "y": 0.0,
-                            "z": 0.0
+                            "z": 32.0
                         },
-                        "radius": 0.0,
+                        "radius": 48.0,
                         "exist": false
                     }
                 },
