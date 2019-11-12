@@ -797,9 +797,9 @@ namespace GameLib
 			_mesh->render(m.context, SynthesisMatrix, worldMatrix, camPos, _line_light, _point_light, materialColor, wireFlg);
 		}
 
-		void builboradRender(static_mesh* _mesh, const DirectX::XMFLOAT4X4& view_projection, const DirectX::XMFLOAT4& _pos, const DirectX::XMFLOAT2 _scale, const float _angle, const DirectX::XMFLOAT4& _cam_pos, const DirectX::XMFLOAT2& texpos, const DirectX::XMFLOAT2& texsize)
+		void builboradRender(static_mesh* _mesh, const DirectX::XMFLOAT4X4& view_projection, const DirectX::XMFLOAT4& _pos, const DirectX::XMFLOAT2 _scale, const float _angle, const DirectX::XMFLOAT4& _cam_pos, const DirectX::XMFLOAT2& texpos, const DirectX::XMFLOAT2& texsize,const float alpha,const DirectX::XMFLOAT3& color)
 		{
-			_mesh->billboardRender(m.context, view_projection, _pos, _scale, _angle, _cam_pos, texpos, texsize);
+			_mesh->billboardRender(m.context, view_projection, _pos, _scale, _angle, _cam_pos, texpos, texsize,alpha,color);
 		}
 
 		void staticMeshShadowRender1(static_mesh* _mesh,

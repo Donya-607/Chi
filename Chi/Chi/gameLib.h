@@ -276,7 +276,7 @@ namespace GameLib
 		void loadMeshMTL(static_mesh* _mesh, const wchar_t* objName, const wchar_t* mtlName);
 		static_mesh::primitive_material& getPrimitiveMaterial(static_mesh* _mesh);
 		void staticMeshRender(static_mesh* _mesh, const DirectX::XMFLOAT4X4&, const DirectX::XMFLOAT4X4&, const DirectX::XMFLOAT4&, line_light& _line_light, std::vector<point_light>& _point_light, const DirectX::XMFLOAT4&, bool);
-		void builboradRender(static_mesh* _mesh,const DirectX::XMFLOAT4X4&,const DirectX::XMFLOAT4&,const DirectX::XMFLOAT2,const float,const DirectX::XMFLOAT4&,const DirectX::XMFLOAT2& texpos,const DirectX::XMFLOAT2& texsize);
+		void builboradRender(static_mesh* _mesh,const DirectX::XMFLOAT4X4&,const DirectX::XMFLOAT4&,const DirectX::XMFLOAT2,const float,const DirectX::XMFLOAT4&,const DirectX::XMFLOAT2& texpos,const DirectX::XMFLOAT2& texsize,const float alpha,const DirectX::XMFLOAT3& color);
 		void staticMeshShadowRender1(static_mesh* _mesh, const DirectX::XMFLOAT4X4&, const DirectX::XMFLOAT4X4&);
 		void staticMeshShadowRender2(static_mesh* _mesh, const DirectX::XMFLOAT4X4&, const DirectX::XMFLOAT4X4&, const DirectX::XMFLOAT4&,const DirectX::XMFLOAT4&,ID3D11ShaderResourceView* ,bool);
 	}

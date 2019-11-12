@@ -150,7 +150,9 @@ public:
 		const float,	//アングル
 		const DirectX::XMFLOAT4&,	//カメラ座標
 		const DirectX::XMFLOAT2& texpos,
-		const DirectX::XMFLOAT2& texsize
+		const DirectX::XMFLOAT2& texsize,
+		const float alpha,
+		const DirectX::XMFLOAT3& color
 	);
 
 	void renderFirst(

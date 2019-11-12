@@ -9,9 +9,14 @@ struct VS_OUT
 struct Light
 {
 	float4 pos;
-	float4 diffuse;
-	float4 specular;
+	float4 color;
 	float4 attenuate;
+};
+
+struct lineLight
+{
+	float4 direction;
+	float4 color;
 };
 
 struct Material
@@ -26,7 +31,7 @@ cbuffer CONSTANT_BUFFER : register(b0)
 	row_major float4x4 world_view_projection;
 	row_major float4x4 world;
 	float4 camPos;
-	float4 ambient;
-	Light pntLight;
+	lineLight line_light;
+	Light pntLight[5];
 	Material material;
 };

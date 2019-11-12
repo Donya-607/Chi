@@ -14,6 +14,15 @@
 #include "./liblary/DirectXTex-master/DirectXTex/DirectXTex.h"
 #include "resourceManager.h"
 #include "light.h"
+#include "Donya/Serializer.h"
+#include "Donya/Template.h"
+//#include <cereal\cereal.hpp>
+//#include <cereal\archives\binary.hpp>
+//#include <cereal\archives\json.hpp>
+//#include <cereal\archives\xml.hpp>
+#include <cereal\types\vector.hpp>
+//#include <cereal\types\unordered_map.hpp>
+#include <cereal\types\string.hpp>
 
 struct fbx_shader
 {
@@ -34,6 +43,34 @@ struct fbx_shader
 
 struct bone
 {
+	friend class cereal::access;
+	template<class Archive>
+	void serialize(Archive& archive, std::uint32_t version)
+	{
+		if (version >= 0)
+		{
+			archive
+			(
+				CEREAL_NVP(transform._11),
+				CEREAL_NVP(transform._12),
+				CEREAL_NVP(transform._13),
+				CEREAL_NVP(transform._14),
+				CEREAL_NVP(transform._21),
+				CEREAL_NVP(transform._22),
+				CEREAL_NVP(transform._23),
+				CEREAL_NVP(transform._24),
+				CEREAL_NVP(transform._31),
+				CEREAL_NVP(transform._32),
+				CEREAL_NVP(transform._33),
+				CEREAL_NVP(transform._34),
+				CEREAL_NVP(transform._41),
+				CEREAL_NVP(transform._42),
+				CEREAL_NVP(transform._43),
+				CEREAL_NVP(transform._44)
+				);
+		}
+	}
+
 	DirectX::XMFLOAT4X4 transform;
 };
 typedef std::vector<bone> skeletal;
@@ -113,6 +150,27 @@ public:
 
 	struct vertex
 	{
+		friend class cereal::access;
+		template<class Archive>
+		void serialize(Archive& archive, std::uint32_t version)
+		{
+			if (version >= 0)
+			{
+				archive
+				(
+					CEREAL_NVP(position.x),
+					CEREAL_NVP(position.y),
+					CEREAL_NVP(position.z),
+					CEREAL_NVP(normal.x),
+					CEREAL_NVP(normal.y),
+					CEREAL_NVP(normal.z),
+					CEREAL_NVP(texcoord.x),
+					CEREAL_NVP(texcoord.y),
+					CEREAL_NVP(bone_weights),
+					CEREAL_NVP(bone_indices)
+					);
+			}
+		}
 		DirectX::XMFLOAT3 position;
 		DirectX::XMFLOAT3 normal;
 		DirectX::XMFLOAT2 texcoord;
@@ -142,6 +200,25 @@ public:
 
 	struct property
 	{
+		friend class cereal::access;
+		template<class Archive>
+		void serialize(Archive& archive, std::uint32_t version)
+		{
+			if (version >= 0)
+			{
+				archive
+				(
+					CEREAL_NVP(factor),
+					CEREAL_NVP(color.x),
+					CEREAL_NVP(color.y),
+					CEREAL_NVP(color.z),
+					CEREAL_NVP(color.w),
+					CEREAL_NVP(texture_filename),
+					CEREAL_NVP(scale_u),
+					CEREAL_NVP(scale_v)
+					);
+			}
+		}
 		float factor = 1;
 		DirectX::XMFLOAT4 color = { 0.8f, 0.8f, 0.8f, 1.0f }; // w channel is used as shininess by only specular.
 		std::string texture_filename;
@@ -151,30 +228,82 @@ public:
 		DirectX::TexMetadata metadata = {};
 		ID3D11ShaderResourceView* shader_resource_view;
 
-		template<class Archive>
-		void serialize(Archive& archive)
-		{
-			archive
-			(
-				factor,
-				color.w, color.x, color.y, color.z,
-				texture_filename,
-				scale_u, scale_v
-			);
-		}
 	};
 
 	struct subset
 	{
+		friend class cereal::access;
+		template<class Archive>
+		void serialize(Archive& archive, std::uint32_t version)
+		{
+			if (version >= 0)
+			{
+				archive
+				(
+					CEREAL_NVP(ambient),
+					CEREAL_NVP(diffuse),
+					CEREAL_NVP(specular),
+					CEREAL_NVP(transparent),
+					CEREAL_NVP(index_start),
+					CEREAL_NVP(index_count)
+					);
+			}
+		}
 		property ambient;
 		property diffuse;
 		property specular;
+		property transparent;
 		u_int index_start = 0;//index bufferÇÃäJénà íu
 		u_int index_count = 0;//vertexÇÃå¬êî
 	};
 
 	struct mesh
 	{
+		friend class cereal::access;
+		template<class Archive>
+		void serialize(Archive& archive, std::uint32_t version)
+		{
+			if (version >= 0)
+			{
+				archive
+				(
+					CEREAL_NVP(vertices),
+					CEREAL_NVP(indices),
+					CEREAL_NVP(index),
+					CEREAL_NVP(subsets),
+					CEREAL_NVP(node_name),
+					CEREAL_NVP(anim),
+					CEREAL_NVP(global_transform._11),
+					CEREAL_NVP(global_transform._12),
+					CEREAL_NVP(global_transform._13),
+					CEREAL_NVP(global_transform._14),
+					CEREAL_NVP(global_transform._21),
+					CEREAL_NVP(global_transform._22),
+					CEREAL_NVP(global_transform._23),
+					CEREAL_NVP(global_transform._24),
+					CEREAL_NVP(global_transform._31),
+					CEREAL_NVP(global_transform._32),
+					CEREAL_NVP(global_transform._33),
+					CEREAL_NVP(global_transform._34),
+					CEREAL_NVP(global_transform._41),
+					CEREAL_NVP(global_transform._42),
+					CEREAL_NVP(global_transform._43),
+					CEREAL_NVP(global_transform._44),
+					CEREAL_NVP(bone_weights),
+					CEREAL_NVP(bone_indices),
+
+					CEREAL_NVP(pos.x),
+					CEREAL_NVP(pos.y),
+					CEREAL_NVP(pos.z),
+					CEREAL_NVP(pos.w)
+
+				);
+			}
+		}
+
+		std::vector<vertex> vertices; // Vertex buffer 
+		std::vector<u_int> indices;  // Index buffer 
+		int index;
 		ID3D11Buffer* vertex_buffer;
 		ID3D11Buffer* index_buffer;
 		std::vector<subset> subsets;
@@ -192,18 +321,33 @@ public:
 		float weight;
 	};
 	DirectX::XMFLOAT4X4 coordinate_conversion = {
-		1, 0, 0, 0,
+		-1, 0, 0, 0,
 		0, 1, 0, 0,
-		0, 0, -1, 0,
+		0, 0, 1, 0,
 		0, 0, 0, 1
 	};
 
 protected:
+	friend class cereal::access;
+	template<class Archive>
+	void serialize(Archive& archive, std::uint32_t version)
+	{
+		if (version >= 0)
+		{
+			archive
+			(
+				CEREAL_NVP(meshes),
+				CEREAL_NVP(have_uv),
+				CEREAL_NVP(have_born),
+				CEREAL_NVP(have_material),
+				CEREAL_NVP(numIndices)
+
+			);
+		}
+	}
 	typedef std::vector<bone_influence> bone_influences_per_control_point;
 	std::vector<mesh>meshes;
 	D3D11_TEXTURE2D_DESC tex2dDesc;
-	std::string vsName;
-	std::string psName;
 	bool have_uv;
 	bool have_born;
 	bool have_material;
@@ -235,7 +379,7 @@ public:
 		return meshes[index];
 	}
 
-	skinned_mesh() : sampleState(nullptr), constant_buffer(nullptr), rasterizeFillOut(nullptr), rasterizeLine(nullptr), depthStencilState(nullptr), have_born(false), have_material(false), have_uv(false), numIndices(0), tex2dDesc(), is_loop(true), stop_animation(false), stop_time(0), animation_flame(0),anim_fin(false)
+	skinned_mesh() : sampleState(nullptr), constant_buffer(nullptr), rasterizeFillOut(nullptr), rasterizeLine(nullptr), depthStencilState(nullptr), have_born(false), have_material(false), have_uv(false), numIndices(0), tex2dDesc(), is_loop(true), stop_animation(false), stop_time(0), animation_flame(0), anim_fin(false)
 	{
 		int a = 0;
 	}
@@ -247,6 +391,9 @@ public:
 	bool createBuffer(int index_mesh, ID3D11Device* device,
 		vertex* vertices, int numV,
 		unsigned int* indices, int numI);
+
+	void saveBinary(std::string _fille_name);
+	bool loadBinary(std::string _fille_name);
 
 	void render(
 		ID3D11DeviceContext* context,
@@ -304,7 +451,7 @@ public:
 	{
 		for (auto& it : meshes)
 		{
-			it.anim.animation_tick = animation_flame * it.anim.sampling_time;
+			it.anim.animation_tick = _animFlame * it.anim.sampling_time;
 		}
 	}
 	void setAnimStopTimer(float _stop_time)
@@ -320,15 +467,9 @@ public:
 		is_loop = flg;
 	}
 
-private:
-	//template <class Archive>
-	//void serialize(Archive& _ar)
-	//{
-	//	_ar(CEREAL_NVP(emit_dset));
-	//}
-
 
 };
+CEREAL_CLASS_VERSION(skinned_mesh, 0)
 
 
 #endif // !SKINNED_MESH_H_

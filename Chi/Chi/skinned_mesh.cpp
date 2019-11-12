@@ -2,13 +2,6 @@
 #include <iostream>
 //#undef max
 //#undef min
-//#include <cereal\cereal.hpp>
-//#include <cereal\archives\binary.hpp>
-//#include <cereal\archives\json.hpp>
-//#include <cereal\archives\xml.hpp>
-//#include <cereal\types\vector.hpp>
-//#include <cereal\types\unordered_map.hpp>
-//#include <cereal\types\string.hpp>
 
 void skinned_mesh::fbxInit(ID3D11Device* _device, const std::string& _fbxFileName)
 {
@@ -71,7 +64,7 @@ void skinned_mesh::fbxInit(ID3D11Device* _device, const std::string& _fbxFileNam
 		FbxMesh* fbx_mesh = fetched_meshes.at(i)->GetMesh();
 		mesh& mesh = meshes.at(i);
 		mesh.node_name = fetched_meshes.at(i)->GetNameOnly();
-
+		mesh.index = index_mesh;
 		const int number_of_materials = fbx_mesh->GetNode()->GetMaterialCount();
 
 		mesh.subsets.resize(number_of_materials);
@@ -106,11 +99,11 @@ void skinned_mesh::fbxInit(ID3D11Device* _device, const std::string& _fbxFileNam
 						if (file_texture)
 						{
 							//material.texture_filename = file_texture->GetFileName();
-							material.texture_filename = file_texture->GetRelativeFileName();
-							std::string FAKE = material.texture_filename;
 							std::string FAKE2 = _fbxFileName.substr(0, _fbxFileName.find_last_of("/") + 1);
+							material.texture_filename = FAKE2 + file_texture->GetRelativeFileName();
+							std::string FAKE = material.texture_filename;
 							std::wstring NAME;
-							NAME += std::wstring(FAKE2.begin(), FAKE2.end()) + std::wstring(FAKE.begin(), FAKE.end());
+							NAME += std::wstring(FAKE.begin(), FAKE.end());
 
 							// Create "diffuse.shader_resource_view" from "filename".
 							if (!ResourceManager::LoadShaderResourceView(_device, NAME.c_str(), &material.shader_resource_view, &tex2dDesc))
@@ -128,19 +121,18 @@ void skinned_mesh::fbxInit(ID3D11Device* _device, const std::string& _fbxFileNam
 			fetch_material_property(subset.diffuse, FbxSurfaceMaterial::sDiffuse, FbxSurfaceMaterial::sDiffuseFactor);
 			fetch_material_property(subset.ambient, FbxSurfaceMaterial::sAmbient, FbxSurfaceMaterial::sAmbientFactor);
 			fetch_material_property(subset.specular, FbxSurfaceMaterial::sSpecular, FbxSurfaceMaterial::sSpecularFactor);
+			fetch_material_property(subset.transparent, FbxSurfaceMaterial::sTransparentColor, FbxSurfaceMaterial::sTransparencyFactor);
 
 		}
 
 
 		// Fetch mesh data 
-		std::vector<vertex> vertices; // Vertex buffer 
-		std::vector<u_int> indices;  // Index buffer 
 		u_int vertex_count = 0;
 
 
 		const FbxVector4* array_of_control_points = fbx_mesh->GetControlPoints();
 		const int number_of_polygons = fbx_mesh->GetPolygonCount();
-		indices.resize(number_of_polygons * 3);
+		mesh.indices.resize(number_of_polygons * 3);
 
 		if (number_of_materials > 0)
 		{
@@ -266,8 +258,8 @@ void skinned_mesh::fbxInit(ID3D11Device* _device, const std::string& _fbxFileNam
 					mesh.bone_indices[i] = vertex.bone_indices[i];
 					mesh.pos = { vertex.position.x,vertex.position.y,vertex.position.z,1.0f };
 				}
-				vertices.push_back(vertex);
-				indices.at(index_offset + index_of_vertex) = static_cast<u_int>(vertex_count);
+				mesh.vertices.push_back(vertex);
+				mesh.indices.at(index_offset + index_of_vertex) = static_cast<u_int>(vertex_count);
 				vertex_count += 1;
 			}
 			subset.index_count += 3;
@@ -283,9 +275,6 @@ void skinned_mesh::fbxInit(ID3D11Device* _device, const std::string& _fbxFileNam
 		}
 
 		fetch_animations(fbx_mesh, mesh.anim);
-
-
-		createBuffer(index_mesh, _device, vertices.data(), vertices.size(), indices.data(), indices.size());
 	}
 
 
@@ -301,69 +290,65 @@ void skinned_mesh::fbxInit(ID3D11Device* _device, const std::string& _fbxFileNam
 
 void skinned_mesh::setInfo(ID3D11Device* _device, const std::string& _fbxFileName, bool is_Tpose)
 {
+	size_t count = _fbxFileName.find_last_of("/") + 1;
+	size_t count2 = _fbxFileName.find_last_of(".") + 1;
+	std::string filename = "./Data/model/serialized/" + _fbxFileName.substr(count, count2 - count);
+	std::string bin_name = filename + "bin";
+	std::string json_name = filename + "json";
 
-	//std::wstring json_file_name;
-	//size_t start = json_file_name.find_last_of(L"\\");
-	//json_file_name = json_file_name.substr(start, json_file_name.size() - start);
+	if (loadBinary(bin_name))
+	{
+		for (auto& p : meshes)
+		{
+			for (auto& it : p.subsets)
+			{
+				std::wstring dummy(it.diffuse.texture_filename.begin(), it.diffuse.texture_filename.end());
+				if (dummy.empty())
+					continue;	ResourceManager::LoadShaderResourceView(_device, dummy, &it.diffuse.shader_resource_view, &tex2dDesc);
 
-	//SetCurrentDirectory(json_file_name.c_str());
-	//HANDLE hnd;
-	//start = json_file_name.find_last_of(L".");
-	//json_file_name = json_file_name.substr(start, json_file_name.size() - start)+L".json";
-	//WIN32_FIND_DATA copy;
-	//hnd = FindFirstFile(json_file_name.c_str(), &copy);
+			}
+		}
+		init(_device);
 
-	//FindClose(hnd);
+	}
+	else if (loadBinary(json_name))
+	{
+		for (auto& p : meshes)
+		{
+			for (auto& it : p.subsets)
+			{
+				std::wstring dummy(it.diffuse.texture_filename.begin(), it.diffuse.texture_filename.end());
+				ResourceManager::LoadShaderResourceView(_device, dummy, &it.diffuse.shader_resource_view, &tex2dDesc);
 
+			}
+		}
+		init(_device);
 
-	//if (&copy == INVALID_HANDLE_VALUE)
-	//{
+	}
 
-	have_uv = false;
-	have_material = 0;
-	have_born = false;
-	HRESULT hr;
-	D3D11_SAMPLER_DESC sampler_desc;
-	sampler_desc.Filter = D3D11_FILTER_ANISOTROPIC; //UNIT.06
-	sampler_desc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-	sampler_desc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-	sampler_desc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-	sampler_desc.MipLODBias = 0;
-	sampler_desc.MaxAnisotropy = 16;
-	sampler_desc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
-	DirectX::XMFLOAT4 dummy(0.0f, 0.0f, 0.0f, 0.0f);
-	memcpy(sampler_desc.BorderColor, &dummy, sizeof(DirectX::XMFLOAT4));
-	sampler_desc.MinLOD = 0;
-	sampler_desc.MaxLOD = D3D11_FLOAT32_MAX;
-	hr = _device->CreateSamplerState(&sampler_desc, &sampleState);
-	_ASSERT_EXPR(SUCCEEDED(hr), hr_trace(hr));
-
-	if (is_Tpose)
-		setInfo_T_pose(_device, _fbxFileName);
 	else
-		fbxInit(_device, _fbxFileName);
+	{
 
-	init(_device);
+		have_uv = false;
+		have_material = 0;
+		have_born = false;
 
+		if (is_Tpose)
+			setInfo_T_pose(_device, _fbxFileName);
+		else
+			fbxInit(_device, _fbxFileName);
 
-	//	std::ofstream ofs;
-	//	ofs.open(json_file_name, std::ios::binary);
+		init(_device);
 
-	//	cereal::JSONOutputArchive o_archive(ofs);
-	//	std::string file_name(std::string(json_file_name.begin(), json_file_name.end()));
-	//	o_archive(cereal::make_nvp(file_name, *this));
-	//}
-	//else
-	//{
-	//	std::ifstream ifs;
-	//	ifs.open(json_file_name, std::ios::binary);
+		saveBinary(bin_name);
+		saveBinary(json_name);
 
-	//	cereal::JSONInputArchive i_archive(ifs);
-	//	std::string file_name(std::string(json_file_name.begin(), json_file_name.end()));
-	//	i_archive(cereal::make_nvp(file_name, *this));
+	}
 
-	//}
-
+	for (auto& p : meshes)
+	{
+		createBuffer(p.index, _device, p.vertices.data(), p.vertices.size(), p.indices.data(), p.indices.size());
+	}
 }
 
 void skinned_mesh::setInfo_T_pose(ID3D11Device* _device, const std::string& _fbxFileName)
@@ -652,14 +637,28 @@ void skinned_mesh::setInfo_T_pose(ID3D11Device* _device, const std::string& _fbx
 void skinned_mesh::init(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
-	//vertexShader
+	//sampler_state
+	D3D11_SAMPLER_DESC sampler_desc;
+	sampler_desc.Filter = D3D11_FILTER_ANISOTROPIC; //UNIT.06
+	sampler_desc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampler_desc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampler_desc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampler_desc.MipLODBias = 0;
+	sampler_desc.MaxAnisotropy = 16;
+	sampler_desc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+	DirectX::XMFLOAT4 dummy(0.0f, 0.0f, 0.0f, 0.0f);
+	memcpy(sampler_desc.BorderColor, &dummy, sizeof(DirectX::XMFLOAT4));
+	sampler_desc.MinLOD = 0;
+	sampler_desc.MaxLOD = D3D11_FLOAT32_MAX;
+	hr = device->CreateSamplerState(&sampler_desc, &sampleState);
+	_ASSERT_EXPR(SUCCEEDED(hr), hr_trace(hr));
 
 
 	//rasterizerLine
 	D3D11_RASTERIZER_DESC line_desc;
 	line_desc.FillMode = D3D11_FILL_WIREFRAME;	//塗りつぶし設定
 	line_desc.CullMode = D3D11_CULL_BACK;		//カリング設定
-	line_desc.FrontCounterClockwise = FALSE;	//頂点がどっち周りですか？
+	line_desc.FrontCounterClockwise = TRUE;	//頂点がどっち周りですか？
 	line_desc.DepthBias = 0;
 	line_desc.DepthBiasClamp = 0;
 	line_desc.SlopeScaledDepthBias = 0;
@@ -673,7 +672,7 @@ void skinned_mesh::init(ID3D11Device* device)
 	D3D11_RASTERIZER_DESC fillOut_desc;
 	fillOut_desc.FillMode = D3D11_FILL_SOLID;	//塗りつぶし設定
 	fillOut_desc.CullMode = D3D11_CULL_BACK;		//カリング設定
-	fillOut_desc.FrontCounterClockwise = FALSE;	//頂点がどっち周りですか？
+	fillOut_desc.FrontCounterClockwise = TRUE;	//頂点がどっち周りですか？
 	fillOut_desc.DepthBias = 0;
 	fillOut_desc.DepthBiasClamp = 0;
 	fillOut_desc.SlopeScaledDepthBias = 0;
@@ -757,6 +756,54 @@ bool skinned_mesh::createBuffer(int index_mesh, ID3D11Device* device, vertex* ve
 	return true;
 }
 
+void skinned_mesh::saveBinary(std::string _file_name)
+{
+	std::string name = _file_name.substr(_file_name.find_last_of("/") + 1, _file_name.find_last_of(".") - 1);
+
+	std::string extend = _file_name.substr(_file_name.find_last_of(".") + 1, _file_name.size() - _file_name.find_last_of(".") + 1);
+
+	Donya::Serializer::Extension ext;
+	std::string filePath;
+	Donya::Serializer seria;
+	if (extend == "bin")
+	{
+		ext = Donya::Serializer::Extension::BINARY;
+		seria.Save(ext, _file_name.c_str(), name.c_str(), *this);
+	}
+	else
+	{
+		ext = Donya::Serializer::Extension::JSON;
+		seria.Save(ext, _file_name.c_str(), name.c_str(), *this);
+	}
+
+
+}
+
+bool skinned_mesh::loadBinary(std::string _file_name)
+{
+	std::string name = _file_name.substr(_file_name.find_last_of("/") + 1, _file_name.find_last_of(".") - 1);
+
+	std::string extend = _file_name.substr(_file_name.find_last_of(".") + 1, _file_name.size() - _file_name.find_last_of(".") + 1);
+
+	Donya::Serializer::Extension ext;
+	std::string filePath;
+	if (extend == "bin")
+	{
+		ext = Donya::Serializer::Extension::BINARY;
+		filePath = "./Data/model/serialized/" + name;
+	}
+	else
+	{
+		ext = Donya::Serializer::Extension::JSON;
+		filePath = "./Data/model/serialized/" + name;
+	}
+
+
+	Donya::Serializer seria;
+	return seria.Load(ext, filePath.c_str(), name.c_str(), *this);
+
+}
+
 void skinned_mesh::render(ID3D11DeviceContext* context, fbx_shader& hlsl, const DirectX::XMFLOAT4X4& SynthesisMatrix, const DirectX::XMFLOAT4X4& worldMatrix, const DirectX::XMFLOAT4& camPos, line_light& _lineLight, std::vector<point_light>& _point_light, const DirectX::XMFLOAT4& materialColor, bool wireFlg, float elapsed_time, float magnification
 )
 {
@@ -793,7 +840,7 @@ void skinned_mesh::render(ID3D11DeviceContext* context, fbx_shader& hlsl, const 
 					if (static_cast<size_t>(animation_flame) > it.anim.size() - 1)
 					{
 
-						animation_flame = it.anim.at(0).size() - 1;
+						animation_flame = it.anim.size() - 1;
 						it.anim.animation_tick = 0;
 						anim_fin = true;
 					}
@@ -813,13 +860,13 @@ void skinned_mesh::render(ID3D11DeviceContext* context, fbx_shader& hlsl, const 
 				cbuffer cb;
 				DirectX::XMStoreFloat4x4
 				(&cb.world_view_projection,
-					DirectX::XMLoadFloat4x4(&it.global_transform) *
+					DirectX::XMLoadFloat4x4(&coordinate_conversion) * DirectX::XMLoadFloat4x4(&it.global_transform) *
 					DirectX::XMLoadFloat4x4(&SynthesisMatrix)
 				);
 
 				DirectX::XMStoreFloat4x4
 				(&cb.world,
-					DirectX::XMLoadFloat4x4(&it.global_transform) *
+					DirectX::XMLoadFloat4x4(&coordinate_conversion) * DirectX::XMLoadFloat4x4(&it.global_transform) *
 					DirectX::XMLoadFloat4x4(&worldMatrix)
 				);
 
@@ -853,6 +900,7 @@ void skinned_mesh::render(ID3D11DeviceContext* context, fbx_shader& hlsl, const 
 					cb.pntLight[i] = _point_light[i].getInfo();
 				}
 				cb.ambient = p.ambient.color;
+				cb.ambient.w = p.transparent.color.w;
 				cb.diffuse = p.diffuse.color;
 				cb.specular = p.specular.color;
 
