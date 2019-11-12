@@ -681,9 +681,18 @@ void AbsorptionParticle::Set(DirectX::XMFLOAT3 _pos)
 		data[i].Init(DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f), DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f), DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f),
 			DirectX::XMFLOAT2(7.5f, 7.5f), DirectX::XMFLOAT2(0.0f, 1420.0f), DirectX::XMFLOAT2(142.0f, 142.0f), false);
 #endif
-		data[i].SetPos(DirectX::XMFLOAT4(_pos.x + imguiData.radius * cosf(((360.0f / MAX_SIZE) * i) * 0.01745f), 
-			_pos.y + (imguiData.radius * 2.0f) * (cosf(((360.0f / MAX_SIZE) * i) * 0.01745f) * sinf(((360.0f / MAX_SIZE) * i) * 0.01745f)), 
+
+#if 0
+		data[i].SetPos(DirectX::XMFLOAT4(_pos.x + imguiData.radius * cosf(((360.0f / MAX_SIZE) * i) * 0.01745f),
+			_pos.y + (imguiData.radius * 2.0f) * (cosf(((360.0f / MAX_SIZE) * i) * 0.01745f) * sinf(((360.0f / MAX_SIZE) * i) * 0.01745f)),
 			_pos.z + imguiData.radius * sinf(((360.0f / MAX_SIZE) * i) * 0.01745f), 1.0f));
+#else
+		DirectX::XMFLOAT3 _dir;
+		_dir.x = (-100 + rand() % 200) / 100.0f;
+		_dir.y = (-100 + rand() % 200) / 100.0f;
+		_dir.z = (-100 + rand() % 200) / 100.0f;
+		data[i].SetPos(DirectX::XMFLOAT4(_pos.x + imguiData.radius * _dir.x, _pos.y + imguiData.radius * _dir.y, _pos.z + imguiData.radius * _dir.z, 1.0f));
+#endif
 		originPos[i] = data[i].GetPos();
 		DirectX::XMFLOAT3 vec;
 		vec.x = _pos.x - data[i].GetPos().x;
@@ -870,7 +879,7 @@ void AbsorptionParticle::UseImGui()
 #endif // USE_IMGUI
 
 
-void DustParticle::Set(DirectX::XMFLOAT3 _pos)
+void DustParticle::Set(DirectX::XMFLOAT3 _pos, int stageNum)
 {
 	for (int i = 0; i < MAX_SIZE; i++)
 	{
@@ -893,41 +902,44 @@ void DustParticle::Set(DirectX::XMFLOAT3 _pos)
 			if (rand() % 2 == 0) _posX *= -1;
 			if (rand() % 2 == 0) _posZ *= -1;
 
-#if 0 // stage1
-			int texPosRand = rand() % 3;
-			switch (texPosRand)
+			if (stageNum == 1) // stage1
 			{
-			case 0:
-				data[i].Init(originPos[i], DirectX::XMFLOAT3(_posX, _posY, _posZ), DirectX::XMFLOAT3(-(_posX / 100.0f), -0.05f, -(_posZ / 100.0f)),
-					DirectX::XMFLOAT2(7.5f, 7.5f), DirectX::XMFLOAT2(0.0f, 1010.0f), DirectX::XMFLOAT2(142.0f, 142.0f), true);
-				break;
-			case 1:
-				data[i].Init(originPos[i], DirectX::XMFLOAT3(_posX, _posY, _posZ), DirectX::XMFLOAT3(-(_posX / 100.0f), -0.05f, -(_posZ / 100.0f)),
-					DirectX::XMFLOAT2(7.5f, 7.5f), DirectX::XMFLOAT2(0.0f, 1150.0f), DirectX::XMFLOAT2(142.0f, 142.0f), true);
-				break;
-			case 2:
-				data[i].Init(originPos[i], DirectX::XMFLOAT3(_posX, _posY, _posZ), DirectX::XMFLOAT3(-(_posX / 100.0f), -0.05f, -(_posZ / 100.0f)),
-					DirectX::XMFLOAT2(7.5f, 7.5f), DirectX::XMFLOAT2(0.0f, 1270.0f), DirectX::XMFLOAT2(142.0f, 142.0f), true);
-				break;
+				int texPosRand = rand() % 3;
+				switch (texPosRand)
+				{
+				case 0:
+					data[i].Init(originPos[i], DirectX::XMFLOAT3(_posX, _posY, _posZ), DirectX::XMFLOAT3(-(_posX / 100.0f), -0.05f, -(_posZ / 100.0f)),
+						DirectX::XMFLOAT2(7.5f, 7.5f), DirectX::XMFLOAT2(0.0f, 1010.0f), DirectX::XMFLOAT2(142.0f, 142.0f), true);
+					break;
+				case 1:
+					data[i].Init(originPos[i], DirectX::XMFLOAT3(_posX, _posY, _posZ), DirectX::XMFLOAT3(-(_posX / 100.0f), -0.05f, -(_posZ / 100.0f)),
+						DirectX::XMFLOAT2(7.5f, 7.5f), DirectX::XMFLOAT2(0.0f, 1150.0f), DirectX::XMFLOAT2(142.0f, 142.0f), true);
+					break;
+				case 2:
+					data[i].Init(originPos[i], DirectX::XMFLOAT3(_posX, _posY, _posZ), DirectX::XMFLOAT3(-(_posX / 100.0f), -0.05f, -(_posZ / 100.0f)),
+						DirectX::XMFLOAT2(7.5f, 7.5f), DirectX::XMFLOAT2(0.0f, 1270.0f), DirectX::XMFLOAT2(142.0f, 142.0f), true);
+					break;
+				}
 			}
-#else // stage3
-			int texPosRand = rand() % 3;
-			switch (texPosRand)
+			else if (stageNum == 3) // stage3
 			{
-			case 0:
-				data[i].Init(originPos[i], DirectX::XMFLOAT3(_posX, _posY, _posZ), DirectX::XMFLOAT3(-(_posX / 100.0f), -0.05f, -(_posZ / 100.0f)),
-					DirectX::XMFLOAT2(7.5f, 7.5f), DirectX::XMFLOAT2(0.0f, 1670.0f), DirectX::XMFLOAT2(142.0f, 142.0f), true);
-				break;
-			case 1:
-				data[i].Init(originPos[i], DirectX::XMFLOAT3(_posX, _posY, _posZ), DirectX::XMFLOAT3(-(_posX / 100.0f), -0.05f, -(_posZ / 100.0f)),
-					DirectX::XMFLOAT2(7.5f, 7.5f), DirectX::XMFLOAT2(0.0f, 1800.0f), DirectX::XMFLOAT2(142.0f, 142.0f), true);
-				break;
-			case 2:
-				data[i].Init(originPos[i], DirectX::XMFLOAT3(_posX, _posY, _posZ), DirectX::XMFLOAT3(-(_posX / 100.0f), -0.05f, -(_posZ / 100.0f)),
-					DirectX::XMFLOAT2(7.5f, 7.5f), DirectX::XMFLOAT2(0.0f, 1920.0f), DirectX::XMFLOAT2(142.0f, 142.0f), true);
-				break;
+				int texPosRand = rand() % 3;
+				switch (texPosRand)
+				{
+				case 0:
+					data[i].Init(originPos[i], DirectX::XMFLOAT3(_posX, _posY, _posZ), DirectX::XMFLOAT3(-(_posX / 100.0f), -0.05f, -(_posZ / 100.0f)),
+						DirectX::XMFLOAT2(7.5f, 7.5f), DirectX::XMFLOAT2(0.0f, 1670.0f), DirectX::XMFLOAT2(142.0f, 142.0f), true);
+					break;
+				case 1:
+					data[i].Init(originPos[i], DirectX::XMFLOAT3(_posX, _posY, _posZ), DirectX::XMFLOAT3(-(_posX / 100.0f), -0.05f, -(_posZ / 100.0f)),
+						DirectX::XMFLOAT2(7.5f, 7.5f), DirectX::XMFLOAT2(0.0f, 1800.0f), DirectX::XMFLOAT2(142.0f, 142.0f), true);
+					break;
+				case 2:
+					data[i].Init(originPos[i], DirectX::XMFLOAT3(_posX, _posY, _posZ), DirectX::XMFLOAT3(-(_posX / 100.0f), -0.05f, -(_posZ / 100.0f)),
+						DirectX::XMFLOAT2(7.5f, 7.5f), DirectX::XMFLOAT2(0.0f, 1920.0f), DirectX::XMFLOAT2(142.0f, 142.0f), true);
+					break;
+				}
 			}
-#endif
 		}
 		cnt[i] = 0;
 	}

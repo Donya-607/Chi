@@ -469,7 +469,7 @@ public:
 #endif // USE_IMGUI
 
 public:
-	void Set(DirectX::XMFLOAT3 _pos);
+	void Set(DirectX::XMFLOAT3 _pos, int stageNum = 1);
 	void Emit();
 	void Draw();
 	void ImGuiDataInit();
