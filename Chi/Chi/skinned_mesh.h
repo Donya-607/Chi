@@ -406,7 +406,8 @@ public:
 		const DirectX::XMFLOAT4& materialColor,
 		bool wireFlg,
 		float elapsed_time,
-		float magnification
+		float magnification,
+		bool animation_flg
 	);
 
 	void render(

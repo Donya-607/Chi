@@ -90,18 +90,18 @@ mov r0.xyzw, v0.xyzw  // r0.x <- output.Position.x; r0.y <- output.Position.y; r
 mov r1.xyzw, v2.xyzw  // r1.x <- output.Color.x; r1.y <- output.Color.y; r1.z <- output.Color.z; r1.w <- output.Color.w
 
 #line 10
-mov r2.xy, v1.xyxx  // r2.x <- output.Tex[0].x; r2.y <- output.Tex[0].y
+itof r2.x, l(1)
+div r2.x, r2.x, cb0[0].x  // r2.x <- dw
 
 #line 11
 itof r2.z, l(1)
-div r2.z, r2.z, cb0[0].x  // r2.z <- dw
+div r3.y, r2.z, cb0[0].y  // r3.y <- dh
 
-#line 12
-itof r3.x, l(1)
-div r3.y, r3.x, cb0[0].y  // r3.y <- dh
+#line 13
+mov r2.zw, v1.xxxy  // r2.z <- output.Tex[0].x; r2.w <- output.Tex[0].y
 
 #line 14
-mov r4.x, -r2.z
+mov r4.x, -r2.x
 mov r4.y, -r3.y
 mul r3.zw, r4.xxxy, cb0[0].zzzz
 add r3.zw, r3.zzzw, v1.xxxy  // r3.z <- output.Tex[1].x; r3.w <- output.Tex[1].y
@@ -113,23 +113,23 @@ mul r4.xy, r4.xyxx, cb0[0].zzzz
 add r4.xy, r4.xyxx, v1.xyxx  // r4.x <- output.Tex[2].x; r4.y <- output.Tex[2].y
 
 #line 16
-mov r2.w, -r3.y
-mul r4.zw, r2.zzzw, cb0[0].zzzz
+mov r2.y, -r3.y
+mul r4.zw, r2.xxxy, cb0[0].zzzz
 add r4.zw, r4.zzzw, v1.xxxy  // r4.z <- output.Tex[3].x; r4.w <- output.Tex[3].y
 
 #line 17
-mov r2.w, -r2.z
-mul r5.x, r2.w, cb0[0].z
+mov r2.y, -r2.x
+mul r5.x, r2.y, cb0[0].z
 mul r5.y, cb0[0].z, l(0.000000)
 add r5.xy, r5.xyxx, v1.xyxx  // r5.x <- output.Tex[4].x; r5.y <- output.Tex[4].y
 
 #line 18
-mul r6.x, r2.z, cb0[0].z
+mul r6.x, r2.x, cb0[0].z
 mul r6.y, cb0[0].z, l(0.000000)
 add r5.zw, r6.xxxy, v1.xxxy  // r5.z <- output.Tex[5].x; r5.w <- output.Tex[5].y
 
 #line 19
-mov r3.x, -r2.z
+mov r3.x, -r2.x
 mul r6.xy, r3.xyxx, cb0[0].zzzz
 add r6.xy, r6.xyxx, v1.xyxx  // r6.x <- output.Tex[6].x; r6.y <- output.Tex[6].y
 
@@ -139,14 +139,14 @@ mul r6.zw, r3.xxxy, cb0[0].zzzz
 add r6.zw, r6.zzzw, v1.xxxy  // r6.z <- output.Tex[7].x; r6.w <- output.Tex[7].y
 
 #line 21
-mov r3.x, r2.z
-mul r2.zw, r3.xxxy, cb0[0].zzzz
-add r2.zw, r2.zzzw, v1.xxxy  // r2.z <- output.Tex[8].x; r2.w <- output.Tex[8].y
+mov r3.x, r2.x
+mul r2.xy, r3.xyxx, cb0[0].zzzz
+add r2.xy, r2.xyxx, v1.xyxx  // r2.x <- output.Tex[8].x; r2.y <- output.Tex[8].y
 
-#line 25
+#line 24
 mov o0.xyzw, r0.xyzw
 mov o1.xyzw, r1.xyzw
-mov o2.xy, r2.xyxx
+mov o2.xy, r2.zwzz
 mov o3.xy, r3.zwzz
 mov o4.xy, r4.xyxx
 mov o5.xy, r4.zwzz
@@ -154,6 +154,6 @@ mov o6.xy, r5.xyxx
 mov o7.xy, r5.zwzz
 mov o8.xy, r6.xyxx
 mov o9.xy, r6.zwzz
-mov o10.xy, r2.zwzz
+mov o10.xy, r2.xyxx
 ret 
 // Approximately 46 instruction slots used

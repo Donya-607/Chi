@@ -552,7 +552,7 @@ namespace GameLib
 	}
 	void postEffect_Bloom(ID3D11ShaderResourceView** _shaderResource, float _blur_value, DirectX::XMFLOAT4 _judge_color)
 	{
-		m.context->OMSetBlendState(m.Blender->states[2], nullptr, 0xFFFFFFFF);
+		m.context->OMSetBlendState(m.Blender->states[1], nullptr, 0xFFFFFFFF);
 
 		m.Bloom.Render(m.context, _shaderResource, _blur_value, _judge_color);
 
@@ -885,9 +885,9 @@ namespace GameLib
 			return _mesh->calcTransformedPosBySpecifyMesh(_pos, _mesh_name,anim);
 		}
 
-		void skinnedMeshRender(skinned_mesh* _mesh, fbx_shader& hlsl, float magnification, const DirectX::XMFLOAT4X4& SynthesisMatrix, const DirectX::XMFLOAT4X4& worldMatrix, const DirectX::XMFLOAT4& camPos, line_light& lineLight, std::vector<point_light>& _point_light, const DirectX::XMFLOAT4& materialColor, bool wireFlg)
+		void skinnedMeshRender(skinned_mesh* _mesh, fbx_shader& hlsl, float magnification, const DirectX::XMFLOAT4X4& SynthesisMatrix, const DirectX::XMFLOAT4X4& worldMatrix, const DirectX::XMFLOAT4& camPos, line_light& lineLight, std::vector<point_light>& _point_light, const DirectX::XMFLOAT4& materialColor, bool wireFlg,bool animation_flg)
 		{
-			_mesh->render(m.context, hlsl, SynthesisMatrix, worldMatrix, camPos, lineLight, _point_light, materialColor, wireFlg, m.hrTimer.time_interval(),magnification);
+			_mesh->render(m.context, hlsl, SynthesisMatrix, worldMatrix, camPos, lineLight, _point_light, materialColor, wireFlg, m.hrTimer.time_interval(),magnification,animation_flg);
 
 		}
 

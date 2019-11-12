@@ -34,6 +34,23 @@ void clearWindow(const DirectX::XMFLOAT4& color)
 	GameLib::clear(color);
 }
 
+
+//RenderTarget
+bool setRenderTarget(ID3D11RenderTargetView** _renderTarget)
+{
+	return GameLib::setRenderTarget(_renderTarget);
+}
+bool resetRendertarget()
+{
+	return GameLib::resetRendertarget();
+}
+void clearRendertarget(ID3D11RenderTargetView* _renderTarget, const DirectX::XMFLOAT4& color)
+{
+	GameLib::clearRT(_renderTarget, color);
+}
+
+
+//ShaderResourceView
 bool createSRV(ID3D11ShaderResourceView** _SRV,ID3D11RenderTargetView** RT)
 {
 	return GameLib::createSRV(_SRV,RT);
@@ -575,9 +592,9 @@ bool calcTransformedPosBySpecifyMesh(skinned_mesh* _mesh, DirectX::XMFLOAT3& _po
 	return GameLib::skinnedMesh::calcTransformedPosBySpecifyMesh(_mesh, _pos, _mesh_name,anim);
 }
 
-void FBXRender(skinned_mesh* _mesh, fbx_shader& hlsl, const DirectX::XMFLOAT4X4& SynthesisMatrix, const DirectX::XMFLOAT4X4& worldMatrix,float magnification, const DirectX::XMFLOAT4& materialColor, bool wireFlg)
+void FBXRender(skinned_mesh* _mesh, fbx_shader& hlsl, const DirectX::XMFLOAT4X4& SynthesisMatrix, const DirectX::XMFLOAT4X4& worldMatrix,float magnification, bool animation_flg, const DirectX::XMFLOAT4& materialColor, bool wireFlg)
 {
-	GameLib::skinnedMesh::skinnedMeshRender(_mesh, hlsl, magnification, SynthesisMatrix, worldMatrix, getCamPos(), getLineLight(), getPointLight(), materialColor, wireFlg);
+	GameLib::skinnedMesh::skinnedMeshRender(_mesh, hlsl, magnification, SynthesisMatrix, worldMatrix, getCamPos(), getLineLight(), getPointLight(), materialColor, wireFlg,animation_flg);
 }
 
 void FBXRender(skinned_mesh* skinnedMesh, fbx_shader& hlsl,bone_animation* anim,const DirectX::XMFLOAT4X4&SynthesisMatrix, const DirectX::XMFLOAT4X4&worldMatrix, const DirectX::XMFLOAT4&materialColor, bool wireFlg)

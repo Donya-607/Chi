@@ -16,7 +16,7 @@
 // Name                 Index   Mask Register SysValue  Format   Used
 // -------------------- ----- ------ -------- -------- ------- ------
 // SV_POSITION              0   xyzw        0      POS   float       
-// COLOR                    0   xyzw        1     NONE   float       
+// COLOR                    0   xyzw        1     NONE   float   xyzw
 // TEXCOORD                 0   xy          2     NONE   float   xy  
 // TEXCOORD                 1   xy          3     NONE   float   xy  
 // TEXCOORD                 2   xy          4     NONE   float   xy  
@@ -38,6 +38,7 @@ ps_5_0
 dcl_globalFlags refactoringAllowed | skipOptimization
 dcl_sampler s0, mode_default
 dcl_resource_texture2d (float,float,float,float) t0
+dcl_input_ps linear v1.xyzw
 dcl_input_ps linear v2.xy
 dcl_input_ps linear v3.xy
 dcl_input_ps linear v4.xy
@@ -94,6 +95,7 @@ loop
 
 #line 12
   sample_indexable(texture2d)(float,float,float,float) r4.xyzw, v[r3.x + 2].xyxx, t0.xyzw, s0
+  mul r4.xyzw, r4.xyzw, v1.xyzw
   mov r3.y, x0[r3.x + 0].x
   mul r4.xyzw, r3.yyyy, r4.xyzw
   add r2.xyzw, r4.xyzw, r2.xyzw
@@ -109,4 +111,4 @@ mul r0.xyz, r0.xyzx, r2.xyzx  // r0.x <- color.x; r0.y <- color.y; r0.z <- color
 mov o0.xyz, r0.xyzx
 mov o0.w, r2.w
 ret 
-// Approximately 28 instruction slots used
+// Approximately 29 instruction slots used

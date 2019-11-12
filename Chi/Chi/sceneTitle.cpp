@@ -49,6 +49,11 @@ void sceneTitle::init()
 	texsize = { 64,64 };
 	alpha = 1.0f;
 	color = { 1.0f,1.0f,1.0f };
+
+	createSRV(&SRV, &RT);
+	screen_SRV = (void*)SRV;
+	blur = 0;
+	judged_color = { 1.0f,1.0f,1.0f,1.0f };
 }
 
 void sceneTitle::update()
@@ -65,7 +70,7 @@ void sceneTitle::update()
 		name = sample.substr(start, sample.size() - start);
 
 		// std::string dummy(name.begin(), name.end());
-		std::string dummy = Donya::WideToMulti( name );
+		std::string dummy = Donya::WideToMulti(name);
 
 		std::string file_name = "./Data/" + dummy;
 		start = dummy.find_last_of(".") + 1;
@@ -193,6 +198,8 @@ void sceneTitle::update()
 
 void sceneTitle::render()
 {
+	setRenderTarget(&RT);
+	clearRendertarget(RT, { 0,0,0,0 });
 	clearWindow(0.5f, 0.5f, 0.5f, 1.0f);
 	setString({ 0,0 }, L"sceneTitle %d : %f", 1, 20.2f);
 	//textOut(L"TITLE", .0f, 0.f);
@@ -226,15 +233,20 @@ void sceneTitle::render()
 			DirectX::XMStoreFloat4x4(&W, worldM);
 
 
-			FBXRender(&p->mesh, shader,WVP, W);
+			FBXRender(&p->mesh, shader, WVP, W);
 		}
 
 	DirectX::XMFLOAT4X4 view_projection;
 	DirectX::XMStoreFloat4x4(&view_projection, getViewMatrix() * getProjectionMatrix());
 	setBlendMode_ALPHA(255);
 
-	billboardRender(&builborad, view_projection, builboard_pos, builborad_size, builborad_angle, getCamPos(), texpos, texsize,alpha,color);
+	billboardRender(&builborad, view_projection, builboard_pos, builborad_size, builborad_angle, getCamPos(), texpos, texsize, alpha, color);
 	setBlendMode_NONE(255);
+
+	resetRendertarget();
+	screen_SRV = (void*)SRV;
+
+	postEffect_Bloom(&SRV, blur, judged_color);
 }
 
 void sceneTitle::uninit()
@@ -318,7 +330,7 @@ void sceneTitle::imGui()
 				ImGui::DragInt("index", &index, 1, 0, models.size() - 1);
 				if (ImGui::Button("+"))
 				{
-					if (index < static_cast<int>( models.size() ) - 1)
+					if (index < static_cast<int>(models.size()) - 1)
 						index++;
 				}
 				ImGui::SameLine();
@@ -368,7 +380,7 @@ void sceneTitle::imGui()
 
 				if (ImGui::TreeNode("material"))
 				{
-					const int SIZE = static_cast<int>( models[index].tex_SRV.size() );
+					const int SIZE = static_cast<int>(models[index].tex_SRV.size());
 					for (int i = 0; i < SIZE; i++)
 					{
 						ImGui::Image(models[index].tex_SRV[i], { 512,512 });
@@ -387,6 +399,36 @@ void sceneTitle::imGui()
 
 		ImGui::End();
 	}
+
+	{}
+	//bloom info ImGui
+	{
+		ImGui::SetNextWindowSize(ImVec2(500.0f, getWindowSize().y / 2.0f), ImGuiSetCond_Once);
+		ImGui::SetNextWindowPos(ImVec2(.0f, getWindowSize().y / 2.0f), ImGuiSetCond_Once);
+		ImGui::Begin("bloom", NULL, ImGuiWindowFlags_MenuBar);
+
+		if (ImGui::TreeNode("parameter"))
+		{
+			ImGui::DragFloat("blur", &blur, 0.1, 0, 10000);
+			ImGui::NewLine();
+
+			ImGui::Text("judged_color");
+			ImGui::DragFloat("r##bloom", &judged_color.x, 0.01, 0, 1.0);
+			ImGui::DragFloat("g##bloom", &judged_color.y, 0.01, 0, 1.0);
+			ImGui::DragFloat("b##bloom", &judged_color.z, 0.01, 0, 1.0);
+
+			ImGui::TreePop();
+		}
+
+		if (ImGui::TreeNode("screen"))
+		{
+			ImGui::Image(screen_SRV, { 640,360 });
+			ImGui::TreePop();
+		}
+
+		ImGui::End();
+	}
+
 
 	//camera_info ImGui
 	{

@@ -9,7 +9,7 @@ float4 main(PSInput input) : SV_TARGET0
 
 
 	for (int i = 0; i < 9; i++) {
-		color += DiffuseTexture.Sample(DecalSampler, input.Tex[i])/* * input.Color */* weight[i];
+		color += DiffuseTexture.Sample(DecalSampler, input.Tex[i]) * input.Color * weight[i];
 	}
 	//	カラーバランス調整
 	color.rgb *= screenColor.rgb;
