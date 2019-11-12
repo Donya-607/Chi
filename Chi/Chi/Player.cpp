@@ -76,10 +76,12 @@ void PlayerParam::UseImGui()
 	{
 		if ( ImGui::TreeNode( "Player.AdjustData" ) )
 		{
-			ImGui::SliderInt( "Defence.WholeExpandingFrame", &frameUnfoldableDefence, 1, 120 );
-			ImGui::SliderInt( "Defence.RecastFrame", &shieldsRecastFrame, 0, 360 );
-			ImGui::SliderInt( "Attack.CancelableFrame", &frameCancelableAttack, 1, frameWholeAttacking );
-			ImGui::SliderInt( "Attack.WholeAttackingFrame", &frameWholeAttacking, 1, 300 );
+			ImGui::SliderInt( "Defence.WholeExpandingFrame",	&frameUnfoldableDefence,	1, 120 );
+			ImGui::SliderInt( "Defence.RecastFrame",			&shieldsRecastFrame,		0, 360 );
+			ImGui::SliderInt( "Attack.StopAnime.Timing(Frame)",	&frameStopTiming,			1, 360 );
+			ImGui::SliderInt( "Attack.StopAnime.Lenth(Frame)",	&frameStopAnime,			1, 360 );
+			ImGui::SliderInt( "Attack.CancelableFrame",			&frameCancelableAttack,		1, frameWholeAttacking );
+			ImGui::SliderInt( "Attack.WholeAttackingFrame",		&frameWholeAttacking,		1, 300 );
 			ImGui::Text( "" );
 
 			ImGui::SliderFloat( "Scale", &scale, 0.0f, 8.0f );
@@ -726,7 +728,19 @@ void Player::AttackUpdate( Input input )
 		lookDirection = input.moveVector;
 	}
 
-	Donya::OBBFrame *pOBBF = PlayerParam::Get().HitBoxAttackF();
+	const int  STOP_TIMING	= PlayerParam::Get().FrameStopAnimeTiming();
+	const int  STOP_LENGTH	= PlayerParam::Get().FrameStopAnimeLength();
+	if ( timer == ( WHOLE_FRAME - STOP_TIMING ) )
+	{
+		setStopAnimation( models.pAttack.get(), /* is_stop = */ true );
+	}
+	else
+	if ( timer == ( WHOLE_FRAME - STOP_TIMING ) - STOP_LENGTH )
+	{
+		setStopAnimation( models.pAttack.get(), /* is_stop = */ false );
+	}
+
+	Donya::OBBFrame *pOBBF	= PlayerParam::Get().HitBoxAttackF();
 	pOBBF->Update();
 }
 void Player::AttackUninit()

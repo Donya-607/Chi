@@ -1,6 +1,6 @@
 {
     "Player": {
-        "cereal_class_version": 5,
+        "cereal_class_version": 6,
         "scale": 1.0,
         "runSpeed": 23.5,
         "rotSlerpFactor": 0.20000000298023225,
@@ -30,8 +30,8 @@
             "exist": true
         },
         "frameUnfoldableDefence": 120,
-        "frameCancelableAttack": 20,
-        "frameWholeAttacking": 135,
+        "frameCancelableAttack": 50,
+        "frameWholeAttacking": 185,
         "hitBoxShield": {
             "pos": {
                 "x": 0.0,
@@ -72,6 +72,8 @@
             }
         },
         "lanceMeshName": "MDL_Spear",
-        "shieldsRecastFrame": 30
+        "shieldsRecastFrame": 30,
+        "frameStopAnime": 30,
+        "frameStopTiming": 3
     }
 }

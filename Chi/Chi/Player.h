@@ -22,7 +22,9 @@ class PlayerParam final : public Donya::Singleton<PlayerParam>
 private:
 	int		frameUnfoldableDefence;	// 1 ~ N. Use when State::Defend.
 	int		shieldsRecastFrame;		// Frame of reuse shield.
-	int		frameCancelableAttack;	// 1 ~ "frameWholeAttacking". Use when State::Attack.
+	int		frameStopAnime;			// 1 ~ N. Frame of stopping animation of attack.Use when State::Attack.
+	int		frameStopTiming;		// 0 ~ N. Timing of stopping animation of attack.Use when State::Attack.
+	int		frameCancelableAttack;	// 1 ~ "frameWholeAttacking". this frame is irrelevant by "frameStopAnime". Use when State::Attack.
 	int		frameWholeAttacking;	// 1 ~ N. this whole frame is irrelevant by "frameCancelableAttack". Use when State::Attack.
 	float	scale;					// Usually 1.0f.
 	float	runSpeed;				// Scalar.
@@ -80,6 +82,14 @@ private:
 		}
 		if ( 6 <= version )
 		{
+			archive
+			(
+				CEREAL_NVP( frameStopAnime ),
+				CEREAL_NVP( frameStopTiming )
+			);
+		}
+		if ( 7 <= version )
+		{
 			// archive( CEREAL_NVP( x ) );
 		}
 	}
@@ -90,6 +100,8 @@ public:
 public:
 	int		FrameWholeDefence()		const { return frameUnfoldableDefence; }
 	int		FrameReuseShield()		const { return shieldsRecastFrame; }
+	int		FrameStopAnimeLength()	const { return frameStopAnime; }
+	int		FrameStopAnimeTiming()	const { return frameStopTiming; }
 	int		FrameCancelableAttack()	const { return frameCancelableAttack; }
 	int		FrameWholeAttacking()	const { return frameWholeAttacking; }
 	float	Scale()					const { return scale; }
@@ -98,8 +110,8 @@ public:
 	Donya::AABB		HitBoxBody()	const { return hitBoxBody;   }
 	Donya::Sphere	HitBoxPhysic()	const { return hitBoxPhysic; }
 	Donya::AABB		HitBoxShield()	const { return hitBoxShield; }
-	Donya::OBBFrame	*HitBoxAttackF()				{ return &hitBoxLance;  }
-	const Donya::OBBFrame	*HitBoxAttackF() const	{ return &hitBoxLance;  }
+	Donya::OBBFrame			*HitBoxAttackF()			{ return &hitBoxLance;  }
+	const Donya::OBBFrame	*HitBoxAttackF()	const	{ return &hitBoxLance;  }
 	std::string LanceMeshName()		const { return lanceMeshName; }
 public:
 	void LoadParameter( bool isBinary = true );
@@ -112,7 +124,7 @@ public:
 
 #endif // USE_IMGUI
 };
-CEREAL_CLASS_VERSION( PlayerParam, 5 )
+CEREAL_CLASS_VERSION( PlayerParam, 6 )
 
 class  skinned_mesh;	// With pointer. because I'm not want include this at header.
 struct fbx_shader;		// Use for argument.
