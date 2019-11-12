@@ -80,11 +80,9 @@ std::string GetModelPath( ModelAttribute modelAttribute )
 		return "./Data/model/Boss/Boss04/Boss04_LongAttack.fbx";			// break;
 	case ModelAttribute::RivalAtkRaid:
 		return "./Data/model/Boss/Boss04/Boss04_JumpAttack.fbx";			// break;
-	case ModelAttribute::RivalAtkRushPre:
+	case ModelAttribute::RivalAtkRushWait:
 		return "./Data/model/Boss/Boss04/Boss04_RushWait.fbx";				// break;
-	case ModelAttribute::RivalAtkRushRaid:
-		return "./Data/model/Boss/Boss04/Boss04_RushWait.fbx";				// break;
-	case ModelAttribute::RivalAtkRushPost:
+	case ModelAttribute::RivalAtkRushSlash:
 		return "./Data/model/Boss/Boss04/Boss04_RushSlash.fbx";				// break;
 	default:
 		assert( !"Error : Specified unexpect model type." ); break;

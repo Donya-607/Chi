@@ -38,27 +38,26 @@ void RivalAI::Update()
 
 #endif // USE_IMGUI
 
+	if ( stopUpdate ) { return; }
+	// else
+
 	timer--;
 	if ( timer <= 0 )
 	{
 		timer = 0;
 
-		// Repeat wait-status <-> attack-status.
-
-		if ( IsAction( status ) )
-		{
-			LotteryWaitState();
-		}
-		else
-		{
-			LotteryAttackState();
-		}
+		LotteryState();
 	}
 }
 
 void RivalAI::OverwriteState( ActionState newState )
 {
 	status = newState;
+}
+void RivalAI::FinishCurrentState()
+{
+	timer = 0;
+	LotteryState();
 }
 
 RivalAI::ActionState RivalAI::ToActionState( WaitState waitStatus ) const
@@ -95,6 +94,19 @@ RivalAI::ActionState RivalAI::ToActionState( AttackState attackStatus ) const
 	return to;
 }
 
+void RivalAI::LotteryState()
+{
+	// Repeat wait-status <-> attack-status.
+
+	if ( IsAction( status ) )
+	{
+		LotteryWaitState();
+	}
+	else
+	{
+		LotteryAttackState();
+	}
+}
 void RivalAI::LotteryWaitState()
 {
 	timer = coolTime;

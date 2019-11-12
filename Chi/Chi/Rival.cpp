@@ -318,6 +318,19 @@ void RivalParam::UseImGui()
 					ImGui::TreePop();
 				}
 
+				if ( ImGui::TreeNode( "Attack.Rush" ) )
+				{
+					ImGui::DragInt( "Rush.WaitLength(Frame)", &m.rush.waitLength );
+					ImGui::DragFloat( "Rush.Speed", &m.rush.rushSpeed );
+					ImGui::DragInt( "Slash.StopAnimeFrame", &m.rush.slashStopAnimeFrame );
+
+					ShowSphere( "Slash.TriggerRange", &m.rush.slashOccurRange );
+
+					ShowSphereF( "HitBox", &m.rush.hitBox );
+
+					ImGui::TreePop();
+				}
+
 				ImGui::TreePop();
 			}
 			ImGui::Text( "" );
@@ -397,9 +410,8 @@ Rival::Rival() :
 		&models.pAtkBarrage,
 		&models.pAtkLine,
 		&models.pAtkRaid,
-		&models.pAtkRushPre,
-		&models.pAtkRushRaid,
-		&models.pAtkRushPost,
+		&models.pAtkRushWait,
+		&models.pAtkRushSlash,
 	};
 	for ( auto &it : modelRefs )
 	{
@@ -462,6 +474,15 @@ void Rival::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya
 	{
 		switch ( extraStatus )
 		{
+		case ExtraState::RUSH_WAIT:
+			FBXRender( models.pAtkRushWait.get(), HLSL, WVP, W );
+			break;
+		case ExtraState::RUSH_RUN:
+			FBXRender( models.pAtkRushSlash.get(), HLSL, WVP, W );
+			break;
+		case ExtraState::RUSH_SLASH:
+			FBXRender( models.pAtkRushSlash.get(), HLSL, WVP, W );
+			break;
 		case ExtraState::BREAK:
 			FBXRender( models.pBreak.get(), HLSL, WVP, W );
 			break;
@@ -493,9 +514,9 @@ void Rival::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya
 		case RivalAI::ActionState::ATTACK_RAID:
 			FBXRender( models.pAtkRaid.get(), HLSL, WVP, W );
 			break;
-		case RivalAI::ActionState::ATTACK_RUSH:
-			FBXRender( models.pAtkRushPre.get(), HLSL, WVP, W );
-			break;
+		//	case RivalAI::ActionState::ATTACK_RUSH:
+		//	FBXRender( models.pAtkRushWait.get(), HLSL, WVP, W );
+		//	break;
 		default: break;
 		}
 	}
@@ -624,6 +645,12 @@ void Rival::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya
 			}
 			break;
 		case RivalAI::ActionState::ATTACK_RUSH:
+			{
+				const auto wsHitBox = RushWorldHitBox();
+				Donya::Vector4 color = GetColor( wsHitBox );
+
+				DrawSphere( wsHitBox.pos, wsHitBox.radius, color, /* applyParentMatrix = */ false );
+			}
 			break;
 		default: break;
 		}
@@ -704,6 +731,18 @@ bool Rival::IsCollideAttackHitBoxes( const Donya::OBB    other, bool disableColl
 		}
 		break;
 	case RivalAI::ActionState::ATTACK_RUSH:
+		{
+			Donya::Sphere wsHitBox = RushWorldHitBox();
+			if ( Donya::OBB::IsHitSphere( other, wsHitBox ) )
+			{
+				wasCollided = true;
+				if ( disableCollidingHitBoxes )
+				{
+					auto &refHitBox = RivalParam::Get().RushHitBox();
+					refHitBox.collision.enable = false;
+				}
+			}
+		}
 		break;
 	default: break;
 	}
@@ -727,7 +766,12 @@ Donya::AABB Rival::GetBodyHitBox() const
 	return wsBody;
 }
 
-Donya::Sphere Rival::RaidWorldHitBox()
+std::vector<Donya::SphereFrame> &Rival::BarragesLocalHitBoxes()
+{
+	return RivalParam::Get().BarrageHitBoxes();
+}
+
+Donya::Sphere Rival::RaidWorldHitBox() const
 {
 	const auto			localHitBoxFN	= RivalParam::Get().RaidHitBox();
 	const Donya::Sphere	localHitBox		= localHitBoxFN.sphereF.collision;
@@ -746,10 +790,12 @@ Donya::Sphere Rival::RaidWorldHitBox()
 		localHitBox.enable
 	};
 }
-
-std::vector<Donya::SphereFrame> &Rival::BarragesLocalHitBoxes()
+Donya::Sphere Rival::RushWorldHitBox() const
 {
-	return RivalParam::Get().BarrageHitBoxes();
+	Donya::Sphere wsHitBox = RivalParam::Get().RushHitBox().collision;
+	wsHitBox.pos = orientation.RotateVector( wsHitBox.pos ); // Rotate the offset.
+	wsHitBox.pos += GetPos();
+	return wsHitBox;
 }
 
 void Rival::WasDefended()
@@ -783,18 +829,16 @@ void Rival::LoadModel()
 	// Donya::OutputDebugStr( "Done RivalModel.Break.\n" );
 	// loadFBX( models.pDefeat.get(), GetModelPath( ModelAttribute::RivalDefeat ) );
 	// Donya::OutputDebugStr( "Done RivalModel.Defeat.\n" );
-	loadFBX( models.pAtkBarrage.get(), GetModelPath( ModelAttribute::RivalAtkBarrage ) );
-	Donya::OutputDebugStr( "Done RivalModel.Attack.Barrage.\n" );
-	loadFBX( models.pAtkLine.get(), GetModelPath( ModelAttribute::RivalAtkLine ) );
-	Donya::OutputDebugStr( "Done RivalModel.Attack.Line.\n" );
-	loadFBX( models.pAtkRaid.get(), GetModelPath( ModelAttribute::RivalAtkRaid ) );
-	Donya::OutputDebugStr( "Done RivalModel.Attack.Raid.\n" );
-	loadFBX( models.pAtkRushPre.get(), GetModelPath( ModelAttribute::RivalAtkRushPre ) );
-	Donya::OutputDebugStr( "Done RivalModel.Attack.Rush.Pre.\n" );
-	// loadFBX( models.pAtkRushRaid.get(), GetModelPath( ModelAttribute::RivalAtkRushRaid ) );
-	// Donya::OutputDebugStr( "Done RivalModel.Attack.Rush.Raid.\n" );
-	// loadFBX( models.pAtkRushPost.get(), GetModelPath( ModelAttribute::RivalAtkRushPost ) );
-	// Donya::OutputDebugStr( "Done RivalModel.Attack.Rush.Post.\n" );
+	// loadFBX( models.pAtkBarrage.get(), GetModelPath( ModelAttribute::RivalAtkBarrage ) );
+	// Donya::OutputDebugStr( "Done RivalModel.Attack.Barrage.\n" );
+	// loadFBX( models.pAtkLine.get(), GetModelPath( ModelAttribute::RivalAtkLine ) );
+	// Donya::OutputDebugStr( "Done RivalModel.Attack.Line.\n" );
+	// loadFBX( models.pAtkRaid.get(), GetModelPath( ModelAttribute::RivalAtkRaid ) );
+	// Donya::OutputDebugStr( "Done RivalModel.Attack.Raid.\n" );
+	loadFBX( models.pAtkRushWait.get(), GetModelPath( ModelAttribute::RivalAtkRushWait ) );
+	Donya::OutputDebugStr( "Done RivalModel.Attack.Rush.Wait.\n" );
+	loadFBX( models.pAtkRushSlash.get(), GetModelPath( ModelAttribute::RivalAtkRushSlash ) );
+	Donya::OutputDebugStr( "Done RivalModel.Attack.Rush.Slash.\n" );
 
 	Donya::OutputDebugStr( "End Rival::LoadModel.\n" );
 }
@@ -1086,22 +1130,104 @@ void Rival::AttackRaidUninit()
 void Rival::AttackRushInit( TargetStatus target )
 {
 	status		= RivalAI::ActionState::ATTACK_RUSH;
+	extraStatus	= ExtraState::RUSH_WAIT;
+	timer		= RivalParam::Open().rush.waitLength;
 	slerpFactor	= RivalParam::Get().SlerpFactor( status );
 	velocity	= 0.0f;
 
-	setAnimFlame( models.pAtkRushPre.get(), 0 );
-	setAnimFlame( models.pAtkRushRaid.get(), 0 );
-	setAnimFlame( models.pAtkRushPost.get(), 0 );
+	AI.StopUpdate();
+
+	setAnimFlame( models.pAtkRushWait.get(), 0 );
+	setAnimFlame( models.pAtkRushSlash.get(), 0 );
+	setLoopFlg( models.pAtkRushSlash.get(), /* is_loop = */ false );
 }
 void Rival::AttackRushUpdate( TargetStatus target )
 {
-	
+	switch ( extraStatus )
+	{
+	case Rival::ExtraState::RUSH_WAIT:
+		{
+			timer--;
+			if ( timer <= 0 )
+			{
+				timer = RivalParam::Open().rush.slashStopAnimeFrame;
+				extraStatus = ExtraState::RUSH_RUN;
+
+				// HACK:May be set to not zero.
+				slerpFactor = 0.0f;
+			}
+		}
+		break;
+	case Rival::ExtraState::RUSH_RUN:
+		{
+			// Animation.
+			{
+				timer--;
+
+				if ( timer <= 0 )
+				{
+					timer = 0;
+					setStopAnimation( models.pAtkRushSlash.get(), /* is_Stop = */ true );
+				}
+				else
+				{
+					RivalParam::Open().rush.hitBox.Update();
+				}
+			}
+
+			velocity = orientation.LocalFront() * RivalParam::Open().rush.rushSpeed;
+
+			float trueFieldRadius{};
+			float currentLength{};
+			{
+				// This calculate process is same as CollideToWall().
+
+				const float bodyRadius = RivalParam::Open().stageBodyRadius;
+				trueFieldRadius = fieldRadius - bodyRadius;
+
+				constexpr Donya::Vector3 ORIGIN = Donya::Vector3::Zero();
+				const Donya::Vector3 currentDistance = GetPos() - ORIGIN;
+				currentLength = currentDistance.Length();
+			}
+
+			Donya::Sphere wsTriggerRange = RivalParam::Open().rush.slashOccurRange;
+			wsTriggerRange.pos = orientation.RotateVector( wsTriggerRange.pos ); // Rotate the offset.
+			wsTriggerRange.pos += GetPos();
+
+			bool occurSlash = ( trueFieldRadius * 0.9f/* Safety margin */ <= currentLength ) ||
+				Donya::Sphere::IsHitPoint( wsTriggerRange, target.pos, /* ignoreExistFlag = */ true );
+
+			if ( occurSlash )
+			{
+				timer		= 0;
+				extraStatus	= ExtraState::RUSH_SLASH;
+				velocity	= 0.0f;
+
+				setStopAnimation( models.pAtkRushSlash.get(), /* is_Stop = */ false );
+			}
+		}
+		break;
+	case Rival::ExtraState::RUSH_SLASH:
+		{
+			RivalParam::Open().rush.hitBox.Update();
+
+			if ( models.pAtkRushSlash->getAnimFinFlg() )
+			{
+				AI.ResumeUpdate();
+				AI.FinishCurrentState();
+			}
+		}
+		break;
+	default: break;
+	}
 }
 void Rival::AttackRushUninit()
 {
-	setAnimFlame( models.pAtkRushPre.get(), 0 );
-	setAnimFlame( models.pAtkRushRaid.get(), 0 );
-	setAnimFlame( models.pAtkRushPost.get(), 0 );
+	timer		= 0;
+	extraStatus	= ExtraState::NONE;
+
+	setAnimFlame( models.pAtkRushWait.get(), 0 );
+	setAnimFlame( models.pAtkRushSlash.get(), 0 );
 }
 
 void Rival::ApplyVelocity( TargetStatus target )

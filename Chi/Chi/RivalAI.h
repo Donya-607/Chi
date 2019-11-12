@@ -80,6 +80,8 @@ private:
 	int attackTimes{};					// Store "gapIntervals" count.
 	int intervalIndex{};
 	std::vector<int> gapIntervals{};	// At least have 1 element.
+
+	bool stopUpdate{ false };
 public:
 	RivalAI() {}
 	// ~RivalAI() = default;
@@ -106,12 +108,18 @@ private:
 public:
 	void Init();
 	void Update();
+
+	void StopUpdate()	{ stopUpdate = true;  }
+	void ResumeUpdate()	{ stopUpdate = false; }
 	ActionState GetState() const { return status; }
+
 	void OverwriteState( ActionState newState );
+	void FinishCurrentState();
 private:
 	ActionState ToActionState( WaitState status ) const;
 	ActionState ToActionState( AttackState status ) const;
 
+	void LotteryState();
 	void LotteryWaitState();
 	void LotteryAttackState();
 

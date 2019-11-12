@@ -137,9 +137,34 @@
             }
         },
         "m.rush": {
-            "cereal_class_version": 0,
+            "cereal_class_version": 1,
             "moveSpeed": 0.0,
-            "slerpFactor": 0.10000000149011612
+            "slerpFactor": 0.10000000149011612,
+            "waitLength": 60,
+            "rushSpeed": 16.0,
+            "slashStopAnimeFrame": 3,
+            "slashOccurRange": {
+                "pos": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 16.0
+                },
+                "radius": 64.0,
+                "exist": false
+            },
+            "hitBox": {
+                "enableFrameStart": 5,
+                "enableFrameLast": 60,
+                "collision": {
+                    "pos": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 32.0
+                    },
+                    "radius": 80.0,
+                    "exist": false
+                }
+            }
         }
     }
 }

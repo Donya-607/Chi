@@ -38,9 +38,8 @@ enum class ModelAttribute
 	RivalAtkBarrage,
 	RivalAtkLine,
 	RivalAtkRaid,
-	RivalAtkRushPre,
-	RivalAtkRushRaid,
-	RivalAtkRushPost,
+	RivalAtkRushWait,
+	RivalAtkRushSlash,
 };
 
 std::string GetModelPath( ModelAttribute modelAttribute );

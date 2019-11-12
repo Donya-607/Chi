@@ -5,7 +5,7 @@
             "value0": 200,
             "value1": 120,
             "value2": 120,
-            "value3": 120
+            "value3": 3
         },
         "coolTimeFrame": {
             "value0": 60,
@@ -20,11 +20,11 @@
         "attackPercents": {
             "value0": 5,
             "value1": 1,
-            "value2": 1024
+            "value2": 1
         },
         "gapIntervals": [
-            16,
-            16
+            0,
+            0
         ]
     }
 }

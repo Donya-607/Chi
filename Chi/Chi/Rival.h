@@ -218,8 +218,13 @@ public:
 		};
 		struct Rush
 		{
-			float	moveSpeed{};
-			float	slerpFactor{}; // 0.0f ~ 1.0f.
+			float				moveSpeed{};
+			float				slerpFactor{}; // 0.0f ~ 1.0f.
+			int					waitLength{};
+			float				rushSpeed{};
+			int					slashStopAnimeFrame{};
+			Donya::Sphere		slashOccurRange{};
+			Donya::SphereFrame	hitBox{};
 		private:
 			friend class cereal::access;
 			template<class Archive>
@@ -232,6 +237,17 @@ public:
 				);
 
 				if ( 1 <= version )
+				{
+					archive
+					(
+						CEREAL_NVP( waitLength ),
+						CEREAL_NVP( rushSpeed ),
+						CEREAL_NVP( slashStopAnimeFrame ),
+						CEREAL_NVP( slashOccurRange ),
+						CEREAL_NVP( hitBox )
+					);
+				}
+				if ( 2 <= version )
 				{
 					// archive( CEREAL_NVP( x ) );
 				}
@@ -308,6 +324,9 @@ public:
 	
 	SphereFrameWithName						&RaidHitBox()				{ return m.raid.hitBox; }
 	const SphereFrameWithName				&RaidHitBox()		const	{ return m.raid.hitBox; }
+	
+	Donya::SphereFrame						&RushHitBox()				{ return m.rush.hitBox; }
+	const Donya::SphereFrame				&RushHitBox()		const	{ return m.rush.hitBox; }
 public:
 	void LoadParameter( bool isBinary = true );
 
@@ -325,7 +344,7 @@ CEREAL_CLASS_VERSION( RivalParam::Member::Move,		0 )
 CEREAL_CLASS_VERSION( RivalParam::Member::Barrage,	1 )
 CEREAL_CLASS_VERSION( RivalParam::Member::Line,		1 )
 CEREAL_CLASS_VERSION( RivalParam::Member::Raid,		1 )
-CEREAL_CLASS_VERSION( RivalParam::Member::Rush,		0 )
+CEREAL_CLASS_VERSION( RivalParam::Member::Rush,		1 )
 
 struct fbx_shader; // Use for argument.
 /// <summary>
@@ -349,12 +368,14 @@ private:
 		std::shared_ptr<skinned_mesh> pAtkBarrage{ nullptr };
 		std::shared_ptr<skinned_mesh> pAtkLine{ nullptr };
 		std::shared_ptr<skinned_mesh> pAtkRaid{ nullptr };
-		std::shared_ptr<skinned_mesh> pAtkRushPre{ nullptr };
-		std::shared_ptr<skinned_mesh> pAtkRushRaid{ nullptr };
-		std::shared_ptr<skinned_mesh> pAtkRushPost{ nullptr };
+		std::shared_ptr<skinned_mesh> pAtkRushWait{ nullptr };
+		std::shared_ptr<skinned_mesh> pAtkRushSlash{ nullptr };
 	};
 	enum class ExtraState
 	{
+		RUSH_WAIT,
+		RUSH_RUN,
+		RUSH_SLASH,
 		BREAK,
 		LEAVE,
 		DEFEAT,
@@ -362,7 +383,7 @@ private:
 	};
 private:
 	RivalAI::ActionState	status;
-	ExtraState				extraStatus;
+	ExtraState				extraStatus;		// Internal status.
 	RivalAI					AI;
 	int						timer;				// Recycle between each state.
 	float					fieldRadius;		// For collision to wall. the field is perfect-circle, so I can detect collide to wall by distance.
@@ -391,9 +412,10 @@ public:
 	/// </summary>
 	Donya::AABB GetBodyHitBox() const;
 
-	Donya::Sphere RaidWorldHitBox();
-
 	std::vector<Donya::SphereFrame> &BarragesLocalHitBoxes();
+
+	Donya::Sphere RaidWorldHitBox() const;
+	Donya::Sphere RushWorldHitBox() const;
 
 	/// <summary>
 	/// Please call when defended Rival's attack.

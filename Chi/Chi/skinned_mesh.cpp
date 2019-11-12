@@ -797,13 +797,14 @@ void skinned_mesh::render(ID3D11DeviceContext* context, fbx_shader& hlsl, const 
 						it.anim.animation_tick = 0;
 						anim_fin = true;
 					}
-
-					if (static_cast<size_t>(animation_flame) < it.anim.size() - 1)
+					else
+					{
 						if (!stop_animation && stop_time <= 0)
 						{
 							anim_fin = false;
 							it.anim.animation_tick += elapsed_time * magnification;
 						}
+					}
 				}
 			}
 
