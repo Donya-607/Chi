@@ -114,10 +114,19 @@ public:
 			_ASSERT_EXPR( 0, L"Failed : Loading sound." );
 			exit( -1 );
 		}
-#if DEBUG_MODE
+	#if DEBUG_MODE
 		Donya::Sound::Load( BGM_ID, "./Data/Sounds/Test/BGM.wav", true  );
 		Donya::Sound::Load( SE_ID,  "./Data/Sounds/Test/SE.wav",  false );
-#endif // DEBUG_MODE
+	#endif // DEBUG_MODE
+
+		loadShader
+		(
+			shader,
+			"./Data/shader/skinned_mesh_has_born_vs.cso",
+			"./Data/shader/skinned_mesh_ps.cso",
+			"./Data/shader/skinned_mesh_vs.cso",
+			"./Data/shader/skinned_mesh_no_uv_ps.cso"
+		);
 
 		getLineLight().setLineLight( lights.direction.direction, lights.direction.color );
 
@@ -128,15 +137,6 @@ public:
 		}
 
 	#if DEBUG_MODE
-		loadShader
-		(
-			shader,
-			"./Data/shader/skinned_mesh_has_born_vs.cso",
-			"./Data/shader/skinned_mesh_ps.cso",
-			"./Data/shader/skinned_mesh_vs.cso",
-			"./Data/shader/skinned_mesh_no_uv_ps.cso"
-		);
-
 		stageNo = AppearStage::RivalNo;
 	#endif // DEBUG_MODE
 
@@ -164,7 +164,7 @@ public:
 		Donya::OutputDebugStr( "No.3 End Boss::Init.\n" );
 		
 		Donya::OutputDebugStr( "No.4 Begin Effect::Init.\n" );
-		// EffectManager::GetInstance()->Init();
+		//EffectManager::GetInstance()->Init();
 		Donya::OutputDebugStr( "No.4 End Effect::Init.\n" );
 
 		Donya::OutputDebugStr( "End Objects initialize.\n" );
@@ -370,7 +370,7 @@ public:
 		default:		Donya::OutputDebugStr( "Error : The boss does not draw !\n" );	break;
 		}
 
-		// EffectManager::GetInstance()->Render( shader );
+		//EffectManager::GetInstance()->Render( shader );
 
 	#if DEBUG_MODE
 		/*
