@@ -1253,7 +1253,7 @@ void Rival::AttackRushUpdate( TargetStatus target )
 			wsTriggerRange.pos = orientation.RotateVector( wsTriggerRange.pos ); // Rotate the offset.
 			wsTriggerRange.pos += GetPos();
 
-			bool occurSlash = ( !velocity.IsZero()/*  */ && trueFieldRadius <= currentLength ) ||
+			bool occurSlash = ( !velocity.IsZero()/* Except when first update of rush. */ && trueFieldRadius <= currentLength ) ||
 				Donya::Sphere::IsHitPoint( wsTriggerRange, target.pos, /* ignoreExistFlag = */ true );
 
 			if ( occurSlash )
