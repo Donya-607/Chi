@@ -530,9 +530,9 @@ void billboardRender(static_mesh* _mesh, const DirectX::XMFLOAT4X4& view_project
 
 
 //skinned_mesh//
-void loadFBX(skinned_mesh* skinnedMesh, const std::string& FBXName,bool isTpose)
+void loadFBX(skinned_mesh* skinnedMesh, const std::string& FBXName, bool load_cerealize,bool isTpose)
 {
-	GameLib::skinnedMesh::loadFBX(skinnedMesh, FBXName,isTpose);
+	GameLib::skinnedMesh::loadFBX(skinnedMesh, FBXName, load_cerealize,isTpose);
 }
 
 void loadShader(fbx_shader& shader, std::string vertex, std::string pixel, std::string noBoneVertex, std::string notexPS)

@@ -384,7 +384,7 @@ public:
 		int a = 0;
 	}
 	~skinned_mesh() {}
-	void setInfo(ID3D11Device* _device, const std::string& _objFileName, bool is_Tpose);
+	void setInfo(ID3D11Device* _device, const std::string& _objFileName,bool load_cerealize, bool is_Tpose);
 	void setInfo_T_pose(ID3D11Device* _device, const std::string& _objFileName);
 
 	void init(ID3D11Device* device);

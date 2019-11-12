@@ -826,9 +826,9 @@ namespace GameLib
 
 	namespace skinnedMesh
 	{
-		void loadFBX(skinned_mesh* _mesh, const std::string& _fbxName,bool is_Tpose)
+		void loadFBX(skinned_mesh* _mesh, const std::string& _fbxName,bool load_cerealize,bool is_Tpose)
 		{
-			_mesh->setInfo(m.device, _fbxName,is_Tpose);
+			_mesh->setInfo(m.device, _fbxName, load_cerealize,is_Tpose);
 		}
 
 		void loadShader(fbx_shader& shader, std::string vertex, std::string pixel, std::string noBoneVertex, std::string notexPS)

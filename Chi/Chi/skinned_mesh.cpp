@@ -288,7 +288,7 @@ void skinned_mesh::fbxInit(ID3D11Device* _device, const std::string& _fbxFileNam
 
 
 
-void skinned_mesh::setInfo(ID3D11Device* _device, const std::string& _fbxFileName, bool is_Tpose)
+void skinned_mesh::setInfo(ID3D11Device* _device, const std::string& _fbxFileName,bool load_cerealize, bool is_Tpose)
 {
 	size_t count = _fbxFileName.find_last_of("/") + 1;
 	size_t count2 = _fbxFileName.find_last_of(".") + 1;
@@ -296,36 +296,57 @@ void skinned_mesh::setInfo(ID3D11Device* _device, const std::string& _fbxFileNam
 	std::string bin_name = filename + "bin";
 	std::string json_name = filename + "json";
 
-	if (loadBinary(bin_name))
+	if (load_cerealize)
 	{
-		for (auto& p : meshes)
+		if (loadBinary(bin_name))
 		{
-			for (auto& it : p.subsets)
+			for (auto& p : meshes)
 			{
-				std::wstring dummy(it.diffuse.texture_filename.begin(), it.diffuse.texture_filename.end());
-				if (dummy.empty())
-					continue;	ResourceManager::LoadShaderResourceView(_device, dummy, &it.diffuse.shader_resource_view, &tex2dDesc);
+				for (auto& it : p.subsets)
+				{
+					std::wstring dummy(it.diffuse.texture_filename.begin(), it.diffuse.texture_filename.end());
+					if (dummy.empty())
+						continue;	ResourceManager::LoadShaderResourceView(_device, dummy, &it.diffuse.shader_resource_view, &tex2dDesc);
 
+				}
 			}
-		}
-		init(_device);
+			init(_device);
 
-	}
-	else if (loadBinary(json_name))
-	{
-		for (auto& p : meshes)
+		}
+		else if (loadBinary(json_name))
 		{
-			for (auto& it : p.subsets)
+			for (auto& p : meshes)
 			{
-				std::wstring dummy(it.diffuse.texture_filename.begin(), it.diffuse.texture_filename.end());
-				ResourceManager::LoadShaderResourceView(_device, dummy, &it.diffuse.shader_resource_view, &tex2dDesc);
+				for (auto& it : p.subsets)
+				{
+					std::wstring dummy(it.diffuse.texture_filename.begin(), it.diffuse.texture_filename.end());
+					ResourceManager::LoadShaderResourceView(_device, dummy, &it.diffuse.shader_resource_view, &tex2dDesc);
 
+				}
 			}
+			init(_device);
+
 		}
-		init(_device);
 
+		else
+		{
+
+			have_uv = false;
+			have_material = 0;
+			have_born = false;
+
+			if (is_Tpose)
+				setInfo_T_pose(_device, _fbxFileName);
+			else
+				fbxInit(_device, _fbxFileName);
+
+			init(_device);
+
+			saveBinary(bin_name);
+			saveBinary(json_name);
+
+		}
 	}
-
 	else
 	{
 

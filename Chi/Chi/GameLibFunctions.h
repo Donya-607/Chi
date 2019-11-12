@@ -171,7 +171,7 @@ void billboardRender(static_mesh* _mesh, const DirectX::XMFLOAT4X4&, const Direc
 
 
 //skinned_mesh//
-void loadFBX(skinned_mesh* skinnedMesh, const std::string& FBXName,bool isTpose = false);
+void loadFBX(skinned_mesh* skinnedMesh, const std::string& FBXName, bool load_cerealize = true,bool isTpose = false);
 
 void loadShader(fbx_shader& shader, std::string vertex, std::string pixel, std::string noBoneVertex, std::string notexPS);
 
