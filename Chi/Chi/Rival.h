@@ -459,6 +459,14 @@ private:
 	void AttackRushInit( TargetStatus target );
 	void AttackRushUpdate( TargetStatus target );
 	void AttackRushUninit();
+
+	void BreakInit( TargetStatus target );
+	void BreakUpdate( TargetStatus target );
+	void BreakUninit();
+
+	void DefeatInit( TargetStatus target );
+	void DefeatUpdate( TargetStatus target );
+	void DefeatUninit();
 private:
 	/// <summary>
 	/// The position("pos") is only changed by this method(or CollideToWall method).

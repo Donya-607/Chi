@@ -673,6 +673,7 @@ public:
 			{
 				wasHitToShield = true;
 				player.SucceededDefence();
+				rival.WasDefended();
 			}
 
 			bool bodyCollided = ( shieldCollided ) ? false : rival.IsCollideAttackHitBoxes( playerBodyBox, /* disableCollidingHitBoxes = */ false );

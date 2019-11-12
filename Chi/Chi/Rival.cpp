@@ -802,6 +802,9 @@ void Rival::WasDefended()
 {
 	if ( status == RivalAI::ActionState::ATTACK_RUSH )
 	{
+		// Should call before anything.
+		AttackRushUninit();
+
 		status = RivalAI::ActionState::WAIT;
 		extraStatus = ExtraState::BREAK;
 	}
@@ -1232,6 +1235,32 @@ void Rival::AttackRushUninit()
 
 	setAnimFlame( models.pAtkRushWait.get(), 0 );
 	setAnimFlame( models.pAtkRushSlash.get(), 0 );
+}
+
+void Rival::BreakInit( TargetStatus target )
+{
+
+}
+void Rival::BreakUpdate( TargetStatus target )
+{
+
+}
+void Rival::BreakUninit()
+{
+
+}
+
+void Rival::DefeatInit( TargetStatus target )
+{
+
+}
+void Rival::DefeatUpdate( TargetStatus target )
+{
+
+}
+void Rival::DefeatUninit()
+{
+
 }
 
 void Rival::ApplyVelocity( TargetStatus target )

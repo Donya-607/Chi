@@ -1403,6 +1403,12 @@ bool skinned_mesh::calcTransformedPosBySpecifyMesh(DirectX::XMFLOAT3& _local_pos
 		{
 
 			DirectX::XMFLOAT4X4 transform = skeletal.at(_mesh->bone_indices[i]).transform;
+			DirectX::XMStoreFloat4x4
+			(
+				&transform,
+				DirectX::XMLoadFloat4x4( &transform )
+				* DirectX::XMLoadFloat4x4( &coordinate_conversion )
+			);
 
 			float w = pos.x * transform._14 + pos.y * transform._24 + pos.z * transform._34 + pos.w * transform._44;
 
@@ -1441,6 +1447,12 @@ bool skinned_mesh::calcTransformedPosBySpecifyMesh(DirectX::XMFLOAT3& _local_pos
 		{
 
 			DirectX::XMFLOAT4X4 transform = skeletal.at(_mesh->bone_indices[i]).transform;
+			DirectX::XMStoreFloat4x4
+			(
+				&transform,
+				DirectX::XMLoadFloat4x4( &transform )
+				* DirectX::XMLoadFloat4x4( &coordinate_conversion )
+			);
 
 			float w = pos.x * transform._14 + pos.y * transform._24 + pos.z * transform._34 + pos.w * transform._44;
 
