@@ -8,6 +8,8 @@
 
 void sceneTitle::init()
 {
+	setCamPos(0.0f, 18.0f, -63.0f);
+	setTarget(0, 3, 0);
 	isStack = false;
 	flg = false;
 	pos = { getCamPos().x,getCamPos().y,getCamPos().z };
@@ -27,7 +29,7 @@ void sceneTitle::init()
 	models.emplace_back();
 	//loadFBX(&models.back().mesh, "./Data/Boss04_3Attack.fbx");
 	models.back().model_pos = { 0,0,0 };
-	models.back().model_angle = { 0,0,0 };
+	models.back().model_angle = { 0,3.1,0 };
 	models.back().model_scale = { 0.1f,0.1f,0.1f };
 	models.back().is_enable = true;
 	for (int i = 0; i < models.back().mesh.getMeshCount(); i++)
@@ -39,12 +41,14 @@ void sceneTitle::init()
 		}
 	}
 
-	createBillboard(&builborad, L"./Data/SpeedRing.png");
+	createBillboard(&builborad, L"./Data/bag001.png");
 	builboard_pos = { 0,0,0,1 };
 	builborad_angle = 0;
 	builborad_size = { 1.0f,1.0f };
 	texpos = { 0,0 };
 	texsize = { 64,64 };
+	alpha = 1.0f;
+	color = { 1.0f,1.0f,1.0f };
 }
 
 void sceneTitle::update()
@@ -69,7 +73,7 @@ void sceneTitle::update()
 		models.emplace_back();
 		loadFBX(&models.back().mesh, file_name);
 		models.back().model_pos = { 0,0,0 };
-		models.back().model_angle = { 0,0,0 };
+		models.back().model_angle = { 0,3.1f,0 };
 		models.back().model_scale = { 0.1f,0.1f,0.1f };
 		models.back().is_enable = true;
 		for (int i = 0; i < models.back().mesh.getMeshCount(); i++)
@@ -192,7 +196,6 @@ void sceneTitle::render()
 	clearWindow(0.5f, 0.5f, 0.5f, 1.0f);
 	setString({ 0,0 }, L"sceneTitle %d : %f", 1, 20.2f);
 	//textOut(L"TITLE", .0f, 0.f);
-
 	if (!models.empty())
 		for (model* p = models.data(); p < models.data() + models.size(); p++)
 		{
@@ -228,7 +231,10 @@ void sceneTitle::render()
 
 	DirectX::XMFLOAT4X4 view_projection;
 	DirectX::XMStoreFloat4x4(&view_projection, getViewMatrix() * getProjectionMatrix());
-	billboardRender(&builborad, view_projection, builboard_pos, builborad_size, builborad_angle, getCamPos(), texpos, texsize);
+	setBlendMode_ALPHA(255);
+
+	billboardRender(&builborad, view_projection, builboard_pos, builborad_size, builborad_angle, getCamPos(), texpos, texsize,alpha,color);
+	setBlendMode_NONE(255);
 }
 
 void sceneTitle::uninit()
@@ -290,6 +296,15 @@ void sceneTitle::imGui()
 			ImGui::Text("texsize");
 			ImGui::DragFloat("x##texsize", &texsize.x);
 			ImGui::DragFloat("y##texsize", &texsize.y);
+			ImGui::NewLine();
+			ImGui::Text("color");
+			ImGui::DragFloat("r##color", &color.x);
+			ImGui::DragFloat("g##color", &color.y);
+			ImGui::DragFloat("b##color", &color.z);
+			ImGui::NewLine();
+			ImGui::DragFloat("alpha", &alpha);
+
+
 			ImGui::TreePop();
 		}
 

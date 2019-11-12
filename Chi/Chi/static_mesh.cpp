@@ -848,7 +848,8 @@ void static_mesh::billboardRender(
 	const DirectX::XMFLOAT2 scale,
 	const float angle,
 	const DirectX::XMFLOAT4& camPos,
-	const DirectX::XMFLOAT2& texpos, const DirectX::XMFLOAT2& texsize)
+	const DirectX::XMFLOAT2& texpos, const DirectX::XMFLOAT2& texsize,
+	const float alpha,const DirectX::XMFLOAT3& color)
 {
 
 	HRESULT hr = S_OK;
@@ -918,7 +919,7 @@ void static_mesh::billboardRender(
 		cb.pntLight[i].attenuate = { 0,0,0,0 };
 
 	}
-	cb.b_material.ambient = { 0,0,0,1.0f };
+	cb.b_material.ambient = { color.x,color.y,color.z,alpha/2.0f+0.5f };
 	cb.b_material.diffuse = { 0,0,0,1.0f };
 	cb.b_material.specular = { 0,0,0,0.5f };
 	context->UpdateSubresource(constant_buffer, 0, nullptr, &cb, 0, 0);

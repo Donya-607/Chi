@@ -10,26 +10,32 @@
 //   row_major float4x4 world_view_projection;// Offset:    0 Size:    64
 //   row_major float4x4 world;          // Offset:   64 Size:    64 [unused]
 //   float4 camPos;                     // Offset:  128 Size:    16 [unused]
-//   float4 ambient;                    // Offset:  144 Size:    16 [unused]
+//   
+//   struct lineLight
+//   {
+//       
+//       float4 direction;              // Offset:  144
+//       float4 color;                  // Offset:  160
+//
+//   } line_light;                      // Offset:  144 Size:    32 [unused]
 //   
 //   struct Light
 //   {
 //       
-//       float4 pos;                    // Offset:  160
-//       float4 diffuse;                // Offset:  176
-//       float4 specular;               // Offset:  192
+//       float4 pos;                    // Offset:  176
+//       float4 color;                  // Offset:  192
 //       float4 attenuate;              // Offset:  208
 //
-//   } pntLight;                        // Offset:  160 Size:    64 [unused]
+//   } pntLight[5];                     // Offset:  176 Size:   240 [unused]
 //   
 //   struct Material
 //   {
 //       
-//       float4 ambient;                // Offset:  224
-//       float4 diffuse;                // Offset:  240
-//       float4 specular;               // Offset:  256
+//       float4 ambient;                // Offset:  416
+//       float4 diffuse;                // Offset:  432
+//       float4 specular;               // Offset:  448
 //
-//   } material;                        // Offset:  224 Size:    48 [unused]
+//   } material;                        // Offset:  416 Size:    48
 //
 // }
 //
@@ -61,7 +67,7 @@
 //
 vs_5_0
 dcl_globalFlags refactoringAllowed | skipOptimization
-dcl_constantbuffer CB0[4], immediateIndexed
+dcl_constantbuffer CB0[27], immediateIndexed
 dcl_input v0.xyzw
 dcl_input v2.xy
 dcl_output_siv o0.xyzw, position
@@ -87,7 +93,7 @@ mul r1.xyzw, v0.wwww, cb0[3].xyzw
 add r0.xyzw, r0.xyzw, r1.xyzw  // r0.x <- vout.position.x; r0.y <- vout.position.y; r0.z <- vout.position.z; r0.w <- vout.position.w
 
 #line 9
-itof r1.xyzw, l(1, 1, 1, 1)  // r1.x <- vout.color.x; r1.y <- vout.color.y; r1.z <- vout.color.z; r1.w <- vout.color.w
+mov r1.xyzw, cb0[26].xyzw  // r1.x <- vout.color.x; r1.y <- vout.color.y; r1.z <- vout.color.z; r1.w <- vout.color.w
 
 #line 10
 mov r2.xy, v2.xyxx  // r2.x <- vout.texcoord.x; r2.y <- vout.texcoord.y

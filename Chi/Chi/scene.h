@@ -55,7 +55,8 @@ private:
 	DirectX::XMFLOAT2 builborad_size;
 	DirectX::XMFLOAT2 texpos;
 	DirectX::XMFLOAT2 texsize;
-
+	float alpha;
+	DirectX::XMFLOAT3 color;
 public:
 	sceneTitle(){}
 	~sceneTitle()

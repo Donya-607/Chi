@@ -3,7 +3,7 @@
 
 Camera::Camera()
 {
-	position = DirectX::XMFLOAT3(0.0f, 500.0f, -500.0f);
+	position = DirectX::XMFLOAT3(0.0f, 300.0f, -300.0f);
 	target = DirectX::XMFLOAT3(.0f, .0f, .0f);
 	state = cameraNumber::MONITORING;
 	constexpr float fov = DirectX::XMConvertToRadians(30.0f);
