@@ -194,16 +194,6 @@ Player::Player() :
 	{
 		InitializeModel( it );
 	}
-
-	std::vector<std::shared_ptr<skinned_mesh> *> dontLoopModels
-	{
-		&models.pDefend,
-		&models.pAttack,
-	};
-	for ( auto &it : dontLoopModels )
-	{
-		setLoopFlg( it->get(), /* is_loop = */ false );
-	}
 }
 Player::~Player() = default;
 
@@ -457,10 +447,20 @@ void Player::LoadModel()
 	Donya::OutputDebugStr( "Done PlayerModel.Wait\n" );
 	loadFBX( models.pRun.get(),		GetModelPath( ModelAttribute::PlayerRun		) );
 	Donya::OutputDebugStr( "Done PlayerModel.Run\n" );
-	// loadFBX( models.pDefend.get(),	GetModelPath( ModelAttribute::PlayerDefend	) );
-	// Donya::OutputDebugStr( "Done PlayerModel.Defend\n" );
+	loadFBX( models.pDefend.get(),	GetModelPath( ModelAttribute::PlayerDefend	) );
+	Donya::OutputDebugStr( "Done PlayerModel.Defend\n" );
 	loadFBX( models.pAttack.get(),	GetModelPath( ModelAttribute::PlayerAtk		) );
 	Donya::OutputDebugStr( "Done PlayerModel.Attack\n" );
+
+	std::vector<std::shared_ptr<skinned_mesh> *> dontLoopModels
+	{
+		&models.pDefend,
+		&models.pAttack,
+	};
+	for ( auto &it : dontLoopModels )
+	{
+		setLoopFlg( it->get(), /* is_loop = */ false );
+	}
 
 	Donya::OutputDebugStr( "End Player::LoadModel.\n" );
 }

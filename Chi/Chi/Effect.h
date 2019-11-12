@@ -148,20 +148,20 @@ public:
 	{
 		eruptionEffect.resize(MAX_SIZE);
 
-		/*auto GenerateFBX = []()->std::shared_ptr<skinned_mesh>
+		auto GenerateFBX = []()->std::shared_ptr<skinned_mesh>
 		{
 			std::shared_ptr<skinned_mesh> tmpFBX = std::make_shared<skinned_mesh>();
 			loadFBX(tmpFBX.get(), GetEffectModelPath(EffectModel::ERUPTION));
 			return tmpFBX;
 		};
-		for(int i = 0;i < eruptionEffect.size();i++)
+		for(int i = 0; i < static_cast<int>( eruptionEffect.size() );i++)
 		{
 			for (int j = 0; j < eruptionEffect[i].MAX_SIZE; j++)
 			{
 				eruptionEffect[i].pModel[j] = std::make_unique<skinned_mesh>();
 				eruptionEffect[i].pModel[j] = GenerateFBX();
 			}
-		}*/
+		}
 	}
 	~EruptionEffectManager() {}
 
