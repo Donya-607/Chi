@@ -930,7 +930,7 @@ namespace GameLib
 
 		void setAnimFlame(bone_animation* _anim, const int _anim_flame)
 		{
-			_anim->setAnimFlame(_anim_flame);
+			_anim->setAnimFlame(static_cast<float>(_anim_flame));
 		}
 
 

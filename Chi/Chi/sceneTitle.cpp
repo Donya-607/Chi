@@ -29,7 +29,7 @@ void sceneTitle::init()
 	models.emplace_back();
 	//loadFBX(&models.back().mesh, "./Data/Boss04_3Attack.fbx");
 	models.back().model_pos = { 0,0,0 };
-	models.back().model_angle = { 0,3.1,0 };
+	models.back().model_angle = { 0,3.1f,0 };
 	models.back().model_scale = { 0.1f,0.1f,0.1f };
 	models.back().is_enable = true;
 	for (int i = 0; i < models.back().mesh.getMeshCount(); i++)
