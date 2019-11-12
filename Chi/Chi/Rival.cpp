@@ -1236,8 +1236,6 @@ void Rival::AttackRushUpdate( TargetStatus target )
 				}
 			}
 
-			velocity = orientation.LocalFront() * RivalParam::Open().rush.rushSpeed;
-
 			float trueFieldRadius{};
 			float currentLength{};
 			{
@@ -1245,7 +1243,7 @@ void Rival::AttackRushUpdate( TargetStatus target )
 
 				const float bodyRadius = RivalParam::Open().stageBodyRadius;
 				trueFieldRadius = fieldRadius - bodyRadius;
-
+				
 				constexpr Donya::Vector3 ORIGIN = Donya::Vector3::Zero();
 				const Donya::Vector3 currentDistance = GetPos() - ORIGIN;
 				currentLength = currentDistance.Length();
@@ -1255,7 +1253,7 @@ void Rival::AttackRushUpdate( TargetStatus target )
 			wsTriggerRange.pos = orientation.RotateVector( wsTriggerRange.pos ); // Rotate the offset.
 			wsTriggerRange.pos += GetPos();
 
-			bool occurSlash = ( trueFieldRadius <= currentLength ) ||
+			bool occurSlash = ( !velocity.IsZero()/*  */ && trueFieldRadius <= currentLength ) ||
 				Donya::Sphere::IsHitPoint( wsTriggerRange, target.pos, /* ignoreExistFlag = */ true );
 
 			if ( occurSlash )
@@ -1265,6 +1263,10 @@ void Rival::AttackRushUpdate( TargetStatus target )
 				velocity	= 0.0f;
 
 				setStopAnimation( models.pAtkRushSlash.get(), /* is_Stop = */ false );
+			}
+			else
+			{
+				velocity = orientation.LocalFront() * RivalParam::Open().rush.rushSpeed;
 			}
 		}
 		break;
