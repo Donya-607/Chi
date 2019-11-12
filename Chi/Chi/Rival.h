@@ -45,8 +45,6 @@ public:
 				// archive( CEREAL_NVP( x ) );
 			}
 		}
-	public:
-		//Donya::Sphere CalcTransformedSphere( skinned_mesh *pMesh, const Donya::Vector4x4 &parentSpaceMatrix ) const;
 	};
 	struct IntervalSpeed
 	{
@@ -181,8 +179,14 @@ public:
 		};
 		struct Raid
 		{
-			float	moveSpeed{};
-			float	slerpFactor{}; // 0.0f ~ 1.0f.
+			float				moveSpeed{};
+			float				slerpFactor{}; // 0.0f ~ 1.0f.
+			int					easingKind{};
+			int					easingType{};
+			int					jumpStartFrame{};
+			int					jumpLastFrame{};
+			float				jumpDistance{};
+			SphereFrameWithName	hitBox{};
 		private:
 			friend class cereal::access;
 			template<class Archive>
@@ -195,6 +199,18 @@ public:
 				);
 
 				if ( 1 <= version )
+				{
+					archive
+					(
+						CEREAL_NVP( easingKind ),
+						CEREAL_NVP( easingType ),
+						CEREAL_NVP( jumpStartFrame ),
+						CEREAL_NVP( jumpLastFrame ),
+						CEREAL_NVP( jumpDistance ),
+						CEREAL_NVP( hitBox )
+					);
+				}
+				if ( 2 <= version )
 				{
 					// archive( CEREAL_NVP( x ) );
 				}
@@ -289,6 +305,9 @@ public:
 	void ResetBarrage();
 	std::vector<Donya::SphereFrame>			&BarrageHitBoxes()			{ return m.barrage.collisions; }
 	const std::vector<Donya::SphereFrame>	&BarrageHitBoxes()	const	{ return m.barrage.collisions; }
+	
+	SphereFrameWithName						&RaidHitBox()				{ return m.raid.hitBox; }
+	const SphereFrameWithName				&RaidHitBox()		const	{ return m.raid.hitBox; }
 public:
 	void LoadParameter( bool isBinary = true );
 
@@ -305,7 +324,7 @@ CEREAL_CLASS_VERSION( RivalParam::IntervalSpeed,	0 )
 CEREAL_CLASS_VERSION( RivalParam::Member::Move,		0 )
 CEREAL_CLASS_VERSION( RivalParam::Member::Barrage,	1 )
 CEREAL_CLASS_VERSION( RivalParam::Member::Line,		1 )
-CEREAL_CLASS_VERSION( RivalParam::Member::Raid,		0 )
+CEREAL_CLASS_VERSION( RivalParam::Member::Raid,		1 )
 CEREAL_CLASS_VERSION( RivalParam::Member::Rush,		0 )
 
 struct fbx_shader; // Use for argument.
@@ -371,6 +390,8 @@ public:
 	/// Returns world space hit-box of body.
 	/// </summary>
 	Donya::AABB GetBodyHitBox() const;
+
+	Donya::Sphere RaidWorldHitBox();
 
 	std::vector<Donya::SphereFrame> &BarragesLocalHitBoxes();
 

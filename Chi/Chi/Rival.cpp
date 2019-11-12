@@ -293,6 +293,30 @@ void RivalParam::UseImGui()
 
 					ImGui::TreePop();
 				}
+				
+				if ( ImGui::TreeNode( "Attack.Raid" ) )
+				{
+					// Easing parameter.
+					{
+						using namespace Donya;
+						constexpr int KIND_COUNT = Easing::GetKindCount();
+						constexpr int TYPE_COUNT = Easing::GetTypeCount();
+						ImGui::SliderInt( "Jump.EasingKind", &m.raid.easingKind, 0, KIND_COUNT - 1 );
+						ImGui::SliderInt( "Jump.EasingType", &m.raid.easingType, 0, TYPE_COUNT - 1 );
+						std::string strKind = Easing::KindName( m.raid.easingKind );
+						std::string strType = Easing::TypeName( m.raid.easingType );
+						ImGui::Text( ( "Easing : " + strKind + "." + strType ).c_str() );
+					}
+
+					ImGui::DragInt( "Jump.StartFrame", &m.raid.jumpStartFrame );
+					ImGui::DragInt( "Jump.LastFrame",  &m.raid.jumpLastFrame  );
+					ImGui::DragFloat( "Jump.Length(Distance)", &m.raid.jumpDistance );
+
+					static std::array<char, 512U> meshNameBuffer{};
+					ShowSphereFN( "Raid", &m.raid.hitBox, &meshNameBuffer );
+
+					ImGui::TreePop();
+				}
 
 				ImGui::TreePop();
 			}
@@ -467,7 +491,7 @@ void Rival::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya
 			FBXRender( models.pAtkLine.get(), HLSL, WVP, W );
 			break;
 		case RivalAI::ActionState::ATTACK_RAID:
-			// FBXRender( models.pAtkRaid.get(), HLSL, WVP, W );
+			FBXRender( models.pAtkRaid.get(), HLSL, WVP, W );
 			break;
 		case RivalAI::ActionState::ATTACK_RUSH:
 			FBXRender( models.pAtkRushPre.get(), HLSL, WVP, W );
@@ -563,6 +587,11 @@ void Rival::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya
 		constexpr Donya::Vector4 COLOR_VALID{ 1.0f, 0.5f, 0.0f, 0.6f };
 		constexpr Donya::Vector4 COLOR_INVALID{ 0.4f, 0.4f, 1.0f, 0.6f };
 
+		auto GetColor = [&COLOR_VALID, &COLOR_INVALID]( const Donya::Sphere &sphere )
+		{
+			return ( sphere.enable && sphere.exist ) ? COLOR_VALID : COLOR_INVALID;
+		};
+
 		// Attacks collision.
 		switch ( status )
 		{
@@ -578,7 +607,7 @@ void Rival::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya
 					const auto &sphere   = sphereF.collision;
 					std::string meshName = RivalParam::Open().barrage.collideMeshName;
 					Donya::Vector3 wsPos = CalcBoneTransformedPosition( models.pAtkBarrage.get(), meshName, W, sphere.pos );
-					Donya::Vector4 color = ( sphere.enable && sphere.exist ) ? COLOR_VALID : COLOR_INVALID;
+					Donya::Vector4 color = GetColor( sphere );
 
 					DrawSphere( wsPos, sphere.radius, color, /* applyParentMatrix = */ false );
 				}
@@ -587,6 +616,12 @@ void Rival::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya
 		case RivalAI::ActionState::ATTACK_LINE:
 			break;
 		case RivalAI::ActionState::ATTACK_RAID:
+			{
+				const auto wsHitBox  = RaidWorldHitBox();
+				Donya::Vector4 color = GetColor( wsHitBox );
+
+				DrawSphere( wsHitBox.pos, wsHitBox.radius, color, /* applyParentMatrix = */ false );
+			}
 			break;
 		case RivalAI::ActionState::ATTACK_RUSH:
 			break;
@@ -650,8 +685,23 @@ bool Rival::IsCollideAttackHitBoxes( const Donya::OBB    other, bool disableColl
 		}
 		break;
 	case RivalAI::ActionState::ATTACK_LINE:
+		{
+
+		}
 		break;
 	case RivalAI::ActionState::ATTACK_RAID:
+		{
+			Donya::Sphere wsHitBox = RaidWorldHitBox();
+			if ( Donya::OBB::IsHitSphere( other, wsHitBox ) )
+			{
+				wasCollided = true;
+				if ( disableCollidingHitBoxes )
+				{
+					auto &refHitBox  = RivalParam::Get().RaidHitBox();
+					refHitBox.sphereF.collision.enable = false;
+				}
+			}
+		}
 		break;
 	case RivalAI::ActionState::ATTACK_RUSH:
 		break;
@@ -675,6 +725,26 @@ Donya::AABB Rival::GetBodyHitBox() const
 	Donya::AABB wsBody = RivalParam::Open().hitBoxBody;
 	wsBody.pos += GetPos();
 	return wsBody;
+}
+
+Donya::Sphere Rival::RaidWorldHitBox()
+{
+	const auto			localHitBoxFN	= RivalParam::Get().RaidHitBox();
+	const Donya::Sphere	localHitBox		= localHitBoxFN.sphereF.collision;
+	const Donya::Vector3 wsPos = CalcBoneTransformedPosition
+	(
+		models.pAtkRaid.get(),
+		localHitBoxFN.meshName,
+		CalcWorldMatrix(),
+		localHitBox.pos
+	);
+	return Donya::Sphere
+	{
+		wsPos,
+		localHitBox.radius,
+		localHitBox.exist,
+		localHitBox.enable
+	};
 }
 
 std::vector<Donya::SphereFrame> &Rival::BarragesLocalHitBoxes()
@@ -717,14 +787,14 @@ void Rival::LoadModel()
 	Donya::OutputDebugStr( "Done RivalModel.Attack.Barrage.\n" );
 	loadFBX( models.pAtkLine.get(), GetModelPath( ModelAttribute::RivalAtkLine ) );
 	Donya::OutputDebugStr( "Done RivalModel.Attack.Line.\n" );
-	// loadFBX( models.pAtkRaid.get(), GetModelPath( ModelAttribute::RivalAtkRaid ) );
-	// Donya::OutputDebugStr( "Done RivalModel.Attack.Raid.\n" );
+	loadFBX( models.pAtkRaid.get(), GetModelPath( ModelAttribute::RivalAtkRaid ) );
+	Donya::OutputDebugStr( "Done RivalModel.Attack.Raid.\n" );
 	loadFBX( models.pAtkRushPre.get(), GetModelPath( ModelAttribute::RivalAtkRushPre ) );
 	Donya::OutputDebugStr( "Done RivalModel.Attack.Rush.Pre.\n" );
-	loadFBX( models.pAtkRushRaid.get(), GetModelPath( ModelAttribute::RivalAtkRushRaid ) );
-	Donya::OutputDebugStr( "Done RivalModel.Attack.Rush.Raid.\n" );
-	loadFBX( models.pAtkRushPost.get(), GetModelPath( ModelAttribute::RivalAtkRushPost ) );
-	Donya::OutputDebugStr( "Done RivalModel.Attack.Rush.Post.\n" );
+	// loadFBX( models.pAtkRushRaid.get(), GetModelPath( ModelAttribute::RivalAtkRushRaid ) );
+	// Donya::OutputDebugStr( "Done RivalModel.Attack.Rush.Raid.\n" );
+	// loadFBX( models.pAtkRushPost.get(), GetModelPath( ModelAttribute::RivalAtkRushPost ) );
+	// Donya::OutputDebugStr( "Done RivalModel.Attack.Rush.Post.\n" );
 
 	Donya::OutputDebugStr( "End Rival::LoadModel.\n" );
 }
@@ -946,14 +1016,13 @@ void Rival::AttackRaidInit( TargetStatus target )
 	extraOffset	= 0.0f;
 	velocity	= 0.0f;
 
-	// ResetCurrentSphereFN( &RivalParam::Get().HitBoxRaid() );
+	ResetCurrentSphereFN( &RivalParam::Get().RaidHitBox() );
 	setAnimFlame( models.pAtkRaid.get(), 0 );
 }
 void Rival::AttackRaidUpdate( TargetStatus target )
 {
-	/*
-	const int START_TIME	= RivalParam::Open().raidJumpStartFrame;
-	const int LANDING_TIME	= RivalParam::Open().raidJumpLastFrame;
+	const int START_TIME	= RivalParam::Open().raid.jumpStartFrame;
+	const int LANDING_TIME	= RivalParam::Open().raid.jumpLastFrame;
 	
 	auto ApplyExtraOffset	= [&]()->void
 	{
@@ -983,12 +1052,12 @@ void Rival::AttackRaidUpdate( TargetStatus target )
 		float percent	= scast<float>( timer - START_TIME ) / scast<float>( LANDING_TIME );
 		float ease		= Donya::Easing::Ease
 		(
-			scast<Donya::Easing::Kind>( RivalParam::Open().raidEaseKind ),
-			scast<Donya::Easing::Type>( RivalParam::Open().raidEaseType ),
+			scast<Donya::Easing::Kind>( RivalParam::Open().raid.easingKind ),
+			scast<Donya::Easing::Type>( RivalParam::Open().raid.easingType ),
 			percent
 		);
 
-		extraOffset = orientation.LocalFront() * ( RivalParam::Open().raidJumpDistance * ease );
+		extraOffset = orientation.LocalFront() * ( RivalParam::Open().raid.jumpDistance * ease );
 
 		if ( timer == START_TIME + LANDING_TIME )
 		{
@@ -1000,9 +1069,8 @@ void Rival::AttackRaidUpdate( TargetStatus target )
 		// No op.
 	}
 
-	auto &hitBox = RivalParam::Get().HitBoxRaid();
+	auto &hitBox = RivalParam::Get().RaidHitBox();
 	hitBox.sphereF.Update();
-	*/
 }
 void Rival::AttackRaidUninit()
 {
@@ -1010,7 +1078,7 @@ void Rival::AttackRaidUninit()
 	extraOffset	= 0.0f;
 	velocity	= 0.0f;
 
-	// ResetCurrentSphereFN( &RivalParam::Get().HitBoxRaid() );
+	ResetCurrentSphereFN( &RivalParam::Get().RaidHitBox() );
 	setAnimFlame( models.pAtkRaid.get(), 0 );
 }
 

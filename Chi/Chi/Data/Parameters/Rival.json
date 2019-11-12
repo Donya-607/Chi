@@ -110,9 +110,31 @@
             "generateFrame": 74
         },
         "m.raid": {
-            "cereal_class_version": 0,
+            "cereal_class_version": 1,
             "moveSpeed": 2.0,
-            "slerpFactor": 0.05999999865889549
+            "slerpFactor": 0.05999999865889549,
+            "easingKind": 7,
+            "easingType": 1,
+            "jumpStartFrame": 40,
+            "jumpLastFrame": 60,
+            "jumpDistance": 600.0,
+            "hitBox": {
+                "cereal_class_version": 0,
+                "sphereF": {
+                    "enableFrameStart": 0,
+                    "enableFrameLast": 0,
+                    "collision": {
+                        "pos": {
+                            "x": 0.0,
+                            "y": 0.0,
+                            "z": 0.0
+                        },
+                        "radius": 0.0,
+                        "exist": false
+                    }
+                },
+                "meshName": "MDL_BlackSword"
+            }
         },
         "m.rush": {
             "cereal_class_version": 0,
