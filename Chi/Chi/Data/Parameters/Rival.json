@@ -1,6 +1,6 @@
 {
     "Rival": {
-        "cereal_class_version": 0,
+        "cereal_class_version": 1,
         "m.scale": 1.0,
         "m.stageBodyRadius": 16.0,
         "m.targetDistNear": 0.07999999821186066,
@@ -165,6 +165,17 @@
                     "exist": false
                 }
             }
+        },
+        "m.breakdown": {
+            "cereal_class_version": 0,
+            "moveSpeed": 0.0,
+            "slerpFactor": 0.0,
+            "breakFrame": 60,
+            "leaveEasingKind": 7,
+            "leaveEasingType": 1,
+            "leaveWholeFrame": 60,
+            "leaveMoveFrame": 60,
+            "leaveDistance": 640.0
         }
     }
 }

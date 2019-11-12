@@ -34,6 +34,7 @@ enum class ModelAttribute
 	RivalIdle,
 	RivalRun,
 	RivalBreak,
+	RivalLeave,
 	RivalDefeat,
 	RivalAtkBarrage,
 	RivalAtkLine,

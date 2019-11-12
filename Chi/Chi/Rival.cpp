@@ -157,7 +157,7 @@ void RivalParam::UseImGui()
 			ImGui::DragFloat( "MoveSpeed.\"Atk.Barrage\"State",		&m.barrage.moveSpeed );
 			ImGui::DragFloat( "MoveSpeed.\"Atk.Line\"State",		&m.line.moveSpeed );
 			ImGui::DragFloat( "MoveSpeed.\"Atk.Raid\"State",		&m.raid.moveSpeed );
-			ImGui::DragFloat( "MoveSpeed.\"Atk.Rush\"State",		&m.rush.moveSpeed );
+			// ImGui::DragFloat( "MoveSpeed.\"Atk.Rush\"State",		&m.rush.moveSpeed ); // Unused.
 			ImGui::Text( "" );
 
 			ImGui::SliderFloat( "SlerpFactor.\"Idle\"State",			&m.idleSlerpFactor,		0.0f, 1.0f );
@@ -331,6 +331,29 @@ void RivalParam::UseImGui()
 					ImGui::TreePop();
 				}
 
+				if ( ImGui::TreeNode( "Attack.Break" ) )
+				{
+					ImGui::DragInt( "Break.WholeLength(Frame)", &m.breakdown.breakFrame );
+					ImGui::DragInt( "Leave.WholeLength(Frame)", &m.breakdown.leaveWholeFrame );
+
+					// Easing parameter.
+					{
+						using namespace Donya;
+						constexpr int KIND_COUNT = Easing::GetKindCount();
+						constexpr int TYPE_COUNT = Easing::GetTypeCount();
+						ImGui::SliderInt( "Leave.EasingKind", &m.breakdown.leaveEasingKind, 0, KIND_COUNT - 1 );
+						ImGui::SliderInt( "Leave.EasingType", &m.breakdown.leaveEasingType, 0, TYPE_COUNT - 1 );
+						std::string strKind = Easing::KindName( m.breakdown.leaveEasingKind );
+						std::string strType = Easing::TypeName( m.breakdown.leaveEasingType );
+						ImGui::Text( ( "Easing : " + strKind + "." + strType ).c_str() );
+					}
+
+					ImGui::DragInt( "Leave.MovingFrame", &m.breakdown.leaveMoveFrame );
+					ImGui::DragFloat( "Leave.Length(Distance)", &m.breakdown.leaveDistance );
+
+					ImGui::TreePop();
+				}
+
 				ImGui::TreePop();
 			}
 			ImGui::Text( "" );
@@ -487,7 +510,7 @@ void Rival::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya
 			FBXRender( models.pBreak.get(), HLSL, WVP, W );
 			break;
 		case ExtraState::LEAVE:
-			FBXRender( models.pBreak.get(), HLSL, WVP, W );
+			FBXRender( models.pLeave.get(), HLSL, WVP, W );
 			break;
 		case ExtraState::DEFEAT:
 			FBXRender( models.pDefeat.get(), HLSL, WVP, W );
@@ -802,11 +825,13 @@ void Rival::WasDefended()
 {
 	if ( status == RivalAI::ActionState::ATTACK_RUSH )
 	{
-		// Should call before anything.
+		// Prevent place the position of myself and target.
+		pos += -orientation.LocalFront() * RivalParam::Open().rush.rushSpeed;
+
+		// Should call before BreakInit().
 		AttackRushUninit();
 
-		status = RivalAI::ActionState::WAIT;
-		extraStatus = ExtraState::BREAK;
+		BreakInit();
 	}
 }
 void Rival::ReceiveImpact()
@@ -828,16 +853,18 @@ void Rival::LoadModel()
 	Donya::OutputDebugStr( "Done RivalModel.Idle.\n" );
 	loadFBX( models.pRun.get(), GetModelPath( ModelAttribute::RivalRun ) );
 	Donya::OutputDebugStr( "Done RivalModel.Run.\n" );
-	// loadFBX( models.pBreak.get(), GetModelPath( ModelAttribute::RivalBreak ) );
-	// Donya::OutputDebugStr( "Done RivalModel.Break.\n" );
-	// loadFBX( models.pDefeat.get(), GetModelPath( ModelAttribute::RivalDefeat ) );
-	// Donya::OutputDebugStr( "Done RivalModel.Defeat.\n" );
-	// loadFBX( models.pAtkBarrage.get(), GetModelPath( ModelAttribute::RivalAtkBarrage ) );
-	// Donya::OutputDebugStr( "Done RivalModel.Attack.Barrage.\n" );
-	// loadFBX( models.pAtkLine.get(), GetModelPath( ModelAttribute::RivalAtkLine ) );
-	// Donya::OutputDebugStr( "Done RivalModel.Attack.Line.\n" );
-	// loadFBX( models.pAtkRaid.get(), GetModelPath( ModelAttribute::RivalAtkRaid ) );
-	// Donya::OutputDebugStr( "Done RivalModel.Attack.Raid.\n" );
+	loadFBX( models.pBreak.get(), GetModelPath( ModelAttribute::RivalBreak ) );
+	Donya::OutputDebugStr( "Done RivalModel.Break.\n" );
+	loadFBX( models.pLeave.get(), GetModelPath( ModelAttribute::RivalLeave ) );
+	Donya::OutputDebugStr( "Done RivalModel.Leave.\n" );
+	loadFBX( models.pDefeat.get(), GetModelPath( ModelAttribute::RivalDefeat ) );
+	Donya::OutputDebugStr( "Done RivalModel.Defeat.\n" );
+	loadFBX( models.pAtkBarrage.get(), GetModelPath( ModelAttribute::RivalAtkBarrage ) );
+	Donya::OutputDebugStr( "Done RivalModel.Attack.Barrage.\n" );
+	loadFBX( models.pAtkLine.get(), GetModelPath( ModelAttribute::RivalAtkLine ) );
+	Donya::OutputDebugStr( "Done RivalModel.Attack.Line.\n" );
+	loadFBX( models.pAtkRaid.get(), GetModelPath( ModelAttribute::RivalAtkRaid ) );
+	Donya::OutputDebugStr( "Done RivalModel.Attack.Raid.\n" );
 	loadFBX( models.pAtkRushWait.get(), GetModelPath( ModelAttribute::RivalAtkRushWait ) );
 	Donya::OutputDebugStr( "Done RivalModel.Attack.Rush.Wait.\n" );
 	loadFBX( models.pAtkRushSlash.get(), GetModelPath( ModelAttribute::RivalAtkRushSlash ) );
@@ -882,6 +909,21 @@ void Rival::ChangeStatus( TargetStatus target )
 	case RivalAI::ActionState::ATTACK_RUSH:			AttackRushUninit();		break;
 	default: break;
 	}
+
+	if ( extraStatus != ExtraState::NONE )
+	{
+		switch ( extraStatus )
+		{
+		//	case Rival::ExtraState::RUSH_WAIT:		break;
+		//	case Rival::ExtraState::RUSH_RUN:		break;
+		//	case Rival::ExtraState::RUSH_SLASH:		break;
+		case Rival::ExtraState::BREAK:	BreakUninit();	break;
+		case Rival::ExtraState::LEAVE:	BreakUninit();	break;
+		case Rival::ExtraState::DEFEAT:	DefeatUninit();	break;
+		default: break;
+		}
+	}
+
 	switch ( lotteryStatus )
 	{
 	case RivalAI::ActionState::WAIT:				WaitInit( target );				break;
@@ -897,6 +939,20 @@ void Rival::ChangeStatus( TargetStatus target )
 }
 void Rival::UpdateCurrentStatus( TargetStatus target )
 {
+	if ( extraStatus != ExtraState::NONE )
+	{
+		switch ( extraStatus )
+		{
+		//	case Rival::ExtraState::RUSH_WAIT:		break;
+		//	case Rival::ExtraState::RUSH_RUN:		break;
+		//	case Rival::ExtraState::RUSH_SLASH:		break;
+		case Rival::ExtraState::BREAK:	BreakUpdate( target );	return; // break;
+		case Rival::ExtraState::LEAVE:	BreakUpdate( target );	return; // break;
+		case Rival::ExtraState::DEFEAT:	DefeatUpdate( target );	return; // break;
+		default: break;
+		}
+	}
+
 	switch ( status )
 	{
 	case RivalAI::ActionState::WAIT:				WaitUpdate( target );			break;
@@ -1237,17 +1293,85 @@ void Rival::AttackRushUninit()
 	setAnimFlame( models.pAtkRushSlash.get(), 0 );
 }
 
-void Rival::BreakInit( TargetStatus target )
+void Rival::BreakInit()
 {
+	const auto temporaryActionState = RivalAI::ActionState::ATTACK_RUSH; // If this action is attack, after break status is wait. if this action is wait, after break status is attack.
+	status		= temporaryActionState;
+	extraStatus	= ExtraState::BREAK;
+	timer		= RivalParam::Open().breakdown.breakFrame;
+	slerpFactor	= 0.0f;
+	velocity	= 0.0f;
+	extraOffset	= 0.0f;
 
+	// Should align the status.
+	AI.OverwriteState( temporaryActionState );
+	AI.StopUpdate();
+
+	setAnimFlame( models.pBreak.get(), 0 );
+	setAnimFlame( models.pLeave.get(), 0 );
+	setLoopFlg( models.pBreak.get(), /* is_loop = */ false );
+	setLoopFlg( models.pLeave.get(), /* is_loop = */ false );
 }
 void Rival::BreakUpdate( TargetStatus target )
 {
+	auto ApplyExtraOffset = [&]()->void
+	{
+		// Apply movement and reset extraOffset.
+		pos += extraOffset;
+		extraOffset = 0.0f;
+	};
 
+	switch ( extraStatus )
+	{
+	case Rival::ExtraState::BREAK:
+		{
+			timer--;
+			if ( timer <= 0 )
+			{
+				timer = 0;
+				extraStatus = ExtraState::LEAVE;
+			}
+		}
+		break;
+	case Rival::ExtraState::LEAVE:
+		{
+			timer++;
+
+			const int MOTION_WHOLE_FRAME	= RivalParam::Open().breakdown.leaveWholeFrame;
+			const int MOVING_FRAME			= RivalParam::Open().breakdown.leaveMoveFrame;
+
+			float percent = scast<float>( timer ) / scast<float>( MOVING_FRAME );
+			float ease = Donya::Easing::Ease
+			(
+				scast<Donya::Easing::Kind>( RivalParam::Open().breakdown.leaveEasingKind ),
+				scast<Donya::Easing::Type>( RivalParam::Open().breakdown.leaveEasingType ),
+				percent
+			);
+
+			extraOffset = -orientation.LocalFront() * ( RivalParam::Open().breakdown.leaveDistance * ease );
+
+			if ( timer == MOVING_FRAME )
+			{
+				ApplyExtraOffset();
+
+				timer = 0;
+				AI.ResumeUpdate();
+				AI.FinishCurrentState();
+			}
+		}
+		break;
+	default: _ASSERT_EXPR( 0, L"Error : Unexpected behavior detected !" ); return; // break;
+	}
 }
 void Rival::BreakUninit()
 {
+	status		= RivalAI::ActionState::WAIT;
+	extraStatus	= ExtraState::NONE;
+	timer		= 0;
+	extraOffset	= 0.0f;
 
+	setAnimFlame( models.pBreak.get(), 0 );
+	setAnimFlame( models.pLeave.get(), 0 );
 }
 
 void Rival::DefeatInit( TargetStatus target )

@@ -253,6 +253,39 @@ public:
 				}
 			}
 		};
+		struct Break
+		{
+			float	moveSpeed{};
+			float	slerpFactor{};	// 0.0f ~ 1.0f.
+			int		breakFrame{};
+			int		leaveEasingKind{};
+			int		leaveEasingType{};
+			int		leaveWholeFrame{};
+			int		leaveMoveFrame{};
+			float	leaveDistance{};
+		private:
+			friend class cereal::access;
+			template<class Archive>
+			void serialize( Archive &archive, std::uint32_t version )
+			{
+				archive
+				(
+					CEREAL_NVP( moveSpeed ),
+					CEREAL_NVP( slerpFactor ),
+					CEREAL_NVP( breakFrame ),
+					CEREAL_NVP( leaveEasingKind ),
+					CEREAL_NVP( leaveEasingType ),
+					CEREAL_NVP( leaveWholeFrame ),
+					CEREAL_NVP( leaveMoveFrame ),
+					CEREAL_NVP( leaveDistance )
+				);
+
+				if ( 1 <= version )
+				{
+					// archive( CEREAL_NVP( x ) );
+				}
+			}
+		};
 
 		float				scale{};				// Usually 1.0f.
 		float				stageBodyRadius{};		// Using for collision to stage's wall.
@@ -267,6 +300,7 @@ public:
 		Line				line{};					// Use when status is attack of line.
 		Raid				raid{};					// Use when status is attack of raid.
 		Rush				rush{};					// Use when status is attack of rush.
+		Break				breakdown{};			// Use when status is attack of break.
 	};
 private:
 	Member m{};
@@ -297,6 +331,10 @@ private:
 		);
 
 		if ( 1 <= version )
+		{
+			archive( CEREAL_NVP( m.breakdown ) );
+		}
+		if ( 2 <= version )
 		{
 			// archive( CEREAL_NVP( x ) );
 		}
@@ -338,13 +376,14 @@ public:
 
 #endif // USE_IMGUI
 };
-CEREAL_CLASS_VERSION( RivalParam, 0 )
+CEREAL_CLASS_VERSION( RivalParam, 1 )
 CEREAL_CLASS_VERSION( RivalParam::IntervalSpeed,	0 )
 CEREAL_CLASS_VERSION( RivalParam::Member::Move,		0 )
 CEREAL_CLASS_VERSION( RivalParam::Member::Barrage,	1 )
 CEREAL_CLASS_VERSION( RivalParam::Member::Line,		1 )
 CEREAL_CLASS_VERSION( RivalParam::Member::Raid,		1 )
 CEREAL_CLASS_VERSION( RivalParam::Member::Rush,		1 )
+CEREAL_CLASS_VERSION( RivalParam::Member::Break,	0 )
 
 struct fbx_shader; // Use for argument.
 /// <summary>
@@ -460,7 +499,7 @@ private:
 	void AttackRushUpdate( TargetStatus target );
 	void AttackRushUninit();
 
-	void BreakInit( TargetStatus target );
+	void BreakInit();
 	void BreakUpdate( TargetStatus target );
 	void BreakUninit();
 

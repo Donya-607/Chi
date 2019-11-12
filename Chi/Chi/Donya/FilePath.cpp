@@ -72,6 +72,8 @@ std::string GetModelPath( ModelAttribute modelAttribute )
 		return "./Data/model/Boss/Boss04/Boss04_Run.fbx";					// break;
 	case ModelAttribute::RivalBreak:
 		return "./Data/model/Boss/Boss04/Boss04_Impact.fbx";				// break;
+	case ModelAttribute::RivalLeave:
+		return "./Data/model/Boss/Boss04/Boss04_TPose.fbx";					// break;
 	case ModelAttribute::RivalDefeat:
 		return "./Data/model/Boss/Boss04/Boss04_Death.fbx";					// break;
 	case ModelAttribute::RivalAtkBarrage:
