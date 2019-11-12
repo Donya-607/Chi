@@ -141,19 +141,19 @@
             "moveSpeed": 0.0,
             "slerpFactor": 0.10000000149011612,
             "waitLength": 60,
-            "rushSpeed": 16.0,
-            "slashStopAnimeFrame": 3,
+            "rushSpeed": 24.0,
+            "slashStopAnimeFrame": 8,
             "slashOccurRange": {
                 "pos": {
                     "x": 0.0,
                     "y": 0.0,
                     "z": 16.0
                 },
-                "radius": 64.0,
-                "exist": false
+                "radius": 80.0,
+                "exist": true
             },
             "hitBox": {
-                "enableFrameStart": 5,
+                "enableFrameStart": 16,
                 "enableFrameLast": 60,
                 "collision": {
                     "pos": {

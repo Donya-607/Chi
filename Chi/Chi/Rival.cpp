@@ -1137,6 +1137,8 @@ void Rival::AttackRushInit( TargetStatus target )
 
 	AI.StopUpdate();
 
+	ResetCurrentSphereF( &RivalParam::Get().RushHitBox() );
+
 	setAnimFlame( models.pAtkRushWait.get(), 0 );
 	setAnimFlame( models.pAtkRushSlash.get(), 0 );
 	setLoopFlg( models.pAtkRushSlash.get(), /* is_loop = */ false );
@@ -1171,7 +1173,7 @@ void Rival::AttackRushUpdate( TargetStatus target )
 				}
 				else
 				{
-					RivalParam::Open().rush.hitBox.Update();
+					RivalParam::Get().RushHitBox().Update();
 				}
 			}
 
@@ -1194,7 +1196,7 @@ void Rival::AttackRushUpdate( TargetStatus target )
 			wsTriggerRange.pos = orientation.RotateVector( wsTriggerRange.pos ); // Rotate the offset.
 			wsTriggerRange.pos += GetPos();
 
-			bool occurSlash = ( trueFieldRadius * 0.9f/* Safety margin */ <= currentLength ) ||
+			bool occurSlash = ( trueFieldRadius <= currentLength ) ||
 				Donya::Sphere::IsHitPoint( wsTriggerRange, target.pos, /* ignoreExistFlag = */ true );
 
 			if ( occurSlash )
@@ -1209,7 +1211,7 @@ void Rival::AttackRushUpdate( TargetStatus target )
 		break;
 	case Rival::ExtraState::RUSH_SLASH:
 		{
-			RivalParam::Open().rush.hitBox.Update();
+			RivalParam::Get().RushHitBox().Update();
 
 			if ( models.pAtkRushSlash->getAnimFinFlg() )
 			{
@@ -1225,6 +1227,8 @@ void Rival::AttackRushUninit()
 {
 	timer		= 0;
 	extraStatus	= ExtraState::NONE;
+
+	ResetCurrentSphereF( &RivalParam::Get().RushHitBox() );
 
 	setAnimFlame( models.pAtkRushWait.get(), 0 );
 	setAnimFlame( models.pAtkRushSlash.get(), 0 );
