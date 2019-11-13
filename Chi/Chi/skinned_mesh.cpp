@@ -862,7 +862,6 @@ void skinned_mesh::render(ID3D11DeviceContext* context, fbx_shader& hlsl, const 
 					{
 
 						animation_flame = it.anim.size() - 1;
-						it.anim.animation_tick = 0;
 						anim_fin = true;
 					}
 					else
