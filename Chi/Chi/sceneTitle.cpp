@@ -409,13 +409,13 @@ void sceneTitle::imGui()
 
 		if (ImGui::TreeNode("parameter"))
 		{
-			ImGui::DragFloat("blur", &blur, 0.1, 0, 10000);
+			ImGui::DragFloat("blur", &blur, 0.1f, 0, 10000.0f);
 			ImGui::NewLine();
 
 			ImGui::Text("judged_color");
-			ImGui::DragFloat("r##bloom", &judged_color.x, 0.01, 0, 1.0);
-			ImGui::DragFloat("g##bloom", &judged_color.y, 0.01, 0, 1.0);
-			ImGui::DragFloat("b##bloom", &judged_color.z, 0.01, 0, 1.0);
+			ImGui::DragFloat("r##bloom", &judged_color.x, 0.01f, 0, 1.0f);
+			ImGui::DragFloat("g##bloom", &judged_color.y, 0.01f, 0, 1.0f);
+			ImGui::DragFloat("b##bloom", &judged_color.z, 0.01f, 0, 1.0f);
 
 			ImGui::TreePop();
 		}

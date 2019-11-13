@@ -197,6 +197,7 @@
     <ClInclude Include="static_mesh.h" />
     <ClInclude Include="system.h" />
     <ClInclude Include="timeMeasurement.h" />
+    <ClInclude Include="UI.h" />
     <ClInclude Include="util.h" />
     <ClInclude Include="vector.h" />
     <ClInclude Include="XinputPad.h" />
@@ -243,14 +244,17 @@
     <ClCompile Include="RivalAI.cpp" />
     <ClCompile Include="SceneEffect.cpp" />
     <ClCompile Include="SceneGame.cpp" />
+    <ClCompile Include="SceneGameOver.cpp" />
     <ClCompile Include="sceneManager.cpp" />
     <ClCompile Include="scenePose.cpp" />
+    <ClCompile Include="SceneResult.cpp" />
     <ClCompile Include="sceneTitle.cpp" />
     <ClCompile Include="skinned_mesh.cpp" />
     <ClCompile Include="Sprite.cpp" />
     <ClCompile Include="Stage.cpp" />
     <ClCompile Include="static_mesh.cpp" />
     <ClCompile Include="timeMeasurement.cpp" />
+    <ClCompile Include="UI.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="bloomSRV.hlsl">

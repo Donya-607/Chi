@@ -16,6 +16,7 @@
 #include "Stage.h"
 #include "light.h"
 #include "Donya/ChiUtility.h"
+#include "Donya/Serializer.h"
 
 #include "Mouse.h"
 
@@ -123,6 +124,26 @@ class SceneEffect : public baseScene
 private:
 	FlashParticle flashParticle;
 	BubbleParticle bubbleParticle;
+EruptionParticle eruqtionParticle;
+	AbsorptionParticle absorptionParticle;
+	DustParticle dustParticle;
+	SparkParticle sparkParticle;
+	LocusParticle locusParticle;
+
+
+	struct billboard
+	{
+		static_mesh pMesh;
+
+		DirectX::XMFLOAT4 pos;			// 座標
+		DirectX::XMFLOAT2 scale;		// 中心座標からの半径
+		float angle;					// 角度
+
+		DirectX::XMFLOAT2 texPos;
+		DirectX::XMFLOAT2 texSize;
+	};
+	billboard data;
+	
 	GolemAI bossAI;
 	int keyCnt;
 	int keyCnt2;
@@ -155,6 +176,139 @@ public:
 	{
 		uninit();
 	}
+	void init();
+	void update();
+	void render();
+	void uninit();
+	void imGui();
+};
+
+class SceneResult : public baseScene
+{
+private:
+	static const int MAX_SIZE = 5;
+
+	struct billboard
+	{
+		std::vector<static_mesh> pMesh;
+		std::vector<int> num;
+
+		DirectX::XMFLOAT4 pos;			// 座標
+		DirectX::XMFLOAT2 scale;		// 中心座標からの半径
+		float angle;					// 角度
+
+		DirectX::XMFLOAT2 texPos;
+		DirectX::XMFLOAT2 texSize;
+	};
+
+	// リザルトロゴ
+//	std::shared_ptr<skinned_mesh> pLogo;		// temp
+
+	// ランキング
+//	std::shared_ptr<skinned_mesh> pRanking;		// temp
+	int rankingScore[MAX_SIZE];
+	billboard rankingRender[MAX_SIZE];
+
+	// Your Score
+//	std::shared_ptr<skinned_mesh> pYourScore;	// temp
+	int yourScore;
+	billboard yourScoreRender;
+
+	// No.
+//	std::shared_ptr<skinned_mesh> pNummber[10];	// temp
+
+	// light
+	Lights	lights;
+
+	Sprite sprite;
+
+	DirectX::XMFLOAT3 rankingPos;
+	DirectX::XMFLOAT3 yourScorePos;
+
+	DirectX::XMFLOAT2 rankingWidth;
+
+private:
+	friend class cereal::access;
+	template<class Archive>
+	void serialize(Archive& archive, std::uint32_t version)
+	{
+		archive
+		(
+			CEREAL_NVP(rankingScore)
+		);
+
+		if (1 <= version)
+		{
+			// archive( CEREAL_NVP( x ) );
+		}
+	}
+	static constexpr const char* SERIAL_ID = "Ranking";
+
+	void LoadParameter(bool isBinary = true);
+
+#if USE_IMGUI
+
+	void SaveParameter();
+
+public:
+	void UseImGui();
+
+#endif // USE_IMGUI
+
+public:
+	SceneResult(int clearTime);
+	~SceneResult() {}
+
+	void init();
+	void update();
+	void render();
+	void uninit();
+	void imGui();
+};
+CEREAL_CLASS_VERSION(SceneResult, 0)
+
+class SceneGameOver : public baseScene
+{
+private:
+
+
+private:
+	friend class cereal::access;
+	template<class Archive>
+	void serialize(Archive& archive, std::uint32_t version)
+	{
+		archive
+		(
+			//CEREAL_NVP(rankingScore)
+		);
+
+		if (1 <= version)
+		{
+			// archive( CEREAL_NVP( x ) );
+		}
+	}
+	static constexpr const char* SERIAL_ID = "Ranking";
+
+	void LoadParameter(bool isBinary = true);
+
+#if USE_IMGUI
+
+	void SaveParameter();
+
+public:
+	void UseImGui();
+
+#endif // USE_IMGUI
+public:
+	SceneGameOver()
+	{
+
+	}
+	~SceneGameOver()
+	{
+
+	}
+
 	void init();
 	void update();
 	void render();
