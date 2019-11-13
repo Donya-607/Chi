@@ -873,10 +873,10 @@ void Player::ApplyVelocity()
 
 			Donya::Vector2 xzWallCenter{ wall.cx, wall.cy };
 			Donya::Vector2 wallSize{ wall.w * xzNAxis.x, wall.h * xzNAxis.y }; // Only either X or Z is valid.
-			float wallWidth = wallSize.Length();
+			float wallWidth = wallSize.Length(); // Extract valid member by Length().
 
 			// Take a value of +1 or -1.
-			int moveSign = Donya::SignBit( xzVelocity.x ) + Donya::SignBit( xzVelocity.y );
+			float moveSign = scast<float>( Donya::SignBit( xzVelocity.x ) + Donya::SignBit( xzVelocity.y ) );
 
 			// Calculate colliding length.
 			// First, calculate body's edge of moving side.
@@ -886,7 +886,10 @@ void Player::ApplyVelocity()
 
 			Donya::Vector2 bodyEdge = xzBodyCenter + ( xzNAxis * bodyWidth * moveSign );
 			Donya::Vector2 wallEdge = xzWallCenter + ( xzNAxis * wallWidth * -moveSign );
-			float collidingLength = ( bodyEdge - wallEdge ).Length();
+			Donya::Vector2 diff = bodyEdge - wallEdge;
+			Donya::Vector2 axisDiff{ diff.x * xzNAxis.x, diff.y * xzNAxis.y };
+			float collidingLength = axisDiff.Length();
+			collidingLength += 0.0001f;	// Prevent the two edges onto same place(the collision detective allows same(equal) value).
 
 			Donya::Vector2 xzCorrection
 			{
