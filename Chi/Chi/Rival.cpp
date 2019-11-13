@@ -178,6 +178,14 @@ void RivalParam::UseImGui()
 		// CommonSettings
 		#pragma endregion
 
+			if ( ImGui::TreeNode( "Defeat" ) )
+			{
+				ImGui::DragInt( "Motion.Length(Frame)", &m.defeat.motionLength );
+				ImGui::SliderFloat( "AfterMotion.HideSpeed", &m.defeat.hideSpeed, 0.00001f, 1.0f );
+
+				ImGui::TreePop();
+			}
+
 			if ( ImGui::TreeNode( "Collisions" ) )
 			{
 				auto ShowAABB	= []( const std::string &prefix, Donya::AABB *pAABB )
@@ -251,7 +259,7 @@ void RivalParam::UseImGui()
 					ShowAABB( "Body.HurtBox", &m.hitBoxBody );
 					ImGui::TreePop();
 				}
-				
+
 				if ( ImGui::TreeNode( "Attack.Barrage" ) )
 				{
 					static std::array<char, 512U> meshNameBuffer{};
@@ -486,7 +494,7 @@ void Rival::Update( TargetStatus target )
 	CollideToWall();
 }
 
-void Rival::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matProjection )
+void Rival::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matProjection, float animeAccel )
 {
 	const auto &PARAM = RivalParam::Open();
 
@@ -501,22 +509,33 @@ void Rival::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya
 		switch ( extraStatus )
 		{
 		case ExtraState::RUSH_WAIT:
-			FBXRender( models.pAtkRushWait.get(), HLSL, WVP, W );
+			FBXRender( models.pAtkRushWait.get(), HLSL, WVP, W, animeAccel );
 			break;
 		case ExtraState::RUSH_RUN:
-			FBXRender( models.pAtkRushSlash.get(), HLSL, WVP, W );
+			FBXRender( models.pAtkRushSlash.get(), HLSL, WVP, W, animeAccel );
 			break;
 		case ExtraState::RUSH_SLASH:
-			FBXRender( models.pAtkRushSlash.get(), HLSL, WVP, W );
+			FBXRender( models.pAtkRushSlash.get(), HLSL, WVP, W, animeAccel );
 			break;
 		case ExtraState::BREAK:
-			FBXRender( models.pBreak.get(), HLSL, WVP, W );
+			FBXRender( models.pBreak.get(), HLSL, WVP, W, animeAccel );
 			break;
 		case ExtraState::LEAVE:
-			FBXRender( models.pLeave.get(), HLSL, WVP, W );
+			FBXRender( models.pLeave.get(), HLSL, WVP, W, animeAccel );
 			break;
 		case ExtraState::DEFEAT:
-			FBXRender( models.pDefeat.get(), HLSL, WVP, W );
+			{
+				const int MOTION_LENGTH = RivalParam::Open().defeat.motionLength;
+				int timeDiff = timer - MOTION_LENGTH;
+				
+				float drawAlpha = 1.0f;
+				if ( 0 < timeDiff )
+				{
+					drawAlpha -= RivalParam::Open().defeat.hideSpeed * timeDiff;
+					drawAlpha =  std::max( 0.0f, drawAlpha );
+				}
+				FBXRender( models.pDefeat.get(), HLSL, WVP, W, animeAccel, /* is_animation = */ true, { 1.0f, 1.0f, 1.0f, drawAlpha } );
+			}
 			break;
 		default: break;
 		}
@@ -526,23 +545,20 @@ void Rival::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya
 		switch ( status )
 		{
 		case RivalAI::ActionState::WAIT:
-			FBXRender( models.pIdle.get(), HLSL, WVP, W );
+			FBXRender( models.pIdle.get(), HLSL, WVP, W, animeAccel );
 			break;
 		case RivalAI::ActionState::MOVE:
-			FBXRender( models.pRun.get(), HLSL, WVP, W );
+			FBXRender( models.pRun.get(), HLSL, WVP, W, animeAccel );
 			break;
 		case RivalAI::ActionState::ATTACK_BARRAGE:
-			FBXRender( models.pAtkBarrage.get(), HLSL, WVP, W );
+			FBXRender( models.pAtkBarrage.get(), HLSL, WVP, W, animeAccel );
 			break;
 		case RivalAI::ActionState::ATTACK_LINE:
-			FBXRender( models.pAtkLine.get(), HLSL, WVP, W );
+			FBXRender( models.pAtkLine.get(), HLSL, WVP, W, animeAccel );
 			break;
 		case RivalAI::ActionState::ATTACK_RAID:
-			FBXRender( models.pAtkRaid.get(), HLSL, WVP, W );
+			FBXRender( models.pAtkRaid.get(), HLSL, WVP, W, animeAccel );
 			break;
-		//	case RivalAI::ActionState::ATTACK_RUSH:
-		//	FBXRender( models.pAtkRushWait.get(), HLSL, WVP, W );
-		//	break;
 		default: break;
 		}
 	}
@@ -685,9 +701,10 @@ void Rival::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya
 #endif // DEBUG_MODE
 }
 
-bool Rival::IsCollideAttackHitBoxes( const Donya::AABB   other, bool disableCollidingHitBoxes )
+bool Rival::IsCollideAttackHitBoxes( const Donya::AABB other, bool disableCollidingHitBoxes )
 {
 	if ( !RivalAI::IsAction( status ) || !other.enable || !other.exist ) { return false; }
+	if ( extraStatus == ExtraState::DEFEAT ) { return false; }
 	// else
 
 	const Donya::OBB otherOBB
@@ -700,9 +717,10 @@ bool Rival::IsCollideAttackHitBoxes( const Donya::AABB   other, bool disableColl
 	};
 	return IsCollideAttackHitBoxes( otherOBB, disableCollidingHitBoxes );
 }
-bool Rival::IsCollideAttackHitBoxes( const Donya::OBB    other, bool disableCollidingHitBoxes )
+bool Rival::IsCollideAttackHitBoxes( const Donya::OBB  other, bool disableCollidingHitBoxes )
 {
 	if ( !RivalAI::IsAction( status ) || !other.enable || !other.exist ) { return false; }
+	if ( extraStatus == ExtraState::DEFEAT ) { return false; }
 	// else
 
 	auto ToWorldSphere			= [&]( const Donya::Sphere &sphere )
@@ -839,13 +857,19 @@ void Rival::WasDefended()
 }
 void Rival::ReceiveImpact()
 {
-	status = decltype( status )::END;
+	DefeatInit();
 }
 
 void Rival::SetFieldRadius( float newFieldRadius )
 {
 	const float bodyRadius = RivalParam::Open().stageBodyRadius;
 	fieldRadius = std::max( newFieldRadius, bodyRadius );
+}
+
+bool Rival::IsDefeated() const
+{
+	const int MOTION_LENGTH = RivalParam::Open().defeat.motionLength;
+	return ( extraStatus == ExtraState::DEFEAT && MOTION_LENGTH <= timer ) ? true : false;
 }
 
 void Rival::LoadModel()
@@ -873,6 +897,21 @@ void Rival::LoadModel()
 	loadFBX( models.pAtkRushSlash.get(), GetModelPath( ModelAttribute::RivalAtkRushSlash ) );
 	Donya::OutputDebugStr( "Done RivalModel.Attack.Rush.Slash.\n" );
 
+	std::vector<std::shared_ptr<skinned_mesh> *> dontLoopModels
+	{
+		&models.pBreak,
+		&models.pLeave,
+		&models.pDefeat,
+		&models.pAtkLine,
+		&models.pAtkRaid,
+		&models.pAtkRushSlash,
+	};
+	for ( auto &it : dontLoopModels )
+	{
+		setLoopFlg( it->get(), /* is_loop = */ false );
+	}
+
+
 	Donya::OutputDebugStr( "End Rival::LoadModel.\n" );
 }
 
@@ -889,9 +928,6 @@ Donya::Vector4x4 Rival::CalcWorldMatrix() const
 	Donya::Vector4x4 S = Donya::Vector4x4::MakeScaling( RivalParam::Open().scale );
 	Donya::Vector4x4 R = orientation.RequireRotationMatrix();
 	Donya::Vector4x4 T = Donya::Vector4x4::MakeTranslation( GetPos() );
-#if DEBUG_MODE
-	if ( status == decltype( status )::END ) { R = Donya::Quaternion::Make( Donya::Vector3::Front(), ToRadian( 180.0f ) ).RequireRotationMatrix(); };
-#endif // DEBUG_MODE
 
 	return S * R * T;
 }
@@ -951,7 +987,7 @@ void Rival::UpdateCurrentStatus( TargetStatus target )
 		//	case Rival::ExtraState::RUSH_SLASH:		break;
 		case Rival::ExtraState::BREAK:	BreakUpdate( target );	return; // break;
 		case Rival::ExtraState::LEAVE:	BreakUpdate( target );	return; // break;
-		case Rival::ExtraState::DEFEAT:	DefeatUpdate( target );	return; // break;
+		case Rival::ExtraState::DEFEAT:	DefeatUpdate();			return; // break;
 		default: break;
 		}
 	}
@@ -1391,17 +1427,25 @@ void Rival::BreakUninit()
 	setAnimFlame( models.pLeave.get(), 0 );
 }
 
-void Rival::DefeatInit( TargetStatus target )
+void Rival::DefeatInit()
 {
+	const auto endState = decltype( status )::END;
+	status		= endState;
+	extraStatus	= ExtraState::DEFEAT;
+	AI.OverwriteState( endState );
+	AI.StopUpdate();
 
+	timer		= 0;
+	velocity	= 0.0f;
+	slerpFactor	= 0.0f;
 }
-void Rival::DefeatUpdate( TargetStatus target )
+void Rival::DefeatUpdate()
 {
-
+	timer++;
 }
 void Rival::DefeatUninit()
 {
-
+	timer = 0;
 }
 
 void Rival::ApplyVelocity( TargetStatus target )

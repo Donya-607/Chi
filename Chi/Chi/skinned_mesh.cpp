@@ -924,6 +924,12 @@ void skinned_mesh::render(ID3D11DeviceContext* context, fbx_shader& hlsl, const 
 				}
 				cb.ambient = p.ambient.color;
 				cb.ambient.w = p.transparent.color.w;
+				{
+					cb.ambient.x *= materialColor.x;
+					cb.ambient.y *= materialColor.y;
+					cb.ambient.z *= materialColor.z;
+					cb.ambient.w *= materialColor.w;
+				}
 				cb.diffuse = p.diffuse.color;
 				cb.specular = p.specular.color;
 

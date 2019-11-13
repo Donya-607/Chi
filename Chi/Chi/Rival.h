@@ -286,6 +286,27 @@ public:
 				}
 			}
 		};
+		struct Defeat
+		{
+			int		motionLength{};	// Per frame.
+			float	hideSpeed{};	// Use after motionLength.
+		private:
+			friend class cereal::access;
+			template<class Archive>
+			void serialize( Archive &archive, std::uint32_t version )
+			{
+				archive
+				(
+					CEREAL_NVP( motionLength ),
+					CEREAL_NVP( hideSpeed )
+				);
+
+				if ( 1 <= version )
+				{
+					// archive( CEREAL_NVP( x ) );
+				}
+			}
+		};
 
 		float				scale{};				// Usually 1.0f.
 		float				stageBodyRadius{};		// Using for collision to stage's wall.
@@ -301,6 +322,7 @@ public:
 		Raid				raid{};					// Use when status is attack of raid.
 		Rush				rush{};					// Use when status is attack of rush.
 		Break				breakdown{};			// Use when status is attack of break.
+		Defeat				defeat{};				// Use when status is attack of defeat.
 	};
 private:
 	Member m{};
@@ -335,6 +357,10 @@ private:
 			archive( CEREAL_NVP( m.breakdown ) );
 		}
 		if ( 2 <= version )
+		{
+			archive( CEREAL_NVP( m.defeat ) );
+		}
+		if ( 3 <= version )
 		{
 			// archive( CEREAL_NVP( x ) );
 		}
@@ -376,7 +402,7 @@ public:
 
 #endif // USE_IMGUI
 };
-CEREAL_CLASS_VERSION( RivalParam, 1 )
+CEREAL_CLASS_VERSION( RivalParam, 2 )
 CEREAL_CLASS_VERSION( RivalParam::IntervalSpeed,	0 )
 CEREAL_CLASS_VERSION( RivalParam::Member::Move,		0 )
 CEREAL_CLASS_VERSION( RivalParam::Member::Barrage,	1 )
@@ -384,6 +410,7 @@ CEREAL_CLASS_VERSION( RivalParam::Member::Line,		1 )
 CEREAL_CLASS_VERSION( RivalParam::Member::Raid,		1 )
 CEREAL_CLASS_VERSION( RivalParam::Member::Rush,		1 )
 CEREAL_CLASS_VERSION( RivalParam::Member::Break,	0 )
+CEREAL_CLASS_VERSION( RivalParam::Member::Defeat,	0 )
 
 struct fbx_shader; // Use for argument.
 /// <summary>
@@ -441,7 +468,7 @@ public:
 
 	void Update( TargetStatus target );
 
-	void Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matProjection );
+	void Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matProjection, float animationAcceleration = 1.0f );
 public:
 	bool IsCollideAttackHitBoxes( const Donya::AABB   judgeOther, bool disableCollidingHitBoxes );
 	bool IsCollideAttackHitBoxes( const Donya::OBB    judgeOther, bool disableCollidingHitBoxes );
@@ -465,6 +492,11 @@ public:
 	void SetFieldRadius( float fieldRadius );
 
 	Donya::Vector3 GetPos() const { return pos + extraOffset; }
+
+	/// <summary>
+	/// Returns true when the status is "Defeat" and the defeat motion was finished completely.
+	/// </summary>
+	bool IsDefeated() const;
 private:
 	void LoadModel();
 
@@ -503,8 +535,8 @@ private:
 	void BreakUpdate( TargetStatus target );
 	void BreakUninit();
 
-	void DefeatInit( TargetStatus target );
-	void DefeatUpdate( TargetStatus target );
+	void DefeatInit();
+	void DefeatUpdate();
 	void DefeatUninit();
 private:
 	/// <summary>

@@ -758,12 +758,20 @@ public:
 			{
 				pSceneManager->setNextScene(new sceneTitle(), false);
 			}
+			ImGui::Text( "" );
 
 			if ( ImGui::TreeNode( "Game" ) )
 			{
 				ImGui::Text( "Show.Press \'ALT\' and \'I\' or \'T'\'key : Toggle ImGui ON/OFF" );
 				ImGui::Text( "Show.Press \'ALT\' and \'H\'key : Toggle Collision ON/OFF" );
 				ImGui::Text( "" );
+
+			#if DEBUG_MODE
+
+				ImGui::Text( "Is the Rival defeated ? : %d", ( rival.IsDefeated() ) ? 1 : 0 );
+				ImGui::Text( "" );
+
+			#endif // DEBUG_MODE
 
 				if ( ImGui::TreeNode( "Sound test" ) )
 				{
