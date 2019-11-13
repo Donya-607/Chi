@@ -288,7 +288,7 @@ void skinned_mesh::fbxInit(ID3D11Device* _device, const std::string& _fbxFileNam
 
 
 
-void skinned_mesh::setInfo(ID3D11Device* _device, const std::string& _fbxFileName,bool load_cerealize, bool is_Tpose)
+void skinned_mesh::setInfo(ID3D11Device* _device, const std::string& _fbxFileName, bool load_cerealize, bool is_Tpose)
 {
 	size_t count = _fbxFileName.find_last_of("/") + 1;
 	size_t count2 = _fbxFileName.find_last_of(".") + 1;
@@ -825,55 +825,57 @@ bool skinned_mesh::loadBinary(std::string _file_name)
 
 }
 
-void skinned_mesh::render(ID3D11DeviceContext* context, fbx_shader& hlsl, const DirectX::XMFLOAT4X4& SynthesisMatrix, const DirectX::XMFLOAT4X4& worldMatrix, const DirectX::XMFLOAT4& camPos, line_light& _lineLight, std::vector<point_light>& _point_light, const DirectX::XMFLOAT4& materialColor, bool wireFlg, float elapsed_time, float magnification
+void skinned_mesh::render(ID3D11DeviceContext* context, fbx_shader& hlsl, const DirectX::XMFLOAT4X4& SynthesisMatrix, const DirectX::XMFLOAT4X4& worldMatrix, const DirectX::XMFLOAT4& camPos, line_light& _lineLight, std::vector<point_light>& _point_light, const DirectX::XMFLOAT4& materialColor, bool wireFlg, float elapsed_time, float magnification, bool animation_flg
 )
 {
-	if (stop_time)
-		stop_time -= elapsed_time;
+	if (animation_flg)
+		if (stop_time)
+			stop_time -= elapsed_time;
 
 	if (have_material)
 	{
 		for (auto& it : meshes)
 		{
-			if (!it.anim.empty())
-			{
-				animation_flame = static_cast<int>(it.anim.animation_tick / it.anim.sampling_time);
-
-				//ループ用
-				if (is_loop)
+			if (animation_flg)
+				if (!it.anim.empty())
 				{
-					if (static_cast<size_t>(animation_flame) > it.anim.size() - 1)
-					{
-						animation_flame = 0;
-						it.anim.animation_tick = 0;
-						anim_fin = true;;
-					}
-					//アニメーションタイマーのインクリメント
-					if (!stop_animation && stop_time <= 0)
-					{
-						it.anim.animation_tick += elapsed_time * magnification;
-						anim_fin = false;
-					}
-				}
-				//ループ無し
-				else
-				{
-					if (static_cast<size_t>(animation_flame) > it.anim.size() - 1)
-					{
+					animation_flame = static_cast<int>(it.anim.animation_tick / it.anim.sampling_time);
 
-						animation_flame = it.anim.size() - 1;
-						anim_fin = true;
-					}
-					else
+					//ループ用
+					if (is_loop)
 					{
+						if (static_cast<size_t>(animation_flame) > it.anim.size() - 1)
+						{
+							animation_flame = 0;
+							it.anim.animation_tick = 0;
+							anim_fin = true;;
+						}
+						//アニメーションタイマーのインクリメント
 						if (!stop_animation && stop_time <= 0)
 						{
-							anim_fin = false;
 							it.anim.animation_tick += elapsed_time * magnification;
+							anim_fin = false;
+						}
+					}
+					//ループ無し
+					else
+					{
+						if (static_cast<size_t>(animation_flame) > it.anim.size() - 1)
+						{
+
+							animation_flame = it.anim.size() - 1;
+							anim_fin = true;
+						}
+						else
+						{
+							if (!stop_animation && stop_time <= 0)
+							{
+								anim_fin = false;
+								it.anim.animation_tick += elapsed_time * magnification;
+							}
 						}
 					}
 				}
-			}
 
 			for (auto& p : it.subsets)
 			{

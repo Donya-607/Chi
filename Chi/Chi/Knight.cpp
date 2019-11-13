@@ -408,7 +408,7 @@ void Knight::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Dony
 			float drawAlpha = ( VIVID_TIME <= timer )
 			? 1.0f - ( KnightParam::Open().explHideSpeed * ( timer - VIVID_TIME ) )
 			: 1.0f;
-			FBXRender( models.pFxExpl.get(), HLSL, FX_WVP, FX_W, 1.0f, { 1.0f, 1.0f, 1.0f, drawAlpha } );
+			FBXRender( models.pFxExpl.get(), HLSL, FX_WVP, FX_W, 1.0f, /* is_animation = */ true, { 1.0f, 1.0f, 1.0f, drawAlpha } );
 		}
 		break;
 	case KnightAI::ActionState::ATTACK_SWING:

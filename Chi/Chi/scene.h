@@ -57,6 +57,13 @@ private:
 	DirectX::XMFLOAT2 texsize;
 	float alpha;
 	DirectX::XMFLOAT3 color;
+
+	//bloom test
+	ID3D11ShaderResourceView* SRV;
+	ID3D11RenderTargetView* RT;
+	ImTextureID screen_SRV;
+	float blur;
+	DirectX::XMFLOAT4 judged_color;
 public:
 	sceneTitle(){}
 	~sceneTitle()

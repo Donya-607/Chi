@@ -16,6 +16,10 @@ DirectX::XMINT2 getWindowSize();
 void clearWindow(const float r = 1.0f, const float g = 1.0f, const float b = 1.0f, const float a = 1.0f);
 void clearWindow(const DirectX::XMFLOAT4& color = { 1.0f,1.0f,1.0f,1.0f });
 
+//RenderTarget
+bool setRenderTarget(ID3D11RenderTargetView** _renderTarget);
+bool resetRendertarget();
+void clearRendertarget(ID3D11RenderTargetView* _renderTarget, const DirectX::XMFLOAT4& color);
 
 //CreateShaderResourceView
 bool createSRV(ID3D11ShaderResourceView** _SRV, ID3D11RenderTargetView** RT);
@@ -187,7 +191,7 @@ const int getAnimFlame(skinned_mesh*);
 bool calcTransformedPosBySpecifyMesh(skinned_mesh* _mesh, DirectX::XMFLOAT3& _pos, std::string _mesh_name);
 bool calcTransformedPosBySpecifyMesh(skinned_mesh* _mesh, DirectX::XMFLOAT3& _pos, std::string _mesh_name, bone_animation* anim);
 
-void FBXRender(skinned_mesh* _mesh,fbx_shader& hlsl,const DirectX::XMFLOAT4X4& SynthesisMatrix,const DirectX::XMFLOAT4X4& worldMatrix, float magnification = 1.0f, const DirectX::XMFLOAT4& materialColor = {1.0f,1.0f,1.0f,1.0f}, bool wireFlg = false);
+void FBXRender(skinned_mesh* _mesh,fbx_shader& hlsl,const DirectX::XMFLOAT4X4& SynthesisMatrix,const DirectX::XMFLOAT4X4& worldMatrix,float magnification = 1.0f,bool animation_flg = true, const DirectX::XMFLOAT4& materialColor = {1.0f,1.0f,1.0f,1.0f}, bool wireFlg = false);
 
 void FBXRender(skinned_mesh* skinnedMesh, fbx_shader& hlsl, bone_animation* anim, const DirectX::XMFLOAT4X4& SynthesisMatrix, const DirectX::XMFLOAT4X4& worldMatrix, const DirectX::XMFLOAT4& materialColor = { 1.0f,1.0f,1.0f,1.0f }, bool wireFlg = false);
 

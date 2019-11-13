@@ -307,7 +307,8 @@ namespace GameLib
 			line_light& lineLight,
 			std::vector<point_light>& _point_light,
 			const DirectX::XMFLOAT4& materialColor,
-			bool wireFlg
+			bool wireFlg,
+			bool animation_flg
 		);
 
 
