@@ -6,15 +6,17 @@
 #include "Donya/Keyboard.h"	// Insert by Donya.
 #include "Donya/Useful.h"	// Insert by Donya.
 
+#include "StorageForScene.h"
+
 void sceneTitle::init()
 {
-	setCamPos(0.0f, 18.0f, -63.0f);
-	setTarget(0, 3, 0);
+	setCamPos( 0.0f, 18.0f, -63.0f );
+	setTarget( 0, 3, 0 );
 	isStack = false;
 	flg = false;
 	pos = { getCamPos().x,getCamPos().y,getCamPos().z };
 	target = { getCamTarget().x,getCamTarget().y,getCamTarget().z };
-	setLightAmbient({ .1f,-1,0,1 }, { 1,1,1,1 });
+	setLightAmbient( { .1f,-1,0,1 }, { 1,1,1,1 } );
 	zoomSpeed = 2.0f;
 	moveSpeed = 10.0f;
 	mouse = std::make_unique<Mouse>();
@@ -25,23 +27,23 @@ void sceneTitle::init()
 	prevMPos = mousePos;
 	cam_angle = 90;
 	models.clear();
-	loadShader(shader, "./Data/shader/skinned_mesh_has_born_vs.cso", "./Data/shader/skinned_mesh_ps.cso", "./Data/shader/skinned_mesh_vs.cso", "./Data/shader/skinned_mesh_no_uv_ps.cso");
+	loadShader( shader, "./Data/shader/skinned_mesh_has_born_vs.cso", "./Data/shader/skinned_mesh_ps.cso", "./Data/shader/skinned_mesh_vs.cso", "./Data/shader/skinned_mesh_no_uv_ps.cso" );
 	models.emplace_back();
 	//loadFBX(&models.back().mesh, "./Data/Boss04_3Attack.fbx");
 	models.back().model_pos = { 0,0,0 };
 	models.back().model_angle = { 0,3.1f,0 };
 	models.back().model_scale = { 0.1f,0.1f,0.1f };
 	models.back().is_enable = true;
-	for (int i = 0; i < models.back().mesh.getMeshCount(); i++)
+	for ( int i = 0; i < models.back().mesh.getMeshCount(); i++ )
 	{
-		for (auto& p : models.back().mesh.getMesh(i).subsets)
+		for ( auto &p : models.back().mesh.getMesh( i ).subsets )
 		{
 			models.back().tex_SRV.emplace_back();
-			models.back().tex_SRV.back() = (void*)p.diffuse.shader_resource_view;
+			models.back().tex_SRV.back() = (void *)p.diffuse.shader_resource_view;
 		}
 	}
 
-	createBillboard(&builborad, L"./Data/bag001.png");
+	createBillboard( &builborad, L"./Data/bag001.png" );
 	builboard_pos = { 0,0,0,1 };
 	builborad_angle = 0;
 	builborad_size = { 1.0f,1.0f };
@@ -50,10 +52,12 @@ void sceneTitle::init()
 	alpha = 1.0f;
 	color = { 1.0f,1.0f,1.0f };
 
-	createSRV(&SRV, &RT);
-	screen_SRV = (void*)SRV;
+	createSRV( &SRV, &RT );
+	screen_SRV = (void *)SRV;
 	blur = 0;
 	judged_color = { 1.0f,1.0f,1.0f,1.0f };
+
+	StorageForScene::ResetStorage();
 }
 
 void sceneTitle::update()

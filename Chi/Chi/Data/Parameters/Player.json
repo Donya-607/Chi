@@ -17,7 +17,7 @@
                 "y": 128.0,
                 "z": 16.0
             },
-            "exist": false
+            "exist": true
         },
         "hitBoxPhysic": {
             "cereal_class_version": 0,

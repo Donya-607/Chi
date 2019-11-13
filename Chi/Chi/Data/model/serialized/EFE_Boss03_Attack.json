@@ -31685,7 +31685,7 @@
                             "color.y": 0.0,
                             "color.z": 0.0,
                             "color.w": 1.0,
-                            "texture_filename": "./Data/model/Effect/EFE_Boss03_Attack.fbm\\TEX_MagicCircle.png",
+                            "texture_filename": "",
                             "scale_u": 1.0,
                             "scale_v": 1.0
                         },

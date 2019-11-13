@@ -189,38 +189,45 @@ void SceneResult::LoadParameter(bool isBinary)
 
 void SceneResult::imGui()
 {
-	ImGui::Begin("Result");
-
-	ImGui::Text("ranking");
-	ImGui::Text("1 : %d", rankingScore[0]);
-	ImGui::Text("2 : %d", rankingScore[1]);
-	ImGui::Text("3 : %d", rankingScore[2]);
-	ImGui::Text("4 : %d", rankingScore[3]);
-	ImGui::Text("5 : %d", rankingScore[4]);
-
-	ImGui::Text(" ");
-
-	ImGui::Text("Your Score : %d", yourScore);
-
-	if (ImGui::TreeNode("BillBoard Test Draw Parametor"))
+	if ( ImGui::BeginIfAllowed( "Result" ) )
 	{
-		/*ImGui::DragFloat3("pos",		&data[0].pos.x);
-		ImGui::DragFloat2("scale",		&data[0].scale.x);
-		ImGui::DragFloat2("texPos",		&data[0].texPos.x);
-		ImGui::DragFloat2("texSize",	&data[0].texSize.x);
+		ImGui::Text("ranking");
+		ImGui::Text("1 : %d", rankingScore[0]);
+		ImGui::Text("2 : %d", rankingScore[1]);
+		ImGui::Text("3 : %d", rankingScore[2]);
+		ImGui::Text("4 : %d", rankingScore[3]);
+		ImGui::Text("5 : %d", rankingScore[4]);
+
 		ImGui::Text(" ");
-		ImGui::DragFloat3("pos ",		&data[1].pos.x);
-		ImGui::DragFloat2("scale ",		&data[1].scale.x);
-		ImGui::DragFloat2("texPos ",	&data[1].texPos.x);
-		ImGui::DragFloat2("texSize ",	&data[1].texSize.x);*/
 
-		ImGui::DragFloat3("rankingPos", &rankingPos.x);
-		ImGui::DragFloat3("yourScorePos", &yourScorePos.x);
-		ImGui::DragFloat2("rankingWidth", &rankingWidth.x);
-		ImGui::TreePop();
+		if ( ImGui::Button( "GoTo Title" ) )
+		{
+			pSceneManager->setNextScene( new sceneTitle(), false );
+		}
+		ImGui::Text(" ");
+
+		ImGui::Text("Your Score : %d", yourScore);
+
+		if (ImGui::TreeNode("BillBoard Test Draw Parametor"))
+		{
+			/*ImGui::DragFloat3("pos",		&data[0].pos.x);
+			ImGui::DragFloat2("scale",		&data[0].scale.x);
+			ImGui::DragFloat2("texPos",		&data[0].texPos.x);
+			ImGui::DragFloat2("texSize",	&data[0].texSize.x);
+			ImGui::Text(" ");
+			ImGui::DragFloat3("pos ",		&data[1].pos.x);
+			ImGui::DragFloat2("scale ",		&data[1].scale.x);
+			ImGui::DragFloat2("texPos ",	&data[1].texPos.x);
+			ImGui::DragFloat2("texSize ",	&data[1].texSize.x);*/
+
+			ImGui::DragFloat3("rankingPos", &rankingPos.x);
+			ImGui::DragFloat3("yourScorePos", &yourScorePos.x);
+			ImGui::DragFloat2("rankingWidth", &rankingWidth.x);
+			ImGui::TreePop();
+		}
+
+		ImGui::End();
 	}
-
-	ImGui::End();
 }
 
 #endif // USE_IMGUI

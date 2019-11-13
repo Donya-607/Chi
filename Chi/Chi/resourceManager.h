@@ -10,7 +10,7 @@ private:
 	ResourceManager() {}
 	~ResourceManager() {}
 
-	static const int RESOURCE_MAX = 64;
+	static const int RESOURCE_MAX = 256;
 
 	struct ResourceShaderResourceViews {
 		int iRefNum;

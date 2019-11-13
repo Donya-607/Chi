@@ -25,6 +25,18 @@ bool ResourceManager::LoadShaderResourceView(
 	ID3D11Device *Device, std::wstring filename,
 	ID3D11ShaderResourceView **SRView, D3D11_TEXTURE2D_DESC *TexDesc)
 {
+	std::wstring onlyFileName{};
+	size_t slashStart		= filename.find_last_of( '/' );
+	size_t backSlashStart	= filename.find_last_of( '\\' );
+	if ( slashStart != std::wstring::npos )
+	{
+		onlyFileName = filename.substr( slashStart );
+	}
+	if ( backSlashStart != std::wstring::npos )
+	{
+		onlyFileName = filename.substr( backSlashStart );
+	}
+
 	HRESULT hr = 0;
 	int no = -1;
 	ResourceShaderResourceViews *find = nullptr;
@@ -42,7 +54,7 @@ bool ResourceManager::LoadShaderResourceView(
 		}
 
 		//	ファイルパスが違うなら無視
-		if (wcscmp(p->path.c_str(), filename.c_str()) != 0) continue;
+		if (wcscmp(p->path.c_str(), onlyFileName.c_str()) != 0) continue;
 
 		//	同名ファイルが存在した
 		find = p;
@@ -55,8 +67,9 @@ bool ResourceManager::LoadShaderResourceView(
 	{
 		DirectX::TexMetadata metadata;
 		DirectX::ScratchImage image;
-		std::wstring dummy = filename;
+		std::wstring dummy = onlyFileName;
 		size_t start = dummy.find_last_of(L".");
+
 
 		std::wstring extension = dummy.substr(start, dummy.size() - start);
 
@@ -64,19 +77,19 @@ bool ResourceManager::LoadShaderResourceView(
 
 		if (L".png" == extension || L".jpeg" == extension || L".jpg" == extension || L".jpe" == extension || L".gif" == extension || L".tiff" == extension || L".tif" == extension || L".bmp" == extension)
 		{
-			DirectX::LoadFromWICFile(filename.c_str(), 0, &metadata, image);
+			DirectX::LoadFromWICFile( filename.c_str(), 0, &metadata, image);
 			_ASSERT_EXPR(SUCCEEDED(hr), hr_trace(hr));
 		}
 		else if (L".dds" == extension)
 		{
-			DirectX::LoadFromDDSFile(filename.c_str(), 0, &metadata, image);
+			DirectX::LoadFromDDSFile( filename.c_str(), 0, &metadata, image);
 			_ASSERT_EXPR(SUCCEEDED(hr), hr_trace(hr));
 		}
 		else if (L".tga" == extension || L".vda" == extension || L".icb" == extension || L".vst" == extension)
 		{
 			use_SRGB = true;
 
-			DirectX::LoadFromTGAFile(filename.c_str(), &metadata, image);
+			DirectX::LoadFromTGAFile( filename.c_str(), &metadata, image);
 			_ASSERT_EXPR(SUCCEEDED(hr), hr_trace(hr));
 		}
 
@@ -84,7 +97,7 @@ bool ResourceManager::LoadShaderResourceView(
 			(
 				FAILED
 				(
-					DirectX::CreateShaderResourceViewEx
+					hr = DirectX::CreateShaderResourceViewEx
 					(
 						Device,
 						image.GetImages(),
@@ -101,7 +114,7 @@ bool ResourceManager::LoadShaderResourceView(
 			)
 			_ASSERT_EXPR(SUCCEEDED(hr), hr_trace(hr));
 		find = p;
-		p->path = filename;
+		p->path = onlyFileName;
 		p->SRView->GetResource(&Resource);
 	}
 

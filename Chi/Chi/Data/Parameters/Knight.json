@@ -29,10 +29,10 @@
             "cereal_class_version": 0,
             "pos": {
                 "x": 0.0,
-                "y": 0.0,
+                "y": 64.0,
                 "z": 0.0
             },
-            "radius": 10.0,
+            "radius": 106.0,
             "exist": true
         },
         "m.hitBoxSwing": {
@@ -84,7 +84,7 @@
                     "y": 0.0,
                     "z": 0.0
                 },
-                "radius": 600.0,
+                "radius": 0.0,
                 "exist": false
             }
         },
