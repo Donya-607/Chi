@@ -2,7 +2,7 @@
     "Player": {
         "cereal_class_version": 6,
         "scale": 1.0,
-        "runSpeed": 23.5,
+        "runSpeed": 13.0,
         "rotSlerpFactor": 0.20000000298023225,
         "hitBoxBody": {
             "cereal_class_version": 0,
@@ -17,7 +17,7 @@
                 "y": 128.0,
                 "z": 16.0
             },
-            "exist": true
+            "exist": false
         },
         "hitBoxPhysic": {
             "cereal_class_version": 0,
@@ -47,8 +47,8 @@
         },
         "hitBoxLance": {
             "cereal_class_version": 0,
-            "enableFrameStart": 65,
-            "enableFrameLast": 85,
+            "enableFrameStart": 120,
+            "enableFrameLast": 155,
             "OBB": {
                 "cereal_class_version": 0,
                 "pos": {
@@ -73,7 +73,7 @@
         },
         "lanceMeshName": "MDL_Spear",
         "shieldsRecastFrame": 30,
-        "frameStopAnime": 30,
-        "frameStopTiming": 3
+        "frameStopAnime": 90,
+        "frameStopTiming": 1
     }
 }

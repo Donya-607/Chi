@@ -2,6 +2,7 @@
 
 #include <array>
 
+#include "Donya/Keyboard.h"
 #include "Donya/FilePath.h"
 #include "Donya/Sound.h"
 #include "Donya/Useful.h"		// Use convert character-code function.
@@ -169,6 +170,79 @@ void PlayerParam::UseImGui()
 }
 
 #endif // USE_IMGUI
+
+Player::Input Player::Input::MakeByExternalInput( Donya::Vector4x4 viewMat )
+{
+	Player::Input input{};
+
+	auto ConnectedControllerCount = []()
+	{
+		return GameLib::input::xInput::getState();
+	};
+#if !DEBUG_MODE
+	if ( 0 < ConnectedControllerCount() )
+#endif // !DEBUG_MODE
+	{
+		// XINPUT_GAMEPAD : https://docs.microsoft.com/ja-jp/windows/win32/api/xinput/ns-xinput-xinput_gamepad
+
+		constexpr int   PAD_NO = 0;
+		constexpr float STICK_RANGE_MAX = 32768.0f;
+		const auto leftStick = GameLib::input::xInput::getThumbL( PAD_NO );
+		if ( leftStick.x != 0 ) { input.moveVector.x = scast<float>( leftStick.x ) / STICK_RANGE_MAX; }
+		if ( leftStick.y != 0 ) { input.moveVector.z = scast<float>( leftStick.y ) / STICK_RANGE_MAX; }
+
+		constexpr int TRIGGER_FLAG = 1;
+		if ( GameLib::input::xInput::pressedButtons( PAD_NO, XboxPad_Button::RIGHT_SHOULDER ) == TRIGGER_FLAG ) { input.doDefend = true; }
+		if ( GameLib::input::xInput::pressedButtons( PAD_NO, XboxPad_Button::X ) == TRIGGER_FLAG ) { input.doAttack = true; }
+	}
+#if !DEBUG_MODE
+	// else
+#endif // !DEBUG_MODE
+	{
+		if ( Donya::Keyboard::Press( VK_UP		) ) { input.moveVector.z = +1.0f; }
+		if ( Donya::Keyboard::Press( VK_DOWN	) ) { input.moveVector.z = -1.0f; }
+		if ( Donya::Keyboard::Press( VK_LEFT	) ) { input.moveVector.x = -1.0f; }
+		if ( Donya::Keyboard::Press( VK_RIGHT	) ) { input.moveVector.x = +1.0f; }
+
+		if ( Donya::Keyboard::Trigger( 'Z' ) ) { input.doDefend = true; }
+		if ( Donya::Keyboard::Trigger( 'X' ) ) { input.doAttack = true; }
+	}
+
+	input.moveVector.Normalize();
+
+	// Transform to camera space from world space.
+	{
+		Donya::Vector4x4 cameraRotation{};
+		{
+			// Extract inverse rotation matrix here.
+			cameraRotation = viewMat;
+			cameraRotation._14 = 0.0f;
+			cameraRotation._24 = 0.0f;
+			cameraRotation._34 = 0.0f;
+			cameraRotation._41 = 0.0f;
+			cameraRotation._42 = 0.0f;
+			cameraRotation._43 = 0.0f;
+			cameraRotation._44 = 1.0f;
+
+			// XXX : If "viewMat" is invalid matrix, Inverse() will returns NaN.
+
+			cameraRotation = cameraRotation.Inverse();
+		}
+
+		Donya::Vector4 moveVector4{};
+		moveVector4.x = input.moveVector.x;
+		moveVector4.y = input.moveVector.y;
+		moveVector4.z = input.moveVector.z;
+		moveVector4.w = 0.0f;
+
+		moveVector4 = cameraRotation * moveVector4;
+
+		input.moveVector.x = moveVector4.x;
+		input.moveVector.z = moveVector4.z;
+	}
+
+	return input;
+}
 
 Player::Player() :
 	status( State::Idle ),

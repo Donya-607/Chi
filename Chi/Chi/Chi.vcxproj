@@ -195,6 +195,7 @@
     <ClInclude Include="Sprite.h" />
     <ClInclude Include="Stage.h" />
     <ClInclude Include="static_mesh.h" />
+    <ClInclude Include="StorageForScene.h" />
     <ClInclude Include="system.h" />
     <ClInclude Include="timeMeasurement.h" />
     <ClInclude Include="UI.h" />
@@ -253,6 +254,7 @@
     <ClCompile Include="Sprite.cpp" />
     <ClCompile Include="Stage.cpp" />
     <ClCompile Include="static_mesh.cpp" />
+    <ClCompile Include="StorageForScene.cpp" />
     <ClCompile Include="timeMeasurement.cpp" />
     <ClCompile Include="UI.cpp" />
   </ItemGroup>

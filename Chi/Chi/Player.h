@@ -152,6 +152,7 @@ public:
 		{
 			return Input{ Donya::Vector3::Zero(), false, false };
 		}
+		static Input MakeByExternalInput( Donya::Vector4x4 viewMat );
 	};
 private:
 	struct Models
