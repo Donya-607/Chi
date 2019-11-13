@@ -185,7 +185,7 @@ public:
 	Player();
 	~Player();
 public:
-	void Init();
+	void Init( const Donya::Vector3 &wsInitialPos, const Donya::Vector3 &initialAnglesRadian );
 	void Uninit();
 
 	void Update( Input input );

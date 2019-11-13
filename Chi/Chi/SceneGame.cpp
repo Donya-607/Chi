@@ -160,7 +160,7 @@ public:
 		Donya::OutputDebugStr( "Objects count : 4\n" );
 
 		Donya::OutputDebugStr( "No.1 Begin Player::Init.\n" );
-		player.Init();
+		player.Init( Donya::Vector3::Zero(), Donya::Vector3::Zero() );
 		player.SetFieldRadius( fieldRadius );
 		Donya::OutputDebugStr( "No.1 End Player::Init.\n" );
 

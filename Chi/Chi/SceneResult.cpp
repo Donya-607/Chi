@@ -8,7 +8,9 @@
 #include "Donya/Keyboard.h"
 
 
-SceneResult::SceneResult(int clearTime)
+SceneResult::SceneResult(int clearTime) :
+	rankingScore(), rankingRender(), yourScore(), yourScoreRender(),
+	lights(), sprite(), rankingPos(), yourScorePos(), rankingWidth()
 {
 	/*pLogo = std::make_shared<skinned_mesh>();
 	pRanking = std::make_shared<skinned_mesh>();
@@ -25,7 +27,7 @@ SceneResult::SceneResult(int clearTime)
 
 	yourScore = clearTime;
 
-	spriteLoad(&sprite, L"./Data/Images/UI.png");
+	spriteLoad(&sprite, L"./Data/Images/UI/UI.png");
 }
 
 void SceneResult::init()  
@@ -116,7 +118,7 @@ void SceneResult::init()
 		rankingRender[i].pMesh.resize(rankingRender[i].num.size());
 		for (int j = 0; j < static_cast<int>( rankingRender[i].num.size() ); j++)
 		{
-			createBillboard(&rankingRender[i].pMesh[j], L"./Data/Images/UI.png");
+			createBillboard(&rankingRender[i].pMesh[j], L"./Data/Images/UI/UI.png");
 		}
 	}
 

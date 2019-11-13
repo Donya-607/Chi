@@ -273,15 +273,16 @@ Player::Player() :
 }
 Player::~Player() = default;
 
-void Player::Init()
+void Player::Init( const Donya::Vector3 &wsInitPos, const Donya::Vector3 &initRadians )
 {
 	PlayerParam::Get().Init();
 	SetFieldRadius( 0.0f ); // Set to body's radius.
 
 	LoadModel();
 	
-	lookDirection = Donya::Vector3::Front();
-	orientation   = Donya::Quaternion::Identity();
+	pos				= wsInitPos;
+	lookDirection	= Donya::Vector3::Front();
+	orientation		= Donya::Quaternion::Make( initRadians.x, initRadians.y, initRadians.z );
 
 	IdleInit( Input::NoOperation() );
 }
