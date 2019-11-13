@@ -1,10 +1,13 @@
 #pragma once
 
-struct StorageForScene
+namespace StorageForScene
 {
-public:
-	int stageNo{};
-};
+	struct Storage
+	{
+	public:
+		int stageNo{};
+	};
 
-void SetStorage( const StorageForScene &newData );
-const StorageForScene *GetStorage();
+	void SetStorage( const Storage &newData );
+	const Storage *GetStorage();
+}

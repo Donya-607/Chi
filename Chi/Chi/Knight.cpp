@@ -642,6 +642,11 @@ void Knight::SetFieldRadius( float newFieldRadius )
 	fieldRadius = std::max( newFieldRadius, bodyRadius );
 }
 
+bool Knight::IsDefeated() const
+{
+	return ( status == KnightAI::ActionState::END ) ? true : false;
+}
+
 void Knight::LoadModel()
 {
 	Donya::OutputDebugStr( "Begin Knight::LoadModel.\n" );

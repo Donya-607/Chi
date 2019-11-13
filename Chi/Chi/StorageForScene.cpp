@@ -1,12 +1,15 @@
 #include "StorageForScene.h"
 
-static StorageForScene instance{};
+namespace StorageForScene
+{
+	static Storage instance{};
 
-void SetStorage( const StorageForScene &newData )
-{
-	instance = newData;
-}
-const StorageForScene *GetStorage()
-{
-	return &instance;
+	void SetStorage( const Storage &newData )
+	{
+		instance = newData;
+	}
+	const Storage *GetStorage()
+	{
+		return &instance;
+	}
 }

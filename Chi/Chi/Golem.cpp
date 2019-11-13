@@ -997,6 +997,11 @@ void Golem::SetFieldRadius( float newFieldRadius )
 	fieldRadius = std::max( newFieldRadius, bodyRadius );
 }
 
+bool Golem::IsDefeated() const
+{
+	return ( status == GolemAI::ActionState::END ) ? true : false;
+}
+
 void Golem::LoadModel()
 {
 	Donya::OutputDebugStr( "Begin Golem::LoadModel.\n" );

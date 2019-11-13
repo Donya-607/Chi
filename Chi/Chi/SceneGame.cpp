@@ -25,6 +25,7 @@
 #include "Player.h"
 #include "Rival.h"
 #include "Stage.h"
+#include "StorageForScene.h"
 
 #define scast static_cast
 
@@ -76,7 +77,7 @@ public:
 public:
 	Impl() :
 		status( State::Battle ),
-		stageNo( NULL ),
+		stageNo( AppearStage::KnightNo ),
 		fieldRadius(), cameraLeaveDistance(),
 		cameraPos(), cameraFocusOffset(),
 		player(),
@@ -150,6 +151,7 @@ public:
 			setPointLight( i );
 		}
 
+		FetchNowStageNumber();
 	#if DEBUG_MODE
 		stageNo = AppearStage::RivalNo;
 	#endif // DEBUG_MODE
@@ -195,6 +197,7 @@ public:
 		{
 		case GolemNo:	golem.Uninit();		break;
 		case KnightNo:	knight.Uninit();	break;
+		case RivalNo:	rival.Uninit();		break;
 		default:		Donya::OutputDebugStr( "Error : The boss does not uninitialize !\n" );	break;
 		}
 
@@ -294,7 +297,6 @@ public:
 		*/
 	#endif // DEBUG_MODE
 	}
-
 public:
 	bool LoadSounds() const
 	{
@@ -323,6 +325,22 @@ public:
 		return successed;
 	}
 
+	void FetchNowStageNumber()
+	{
+		using namespace StorageForScene;
+
+		const Storage *pStorage = GetStorage();
+		if ( !pStorage )
+		{
+			_ASSERT_EXPR( 0, L"Error : The storage is invalid !" );
+			exit( -1 );
+			return;
+		}
+		// else
+
+		stageNo = pStorage->stageNo;
+	}
+
 	void BattleUpdate()
 	{
 		stage.Update();
@@ -337,6 +355,11 @@ public:
 		EffectManager::GetInstance()->Update();
 
 		ProcessCollision();
+
+		if ( IsBossDefeated() )
+		{
+			status = State::Win;
+		}
 	}
 
 	void WinUpdate()
@@ -352,7 +375,31 @@ public:
 
 		EffectManager::GetInstance()->Update();
 
-		ProcessCollision();
+		bool shouldChangeScene{};
+	#if DEBUG_MODE
+		shouldChangeScene = true;
+	#endif // DEBUG_MODE
+
+		if ( shouldChangeScene )
+		{
+			using namespace StorageForScene;
+			Storage storage{};
+
+			if ( IsLastStage( stageNo ) )
+			{
+				storage.stageNo = 0;
+				SetStorage( storage );
+
+				pSceneManager->setNextScene( new SceneResult( NULL ), false );
+			}
+			else
+			{
+				storage.stageNo = stageNo + 1;
+				SetStorage( storage );
+
+				pSceneManager->setNextScene( new SceneGame(), false );
+			}
+		}
 	}
 
 	void BossUpdate()
@@ -382,6 +429,18 @@ public:
 			return;
 		default: Donya::OutputDebugStr( "Error : The boss does not update !\n" ); break;
 		}
+	}
+	bool IsBossDefeated() const
+	{
+		switch ( stageNo )
+		{
+		case GolemNo:	return golem.IsDefeated();
+		case KnightNo:	return knight.IsDefeated();
+		case RivalNo:	return rival.IsDefeated();
+		default:		_ASSERT_EXPR( 0, "Error : Choosed unexpected boss!\n" ); break;
+		}
+
+		return false;
 	}
 
 	Donya::Vector3 GetCameraTargetPos() const
