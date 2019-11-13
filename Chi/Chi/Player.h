@@ -171,21 +171,22 @@ private:
 		Dead,
 	};
 private:
-	State				status;
-	int					timer;				// Recycle between each state.
-	int					shieldsRecastTime;	// I can defend when this time is zero.
-	float				fieldRadius;		// For collision to wall. the field is perfect-circle, so I can detect collide to wall by distance.
-	Donya::Vector3		pos;				// In world space.
-	Donya::Vector3		velocity;			// In world space.
-	Donya::Vector3		lookDirection;		// In world space.
-	Donya::Quaternion	orientation;
-	Models				models;
+	State					status;
+	int						timer;				// Recycle between each state.
+	int						shieldsRecastTime;	// I can defend when this time is zero.
+	float					fieldRadius;		// For collision to wall. the field is perfect-circle, so I can detect collide to wall by distance.
+	Donya::Vector3			pos;				// In world space.
+	Donya::Vector3			velocity;			// In world space.
+	Donya::Vector3			lookDirection;		// In world space.
+	Donya::Quaternion		orientation;
+	Models					models;
+	std::vector<Donya::Box>	wallCollisions;		// Stored hit-boxes belongs world space, XZ plane. This variable only assigned at Init().
 	bool				wasSucceededDefence;
 public:
 	Player();
 	~Player();
 public:
-	void Init( const Donya::Vector3 &wsInitialPos, const Donya::Vector3 &initialAnglesRadian );
+	void Init( const Donya::Vector3 &wsInitialPos, const Donya::Vector3 &initialAnglesRadian, const std::vector<Donya::Box> &wsXZWallCollisions );
 	void Uninit();
 
 	void Update( Input input );
@@ -218,6 +219,15 @@ public:
 	void ReceiveImpact();
 
 	void SetFieldRadius( float fieldRadius );
+
+#if DEBUG_MODE
+
+	void ReplaceWallCollisions( const std::vector<Donya::Box> &wsXZWallCollisions )
+	{
+		wallCollisions = wsXZWallCollisions;
+	}
+
+#endif // DEBUG_MODE
 private:
 	void LoadModel();
 

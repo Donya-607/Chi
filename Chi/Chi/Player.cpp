@@ -251,6 +251,7 @@ Player::Player() :
 	pos(), velocity(), lookDirection(),
 	orientation(),
 	models(),
+	wallCollisions(),
 	wasSucceededDefence( false )
 {
 	auto InitializeModel = []( std::shared_ptr<skinned_mesh> *ppMesh )
@@ -273,7 +274,7 @@ Player::Player() :
 }
 Player::~Player() = default;
 
-void Player::Init( const Donya::Vector3 &wsInitPos, const Donya::Vector3 &initRadians )
+void Player::Init( const Donya::Vector3 &wsInitPos, const Donya::Vector3 &initRadians, const std::vector<Donya::Box> &wsWallCollisions )
 {
 	PlayerParam::Get().Init();
 	SetFieldRadius( 0.0f ); // Set to body's radius.
@@ -283,6 +284,7 @@ void Player::Init( const Donya::Vector3 &wsInitPos, const Donya::Vector3 &initRa
 	pos				= wsInitPos;
 	lookDirection	= Donya::Vector3::Front();
 	orientation		= Donya::Quaternion::Make( initRadians.x, initRadians.y, initRadians.z );
+	wallCollisions	= wsWallCollisions;
 
 	IdleInit( Input::NoOperation() );
 }
@@ -294,6 +296,8 @@ void Player::Uninit()
 	models.pRun.reset();
 	models.pDefend.reset();
 	models.pAttack.reset();
+
+	wallCollisions.clear();
 }
 
 void Player::Update( Input input )
@@ -835,9 +839,74 @@ void Player::AssignInputVelocity( Input input )
 
 void Player::ApplyVelocity()
 {
+	/// <summary>
+	/// The "xzNAxis" is specify moving axis. please only set to { 1, 0 } or { 0, 1 }.
+	/// </summary>
+	auto MoveSpecifiedAxis = [&]( Donya::Vector2 xzNAxis, float moveSpeed )->void
+	{
+		if ( ZeroEqual( moveSpeed ) ) { return; }
+		// else
+
+		// Only either X or Z is valid.
+		const Donya::Vector2 xzVelocity = xzNAxis * moveSpeed;
+		pos.x += xzVelocity.x;
+		pos.z += xzVelocity.y;
+
+		const auto actualBody = PlayerParam::Get().HitBoxPhysic();
+		const float bodyWidth = actualBody.radius;
+
+		// The player's hit box of stage is circle, but doing with rectangle for easily correction.
+		Donya::Box xzBody{};
+		{
+			xzBody.cx		= pos.x;
+			xzBody.cy		= pos.z;
+			xzBody.w		= bodyWidth;
+			xzBody.h		= bodyWidth;
+			xzBody.exist	= true;
+		}
+		Donya::Vector2 xzBodyCenter{ xzBody.cx, xzBody.cy };
+
+		for ( const auto &wall : wallCollisions )
+		{
+			if ( !Donya::Box::IsHitBox( xzBody, wall ) ) { continue; }
+			// else
+
+			Donya::Vector2 xzWallCenter{ wall.cx, wall.cy };
+			Donya::Vector2 wallSize{ wall.w * xzNAxis.x, wall.h * xzNAxis.y }; // Only either X or Z is valid.
+			float wallWidth = wallSize.Length();
+
+			// Take a value of +1 or -1.
+			int moveSign = Donya::SignBit( xzVelocity.x ) + Donya::SignBit( xzVelocity.y );
+
+			// Calculate colliding length.
+			// First, calculate body's edge of moving side.
+			// Then, calculate wall's edge of inverse moving side.
+			// After that, calculate colliding length from two edges.
+			// Finally, correct the position to inverse moving side only that length.
+
+			Donya::Vector2 bodyEdge = xzBodyCenter + ( xzNAxis * bodyWidth * moveSign );
+			Donya::Vector2 wallEdge = xzWallCenter + ( xzNAxis * wallWidth * -moveSign );
+			float collidingLength = ( bodyEdge - wallEdge ).Length();
+
+			Donya::Vector2 xzCorrection
+			{
+				xzNAxis.x * ( collidingLength * -moveSign ),
+				xzNAxis.y * ( collidingLength * -moveSign )
+			};
+			pos.x += xzCorrection.x;
+			pos.z += xzCorrection.y;
+		}
+	};
+
 	if ( !velocity.IsZero() )
 	{
-		pos += velocity;
+		// Move to X-axis with collision.
+		MoveSpecifiedAxis( Donya::Vector2{ 1.0f, 0.0f }, velocity.x );
+		// Move to Y-axis only.
+		pos.y += velocity.y;
+		// Move to Z-axis with collision.
+		MoveSpecifiedAxis( Donya::Vector2{ 0.0f, 1.0f }, velocity.z );
+
 		lookDirection = velocity.Normalized();
 	}
 

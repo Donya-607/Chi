@@ -74,6 +74,11 @@ public:
 	Golem			golem;
 	Rival			rival;
 	fbx_shader		shader;
+#if DEBUG_MODE
+
+	std::vector<Donya::Box> wallCollisions{};
+
+#endif // DEBUG_MODE
 public:
 	Impl() :
 		status( State::Battle ),
@@ -160,7 +165,7 @@ public:
 		Donya::OutputDebugStr( "Objects count : 4\n" );
 
 		Donya::OutputDebugStr( "No.1 Begin Player::Init.\n" );
-		player.Init( Donya::Vector3::Zero(), Donya::Vector3::Zero() );
+		player.Init( Donya::Vector3::Zero(), Donya::Vector3::Zero(), std::vector<Donya::Box>(/* empty */) );
 		player.SetFieldRadius( fieldRadius );
 		Donya::OutputDebugStr( "No.1 End Player::Init.\n" );
 
@@ -258,44 +263,41 @@ public:
 		EffectManager::GetInstance()->Render( shader );
 
 	#if DEBUG_MODE
-		/*
-		if ( 0 )
+		if ( !wallCollisions.empty() )
 		{
-			XMFLOAT4X4 World, world_view_projection;
-			DirectX::XMMATRIX worldM;
-			DirectX::XMMATRIX worldcubeM;
-			DirectX::XMMATRIX S, R, Rx, Ry, Rz, T;
-			auto plPos = player.GetPosition();
-			T = DirectX::XMMatrixTranslation(plPos.x, plPos.y, plPos.z);
-			worldM = T;
+			constexpr float HEIGHT = 1024.0f;
+			constexpr Donya::Vector4 COLOR = { 0.7f, 0.2f, 0.7f, 0.6f };
 
-			DirectX::XMStoreFloat4x4(&world_view_projection, worldM * getViewMatrix() * getProjectionMatrix());
-			DirectX::XMStoreFloat4x4(&World, worldM);
+			auto GenerateCube = []()->std::shared_ptr<static_mesh>
+			{
+				std::shared_ptr<static_mesh> tmpCube = std::make_shared<static_mesh>();
+				createCube( tmpCube.get() );
+				return tmpCube;
+			};
+			static std::shared_ptr<static_mesh> pCube = GenerateCube();
 
-			FBXRender(&animTest,shader, world_view_projection, World);
+			auto DrawAABB = [&V, &P]( const Donya::AABB &AABB, const Donya::Vector4 &color )
+			{
+				Donya::Vector4x4 S = Donya::Vector4x4::MakeScaling( AABB.size * 2.0f ); // Half size->Whole size.
+				Donya::Vector4x4 T = Donya::Vector4x4::MakeTranslation( AABB.pos );
+				Donya::Vector4x4 W = ( S * T );
+				Donya::Vector4x4 WVP = W * V * P;
 
-			DirectX::XMFLOAT3 pos = { -10,10,100 };
-			worldcubeM = DirectX::XMMatrixIdentity();
+				OBJRender( pCube.get(), WVP, W, color );
+			};
 
-			S = DirectX::XMMatrixScaling(10, 10, 10);
-
-			Rx = DirectX::XMMatrixRotationX(0);
-			Ry = DirectX::XMMatrixRotationY(0);
-			Rz = DirectX::XMMatrixRotationZ(0);
-			R = Rz * Rx * Ry;
-
-			calcTransformedPosBySpecifyMesh(&animTest, pos, "_04_MDL_yoroi1:_02_MDL_yoroi:spear");
-			T = DirectX::XMMatrixTranslation(pos.x, pos.y, pos.z);
-
-			worldcubeM = S * R * T * worldM;
-
-			DirectX::XMStoreFloat4x4(&world_view_projection, worldcubeM * getViewMatrix() * getProjectionMatrix());
-			DirectX::XMStoreFloat4x4(&World, worldcubeM);
-
-			OBJRender(&testCube, world_view_projection, World);
-
+			Donya::AABB wall{};
+			wall.size.y = HEIGHT;
+			for ( const auto &it : wallCollisions )
+			{
+				wall.pos.x = it.cx;
+				wall.pos.z = it.cy;
+				wall.size.x = it.w;
+				wall.size.z = it.h;
+				
+				DrawAABB( wall, COLOR );
+			}
 		}
-		*/
 	#endif // DEBUG_MODE
 	}
 public:
@@ -819,6 +821,43 @@ public:
 
 					ImGui::TreePop();
 				}
+
+			#if DEBUG_MODE
+
+				if ( ImGui::TreeNode( "Player's Wall Collisions" ) )
+				{
+					if ( ImGui::Button( "Assign to player" ) )
+					{
+						player.ReplaceWallCollisions( wallCollisions );
+					}
+
+					bool canPopBack = ( 1U <= wallCollisions.size() ) ? true : false;
+					if ( ImGui::Button( "Append" ) )
+					{
+						Donya::Box append{};
+						append.cx = append.cy = 0.0f;
+						append.w  = append.h  = 1.0f;
+						append.exist = true;
+						wallCollisions.push_back( append  );
+					}
+					if ( canPopBack && ImGui::Button( "PopBack" ) )
+					{
+						wallCollisions.pop_back();
+					}
+
+					const size_t COUNT = wallCollisions.size();
+					for ( size_t i = 0; i < COUNT; ++i )
+					{
+						auto &wall = wallCollisions[i];
+						ImGui::DragFloat2( ( "Position.XZ." + std::to_string( i ) ).c_str(), &wall.cx );
+						ImGui::DragFloat2( ( "Size.XZ." + std::to_string( i ) ).c_str(), &wall.w );
+						ImGui::Text( "" );
+					}
+
+					ImGui::TreePop();
+				}
+
+			#endif // DEBUG_MODE
 
 				if ( ImGui::TreeNode( "File.I/O" ) )
 				{
