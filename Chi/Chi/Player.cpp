@@ -95,6 +95,7 @@ void PlayerParam::UseImGui()
 
 			if ( ImGui::TreeNode( "Attack.Advance" ) )
 			{
+				ImGui::SliderFloat( "Advance.MoveDistance",	&advanceDistance,	0.0f, 360.0f );
 				ImGui::SliderInt( "Advance.StartFrame",		&advanceStartFrame,	1, frameWholeAttacking );
 				ImGui::SliderInt( "Advance.FinishFrame",	&advanceFinFrame,	1, frameWholeAttacking );
 				ImGui::SliderInt( "Return.FinishFrame",		&returnFinFrame,	1, frameWholeAttacking );
@@ -104,17 +105,19 @@ void PlayerParam::UseImGui()
 					using namespace Donya;
 					constexpr int KIND_COUNT = Easing::GetKindCount();
 					constexpr int TYPE_COUNT = Easing::GetTypeCount();
+					std::string strKind{};
+					std::string strType{};
 
 					ImGui::SliderInt( "Advance.EasingKind", &advanceEaseKind, 0, KIND_COUNT - 1 );
 					ImGui::SliderInt( "Advance.EasingType", &advanceEaseType, 0, TYPE_COUNT - 1 );
-					std::string strKind = Easing::KindName( advanceEaseKind );
-					std::string strType = Easing::TypeName( advanceEaseType );
+					strKind = Easing::KindName( advanceEaseKind );
+					strType = Easing::TypeName( advanceEaseType );
 					ImGui::Text( ( "Advance.Easing : " + strKind + "." + strType ).c_str() );
 
 					ImGui::SliderInt( "Return.EasingKind", &returnEaseKind, 0, KIND_COUNT - 1 );
 					ImGui::SliderInt( "Return.EasingType", &returnEaseType, 0, TYPE_COUNT - 1 );
-					std::string strKind = Easing::KindName( returnEaseKind );
-					std::string strType = Easing::TypeName( returnEaseType );
+					strKind = Easing::KindName( returnEaseKind );
+					strType = Easing::TypeName( returnEaseType );
 					ImGui::Text( ( "Return.Easing : " + strKind + "." + strType ).c_str() );
 				}
 
@@ -857,7 +860,7 @@ void Player::AttackUpdate( Input input )
 		const int RETURN_START	= ADVANCE_FIN;
 		const int RETURN_FIN	= PlayerParam::Get().FrameReturnFin();
 
-		auto CalcEaseFactor		= []( float elapsedTime, float start, float fin, int kind, int type )
+		auto CalcEaseFactor		= []( int elapsedTime, int start, int fin, int kind, int type )
 		{
 			float percent = scast<float>( elapsedTime - start ) / scast<float>( fin - start );
 			return Donya::Easing::Ease
@@ -919,8 +922,6 @@ void Player::AttackUpdate( Input input )
 void Player::AttackUninit()
 {
 	timer		= 0;
-
-	pos += extraOffset;
 	extraOffset	= 0.0f;
 
 	Donya::OBBFrame *pOBBF = PlayerParam::Get().HitBoxAttackF();

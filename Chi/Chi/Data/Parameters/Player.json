@@ -1,6 +1,6 @@
 {
     "Player": {
-        "cereal_class_version": 6,
+        "cereal_class_version": 7,
         "scale": 1.0,
         "runSpeed": 13.0,
         "rotSlerpFactor": 0.20000000298023225,
@@ -74,6 +74,13 @@
         "lanceMeshName": "MDL_Spear",
         "shieldsRecastFrame": 30,
         "frameStopAnime": 90,
-        "frameStopTiming": 1
+        "frameStopTiming": 1,
+        "advanceStartFrame": 90,
+        "advanceFinFrame": 150,
+        "returnFinFrame": 180,
+        "advanceEaseKind": 0,
+        "advanceEaseType": 0,
+        "returnEaseKind": 8,
+        "returnEaseType": 1
     }
 }
