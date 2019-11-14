@@ -111,6 +111,10 @@ private:
 		}
 		if ( 8 <= version )
 		{
+			archive( CEREAL_NVP( advanceDistance ) );
+		}
+		if ( 9 <= version )
+		{
 			// archive( CEREAL_NVP( x ) );
 		}
 	}
@@ -153,7 +157,7 @@ public:
 
 #endif // USE_IMGUI
 };
-CEREAL_CLASS_VERSION( PlayerParam, 7 )
+CEREAL_CLASS_VERSION( PlayerParam, 8 )
 
 class  skinned_mesh;	// With pointer. because I'm not want include this at header.
 struct fbx_shader;		// Use for argument.

@@ -1,6 +1,6 @@
 {
     "Player": {
-        "cereal_class_version": 7,
+        "cereal_class_version": 8,
         "scale": 1.0,
         "runSpeed": 13.0,
         "rotSlerpFactor": 0.20000000298023225,
@@ -81,6 +81,7 @@
         "advanceEaseKind": 0,
         "advanceEaseType": 0,
         "returnEaseKind": 8,
-        "returnEaseType": 1
+        "returnEaseType": 1,
+        "advanceDistance": 64.0
     }
 }
