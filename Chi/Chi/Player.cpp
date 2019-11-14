@@ -889,7 +889,7 @@ void Player::ApplyVelocity()
 			Donya::Vector2 diff = bodyEdge - wallEdge;
 			Donya::Vector2 axisDiff{ diff.x * xzNAxis.x, diff.y * xzNAxis.y };
 			float collidingLength = axisDiff.Length();
-			collidingLength += 0.0001f;	// Prevent the two edges onto same place(the collision detective allows same(equal) value).
+			collidingLength += 0.1f;	// Prevent the two edges onto same place(the collision detective allows same(equal) value).
 
 			Donya::Vector2 xzCorrection
 			{
