@@ -1,5 +1,6 @@
 #include "Effect.h"
 #include "GameLibFunctions.h"
+#include "Donya/Useful.h"		// Use IsShowCollision().
 #include "Player.h"
 
 //
@@ -379,6 +380,8 @@ void EruptionEffect::Render( fbx_shader &HLSL )
 		Donya::Vector4x4 V = Donya::Vector4x4::FromMatrix(GameLib::camera::GetViewMatrix());
 		Donya::Vector4x4 P = Donya::Vector4x4::FromMatrix(GameLib::camera::GetProjectionMatrix());
 
+	#if DEBUG_MODE
+
 		auto GenerateSphere = []()->std::shared_ptr<static_mesh>
 		{
 			std::shared_ptr<static_mesh> tmpSphere = std::make_shared<static_mesh>();
@@ -386,6 +389,8 @@ void EruptionEffect::Render( fbx_shader &HLSL )
 			return tmpSphere;
 		};
 		static std::shared_ptr<static_mesh> pSphere = GenerateSphere();
+
+	#endif // DEBUG_MODE
 
 		for (int i = 0; i < MAX_SIZE; i++)
 		{
@@ -399,7 +404,9 @@ void EruptionEffect::Render( fbx_shader &HLSL )
 				FBXRender(pModel[i].get(), HLSL, WVP, W);
 			}
 
-			if (hitSphere[i].exist)
+		#if DEBUG_MODE
+
+			if ( Donya::IsShowCollision() && hitSphere[i].exist)
 			{
 				Donya::Vector4x4 CS = Donya::Vector4x4::MakeScaling(hitSphere[i].radius); // Half size->Whole size.
 				Donya::Vector4x4 CR = Donya::Vector4x4::MakeRotationEuler(Donya::Vector3(0.0f, 0.0f, 0.0f));
@@ -409,6 +416,8 @@ void EruptionEffect::Render( fbx_shader &HLSL )
 
 				OBJRender(pSphere.get(), CWVP, CW, Donya::Vector4(0.0f, 0.3f, 0.3f, 0.6f));
 			}
+
+		#endif // DEBUG_MODE
 		}
 	}
 }
@@ -654,6 +663,8 @@ void LongAttackEffect::Render(fbx_shader& HLSL)
 		Donya::Vector4x4 V = Donya::Vector4x4::FromMatrix(GameLib::camera::GetViewMatrix());
 		Donya::Vector4x4 P = Donya::Vector4x4::FromMatrix(GameLib::camera::GetProjectionMatrix());
 
+	#if DEBUG_MODE
+
 		auto GenerateSphere = []()->std::shared_ptr<static_mesh>
 		{
 			std::shared_ptr<static_mesh> tmpSphere = std::make_shared<static_mesh>();
@@ -661,6 +672,8 @@ void LongAttackEffect::Render(fbx_shader& HLSL)
 			return tmpSphere;
 		};
 		static std::shared_ptr<static_mesh> pSphere = GenerateSphere();
+
+	#endif // DEBUG_MODE
 
 		for (int i = 0; i < aliveMaxNum; i++)
 		{
@@ -674,7 +687,9 @@ void LongAttackEffect::Render(fbx_shader& HLSL)
 				FBXRender(pModel[i].get(), HLSL, WVP, W);
 			}
 
-			if (hitSphere[i].exist)
+		#if DEBUG_MODE
+
+			if ( Donya::IsShowCollision() && hitSphere[i].exist)
 			{
 				Donya::Vector4x4 CS = Donya::Vector4x4::MakeScaling(hitSphere[i].radius); // Half size->Whole size.
 				Donya::Vector4x4 CR = Donya::Vector4x4::MakeRotationEuler(Donya::Vector3(0.0f, 0.0f, 0.0f));
@@ -684,6 +699,8 @@ void LongAttackEffect::Render(fbx_shader& HLSL)
 
 				OBJRender(pSphere.get(), CWVP, CW, Donya::Vector4(0.0f, 0.3f, 0.3f, 0.6f));
 			}
+
+		#endif // DEBUG_MODE
 		}
 	}
 }
