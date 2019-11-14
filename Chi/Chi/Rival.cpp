@@ -688,9 +688,14 @@ void Rival::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya
 			break;
 		case RivalAI::ActionState::ATTACK_RUSH:
 			{
-				const auto wsHitBox = RushWorldHitBox();
+				const auto wsHitBox  = RushWorldHitBox();
 				Donya::Vector4 color = GetColor( wsHitBox );
+				DrawSphere( wsHitBox.pos, wsHitBox.radius, color, /* applyParentMatrix = */ false );
 
+				Donya::Sphere wsTriggerRange = RivalParam::Open().rush.slashOccurRange;
+				wsTriggerRange.pos = orientation.RotateVector( wsTriggerRange.pos ); // Rotate the offset.
+				wsTriggerRange.pos += GetPos();
+				color = GetColor( wsTriggerRange );
 				DrawSphere( wsHitBox.pos, wsHitBox.radius, color, /* applyParentMatrix = */ false );
 			}
 			break;

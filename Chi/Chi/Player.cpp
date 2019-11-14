@@ -852,8 +852,11 @@ void Player::ApplyVelocity()
 		pos.x += xzVelocity.x;
 		pos.z += xzVelocity.y;
 
-		const auto actualBody = PlayerParam::Get().HitBoxPhysic();
-		const float bodyWidth = actualBody.radius;
+		// Take a value of +1 or -1.
+		const float moveSign = scast<float>( Donya::SignBit( xzVelocity.x ) + Donya::SignBit( xzVelocity.y ) );
+
+		const auto  actualBody = PlayerParam::Get().HitBoxPhysic();
+		const float bodyWidth  = actualBody.radius;
 
 		// The player's hit box of stage is circle, but doing with rectangle for easily correction.
 		Donya::Box xzBody{};
@@ -875,9 +878,6 @@ void Player::ApplyVelocity()
 			Donya::Vector2 wallSize{ wall.w * xzNAxis.x, wall.h * xzNAxis.y }; // Only either X or Z is valid.
 			float wallWidth = wallSize.Length(); // Extract valid member by Length().
 
-			// Take a value of +1 or -1.
-			float moveSign = scast<float>( Donya::SignBit( xzVelocity.x ) + Donya::SignBit( xzVelocity.y ) );
-
 			// Calculate colliding length.
 			// First, calculate body's edge of moving side.
 			// Then, calculate wall's edge of inverse moving side.
@@ -889,7 +889,7 @@ void Player::ApplyVelocity()
 			Donya::Vector2 diff = bodyEdge - wallEdge;
 			Donya::Vector2 axisDiff{ diff.x * xzNAxis.x, diff.y * xzNAxis.y };
 			float collidingLength = axisDiff.Length();
-			collidingLength += 0.1f;	// Prevent the two edges onto same place(the collision detective allows same(equal) value).
+			collidingLength += 0.1f; // Prevent the two edges onto same place(the collision detective allows same(equal) value).
 
 			Donya::Vector2 xzCorrection
 			{
