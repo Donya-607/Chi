@@ -1,6 +1,6 @@
 {
     "Golem": {
-        "cereal_class_version": 9,
+        "cereal_class_version": 10,
         "scale": 1.0,
         "hitBoxesBody": [
             {
@@ -130,7 +130,7 @@
                             "z": 0.0,
                             "w": 0.8775825500488281
                         },
-                        "exist": false
+                        "exist": true
                     }
                 },
                 "meshName": "MDL_HandL"
@@ -211,7 +211,7 @@
                         "z": 0.0
                     },
                     "radius": 230.0,
-                    "exist": true
+                    "exist": false
                 }
             }
         ],
@@ -221,6 +221,8 @@
         "rotLeaveWholeFrame": 60,
         "rotLeaveDistance": 666.0,
         "swingStopFrame": 105,
-        "swingStopLength": 0.699999988079071
+        "swingStopLength": 0.699999988079071,
+        "defeatMotionLength": 360,
+        "defeatHideSpeed": 0.0010000000474974514
     }
 }

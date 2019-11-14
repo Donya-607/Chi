@@ -730,6 +730,7 @@ void Knight::ChangeStatus( TargetStatus target )
 	case KnightAI::ActionState::ATTACK_EXPLOSION:	AttackExplosionUninit();	break;
 	case KnightAI::ActionState::ATTACK_SWING:		AttackSwingUninit();		break;
 	case KnightAI::ActionState::ATTACK_RAID:		AttackRaidUninit();			break;
+	case KnightAI::ActionState::END:				DefeatUninit();				break;
 	default: break;
 	}
 	switch ( lotteryStatus )
@@ -739,6 +740,7 @@ void Knight::ChangeStatus( TargetStatus target )
 	case KnightAI::ActionState::ATTACK_EXPLOSION:	AttackExplosionInit( target );	break;
 	case KnightAI::ActionState::ATTACK_SWING:		AttackSwingInit( target );		break;
 	case KnightAI::ActionState::ATTACK_RAID:		AttackRaidInit( target );		break;
+	// case KnightAI::ActionState::END:				DefeatInit();		break; // Unnecessary.
 	default: break;
 	}
 
@@ -753,6 +755,7 @@ void Knight::UpdateCurrentStatus( TargetStatus target )
 	case KnightAI::ActionState::ATTACK_EXPLOSION:	AttackExplosionUpdate( target );	break;
 	case KnightAI::ActionState::ATTACK_SWING:		AttackSwingUpdate( target );		break;
 	case KnightAI::ActionState::ATTACK_RAID:		AttackRaidUpdate( target );			break;
+	case KnightAI::ActionState::END:				DefeatUpdate();						break;
 	default: break;
 	}
 }

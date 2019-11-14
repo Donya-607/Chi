@@ -1,6 +1,6 @@
 {
     "Knight": {
-        "cereal_class_version": 6,
+        "cereal_class_version": 7,
         "m.scale": 1.0,
         "m.stageBodyRadius": 320.0,
         "m.targetDistNear": 0.05000000074505806,
@@ -94,6 +94,8 @@
         "m.raidJumpLastFrame": 80,
         "m.raidJumpDistance": 666.0,
         "m.raidEaseKind": 7,
-        "m.raidEaseType": 1
+        "m.raidEaseType": 1,
+        "m.defeatMotionLength": 230,
+        "m.defeatHideSpeed": 0.0010000000474974514
     }
 }

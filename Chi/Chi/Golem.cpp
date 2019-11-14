@@ -171,6 +171,16 @@ void GolemParam::UseImGui()
 				ImGui::TreePop();
 			}
 			ImGui::Text( "" );
+
+			if ( ImGui::TreeNode( "Defeat" ) )
+			{
+				ImGui::DragInt( "Motion.Length(Frame)", &defeatMotionLength );
+				ImGui::SliderFloat( "AfterMotion.HideSpeed", &defeatHideSpeed, 0.00001f, 1.0f );
+
+				ImGui::TreePop();
+			}
+			ImGui::Text( "" );
+
 			if ( ImGui::TreeNode( "SwingAttack" ) )
 			{
 				ImGui::DragInt  ( "StopFrame",			&swingStopFrame  );
@@ -1003,7 +1013,7 @@ std::vector<Donya::OBB> Golem::GetBodyHitBoxes() const
 
 void Golem::ReceiveImpact()
 {
-	status = decltype( status )::END;
+	DefeatInit();
 }
 
 void Golem::SetFieldRadius( float newFieldRadius )
@@ -1058,9 +1068,6 @@ Donya::Vector4x4 Golem::CalcWorldMatrix() const
 	Donya::Vector4x4 S = Donya::Vector4x4::MakeScaling( GolemParam::Get().Scale() );
 	Donya::Vector4x4 R = orientation.RequireRotationMatrix();
 	Donya::Vector4x4 T = Donya::Vector4x4::MakeTranslation( GetPos() );
-#if DEBUG_MODE
-	if ( status == decltype( status )::END ) { R = Donya::Quaternion::Make( Donya::Vector3::Front(), ToRadian( 180.0f ) ).RequireRotationMatrix(); };
-#endif // DEBUG_MODE
 
 	return S * R * T;
 }
@@ -1076,8 +1083,9 @@ void Golem::ChangeStatus( TargetStatus target )
 	case GolemAI::ActionState::WAIT:				WaitUninit();			break;
 	case GolemAI::ActionState::MOVE:				MoveUninit();			break;
 	case GolemAI::ActionState::ATTACK_SWING:		AttackSwingUninit();	break;
-	case GolemAI::ActionState::ATTACK_FAST:		AttackFastUninit();		break;
-	case GolemAI::ActionState::ATTACK_ROTATE:	AttackRotateUninit();	break;
+	case GolemAI::ActionState::ATTACK_FAST:			AttackFastUninit();		break;
+	case GolemAI::ActionState::ATTACK_ROTATE:		AttackRotateUninit();	break;
+	case GolemAI::ActionState::END:					DefeatUninit();			break;
 	default: break;
 	}
 	switch ( lotteryStatus )
@@ -1085,8 +1093,9 @@ void Golem::ChangeStatus( TargetStatus target )
 	case GolemAI::ActionState::WAIT:				WaitInit( target );			break;
 	case GolemAI::ActionState::MOVE:				MoveInit( target );			break;
 	case GolemAI::ActionState::ATTACK_SWING:		AttackSwingInit( target );	break;
-	case GolemAI::ActionState::ATTACK_FAST:		AttackFastInit( target );	break;
-	case GolemAI::ActionState::ATTACK_ROTATE:	AttackRotateInit( target );	break;
+	case GolemAI::ActionState::ATTACK_FAST:			AttackFastInit( target );	break;
+	case GolemAI::ActionState::ATTACK_ROTATE:		AttackRotateInit( target );	break;
+	// case GolemAI::ActionState::END:					DefeatInit();				break; // Unnecessary
 	default: break;
 	}
 
@@ -1099,8 +1108,9 @@ void Golem::UpdateCurrentStatus( TargetStatus target )
 	case GolemAI::ActionState::WAIT:				WaitUpdate( target );			break;
 	case GolemAI::ActionState::MOVE:				MoveUpdate( target );			break;
 	case GolemAI::ActionState::ATTACK_SWING:		AttackSwingUpdate( target );	break;
-	case GolemAI::ActionState::ATTACK_FAST:		AttackFastUpdate( target );		break;
-	case GolemAI::ActionState::ATTACK_ROTATE:	AttackRotateUpdate( target );	break;
+	case GolemAI::ActionState::ATTACK_FAST:			AttackFastUpdate( target );		break;
+	case GolemAI::ActionState::ATTACK_ROTATE:		AttackRotateUpdate( target );	break;
+	case GolemAI::ActionState::END:					DefeatUpdate();					break;
 	default: break;
 	}
 }
