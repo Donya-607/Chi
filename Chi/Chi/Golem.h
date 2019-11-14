@@ -63,6 +63,8 @@ private:
 	float							idleSlerpFactor;		// 0.0 ~ 1.0. Use when status is idle.
 	float							moveMoveSpeed;			// Use when status is move.
 	float							moveSlerpFactor;		// 0.0 ~ 1.0. Use when status is move.
+	int								defeatMotionLength{};	// Per frame. Use when status is defeat(END).
+	float							defeatHideSpeed{};		// Use after motionLength.
 	float							attackFastMoveSpeed;	// Use when status is attack of fast.
 	float							attackFastSlerpFactor;	// 0.0 ~ 1.0. Use when status is attack of fast.
 	float							attackRotateMoveSpeed;	// Use when status is attack of rotate.
@@ -144,6 +146,14 @@ private:
 			}
 			if ( 10 <= version )
 			{
+				archive
+				(
+					CEREAL_NVP( defeatMotionLength ),
+					CEREAL_NVP( defeatHideSpeed )
+				);
+			}
+			if ( 11 <= version )
+			{
 				// archive( CEREAL_NVP( x ) );
 			}
 
@@ -211,6 +221,8 @@ public:
 	float									TargetDistFar()			const	{ return targetDistFar; }
 	float									MoveSpeed  ( GolemAI::ActionState status ) const;
 	float									SlerpFactor( GolemAI::ActionState status ) const;
+	int										DefeatMotionLength()	const	{ return defeatMotionLength; }
+	float									DefeatHideSpeed()		const	{ return defeatHideSpeed; }
 	Donya::Vector3							GetInitPosition( int stageNumber ) const;
 	Donya::Vector3							GetDrawOffset  ( int stageNumber ) const;
 	std::vector<Donya::OBBFrame>			*OBBAtksSwing()					{ return &OBBAttacksSwing; }
@@ -231,7 +243,7 @@ public:
 
 #endif // USE_IMGUI
 };
-CEREAL_CLASS_VERSION( GolemParam, 9 )
+CEREAL_CLASS_VERSION( GolemParam, 10 )
 CEREAL_CLASS_VERSION( GolemParam::OBBFrameWithName, 0 )
 
 struct fbx_shader; // Use for argument.
@@ -249,6 +261,7 @@ private:
 	struct Models
 	{
 		std::shared_ptr<skinned_mesh> pIdle{ nullptr };
+		std::shared_ptr<skinned_mesh> pDefeat{ nullptr };
 		std::shared_ptr<skinned_mesh> pAtkFast{ nullptr };
 		std::shared_ptr<skinned_mesh> pAtkSwing{ nullptr };
 		std::shared_ptr<skinned_mesh> pAtkRotate{ nullptr };
@@ -276,7 +289,7 @@ public:
 
 	void Update( TargetStatus target );
 
-	void Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matProjection );
+	void Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matProjection, float animationAcceleration = 1.0f );
 public:
 	bool IsCollideAttackHitBoxes( const Donya::AABB   judgeOther, bool disableCollidingHitBoxes );
 	bool IsCollideAttackHitBoxes( const Donya::OBB    judgeOther, bool disableCollidingHitBoxes );
@@ -324,6 +337,10 @@ private:
 	void AttackRotateInit( TargetStatus target );
 	void AttackRotateUpdate( TargetStatus target );
 	void AttackRotateUninit();
+
+	void DefeatInit();
+	void DefeatUpdate();
+	void DefeatUninit();
 private:
 	/// <summary>
 	/// The position("pos") is only changed by this method(or CollideToWall method).

@@ -77,6 +77,8 @@ private:
 	int attackTimes{};					// Store "gapIntervals" count.
 	int intervalIndex{};
 	std::vector<int> gapIntervals{};	// At least have 1 element.
+
+	bool stopUpdate{ false };
 public:
 	KnightAI() {}
 	// ~KnightAI() = default;
@@ -103,7 +105,12 @@ private:
 public:
 	void Init();
 	void Update();
+
+	void StopUpdate()	{ stopUpdate = true;  }
+	void ResumeUpdate()	{ stopUpdate = false; }
 	ActionState GetState() const { return status; }
+
+	void OverwriteState( ActionState newState );
 private:
 	ActionState ToActionState( WaitState status ) const;
 	ActionState ToActionState( AttackState status ) const;

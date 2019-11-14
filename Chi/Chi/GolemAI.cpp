@@ -38,6 +38,9 @@ void GolemAI::Update()
 
 #endif // USE_IMGUI
 
+	if ( stopUpdate ) { return; }
+	// else
+
 	timer--;
 	if ( timer <= 0 )
 	{
@@ -54,6 +57,11 @@ void GolemAI::Update()
 			LotteryAttackState();
 		}
 	}
+}
+
+void GolemAI::OverwriteState( ActionState newState )
+{
+	status = newState;
 }
 
 GolemAI::ActionState GolemAI::ToActionState( WaitState waitStatus ) const

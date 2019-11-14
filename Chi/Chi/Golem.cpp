@@ -498,6 +498,7 @@ Golem::Golem() :
 	std::vector<std::shared_ptr<skinned_mesh> *> modelRefs
 	{
 		&models.pIdle,
+		&models.pDefeat,
 		&models.pAtkFast,
 		&models.pAtkSwing,
 		&models.pAtkRotate,
@@ -550,7 +551,7 @@ void Golem::Update( TargetStatus target )
 	CollideToWall();
 }
 
-void Golem::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matProjection )
+void Golem::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matProjection, float animeAccel )
 {
 	const auto &PARAM = GolemParam::Get();
 
@@ -576,6 +577,20 @@ void Golem::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya
 		break;
 	case GolemAI::ActionState::ATTACK_ROTATE:
 		FBXRender( models.pAtkRotate.get(), HLSL, WVP, W );
+		break;
+	case GolemAI::ActionState::END:
+		{
+			const int MOTION_LENGTH = GolemParam::Get().DefeatMotionLength();
+			int timeDiff = timer - MOTION_LENGTH;
+
+			float drawAlpha = 1.0f;
+			if ( 0 < timeDiff )
+			{
+				drawAlpha -= GolemParam::Get().DefeatHideSpeed() * timeDiff;
+				drawAlpha = std::max( 0.0f, drawAlpha );
+			}
+			FBXRender( models.pDefeat.get(), HLSL, WVP, W, animeAccel, /* is_animation = */ true, { 1.0f, 1.0f, 1.0f, drawAlpha } );
+		}
 		break;
 	default: break;
 	}
@@ -999,7 +1014,8 @@ void Golem::SetFieldRadius( float newFieldRadius )
 
 bool Golem::IsDefeated() const
 {
-	return ( status == GolemAI::ActionState::END ) ? true : false;
+	const int MOTION_LENGTH = GolemParam::Get().DefeatMotionLength();
+	return ( status == GolemAI::ActionState::END && MOTION_LENGTH <= timer ) ? true : false;
 }
 
 void Golem::LoadModel()
@@ -1008,12 +1024,23 @@ void Golem::LoadModel()
 
 	loadFBX( models.pIdle.get(),		GetModelPath( ModelAttribute::GolemIdle		) );
 	Donya::OutputDebugStr( "Done GolemModel.Idle.\n" );
+	loadFBX( models.pDefeat.get(),		GetModelPath( ModelAttribute::GolemDefeat		) );
+	Donya::OutputDebugStr( "Done GolemModel.Defeat.\n" );
 	loadFBX( models.pAtkSwing.get(),	GetModelPath( ModelAttribute::GolemAtkSwing	) );
 	Donya::OutputDebugStr( "Done GolemModel.Attack.Swing.\n" );
 	loadFBX( models.pAtkFast.get(),		GetModelPath( ModelAttribute::GolemAtkFast	) );
 	Donya::OutputDebugStr( "Done GolemModel.Attack.Fast.\n" );
 	loadFBX( models.pAtkRotate.get(),	GetModelPath( ModelAttribute::GolemAtkRotate	) );
 	Donya::OutputDebugStr( "Done GolemModel.Attack.Rotate.\n" );
+
+	std::vector<std::shared_ptr<skinned_mesh> *> dontLoopModels
+	{
+		&models.pDefeat,
+	};
+	for ( auto &it : dontLoopModels )
+	{
+		setLoopFlg( it->get(), /* is_loop = */ false );
+	}
 
 	Donya::OutputDebugStr( "End Golem::LoadModel.\n" );
 }
@@ -1300,6 +1327,26 @@ void Golem::AttackRotateUninit()
 
 	ResetCurrentSphereFrames( GolemParam::Get().RotateAtkCollisions() );
 	setAnimFlame( models.pAtkRotate.get(), 0 );
+}
+
+void Golem::DefeatInit()
+{
+	const auto endState = decltype( status )::END;
+	status = endState;
+	AI.OverwriteState( endState );
+	AI.StopUpdate();
+
+	timer			= 0;
+	velocity		= 0.0f;
+	slerpFactor		= 0.0f;
+}
+void Golem::DefeatUpdate()
+{
+	timer++;
+}
+void Golem::DefeatUninit()
+{
+	timer = 0;
 }
 
 void Golem::ApplyVelocity( TargetStatus target )

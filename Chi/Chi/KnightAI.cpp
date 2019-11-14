@@ -38,6 +38,9 @@ void KnightAI::Update()
 
 #endif // USE_IMGUI
 
+	if ( stopUpdate ) { return; }
+	// else
+
 	timer--;
 	if ( timer <= 0 )
 	{
@@ -54,6 +57,11 @@ void KnightAI::Update()
 			LotteryAttackState();
 		}
 	}
+}
+
+void KnightAI::OverwriteState( ActionState newState )
+{
+	status = newState;
 }
 
 KnightAI::ActionState KnightAI::ToActionState( WaitState waitStatus ) const

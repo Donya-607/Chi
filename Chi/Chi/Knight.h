@@ -57,6 +57,8 @@ public:
 		float				idleSlerpFactor{};		// 0.0 ~ 1.0. Use when status is idle.
 		float				moveMoveSpeed{};		// Use when status is move.
 		float				moveSlerpFactor{};		// 0.0 ~ 1.0. Use when status is move.
+		int					defeatMotionLength{};	// Per frame. Use when status is defeat(END).
+		float				defeatHideSpeed{};		// Use after motionLength.
 		float				explMoveSpeed{};		// Use when status is explosion.
 		float				explSlerpFactor{};		// 0.0 ~ 1.0. Use when status is explosion.
 		float				swingMoveSpeed{};		// Use when status is swing.
@@ -156,6 +158,14 @@ private:
 		}
 		if ( 7 <= version )
 		{
+			archive
+			(
+				CEREAL_NVP( m.defeatMotionLength ),
+				CEREAL_NVP( m.defeatHideSpeed )
+			);
+		}
+		if ( 8 <= version )
+		{
 			// archive( CEREAL_NVP( x ) );
 		}
 	}
@@ -186,7 +196,7 @@ public:
 
 #endif // USE_IMGUI
 };
-CEREAL_CLASS_VERSION( KnightParam, 6 )
+CEREAL_CLASS_VERSION( KnightParam, 7 )
 
 struct fbx_shader; // Use for argument.
 /// <summary>
@@ -203,6 +213,7 @@ private:
 	struct Models
 	{
 		std::shared_ptr<skinned_mesh> pIdle{ nullptr };
+		std::shared_ptr<skinned_mesh> pDefeat{ nullptr };
 		std::shared_ptr<skinned_mesh> pRunFront{ nullptr };
 		std::shared_ptr<skinned_mesh> pAtkExpl{ nullptr };
 		std::shared_ptr<skinned_mesh> pAtkSwing{ nullptr };
@@ -230,7 +241,7 @@ public:
 
 	void Update( TargetStatus target );
 
-	void Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matProjection );
+	void Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matProjection, float animationAcceleration = 1.0f );
 public:
 	bool IsCollideAttackHitBoxes( const Donya::AABB   judgeOther, bool disableCollidingHitBoxes );
 	bool IsCollideAttackHitBoxes( const Donya::OBB    judgeOther, bool disableCollidingHitBoxes );
@@ -291,6 +302,10 @@ private:
 	void AttackRaidInit( TargetStatus target );
 	void AttackRaidUpdate( TargetStatus target );
 	void AttackRaidUninit();
+
+	void DefeatInit();
+	void DefeatUpdate();
+	void DefeatUninit();
 private:
 	/// <summary>
 	/// The position("pos") is only changed by this method(or CollideToWall method).

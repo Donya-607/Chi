@@ -147,6 +147,14 @@ void KnightParam::UseImGui()
 			ImGui::DragFloat3( "DrawPosition.Offset", &m.drawOffset.x );
 			ImGui::Text( "" );
 
+			if ( ImGui::TreeNode( "Defeat" ) )
+			{
+				ImGui::DragInt( "Motion.Length(Frame)", &m.defeatMotionLength );
+				ImGui::SliderFloat( "AfterMotion.HideSpeed", &m.defeatHideSpeed, 0.00001f, 1.0f );
+
+				ImGui::TreePop();
+			}
+
 			if ( ImGui::TreeNode( "Collisions" ) )
 			{
 				auto ShowAABB	= []( const std::string &prefix, Donya::AABB *pAABB )
@@ -311,6 +319,7 @@ Knight::Knight() :
 	std::vector<std::shared_ptr<skinned_mesh> *> modelRefs
 	{
 		&models.pIdle,
+		&models.pDefeat,
 		&models.pRunFront,
 		&models.pAtkExpl,
 		&models.pAtkSwing,
@@ -364,7 +373,7 @@ void Knight::Update( TargetStatus target )
 	CollideToWall();
 }
 
-void Knight::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matProjection )
+void Knight::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matProjection, float animeAccel )
 {
 	const auto &PARAM = KnightParam::Open();
 
@@ -375,9 +384,6 @@ void Knight::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Dony
 	Donya::Vector4x4 S = Donya::Vector4x4::MakeScaling( PARAM.scale );
 	Donya::Vector4x4 R = orientation.RequireRotationMatrix();
 	Donya::Vector4x4 T = Donya::Vector4x4::MakeTranslation( GetPos() );
-#if DEBUG_MODE
-	if ( status == decltype( status )::END ) { R = Donya::Quaternion::Make( Donya::Vector3::Front(), ToRadian( 180.0f ) ).RequireRotationMatrix(); };
-#endif // DEBUG_MODE
 	Donya::Vector4x4 W = CalcWorldMatrix() * DRAW_OFFSET;
 	Donya::Vector4x4 WVP = W * matView * matProjection;
 
@@ -416,6 +422,20 @@ void Knight::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Dony
 		break;
 	case KnightAI::ActionState::ATTACK_RAID:
 		FBXRender( models.pAtkRaid.get(), HLSL, WVP, W );
+		break;
+	case KnightAI::ActionState::END:
+		{
+			const int MOTION_LENGTH = KnightParam::Open().defeatMotionLength;
+			int timeDiff = timer - MOTION_LENGTH;
+
+			float drawAlpha = 1.0f;
+			if ( 0 < timeDiff )
+			{
+				drawAlpha -= KnightParam::Open().defeatHideSpeed * timeDiff;
+				drawAlpha = std::max( 0.0f, drawAlpha );
+			}
+			FBXRender( models.pDefeat.get(), HLSL, WVP, W, animeAccel, /* is_animation = */ true, { 1.0f, 1.0f, 1.0f, drawAlpha } );
+		}
 		break;
 	default: break;
 	}
@@ -633,7 +653,7 @@ Donya::Sphere Knight::CalcAttackHitBoxRaid() const
 
 void Knight::ReceiveImpact()
 {
-	status = decltype( status )::END;
+	DefeatInit();
 }
 
 void Knight::SetFieldRadius( float newFieldRadius )
@@ -644,7 +664,8 @@ void Knight::SetFieldRadius( float newFieldRadius )
 
 bool Knight::IsDefeated() const
 {
-	return ( status == KnightAI::ActionState::END ) ? true : false;
+	const int MOTION_LENGTH = KnightParam::Open().defeatMotionLength;
+	return ( status == KnightAI::ActionState::END && MOTION_LENGTH <= timer ) ? true : false;
 }
 
 void Knight::LoadModel()
@@ -653,6 +674,8 @@ void Knight::LoadModel()
 
 	loadFBX( models.pIdle.get(), GetModelPath( ModelAttribute::KnightIdle ) );
 	Donya::OutputDebugStr( "Done KnightModel.Idle.\n" );
+	loadFBX( models.pDefeat.get(), GetModelPath( ModelAttribute::KnightDefeat ) );
+	Donya::OutputDebugStr( "Done KnightModel.Defeat.\n" );
 	loadFBX( models.pRunFront.get(), GetModelPath( ModelAttribute::KnightRunFront ) );
 	Donya::OutputDebugStr( "Done KnightModel.RunFront.\n" );
 	loadFBX( models.pAtkExpl.get(), GetModelPath( ModelAttribute::KnightAtkExplosion ) );
@@ -663,6 +686,16 @@ void Knight::LoadModel()
 	Donya::OutputDebugStr( "Done KnightModel.Attack.Raid.\n" );
 	loadFBX( models.pFxExpl.get(), GetModelPath( ModelAttribute::KnightFxExplosion ) );
 	Donya::OutputDebugStr( "Done KnightModel.Fx.Explosion.\n" );
+
+	std::vector<std::shared_ptr<skinned_mesh> *> dontLoopModels
+	{
+		&models.pDefeat,
+		&models.pAtkExpl,
+	};
+	for ( auto &it : dontLoopModels )
+	{
+		setLoopFlg( it->get(), /* is_loop = */ false );
+	}
 
 	Donya::OutputDebugStr( "End Knight::LoadModel.\n" );
 }
@@ -680,9 +713,6 @@ Donya::Vector4x4 Knight::CalcWorldMatrix() const
 	Donya::Vector4x4 S = Donya::Vector4x4::MakeScaling( KnightParam::Open().scale );
 	Donya::Vector4x4 R = orientation.RequireRotationMatrix();
 	Donya::Vector4x4 T = Donya::Vector4x4::MakeTranslation( GetPos() );
-#if DEBUG_MODE
-	if ( status == decltype( status )::END ) { R = Donya::Quaternion::Make( Donya::Vector3::Front(), ToRadian( 180.0f ) ).RequireRotationMatrix(); };
-#endif // DEBUG_MODE
 
 	return S * R * T;
 }
@@ -959,6 +989,27 @@ void Knight::AttackRaidUninit()
 
 	ResetCurrentSphereFN( &KnightParam::Get().HitBoxRaid() );
 	setAnimFlame( models.pAtkRaid.get(), 0 );
+}
+
+void Knight::DefeatInit()
+{
+	const auto endState = decltype( status )::END;
+	status = endState;
+	AI.OverwriteState( endState );
+	AI.StopUpdate();
+
+	timer				= 0;
+	reviveCollisionTime	= 0;
+	velocity			= 0.0f;
+	slerpFactor			= 0.0f;
+}
+void Knight::DefeatUpdate()
+{
+	timer++;
+}
+void Knight::DefeatUninit()
+{
+	timer = 0;
 }
 
 void Knight::ApplyVelocity( TargetStatus target )

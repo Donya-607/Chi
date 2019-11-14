@@ -46,16 +46,10 @@ std::string GetModelPath( ModelAttribute modelAttribute )
 		return "./Data/model/Player/MDL_Player_Shield.fbx";					// break;
 	case ModelAttribute::Stage:
 		return "./Data/model/Stage/MDL_Stage01.fbx";						// break;
-	case ModelAttribute::GolemIdle:
-		return "./Data/model/Boss/Boss03/MDL_Boss03_Wait.fbx";				// break;
-	case ModelAttribute::GolemAtkSwing:
-		return "./Data/model/Boss/Boss03/MDL_Boss03_Attack_Bandgap.fbx";	// break;
-	case ModelAttribute::GolemAtkFast:
-		return "./Data/model/Boss/Boss03/MDL_Boss03_Attack_Continuous.fbx";	// break;
-	case ModelAttribute::GolemAtkRotate:
-		return "./Data/model/Boss/Boss03/MDL_Boss03_Attack_Rotate.fbx";		// break;
 	case ModelAttribute::KnightIdle:
 		return "./Data/model/Boss/Boss02/MDL_Boss02_Wait.fbx";				// break;
+	case ModelAttribute::KnightDefeat:
+		return "./Data/model/Boss/Boss02/MDL_Boss02_Death.fbx";				// break;
 	case ModelAttribute::KnightRunFront:
 		return "./Data/model/Boss/Boss02/MDL_Boss02_Walk_Forward.fbx";		// break;
 	case ModelAttribute::KnightAtkExplosion:
@@ -66,6 +60,16 @@ std::string GetModelPath( ModelAttribute modelAttribute )
 		return "./Data/model/Boss/Boss02/MDL_Boss02_Attack_JumpAttack.fbx";	// break;
 	case ModelAttribute::KnightFxExplosion:
 		return "./Data/model/Effect/EFE_Boss02_Explosion.fbx";				// break;
+	case ModelAttribute::GolemIdle:
+		return "./Data/model/Boss/Boss03/MDL_Boss03_Wait.fbx";				// break;
+	case ModelAttribute::GolemDefeat:
+		return "./Data/model/Boss/Boss03/MDL_Boss03_Death.fbx";				// break;
+	case ModelAttribute::GolemAtkSwing:
+		return "./Data/model/Boss/Boss03/MDL_Boss03_Attack_Bandgap.fbx";	// break;
+	case ModelAttribute::GolemAtkFast:
+		return "./Data/model/Boss/Boss03/MDL_Boss03_Attack_Continuous.fbx";	// break;
+	case ModelAttribute::GolemAtkRotate:
+		return "./Data/model/Boss/Boss03/MDL_Boss03_Attack_Rotate.fbx";		// break;
 	case ModelAttribute::RivalIdle:
 		return "./Data/model/Boss/Boss04/Boss04_Wait.fbx";					// break;
 	case ModelAttribute::RivalRun:

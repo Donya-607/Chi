@@ -61,8 +61,8 @@ private:
 
 		END
 	};
-	static constexpr int ATTACK_STATE_COUNT	= static_cast<int>( AttackState::END );		// Except an attack with gap.
-	static constexpr int ALL_ATTACK_COUNT	= static_cast<int>( AttackState::END ) + 1;	// Contain an attack with gap.
+	static constexpr int ATTACK_STATE_COUNT = static_cast<int>( AttackState::END );		// Except an attack with gap.
+	static constexpr int ALL_ATTACK_COUNT = static_cast<int>( AttackState::END ) + 1;	// Contain an attack with gap.
 private:
 	ActionState status{};
 
@@ -77,6 +77,8 @@ private:
 	int attackTimes{};					// Store "gapIntervals" count.
 	int intervalIndex{};
 	std::vector<int> gapIntervals{};	// At least have 1 element.
+
+	bool stopUpdate{ false };
 public:
 	GolemAI() {}
 	// ~GolemAI() = default;
@@ -135,7 +137,11 @@ public:
 	void Init();
 	void Update();
 
+	void StopUpdate()	{ stopUpdate = true;  }
+	void ResumeUpdate()	{ stopUpdate = false; }
 	ActionState GetState() const { return status; }
+
+	void OverwriteState( ActionState newState );
 private:
 	ActionState ToActionState( WaitState status ) const;
 	ActionState ToActionState( AttackState status ) const;
