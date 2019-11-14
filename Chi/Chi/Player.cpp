@@ -850,6 +850,69 @@ void Player::AttackUpdate( Input input )
 		setStopAnimation( models.pAttack.get(), /* is_stop = */ false );
 	}
 
+	// Easing process.
+	{
+		const int ADVANCE_START	= PlayerParam::Get().FrameAdvanceStart();
+		const int ADVANCE_FIN	= PlayerParam::Get().FrameAdvanceFin();
+		const int RETURN_START	= ADVANCE_FIN;
+		const int RETURN_FIN	= PlayerParam::Get().FrameReturnFin();
+
+		auto CalcEaseFactor		= []( float elapsedTime, float start, float fin, int kind, int type )
+		{
+			float percent = scast<float>( elapsedTime - start ) / scast<float>( fin - start );
+			return Donya::Easing::Ease
+			(
+				scast<Donya::Easing::Kind>( kind ),
+				scast<Donya::Easing::Type>( type ),
+				percent
+			);
+		};
+
+		auto ApplyExtraOffset	= [&]()->void
+		{
+			// Apply movement and reset extraOffset.
+			pos += extraOffset;
+			extraOffset = 0.0f;
+		};
+
+		int elapsedTime = WHOLE_FRAME - timer;
+		if ( ADVANCE_START <= elapsedTime && elapsedTime < ADVANCE_FIN )
+		{
+			float ease = CalcEaseFactor
+			(
+				elapsedTime,
+				ADVANCE_START, ADVANCE_FIN,
+				PlayerParam::Get().AdvanceEaseKind(),
+				PlayerParam::Get().AdvanceEaseType()
+			);
+			
+			extraOffset = orientation.LocalFront() * ( PlayerParam::Get().AdvanceDistance() * ease );
+
+			if ( elapsedTime == ADVANCE_FIN - 1 )
+			{
+				ApplyExtraOffset();
+			}
+		}
+		else
+		if ( RETURN_START <= elapsedTime && elapsedTime < RETURN_FIN )
+		{
+			float ease = CalcEaseFactor
+			(
+				elapsedTime,
+				RETURN_START, RETURN_FIN,
+				PlayerParam::Get().ReturnEaseKind(),
+				PlayerParam::Get().ReturnEaseType()
+			);
+
+			extraOffset = -orientation.LocalFront() * ( PlayerParam::Get().AdvanceDistance() * ease );
+
+			if ( elapsedTime == RETURN_FIN - 1 )
+			{
+				ApplyExtraOffset();
+			}
+		}
+	}
+
 	Donya::OBBFrame *pOBBF	= PlayerParam::Get().HitBoxAttackF();
 	pOBBF->Update();
 }

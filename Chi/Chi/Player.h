@@ -33,6 +33,7 @@ private:
 	int		advanceEaseType;
 	int		returnEaseKind;
 	int		returnEaseType;
+	float	advanceDistance;		// Use when State::Attack.
 	float	scale;					// Usually 1.0f.
 	float	runSpeed;				// Scalar.
 	float	rotSlerpFactor;			// Use player's rotation.
@@ -131,6 +132,7 @@ public:
 	int		AdvanceEaseType()		const { return advanceEaseType; }
 	int		ReturnEaseKind()		const { return returnEaseKind; }
 	int		ReturnEaseType()		const { return returnEaseType; }
+	float	AdvanceDistance()		const { return advanceDistance; }
 	float	Scale()					const { return scale; }
 	float	RunSpeed()				const { return runSpeed; }
 	float	SlerpFactor()			const { return rotSlerpFactor; }
