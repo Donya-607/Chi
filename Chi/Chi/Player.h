@@ -205,6 +205,7 @@ private:
 	Donya::Vector3			pos;				// In world space.
 	Donya::Vector3			velocity;			// In world space.
 	Donya::Vector3			lookDirection;		// In world space.
+	Donya::Vector3			extraOffset;		// Actual position is "pos + extraOffset".
 	Donya::Quaternion		orientation;
 	Models					models;
 	std::vector<Donya::Box>	wallCollisions;		// Stored hit-boxes belongs world space, XZ plane. This variable only assigned at Init().
@@ -223,7 +224,7 @@ public:
 	/// <summary>
 	/// Returns world-space position.
 	/// </summary>
-	Donya::Vector3 GetPosition() const { return pos; }
+	Donya::Vector3 GetPosition() const { return pos + extraOffset; }
 
 	/// <summary>
 	/// Returns world space hurt-box.

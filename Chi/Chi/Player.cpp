@@ -279,7 +279,7 @@ Player::Player() :
 	status( State::Idle ),
 	timer( 0 ), shieldsRecastTime( 0 ),
 	fieldRadius( 0 ),
-	pos(), velocity(), lookDirection(),
+	pos(), velocity(), lookDirection(), extraOffset(),
 	orientation(),
 	models(),
 	wallCollisions(),
@@ -464,14 +464,14 @@ Donya::OBB Player::GetHurtBox() const
 {
 	const auto &HITBOX = PlayerParam::Get().HitBoxBody();
 
-	Donya::OBB wsOBB = MakeOBB( HITBOX, pos, orientation );
+	Donya::OBB wsOBB = MakeOBB( HITBOX, GetPosition(), orientation );
 	return wsOBB;
 }
 Donya::OBB Player::GetShieldHitBox() const
 {
 	const auto &HITBOX = PlayerParam::Get().HitBoxShield();
 
-	Donya::OBB wsOBB = MakeOBB( HITBOX, pos, orientation );
+	Donya::OBB wsOBB = MakeOBB( HITBOX, GetPosition(), orientation );
 	if ( status != State::Defend ) { wsOBB.exist = false; }
 	return wsOBB;
 }
@@ -584,7 +584,7 @@ Donya::Vector4x4 Player::CalcWorldMatrix() const
 #if DEBUG_MODE
 	if ( status == State::Dead ) { R = Donya::Quaternion::Make( Donya::Vector3::Front(), ToRadian( 180.0f ) ).RequireRotationMatrix(); }
 #endif // DEBUG_MODE
-	Donya::Vector4x4 T = Donya::Vector4x4::MakeTranslation( pos );
+	Donya::Vector4x4 T = Donya::Vector4x4::MakeTranslation( GetPosition() );
 	return S * R * T;
 }
 
@@ -818,9 +818,9 @@ void Player::ChangeStatusFromAttack( Input input )
 void Player::AttackInit( Input input )
 {
 	status		= State::Attack;
-	velocity	= 0.0f; // Each member set to zero.
-
 	timer		= PlayerParam::Get().FrameWholeAttacking();
+	velocity	= 0.0f; // Each member set to zero.
+	extraOffset	= 0.0f;
 
 	Donya::OBBFrame *pOBBF = PlayerParam::Get().HitBoxAttackF();
 	pOBBF->currentFrame = 0;
@@ -855,7 +855,10 @@ void Player::AttackUpdate( Input input )
 }
 void Player::AttackUninit()
 {
-	timer = 0;
+	timer		= 0;
+
+	pos += extraOffset;
+	extraOffset	= 0.0f;
 
 	Donya::OBBFrame *pOBBF = PlayerParam::Get().HitBoxAttackF();
 	pOBBF->currentFrame = 0;
@@ -892,8 +895,8 @@ void Player::ApplyVelocity()
 		// The player's hit box of stage is circle, but doing with rectangle for easily correction.
 		Donya::Box xzBody{};
 		{
-			xzBody.cx		= pos.x;
-			xzBody.cy		= pos.z;
+			xzBody.cx		= GetPosition().x;
+			xzBody.cy		= GetPosition().z;
 			xzBody.w		= bodyWidth;
 			xzBody.h		= bodyWidth;
 			xzBody.exist	= true;
@@ -929,6 +932,10 @@ void Player::ApplyVelocity()
 			};
 			pos.x += xzCorrection.x;
 			pos.z += xzCorrection.y;
+
+			// Calculating position contains "extraOffset", so I should except "extraOffset".
+			pos.x -= extraOffset.x;
+			pos.z -= extraOffset.z;
 		}
 	};
 
@@ -966,7 +973,7 @@ void Player::CollideToWall()
 	const float trueFieldRadius = fieldRadius - bodyRadius;
 
 	constexpr Donya::Vector3 ORIGIN = Donya::Vector3::Zero();
-	const Donya::Vector3 currentDistance = pos - ORIGIN;
+	const Donya::Vector3 currentDistance = GetPosition() - ORIGIN;
 	const float currentLength = currentDistance.Length();
 
 	if ( trueFieldRadius < currentLength )
@@ -974,6 +981,7 @@ void Player::CollideToWall()
 		float diff = currentLength - trueFieldRadius;
 		const Donya::Vector3 direction = currentDistance.Normalized();
 		pos = ORIGIN + ( direction * ( currentLength - diff ) );
+		pos -= extraOffset; // Calculating position contains "extraOffset", so I should except "extraOffset".
 	}
 }
 
