@@ -345,9 +345,11 @@ void Player::Update( Input input )
 
 	ChangeStatus( input );
 	UpdateCurrentStatus( input );
-
-	ApplyVelocity();
-	CollideToWall();
+}
+void Player::PhysicUpdate( const std::vector<Donya::Circle> &xzCylinderWalls )
+{
+	ApplyVelocity( xzCylinderWalls );
+	CollideToStagesWall();
 }
 
 void Player::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matProjection )
@@ -935,7 +937,7 @@ void Player::AssignInputVelocity( Input input )
 	velocity *= PlayerParam::Get().RunSpeed();
 }
 
-void Player::ApplyVelocity()
+void Player::ApplyVelocity( const std::vector<Donya::Circle> &xzCylinderWalls )
 {
 	/// <summary>
 	/// The "xzNAxis" is specify moving axis. please only set to { 1, 0 } or { 0, 1 }.
@@ -952,54 +954,95 @@ void Player::ApplyVelocity()
 
 		// Take a value of +1 or -1.
 		const float moveSign = scast<float>( Donya::SignBit( xzVelocity.x ) + Donya::SignBit( xzVelocity.y ) );
-
 		const auto  actualBody = PlayerParam::Get().HitBoxPhysic();
-		const float bodyWidth  = actualBody.radius;
 
-		// The player's hit box of stage is circle, but doing with rectangle for easily correction.
-		Donya::Box xzBody{};
+		// VS Cylinder walls.
 		{
-			xzBody.cx		= GetPosition().x;
-			xzBody.cy		= GetPosition().z;
-			xzBody.w		= bodyWidth;
-			xzBody.h		= bodyWidth;
-			xzBody.exist	= true;
-		}
-		Donya::Vector2 xzBodyCenter{ xzBody.cx, xzBody.cy };
-
-		for ( const auto &wall : wallCollisions )
-		{
-			if ( !Donya::Box::IsHitBox( xzBody, wall ) ) { continue; }
-			// else
-
-			Donya::Vector2 xzWallCenter{ wall.cx, wall.cy };
-			Donya::Vector2 wallSize{ wall.w * xzNAxis.x, wall.h * xzNAxis.y }; // Only either X or Z is valid.
-			float wallWidth = wallSize.Length(); // Extract valid member by Length().
-
-			// Calculate colliding length.
-			// First, calculate body's edge of moving side.
-			// Then, calculate wall's edge of inverse moving side.
-			// After that, calculate colliding length from two edges.
-			// Finally, correct the position to inverse moving side only that length.
-
-			Donya::Vector2 bodyEdge = xzBodyCenter + ( xzNAxis * bodyWidth * moveSign );
-			Donya::Vector2 wallEdge = xzWallCenter + ( xzNAxis * wallWidth * -moveSign );
-			Donya::Vector2 diff = bodyEdge - wallEdge;
-			Donya::Vector2 axisDiff{ diff.x * xzNAxis.x, diff.y * xzNAxis.y };
-			float collidingLength = axisDiff.Length();
-			collidingLength += 0.1f; // Prevent the two edges onto same place(the collision detective allows same(equal) value).
-
-			Donya::Vector2 xzCorrection
+			Donya::Circle xzBody{};
 			{
-				xzNAxis.x * ( collidingLength * -moveSign ),
-				xzNAxis.y * ( collidingLength * -moveSign )
-			};
-			pos.x += xzCorrection.x;
-			pos.z += xzCorrection.y;
+				xzBody.cx		= GetPosition().x;
+				xzBody.cy		= GetPosition().z;
+				xzBody.radius	= actualBody.radius;
+				xzBody.exist	= true;
+			}
+			Donya::Vector2 xzBodyCenter{ xzBody.cx, xzBody.cy };
+			for ( const auto &it : xzCylinderWalls )
+			{
+				if ( !Donya::Circle::IsHitCircle( xzBody, it ) ) { continue; }
+				// else
 
-			// Calculating position contains "extraOffset", so I should except "extraOffset".
-			pos.x -= extraOffset.x;
-			pos.z -= extraOffset.z;
+				Donya::Vector2 xzWallCenter{ it.cx, it.cy };
+
+				Donya::Vector2 xznVecToBody = xzBodyCenter - xzWallCenter;
+				xznVecToBody.Normalize();
+
+				float correctLength = xzBody.radius + it.radius;
+				correctLength += 0.1f; // Prevent the two circles onto same place(the collision detective allows same(equal) value).
+
+				Donya::Vector2 correction{};
+				// correction.x = ( xznVecToBody.x * ( xzNAxis.x * correctLength ) ); // The "xzNAxis" is unnecessary.
+				// correction.y = ( xznVecToBody.y * ( xzNAxis.y * correctLength ) ); // The "xzNAxis" is unnecessary.
+				correction.x = ( xznVecToBody.x * ( correctLength ) );
+				correction.y = ( xznVecToBody.y * ( correctLength ) );
+
+				pos.x = xzWallCenter.x + correction.x;
+				pos.z = xzWallCenter.y + correction.y;
+
+				// Calculating position contains "extraOffset", so I should except "extraOffset".
+				pos.x -= extraOffset.x;
+				pos.z -= extraOffset.z;
+			}
+		}
+
+		// VS Rectangle walls.
+		{
+			const float bodyWidth = actualBody.radius;
+
+			// The player's hit box of stage is circle, but doing with rectangle for easily correction.
+			Donya::Box xzBody{};
+			{
+				xzBody.cx		= GetPosition().x;
+				xzBody.cy		= GetPosition().z;
+				xzBody.w		= bodyWidth;
+				xzBody.h		= bodyWidth;
+				xzBody.exist	= true;
+			}
+			Donya::Vector2 xzBodyCenter{ xzBody.cx, xzBody.cy };
+
+			for ( const auto &wall : wallCollisions )
+			{
+				if ( !Donya::Box::IsHitBox( xzBody, wall ) ) { continue; }
+				// else
+
+				Donya::Vector2 xzWallCenter{ wall.cx, wall.cy };
+				Donya::Vector2 wallSize{ wall.w * xzNAxis.x, wall.h * xzNAxis.y }; // Only either X or Z is valid.
+				float wallWidth = wallSize.Length(); // Extract valid member by Length().
+
+				// Calculate colliding length.
+				// First, calculate body's edge of moving side.
+				// Then, calculate wall's edge of inverse moving side.
+				// After that, calculate colliding length from two edges.
+				// Finally, correct the position to inverse moving side only that length.
+
+				Donya::Vector2 bodyEdge = xzBodyCenter + ( xzNAxis * bodyWidth * moveSign );
+				Donya::Vector2 wallEdge = xzWallCenter + ( xzNAxis * wallWidth * -moveSign );
+				Donya::Vector2 diff = bodyEdge - wallEdge;
+				Donya::Vector2 axisDiff{ diff.x * xzNAxis.x, diff.y * xzNAxis.y };
+				float collidingLength = axisDiff.Length();
+				collidingLength += 0.1f; // Prevent the two edges onto same place(the collision detective allows same(equal) value).
+
+				Donya::Vector2 xzCorrection
+				{
+					xzNAxis.x * ( collidingLength * -moveSign ),
+					xzNAxis.y * ( collidingLength * -moveSign )
+				};
+				pos.x += xzCorrection.x;
+				pos.z += xzCorrection.y;
+
+				// Calculating position contains "extraOffset", so I should except "extraOffset".
+				pos.x -= extraOffset.x;
+				pos.z -= extraOffset.z;
+			}
 		}
 	};
 
@@ -1031,7 +1074,7 @@ void Player::ApplyVelocity()
 	}
 }
 
-void Player::CollideToWall()
+void Player::CollideToStagesWall()
 {
 	const float bodyRadius = PlayerParam::Get().HitBoxPhysic().radius;
 	const float trueFieldRadius = fieldRadius - bodyRadius;

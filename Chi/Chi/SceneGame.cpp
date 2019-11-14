@@ -353,6 +353,9 @@ public:
 
 		BossUpdate();
 
+		std::vector<Donya::Circle> bossBodies = FetchBossBodies();
+		player.PhysicUpdate( bossBodies );
+
 		CameraUpdate( GetCameraTargetPos() );
 
 		EffectManager::GetInstance()->Update();
@@ -432,6 +435,55 @@ public:
 			return;
 		default: Donya::OutputDebugStr( "Error : The boss does not update !\n" ); break;
 		}
+	}
+	std::vector<Donya::Circle> FetchBossBodies() const
+	{
+		auto ToCircle = []( const Donya::Sphere &wsSphere )
+		{
+			Donya::Circle xzBody{};
+			xzBody.cx		= wsSphere.pos.x;
+			xzBody.cy		= wsSphere.pos.z;
+			xzBody.radius	= wsSphere.radius;
+			xzBody.exist	= wsSphere.exist;
+			return xzBody;
+		};
+
+		std::vector<Donya::Circle> bodies{};
+		switch ( stageNo )
+		{
+		case KnightNo:
+			{
+				Donya::Sphere hitBox = knight.GetBodyHitBox();
+				bodies.emplace_back( ToCircle( hitBox ) );
+			}
+			break;
+		case GolemNo:
+			{
+				std::vector<Donya::Sphere> hitBoxes = golem.GetBodyHitBoxes();
+				for ( const auto &it : hitBoxes )
+				{
+					bodies.emplace_back( ToCircle( it ) );
+				}
+			}
+			break;
+		case RivalNo:
+			{
+				Donya::AABB hitBox = rival.GetBodyHitBox();
+				Donya::Sphere sphereVersion{};
+				{
+					Donya::Vector2 xzSize{ hitBox.size.x, hitBox.size.z };
+
+					sphereVersion.pos		= hitBox.pos;
+					sphereVersion.radius	= xzSize.Length();
+					sphereVersion.exist		= hitBox.exist;
+				}
+				bodies.emplace_back( ToCircle( sphereVersion ) );
+			}
+			break;
+		default: Donya::OutputDebugStr( "Error : The boss bodies does not fetched !\n" ); break;
+		}
+
+		return bodies;
 	}
 	bool IsBossDefeated() const
 	{
@@ -548,40 +600,6 @@ public:
 		{
 			bool wasHitToShield = false;
 
-		#if FETCH_BOXES_THEN_JUDGE
-
-			const auto attackBoxes = golem.RequireAttackHitBoxesOBB();
-			for ( const auto &it : attackBoxes )
-			{
-				if ( Donya::OBB::IsHitOBB( playerShieldBox, it ) )
-				{
-					wasHitToShield = true;
-					player.SucceededDefence();
-				}
-				if ( !wasHitToShield && Donya::OBB::IsHitOBB( playerBodyBox, it ) )
-				{
-					player.ReceiveImpact();
-				}
-
-				wasHitToShield = false;
-			}
-
-			const auto attackSpheres = golem.RequireAttackHitBoxesSphere();
-			for ( const auto &it : attackSpheres )
-			{
-				if ( Donya::OBB::IsHitSphere( playerShieldBox, it ) )
-				{
-					wasHitToShield = true;
-					player.SucceededDefence();
-				}
-				if ( !wasHitToShield && Donya::OBB::IsHitSphere( playerBodyBox, it ) )
-				{
-					player.ReceiveImpact();
-				}
-			}
-
-		#else
-
 			auto &eruptionEffects = EffectManager::GetInstance()->GetEruptionEffectVector();
 			for ( auto &effect : eruptionEffects )
 			{
@@ -615,8 +633,6 @@ public:
 			{
 				player.ReceiveImpact();
 			}
-
-		#endif // FETCH_BOXES_THEN_JUDGE
 		}
 		
 		// PlayerAttack VS BossBodies
@@ -624,7 +640,7 @@ public:
 			const auto pBossBodies = golem.GetBodyHitBoxes();
 			for ( const auto &it : pBossBodies )
 			{
-				if ( Donya::OBB::IsHitOBB( playerAttackBox, it ) )
+				if ( Donya::OBB::IsHitSphere( playerAttackBox, it ) )
 				{
 					golem.ReceiveImpact();
 					break;

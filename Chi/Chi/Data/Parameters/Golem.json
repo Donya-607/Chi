@@ -11,74 +11,38 @@
                     "y": 0.0,
                     "z": 8.0
                 },
-                "size": {
-                    "x": 100.0,
-                    "y": 200.0,
-                    "z": 80.0
-                },
+                "radius": 200.0,
                 "exist": true
             },
             {
                 "pos": {
                     "x": 160.0,
-                    "y": 0.0,
+                    "y": 32.0,
                     "z": 0.0
                 },
-                "size": {
-                    "x": 50.0,
-                    "y": 100.0,
-                    "z": 50.0
-                },
+                "radius": 128.0,
                 "exist": true
             },
             {
                 "pos": {
                     "x": -160.0,
-                    "y": 0.0,
+                    "y": 32.0,
                     "z": 0.0
                 },
-                "size": {
-                    "x": 50.0,
-                    "y": 100.0,
-                    "z": 50.0
-                },
+                "radius": 128.0,
                 "exist": true
             }
         ],
-        "initPosPerStage": [
-            {
-                "x": 0.0,
-                "y": 0.0,
-                "z": 295.0
-            },
-            {
-                "x": 0.0,
-                "y": 0.0,
-                "z": 191.0
-            },
-            {
-                "x": 0.0,
-                "y": 0.0,
-                "z": 124.0
-            }
-        ],
-        "drawOffsetsPerStage": [
-            {
-                "x": 0.0,
-                "y": -60.0,
-                "z": 0.0
-            },
-            {
-                "x": 0.0,
-                "y": -60.0,
-                "z": 0.0
-            },
-            {
-                "x": 0.0,
-                "y": -60.0,
-                "z": 0.0
-            }
-        ],
+        "initPos": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 295.0
+        },
+        "drawOffset": {
+            "x": 0.0,
+            "y": -60.0,
+            "z": 0.0
+        },
         "OBBAttacksSwing": [
             {
                 "cereal_class_version": 0,
@@ -130,7 +94,7 @@
                             "z": 0.0,
                             "w": 0.8775825500488281
                         },
-                        "exist": true
+                        "exist": false
                     }
                 },
                 "meshName": "MDL_HandL"
@@ -204,7 +168,6 @@
                 "enableFrameStart": 45,
                 "enableFrameLast": 100,
                 "collision": {
-                    "cereal_class_version": 0,
                     "pos": {
                         "x": 0.0,
                         "y": 0.0,

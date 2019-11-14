@@ -162,7 +162,7 @@ class Player
 public:
 	struct Input
 	{
-		Donya::Vector3 moveVector; // Normalized.
+		Donya::Vector3 moveVector;	// Normalized.
 		bool doDefend;
 		bool doAttack;
 	public:
@@ -171,7 +171,7 @@ public:
 			doDefend( false ),
 			doAttack( false )
 		{}
-		Input( Donya::Vector3 moveVector, bool doDefend, bool doAttack ) :
+		Input( const Donya::Vector3 &moveVector, bool doDefend, bool doAttack ) :
 			moveVector( moveVector ),
 			doDefend( doDefend ),
 			doAttack( doAttack )
@@ -220,6 +220,10 @@ public:
 	void Uninit();
 
 	void Update( Input input );
+	/// <summary>
+	/// Update the position, then doing collision to walls and repulsion.
+	/// </summary>
+	void PhysicUpdate( const std::vector<Donya::Circle> &xzCylinderWalls );
 
 	void Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matProjection );
 public:
@@ -292,13 +296,13 @@ private:
 	void AssignInputVelocity( Input input );
 
 	/// <summary>
-	/// The position("pos") is only changed by this method(or CollideToWall method).
+	/// The position("pos") is only changed by this method(or CollideToStagesWall method).
 	/// </summary>
-	void ApplyVelocity();
+	void ApplyVelocity( const std::vector<Donya::Circle> &xzCylinderWalls );
 	/// <summary>
 	/// If the position("pos") without to field range, clamp to field range.
 	/// </summary>
-	void CollideToWall();
+	void CollideToStagesWall();
 private:
 #if USE_IMGUI
 

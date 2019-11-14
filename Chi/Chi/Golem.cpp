@@ -24,12 +24,9 @@ GolemParam::GolemParam() :
 	moveMoveSpeed( 0.0f ), moveSlerpFactor( 1.0f ),
 	attackFastMoveSpeed( 0.0f ), attackFastSlerpFactor( 1.0f ),
 	attackRotateMoveSpeed( 0.0f ), attackRotateSlerpFactor( 1.0f ),
-	initPosPerStage(), drawOffsetsPerStage(), hitBoxesBody(),
+	initPos(), drawOffset(), hitBoxesBody(),
 	OBBAttacksSwing(), OBBFAttacksFast(), rotateAttackCollisions()
-{
-	initPosPerStage.resize( 1U );
-	drawOffsetsPerStage.resize( 1U );
-}
+{}
 GolemParam::~GolemParam() = default;
 
 void GolemParam::Init()
@@ -68,18 +65,6 @@ float GolemParam::SlerpFactor( GolemAI::ActionState status ) const
 	}
 
 	return 1.0f;
-}
-Donya::Vector3 GolemParam::GetInitPosition( int stageNo ) const
-{
-	_ASSERT_EXPR( stageNo <= scast<int>( initPosPerStage.size() ), L"Error : Specified stage number over than stage count !" );
-
-	return initPosPerStage[stageNo];
-}
-Donya::Vector3 GolemParam::GetDrawOffset( int stageNo ) const
-{
-	_ASSERT_EXPR( stageNo <= scast<int>( drawOffsetsPerStage.size() ), L"Error : Specified stage number over than stage count !" );
-
-	return drawOffsetsPerStage[stageNo];
 }
 
 void GolemParam::LoadParameter( bool isBinary )
@@ -132,45 +117,8 @@ void GolemParam::UseImGui()
 			ImGui::SliderFloat( "SlerpFactor.\"Attack.Rotate\"State", &attackRotateSlerpFactor, 0.0f, 1.0f );
 			ImGui::Text( "" );
 
-			if ( ImGui::TreeNode( "Initialize.Position" ) )
-			{
-				if ( ImGui::Button( "Append" ) )
-				{
-					initPosPerStage.push_back( {} );
-				}
-				if ( 2 <= initPosPerStage.size() && ImGui::Button( "PopBack" ) )
-				{
-					initPosPerStage.pop_back();
-				}
-
-				const size_t COUNT = initPosPerStage.size();
-				for ( size_t i = 0; i < COUNT; ++i )
-				{
-					ImGui::DragFloat3( ( "Stage[" + std::to_string( i ) + "].Pos" ).c_str(), &initPosPerStage[i].x );
-				}
-
-				ImGui::TreePop();
-			}	
-			if ( ImGui::TreeNode( "DrawPosition.Offset" ) )
-			{
-				if ( ImGui::Button( "Append" ) )
-				{
-					drawOffsetsPerStage.push_back( {} );
-				}
-				if ( 2 <= drawOffsetsPerStage.size() && ImGui::Button( "PopBack" ) )
-				{
-					drawOffsetsPerStage.pop_back();
-				}
-
-				const size_t COUNT = drawOffsetsPerStage.size();
-				for ( size_t i = 0; i < COUNT; ++i )
-				{
-					ImGui::DragFloat3( ( "Stage[" + std::to_string( i ) + "].Pos" ).c_str(), &drawOffsetsPerStage[i].x );
-				}
-
-				ImGui::TreePop();
-			}
-			ImGui::Text( "" );
+			ImGui::DragFloat3( "Initialize.Position", &initPos.x );
+			ImGui::DragFloat3( "DrawPosition.Offset", &drawOffset.x );
 
 			if ( ImGui::TreeNode( "Defeat" ) )
 			{
@@ -260,6 +208,52 @@ void GolemParam::UseImGui()
 					pSphereF->collision.exist = oldExistFlag;
 				};
 
+				auto ShowSpheres	= [&ShowSphere]( const std::string &prefix, std::vector<Donya::Sphere> *pSpheres )
+				{
+					if ( ImGui::TreeNode( prefix.c_str() ) )
+					{
+						if ( ImGui::Button( "Append" ) )
+						{
+							pSpheres->push_back( {} );
+						}
+						if ( 1 <= pSpheres->size() && ImGui::Button( "PopBack" ) )
+						{
+							pSpheres->pop_back();
+						}
+
+						const size_t COUNT = pSpheres->size();
+						for ( size_t i = 0; i < COUNT; ++i )
+						{
+							auto &sphere = pSpheres->at( i );
+							ShowSphere( "[" + std::to_string( i ) + "]", &sphere );
+						}
+
+						ImGui::TreePop();
+					}
+				};
+				auto ShowSphereFs	= [&ShowSphereF]( const std::string &prefix, std::vector<Donya::SphereFrame> *pSphereFs )
+				{
+					if ( ImGui::TreeNode( prefix.c_str() ) )
+					{
+						if ( ImGui::Button( "Append" ) )
+						{
+							pSphereFs->push_back( {} );
+						}
+						if ( 1 <= pSphereFs->size() && ImGui::Button( "PopBack" ) )
+						{
+							pSphereFs->pop_back();
+						}
+
+						const size_t COUNT = pSphereFs->size();
+						for ( size_t i = 0; i < COUNT; ++i )
+						{
+							auto &sphereF = pSphereFs->at( i );
+							ShowSphereF( "[" + std::to_string( i ) + "]", &sphereF );
+						}
+
+						ImGui::TreePop();
+					}
+				};
 				auto ShowAABBs		= [&ShowAABB]( const std::string &prefix, std::vector<Donya::AABB> *pAABBs )
 				{
 					if ( ImGui::TreeNode( prefix.c_str() ) )
@@ -307,29 +301,6 @@ void GolemParam::UseImGui()
 						ImGui::TreePop();
 					}
 				};
-				auto ShowSphereFs	= [&ShowSphereF]( const std::string &prefix, std::vector<Donya::SphereFrame> *pSphereFs )
-				{
-					if ( ImGui::TreeNode( prefix.c_str() ) )
-					{
-						if ( ImGui::Button( "Append" ) )
-						{
-							pSphereFs->push_back( {} );
-						}
-						if ( 1 <= pSphereFs->size() && ImGui::Button( "PopBack" ) )
-						{
-							pSphereFs->pop_back();
-						}
-
-						const size_t COUNT = pSphereFs->size();
-						for ( size_t i = 0; i < COUNT; ++i )
-						{
-							auto &sphereF = pSphereFs->at( i );
-							ShowSphereF( "[" + std::to_string( i ) + "]", &sphereF );
-						}
-
-						ImGui::TreePop();
-					}
-				};
 
 				if ( ImGui::TreeNode( "Attacks.Fast" ) )
 				{
@@ -371,7 +342,7 @@ void GolemParam::UseImGui()
 
 				ShowSphereFs( "Attacks.Rotate", &rotateAttackCollisions );
 
-				ShowAABBs( "Body.HurtBox", &hitBoxesBody );
+				ShowSpheres( "Body.HurtBox", &hitBoxesBody );
 
 				ImGui::TreePop();
 			}
@@ -528,7 +499,7 @@ void Golem::Init( int stageNumber )
 
 	stageNo	= stageNumber;
 	status	= GolemAI::ActionState::WAIT;
-	pos		= GolemParam::Get().GetInitPosition( stageNo );
+	pos		= GolemParam::Get().GetInitPosition();
 
 	SetFieldRadius( 0.0f ); // Set to body's radius.
 
@@ -565,7 +536,7 @@ void Golem::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya
 {
 	const auto &PARAM = GolemParam::Get();
 
-	const Donya::Vector3 drawOffset = PARAM.GetDrawOffset( stageNo );
+	const Donya::Vector3 drawOffset = PARAM.GetDrawOffset();
 	const Donya::Vector4x4 DRAW_OFFSET = Donya::Vector4x4::MakeTranslation( drawOffset );
 
 	Donya::Vector4x4 W = CalcWorldMatrix() * DRAW_OFFSET;
@@ -669,10 +640,10 @@ void Golem::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya
 		constexpr Donya::Vector4 COLOR_BODY			{ 0.0f, 0.5f, 0.0f, 0.6f };
 		constexpr Donya::Vector4 COLOR_BODY_CIRCLE	{ 0.0f, 0.3f, 0.3f, 0.6f };
 		
-		const auto *pAABBs = PARAM.BodyHitBoxes();
-		for ( const auto &it : *pAABBs )
+		const auto *pSpheres = PARAM.BodyHitBoxes();
+		for ( const auto &it : *pSpheres )
 		{
-			DrawCube( it.pos, it.size, orientation, COLOR_BODY );
+			DrawSphere( it.pos, it.radius, COLOR_BODY );
 		}
 
 		DrawSphere( {/*Zero*/}, PARAM.StageBodyRadius(), COLOR_BODY_CIRCLE );
@@ -988,24 +959,25 @@ std::vector<Donya::Sphere> Golem::RequireAttackHitBoxesSphere() const
 
 	return spheres;
 }
-static Donya::OBB MakeOBB( const Donya::AABB &AABB, const Donya::Vector3 &wsPos, const Donya::Quaternion &orientation )
-{
-	Donya::OBB OBB{};
-	OBB.pos			= AABB.pos + wsPos;
-	OBB.size		= AABB.size;
-	OBB.orientation	= orientation;
-	OBB.exist		= AABB.exist;
-	return OBB;
-}
-std::vector<Donya::OBB> Golem::GetBodyHitBoxes() const
+std::vector<Donya::Sphere> Golem::GetBodyHitBoxes() const
 {
 	const auto &PARAM = GolemParam::Get();
-	std::vector<Donya::OBB> collisions{};
+	std::vector<Donya::Sphere> collisions{};
 
-	const auto *pAABBs = PARAM.BodyHitBoxes();
-	for ( const auto &it : *pAABBs )
+	auto ToWorldSpace = []( const Donya::Sphere &localSphere, const Donya::Vector3 &wsPos, const Donya::Quaternion &orientation )
 	{
-		collisions.emplace_back( MakeOBB( it, GetPos(), orientation ) );
+		Donya::Sphere  wsSphere{};
+		Donya::Vector3 rotatedOffset = orientation.RotateVector( localSphere.pos );
+		wsSphere.pos	= rotatedOffset + wsPos;
+		wsSphere.radius	= localSphere.radius;
+		wsSphere.exist	= localSphere.exist;
+		return wsSphere;
+	};
+
+	const auto *pSpheres = PARAM.BodyHitBoxes();
+	for ( const auto &it : *pSpheres )
+	{
+		collisions.emplace_back( ToWorldSpace( it, GetPos(), orientation ) );
 	}
 
 	return collisions;
