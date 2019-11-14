@@ -35,5 +35,5 @@ void Stage::Draw(fbx_shader& hlsl,const Donya::Vector4x4 &matView, const Donya::
 
 void Stage::LoadModel()
 {
-	loadFBX( pModel.get(), GetModelPath( ModelAttribute::Stage ) );
+	loadFBX( pModel.get(), GetModelPath( ModelAttribute::Stage01 ) );
 }
