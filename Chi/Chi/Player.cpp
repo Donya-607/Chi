@@ -3,6 +3,7 @@
 #include <array>
 
 #include "Donya/Keyboard.h"
+#include "Donya/Easing.h"
 #include "Donya/FilePath.h"
 #include "Donya/Sound.h"
 #include "Donya/Useful.h"		// Use convert character-code function.
@@ -24,6 +25,8 @@
 
 PlayerParam::PlayerParam() :
 	frameUnfoldableDefence( 1 ), shieldsRecastFrame( 1 ), frameCancelableAttack( 1 ), frameWholeAttacking( 1 ),
+	advanceStartFrame(), advanceFinFrame(), returnFinFrame(),
+	advanceEaseKind(), advanceEaseType(), returnEaseKind(), returnEaseType(),
 	scale( 1.0f ), runSpeed( 1.0f ), rotSlerpFactor( 0.3f ),
 	hitBoxBody(), hitBoxPhysic(), hitBoxShield(), hitBoxLance(),
 	lanceMeshName()
@@ -89,6 +92,34 @@ void PlayerParam::UseImGui()
 			ImGui::DragFloat( "Running Speed", &runSpeed );
 			ImGui::SliderFloat( "SlerpPercent of Rotation", &rotSlerpFactor, 0.05f, 1.0f );
 			ImGui::Text( "" );
+
+			if ( ImGui::TreeNode( "Attack.Advance" ) )
+			{
+				ImGui::SliderInt( "Advance.StartFrame",		&advanceStartFrame,	1, frameWholeAttacking );
+				ImGui::SliderInt( "Advance.FinishFrame",	&advanceFinFrame,	1, frameWholeAttacking );
+				ImGui::SliderInt( "Return.FinishFrame",		&returnFinFrame,	1, frameWholeAttacking );
+
+				// Easing parameter.
+				{
+					using namespace Donya;
+					constexpr int KIND_COUNT = Easing::GetKindCount();
+					constexpr int TYPE_COUNT = Easing::GetTypeCount();
+
+					ImGui::SliderInt( "Advance.EasingKind", &advanceEaseKind, 0, KIND_COUNT - 1 );
+					ImGui::SliderInt( "Advance.EasingType", &advanceEaseType, 0, TYPE_COUNT - 1 );
+					std::string strKind = Easing::KindName( advanceEaseKind );
+					std::string strType = Easing::TypeName( advanceEaseType );
+					ImGui::Text( ( "Advance.Easing : " + strKind + "." + strType ).c_str() );
+
+					ImGui::SliderInt( "Return.EasingKind", &returnEaseKind, 0, KIND_COUNT - 1 );
+					ImGui::SliderInt( "Return.EasingType", &returnEaseType, 0, TYPE_COUNT - 1 );
+					std::string strKind = Easing::KindName( returnEaseKind );
+					std::string strType = Easing::TypeName( returnEaseType );
+					ImGui::Text( ( "Return.Easing : " + strKind + "." + strType ).c_str() );
+				}
+
+				ImGui::TreePop();
+			}
 
 			static std::array<char, 512U> lanceNameBuffer{};
 			ImGui::InputText( "MeshName.Lance", lanceNameBuffer.data(), lanceNameBuffer.size() );

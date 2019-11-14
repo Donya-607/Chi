@@ -26,6 +26,13 @@ private:
 	int		frameStopTiming;		// 0 ~ N. Timing of stopping animation of attack.Use when State::Attack.
 	int		frameCancelableAttack;	// 1 ~ "frameWholeAttacking". this frame is irrelevant by "frameStopAnime". Use when State::Attack.
 	int		frameWholeAttacking;	// 1 ~ N. this whole frame is irrelevant by "frameCancelableAttack". Use when State::Attack.
+	int		advanceStartFrame;		// 1 ~ N.
+	int		advanceFinFrame;		// 1 ~ N. this frame is same as start frame of return.
+	int		returnFinFrame;			// 1 ~ "frameWholeAttacking".
+	int		advanceEaseKind;
+	int		advanceEaseType;
+	int		returnEaseKind;
+	int		returnEaseType;
 	float	scale;					// Usually 1.0f.
 	float	runSpeed;				// Scalar.
 	float	rotSlerpFactor;			// Use player's rotation.
@@ -90,6 +97,19 @@ private:
 		}
 		if ( 7 <= version )
 		{
+			archive
+			(
+				CEREAL_NVP( advanceStartFrame ),
+				CEREAL_NVP( advanceFinFrame ),
+				CEREAL_NVP( returnFinFrame ),
+				CEREAL_NVP( advanceEaseKind ),
+				CEREAL_NVP( advanceEaseType ),
+				CEREAL_NVP( returnEaseKind ),
+				CEREAL_NVP( returnEaseType )
+			);
+		}
+		if ( 8 <= version )
+		{
 			// archive( CEREAL_NVP( x ) );
 		}
 	}
@@ -104,6 +124,13 @@ public:
 	int		FrameStopAnimeTiming()	const { return frameStopTiming; }
 	int		FrameCancelableAttack()	const { return frameCancelableAttack; }
 	int		FrameWholeAttacking()	const { return frameWholeAttacking; }
+	int		FrameAdvanceStart()		const { return advanceStartFrame; }
+	int		FrameAdvanceFin()		const { return advanceFinFrame; }
+	int		FrameReturnFin()		const { return returnFinFrame; }
+	int		AdvanceEaseKind()		const { return advanceEaseKind; }
+	int		AdvanceEaseType()		const { return advanceEaseType; }
+	int		ReturnEaseKind()		const { return returnEaseKind; }
+	int		ReturnEaseType()		const { return returnEaseType; }
 	float	Scale()					const { return scale; }
 	float	RunSpeed()				const { return runSpeed; }
 	float	SlerpFactor()			const { return rotSlerpFactor; }
@@ -124,7 +151,7 @@ public:
 
 #endif // USE_IMGUI
 };
-CEREAL_CLASS_VERSION( PlayerParam, 6 )
+CEREAL_CLASS_VERSION( PlayerParam, 7 )
 
 class  skinned_mesh;	// With pointer. because I'm not want include this at header.
 struct fbx_shader;		// Use for argument.
