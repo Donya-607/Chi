@@ -822,10 +822,11 @@ void Player::ChangeStatusFromAttack( Input input )
 }
 void Player::AttackInit( Input input )
 {
-	status		= State::Attack;
-	timer		= PlayerParam::Get().FrameWholeAttacking();
-	velocity	= 0.0f; // Each member set to zero.
-	extraOffset	= 0.0f;
+	status				= State::Attack;
+	timer				= PlayerParam::Get().FrameWholeAttacking();
+	velocity			= 0.0f; // Each member set to zero.
+	extraOffset			= 0.0f;
+	shieldsRecastTime	= 0;	// This allows attack cancel anytime.
 
 	Donya::OBBFrame *pOBBF = PlayerParam::Get().HitBoxAttackF();
 	pOBBF->currentFrame = 0;
