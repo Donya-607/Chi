@@ -1,8 +1,10 @@
 #pragma once
 
 #include <string>
+#include <typeinfo>
 #include <vector>
 
+#include <cereal/cereal.hpp>
 #include <cereal/types/polymorphic.hpp>
 #include <cereal/types/vector.hpp>
 
@@ -11,7 +13,7 @@
 
 struct ActionStorage
 {
-	int waitNo{};
+	int waitNo{};		// -1:random.
 	int nextAttackNo{};
 private:
 	friend class cereal::access;
@@ -49,7 +51,10 @@ CEREAL_CLASS_VERSION( ActionStorage, 0 )
 class LotteryBase
 {
 public:
-	virtual ActionStorage Lottery( float distance ) = 0;
+	virtual void Init() = 0;
+	virtual void Uninit() = 0;
+public:
+	virtual ActionStorage Lottery( float normalizedDistance ) = 0;
 
 	virtual void LoadParameter( bool isBinary = 0 ) = 0;
 
@@ -60,12 +65,31 @@ public:
 	/// <summary>
 	/// Showing all members to ImGui::TreeNode().
 	/// </summary>
-	virtual void ShowImGuiNode( const std::string &prefix ) = 0;
+	virtual void ShowImGuiNode( const std::string &prefix, bool isAllowUnitIO = false ) = 0;
 
 #endif // USE_IMGUI
 
 };
 
+#if USE_IMGUI
+
+void ShowImGuiChooserNode( const std::string &prefix, std::unique_ptr<LotteryBase> *ppChooserBase, int *pNowKind );
+
+#endif // USE_IMGUI
+
+enum class ChooserKind
+{
+	Distance = 0,
+	Fixed,
+
+	CHOOSERS_COUNT
+};
+void ResetLotteryKind( std::unique_ptr<LotteryBase> *ppChooserBase, int chooserKind );
+void ResetLotteryKind( std::unique_ptr<LotteryBase> *ppChooserBase, ChooserKind chooserKind );
+
+/// <summary>
+/// Chooser number 0.
+/// </summary>
 class DistanceLottery : public LotteryBase
 {
 public:
@@ -109,25 +133,32 @@ private:
 	}
 	static constexpr const char *SERIAL_ID = "DistanceLottery";
 public:
-	virtual ActionStorage Lottery( float distance ) = 0;
+	void Init() override;
+	void Uninit() override;
 
-	virtual void LoadParameter( bool isBinary = 0 ) = 0;
+	ActionStorage Lottery( float normalizedDistance ) override;
+
+	void LoadParameter( bool isBinary = 0 ) override;
 
 #if USE_IMGUI
 
-	virtual void SaveParameter() = 0;
+	void SaveParameter() override;
 
 	/// <summary>
 	/// Showing all members to ImGui::TreeNode().
 	/// </summary>
-	virtual void ShowImGuiNode( const std::string &prefix ) = 0;
+	void ShowImGuiNode( const std::string &prefix, bool isAllowUnitIO = false ) override;
 
 #endif // USE_IMGUI
 };
 CEREAL_CLASS_VERSION( DistanceLottery, 0 )
 CEREAL_CLASS_VERSION( DistanceLottery::Content, 0 )
 CEREAL_REGISTER_TYPE( DistanceLottery )
+CEREAL_REGISTER_POLYMORPHIC_RELATION( LotteryBase, DistanceLottery )
 
+/// <summary>
+/// Chooser number 1.
+/// </summary>
 class FixedLottery : public LotteryBase
 {
 private:
@@ -149,20 +180,24 @@ private:
 	}
 	static constexpr const char *SERIAL_ID = "FixedLottery";
 public:
-	virtual ActionStorage Lottery( float distance ) override;
+	void Init() override;
+	void Uninit() override;
 
-	virtual void LoadParameter( bool isBinary = 0 ) override;
+	ActionStorage Lottery( float normalizedDistance ) override;
+
+	void LoadParameter( bool isBinary = 0 ) override;
 
 #if USE_IMGUI
 
-	virtual void SaveParameter() override;
+	void SaveParameter() override;
 
 	/// <summary>
 	/// Showing all members to ImGui::TreeNode().
 	/// </summary>
-	virtual void ShowImGuiNode( const std::string &prefix ) override;
+	void ShowImGuiNode( const std::string &prefix, bool isAllowUnitIO = false ) override;
 
 #endif // USE_IMGUI
 };
 CEREAL_CLASS_VERSION( FixedLottery, 0 )
 CEREAL_REGISTER_TYPE( FixedLottery )
+CEREAL_REGISTER_POLYMORPHIC_RELATION( LotteryBase, FixedLottery )

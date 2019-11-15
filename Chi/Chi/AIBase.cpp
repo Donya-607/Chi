@@ -2,6 +2,8 @@
 
 #include "Donya/FilePath.h"
 
+#define scast static_cast
+
 #if USE_IMGUI
 
 void ActionStorage::ShowImGuiNode( const std::string &prefix )
@@ -9,27 +11,90 @@ void ActionStorage::ShowImGuiNode( const std::string &prefix )
 	const std::string nodeCaption = prefix; ".Actions";
 	if ( ImGui::TreeNode( nodeCaption.c_str() ) )
 	{
-		ImGui::DragInt( "Wait", &waitNo );
-		ImGui::DragInt( "NextAttack", &nextAttackNo );
+		ImGui::SliderInt( "Wait", &waitNo, 0, 5 );
+		enum WaitKind { Wait = 0, MoveNear, MoveFar, MoveSide, MoveAimSide };
+		switch ( waitNo )
+		{
+		case Wait:			ImGui::Text( "Wait:[Wait]" );			break;
+		case MoveNear:		ImGui::Text( "Wait:[Move.Near]" );		break;
+		case MoveFar:		ImGui::Text( "Wait:[Move.Far]" );		break;
+		case MoveSide:		ImGui::Text( "Wait:[Move.Side]" );		break;
+		case MoveAimSide:	ImGui::Text( "Wait:[Move.AimSIde]" );	break;
+		default:			ImGui::Text( "Error" );					break;
+		}
+
+		ImGui::SliderInt( "NextAttack", &nextAttackNo, -1, 4 );
+		if ( nextAttackNo == -1 ) { ImGui::Text( "Attack:[Random]" ); }
 
 		ImGui::TreePop();
 	}
 }
 
+void ShowImGuiChooserNode( const std::string &prefix, std::unique_ptr<LotteryBase> *ppChooserBase, int *pNowKind )
+{
+	int oldKind = *pNowKind;
+	ImGui::SliderInt( ( prefix + ".Kind" ).c_str(), pNowKind, 0, scast<int>( ChooserKind::CHOOSERS_COUNT ) - 1 );
+	if ( oldKind != *pNowKind )
+	{
+		ResetLotteryKind( ppChooserBase, scast<ChooserKind>( *pNowKind ) );
+	}
+
+	( *ppChooserBase )->ShowImGuiNode( prefix );
+}
+
 #endif // USE_IMGUI
+
+void ResetLotteryKind( std::unique_ptr<LotteryBase> *ppChooserBase, int chooserKind )
+{
+	return ResetLotteryKind( ppChooserBase, scast<ChooserKind>( chooserKind ) );
+}
+void ResetLotteryKind( std::unique_ptr<LotteryBase> *ppChooserBase, ChooserKind chooserKind )
+{
+	_ASSERT_EXPR( chooserKind != ChooserKind::CHOOSERS_COUNT , L"Error : passed chooser's number is invalid !" );
+
+	std::unique_ptr<LotteryBase> &reference = *ppChooserBase;
+	switch ( chooserKind )
+	{
+	case ChooserKind::Distance:
+		reference.reset( nullptr );
+		reference = std::make_unique<DistanceLottery>();
+		return;
+	case ChooserKind::Fixed:
+		reference.reset( nullptr );
+		reference = std::make_unique<FixedLottery>();
+		return;
+	default: return;
+	}
+}
 
 DistanceLottery::DistanceLottery() : LotteryBase(), data()
 {}
 DistanceLottery::~DistanceLottery() = default;
 
-ActionStorage DistanceLottery::Lottery( float distance )
+void DistanceLottery::Init()
+{
+	LoadParameter();
+}
+void DistanceLottery::Uninit()
+{
+	// No op.
+}
+
+ActionStorage DistanceLottery::Lottery( float nDistance )
 {
 	if ( data.empty() ) { return ActionStorage::Zero(); }
 	// else
 
-#if DEBUG_MODE
-	return data[0].action;
-#endif // DEBUG_MODE
+	for ( const auto &it : data )
+	{
+		if ( nDistance <= it.distance )
+		{
+			return it.action;
+		}
+	}
+	
+	// Fail safe.
+	return data.back().action;
 }
 
 void DistanceLottery::LoadParameter( bool isBinary )
@@ -57,7 +122,7 @@ void DistanceLottery::SaveParameter()
 	seria.Save( json, jsonPath.c_str(), SERIAL_ID, *this );
 }
 
-void DistanceLottery::ShowImGuiNode( const std::string &prefix )
+void DistanceLottery::ShowImGuiNode( const std::string &prefix, bool isAllowUnitIO )
 {
 	const std::string nodeCaption = prefix + ".Lottery.Distance";
 	if ( ImGui::TreeNode( nodeCaption.c_str() ) )
@@ -92,7 +157,7 @@ void DistanceLottery::ShowImGuiNode( const std::string &prefix )
 			ImGui::Text( "" );
 		}
 
-		if ( ImGui::TreeNode( "File.I/O" ) )
+		if ( isAllowUnitIO && ImGui::TreeNode( "File.I/O" ) )
 		{
 			static bool isBinary = true;
 			if ( ImGui::RadioButton( "Binary", isBinary ) ) { isBinary = true; }
@@ -122,6 +187,15 @@ void DistanceLottery::ShowImGuiNode( const std::string &prefix )
 FixedLottery::FixedLottery() : LotteryBase(), action()
 {}
 FixedLottery::~FixedLottery() = default;
+
+void FixedLottery::Init()
+{
+	LoadParameter();
+}
+void FixedLottery::Uninit()
+{
+	// No op.
+}
 
 ActionStorage FixedLottery::Lottery( float distance )
 {
@@ -153,14 +227,14 @@ void FixedLottery::SaveParameter()
 	seria.Save( json, jsonPath.c_str(), SERIAL_ID, *this );
 }
 
-void FixedLottery::ShowImGuiNode( const std::string &prefix )
+void FixedLottery::ShowImGuiNode( const std::string &prefix, bool isAllowUnitIO )
 {
 	const std::string nodeCaption = prefix + ".Lottery.Fixed";
 	if ( ImGui::TreeNode( nodeCaption.c_str() ) )
 	{
 		action.ShowImGuiNode( "Choice" );
 
-		if ( ImGui::TreeNode( "File.I/O" ) )
+		if ( isAllowUnitIO && ImGui::TreeNode( "File.I/O" ) )
 		{
 			static bool isBinary = true;
 			if ( ImGui::RadioButton( "Binary", isBinary ) ) { isBinary = true; }

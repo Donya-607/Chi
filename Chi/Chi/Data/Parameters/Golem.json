@@ -40,7 +40,7 @@
         },
         "drawOffset": {
             "x": 0.0,
-            "y": -60.0,
+            "y": -184.0,
             "z": 0.0
         },
         "OBBAttacksSwing": [
@@ -75,18 +75,18 @@
             {
                 "cereal_class_version": 0,
                 "OBBF": {
-                    "enableFrameStart": 38,
-                    "enableFrameLast": 62,
+                    "enableFrameStart": 50,
+                    "enableFrameLast": 75,
                     "OBB": {
                         "pos": {
-                            "x": 0.0,
-                            "y": -60.0,
+                            "x": 96.0,
+                            "y": -128.0,
                             "z": -60.0
                         },
                         "size": {
-                            "x": 100.0,
-                            "y": 128.0,
-                            "z": 128.0
+                            "x": 80.0,
+                            "y": 80.0,
+                            "z": 80.0
                         },
                         "orientation": {
                             "x": 0.0,
@@ -101,18 +101,18 @@
             },
             {
                 "OBBF": {
-                    "enableFrameStart": 115,
-                    "enableFrameLast": 130,
+                    "enableFrameStart": 145,
+                    "enableFrameLast": 170,
                     "OBB": {
                         "pos": {
-                            "x": 0.0,
-                            "y": -60.0,
+                            "x": -64.0,
+                            "y": -128.0,
                             "z": -60.0
                         },
                         "size": {
-                            "x": 100.0,
-                            "y": 128.0,
-                            "z": 128.0
+                            "x": 80.0,
+                            "y": 80.0,
+                            "z": 80.0
                         },
                         "orientation": {
                             "x": 0.0,
@@ -127,18 +127,18 @@
             },
             {
                 "OBBF": {
-                    "enableFrameStart": 200,
-                    "enableFrameLast": 215,
+                    "enableFrameStart": 250,
+                    "enableFrameLast": 275,
                     "OBB": {
                         "pos": {
-                            "x": 0.0,
-                            "y": -60.0,
+                            "x": 96.0,
+                            "y": -128.0,
                             "z": -60.0
                         },
                         "size": {
-                            "x": 100.0,
-                            "y": 128.0,
-                            "z": 128.0
+                            "x": 80.0,
+                            "y": 80.0,
+                            "z": 80.0
                         },
                         "orientation": {
                             "x": 0.0,
@@ -183,8 +183,8 @@
         "rotLeaveStartFrame": 70,
         "rotLeaveWholeFrame": 60,
         "rotLeaveDistance": 666.0,
-        "swingStopFrame": 105,
-        "swingStopLength": 0.699999988079071,
+        "swingStopFrame": 130,
+        "swingStopLength": 4.0,
         "defeatMotionLength": 360,
         "defeatHideSpeed": 0.0010000000474974514
     }

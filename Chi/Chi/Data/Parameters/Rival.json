@@ -44,8 +44,8 @@
             "collisions": [
                 {
                     "cereal_class_version": 0,
-                    "enableFrameStart": 20,
-                    "enableFrameLast": 40,
+                    "enableFrameStart": 42,
+                    "enableFrameLast": 52,
                     "collision": {
                         "cereal_class_version": 0,
                         "pos": {
@@ -53,33 +53,33 @@
                             "y": 0.0,
                             "z": 32.0
                         },
-                        "radius": 48.0,
+                        "radius": 0.0,
                         "exist": false
                     }
                 },
                 {
-                    "enableFrameStart": 65,
-                    "enableFrameLast": 85,
+                    "enableFrameStart": 90,
+                    "enableFrameLast": 100,
                     "collision": {
                         "pos": {
                             "x": 0.0,
                             "y": 0.0,
                             "z": 32.0
                         },
-                        "radius": 48.0,
+                        "radius": 0.0,
                         "exist": false
                     }
                 },
                 {
-                    "enableFrameStart": 110,
-                    "enableFrameLast": 130,
+                    "enableFrameStart": 150,
+                    "enableFrameLast": 160,
                     "collision": {
                         "pos": {
                             "x": 0.0,
                             "y": 0.0,
                             "z": 32.0
                         },
-                        "radius": 48.0,
+                        "radius": 30.0,
                         "exist": false
                     }
                 }
@@ -107,7 +107,7 @@
             "cereal_class_version": 1,
             "moveSpeed": 0.0,
             "slerpFactor": 0.10000000149011612,
-            "generateFrame": 137
+            "generateFrame": 4
         },
         "m.raid": {
             "cereal_class_version": 1,
@@ -121,7 +121,7 @@
             "hitBox": {
                 "cereal_class_version": 0,
                 "sphereF": {
-                    "enableFrameStart": 40,
+                    "enableFrameStart": 60,
                     "enableFrameLast": 80,
                     "collision": {
                         "pos": {
@@ -129,7 +129,7 @@
                             "y": 0.0,
                             "z": 32.0
                         },
-                        "radius": 48.0,
+                        "radius": 30.0,
                         "exist": false
                     }
                 },
@@ -153,15 +153,15 @@
                 "exist": true
             },
             "hitBox": {
-                "enableFrameStart": 16,
-                "enableFrameLast": 60,
+                "enableFrameStart": 57,
+                "enableFrameLast": 70,
                 "collision": {
                     "pos": {
                         "x": 0.0,
-                        "y": 0.0,
-                        "z": 32.0
+                        "y": 64.0,
+                        "z": 96.0
                     },
-                    "radius": 80.0,
+                    "radius": 30.0,
                     "exist": false
                 }
             }

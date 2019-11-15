@@ -39,8 +39,8 @@
             "cereal_class_version": 0,
             "sphereF": {
                 "cereal_class_version": 0,
-                "enableFrameStart": 45,
-                "enableFrameLast": 70,
+                "enableFrameStart": 50,
+                "enableFrameLast": 72,
                 "collision": {
                     "pos": {
                         "x": 0.0,
@@ -55,15 +55,15 @@
         },
         "m.hitBoxRaid": {
             "sphereF": {
-                "enableFrameStart": 70,
-                "enableFrameLast": 120,
+                "enableFrameStart": 100,
+                "enableFrameLast": 130,
                 "collision": {
                     "pos": {
                         "x": 0.0,
                         "y": 0.0,
                         "z": 0.0
                     },
-                    "radius": 96.0,
+                    "radius": 80.0,
                     "exist": false
                 }
             },
@@ -77,7 +77,7 @@
         "m.explReviveColFrame": 10,
         "m.hitBoxExpl": {
             "enableFrameStart": 2,
-            "enableFrameLast": 120,
+            "enableFrameLast": 130,
             "collision": {
                 "pos": {
                     "x": 0.0,

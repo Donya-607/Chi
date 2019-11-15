@@ -287,7 +287,7 @@ private:
 	void WaitUpdate( TargetStatus target );
 	void WaitUninit();
 
-	void MoveInit( TargetStatus target );
+	void MoveInit( TargetStatus target, KnightAI::ActionState statusDetail );
 	void MoveUpdate( TargetStatus target );
 	void MoveUninit();
 

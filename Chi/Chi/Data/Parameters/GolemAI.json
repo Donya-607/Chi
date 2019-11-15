@@ -2,9 +2,9 @@
     "GolemAI": {
         "cereal_class_version": 4,
         "wholeFrame": {
-            "value0": 240,
-            "value1": 165,
-            "value2": 177
+            "value0": 305,
+            "value1": 208,
+            "value2": 410
         },
         "coolTimeFrame": {
             "value0": 75,
@@ -16,8 +16,8 @@
             "value1": 35
         },
         "attackPercents": {
-            "value0": 10,
-            "value1": 10
+            "value0": 50,
+            "value1": 50
         },
         "gapIntervals": [
             3,

@@ -1,6 +1,6 @@
 #include "KnightAI.h"
 
-#include <numeric> // Use accumulate().
+#include <numeric>	// Use accumulate().
 
 #include "Donya/FilePath.h"
 #include "Donya/Serializer.h"
@@ -19,18 +19,25 @@ void KnightAI::Init()
 
 	wholeFrame.fill( 1 );
 	coolTimeFrame.fill( 1 );
-	waitPercents.fill( 1 );
-	attackPercents.fill( 1 );
 
 	LoadParameter();
 
-	if ( gapIntervals.empty() )
+	for ( auto &it : pAttackChoosers )
 	{
-		gapIntervals.resize( 1U );
+		// Set temporary instance(prevent nullptr).
+		if ( !it ) { ResetLotteryKind( &it, ChooserKind::Fixed ); }
+
+		it->LoadParameter();
 	}
+
+	timer	= initCoolTime;
+	status	= ToActionState( scast<WaitState>( initStorage.waitNo ) );
+
+	if ( gapIntervals.empty() ) { gapIntervals.resize( 1U ); }
+	attackTimes = gapIntervals.front();
 }
 
-void KnightAI::Update()
+void KnightAI::Update( float targetDistance )
 {
 #if USE_IMGUI
 
@@ -50,11 +57,11 @@ void KnightAI::Update()
 
 		if ( IsAction( status ) )
 		{
-			LotteryWaitState();
+			AssignWaitState();
 		}
 		else
 		{
-			LotteryAttackState();
+			AssignAttackState( targetDistance );
 		}
 	}
 }
@@ -73,8 +80,11 @@ KnightAI::ActionState KnightAI::ToActionState( WaitState waitStatus ) const
 
 	switch ( waitStatus )
 	{
-	case WaitState::WAIT:	to = ActionState::WAIT;	break;
-	case WaitState::MOVE:	to = ActionState::MOVE;	break;
+	case WaitState::WAIT:			to = ActionState::WAIT;				break;
+	case WaitState::MOVE_GET_NEAR:	to = ActionState::MOVE_GET_NEAR;	break;
+	case WaitState::MOVE_GET_FAR:	to = ActionState::MOVE_GET_FAR;		break;
+	case WaitState::MOVE_SIDE:		to = ActionState::MOVE_SIDE;		break;
+	case WaitState::MOVE_AIM_SIDE:	to = ActionState::MOVE_AIM_SIDE;	break;
 	default: break;
 	}
 
@@ -96,70 +106,59 @@ KnightAI::ActionState KnightAI::ToActionState( AttackState attackStatus ) const
 
 	return to;
 }
-
-void KnightAI::LotteryWaitState()
+KnightAI::AttackState KnightAI::ToAttackState( ActionState status ) const
 {
-	timer = coolTime;
+	AttackState to = AttackState::END;
 
-	const int percentSum = std::accumulate( waitPercents.begin(), waitPercents.end(), 0 );
+	if ( status == ActionState::END ) { return to; }
+	// else
 
-	ActionState oldState = status;
-	while ( oldState == status )
+	switch ( status )
 	{
-		const int percentRand = Donya::Random::GenerateInt( percentSum );
-
-		for ( int i = 0; i < WAIT_STATE_COUNT; ++i )
-		{
-			int partSum = ( i == WAIT_STATE_COUNT - 1 )
-				? percentSum
-				: std::accumulate( waitPercents.begin(), ( waitPercents.begin() + i + 1 ), 0 );
-
-			if ( percentRand <= partSum )
-			{
-				status = ToActionState( scast<WaitState>( i ) );
-				break;
-			}
-		}
+	case ActionState::ATTACK_SWING:		to = AttackState::SWING;	break;
+	case ActionState::ATTACK_RAID:		to = AttackState::RAID;		break;
+	default: break;
 	}
+
+	return to;
 }
-void KnightAI::LotteryAttackState()
+
+void KnightAI::AssignWaitState()
+{
+	timer  = coolTime;
+	status = ToActionState( scast<WaitState>( storage.waitNo ) );
+}
+void KnightAI::AssignAttackState( float targetDistance )
 {
 	if ( attackTimes <= 0 )
 	{
-		status		= GetGapAttack();
-		timer		= wholeFrame.back();
-		coolTime	= coolTimeFrame.back();
+		status			= GetGapAttack();
+		timer			= wholeFrame.back();
+		coolTime		= coolTimeFrame.back();
 
 		intervalIndex	= ( intervalIndex <= scast<int>( gapIntervals.size() ) - 1 ) ? 0 : intervalIndex + 1;
 		attackTimes		= gapIntervals[intervalIndex];
+
+		storage			= pAttackChoosers.back()->Lottery( targetDistance );
+
 		return;
 	}
 	// else
 
 	attackTimes--;
 
-	const int percentSum = std::accumulate( attackPercents.begin(), attackPercents.end(), 0 );
+	int attackNo = storage.nextAttackNo;
+	if ( attackNo < 0 ) { attackNo = scast<int>( ToAttackState( LotteryAttack() ) ); }
 
-	ActionState oldState = status;
-	while ( oldState == status )
-	{
-		const int percentRand = Donya::Random::GenerateInt( percentSum );
-
-		for ( int i = 0; i < ATTACK_STATE_COUNT; ++i )
-		{
-			int partSum = ( i == ATTACK_STATE_COUNT - 1 )
-			? percentSum
-			: std::accumulate( attackPercents.begin(), ( attackPercents.begin() + i + 1 ), 0 );
-
-			if ( percentRand <= partSum )
-			{
-				status = ToActionState( scast<AttackState>( i ) );
-				timer = wholeFrame[i];
-				coolTime = coolTimeFrame[i];
-				break;
-			}
-		}
-	}
+	status		= ToActionState( scast<AttackState>( attackNo ) );
+	timer		= wholeFrame[attackNo];
+	coolTime	= coolTimeFrame[attackNo];
+	storage		= pAttackChoosers[attackNo]->Lottery( targetDistance );
+}
+KnightAI::ActionState KnightAI::LotteryAttack()
+{
+	const int lottery = Donya::Random::GenerateInt( ATTACK_STATE_COUNT );
+	return ToActionState( scast<AttackState>( lottery ) );
 }
 
 KnightAI::ActionState KnightAI::GetGapAttack() const
@@ -201,7 +200,10 @@ void KnightAI::ImGui()
 			constexpr std::array<const char *, ACTION_STATE_COUNT> NAMES
 			{
 				"Wait",
-				"Move",
+				"Move.Near",
+				"Move.Far",
+				"Move.Side",
+				"Move.AimSide",
 				"Attack.Explosion",
 				"Attack.Swing",
 				"Attack.Raid",
@@ -216,7 +218,10 @@ void KnightAI::ImGui()
 			constexpr std::array<const char *, WAIT_STATE_COUNT> NAMES
 			{
 				"Wait",
-				"Move",
+				"Move.Near",
+				"Move.Far",
+				"Move.Side",
+				"Move.AimSide",
 			};
 
 			if ( WAIT_STATE_COUNT <= i ) { return "Error Name"; }
@@ -270,24 +275,21 @@ void KnightAI::ImGui()
 
 		if ( ImGui::TreeNode( "AdjustData" ) )
 		{
-			if ( ImGui::TreeNode( "Wait.Percents" ) )
+			if ( ImGui::TreeNode( "Initialize" ) )
 			{
-				int i = 0;
-				for ( auto &it : waitPercents )
-				{
-					ImGui::SliderInt( GetWaitName( i ).c_str(), &it, 1, 1024 );
-					i++;
-				}
+				ImGui::DragInt( "CoolTime", &initCoolTime );
+				initStorage.ShowImGuiNode( "FirstChoice" );
 
 				ImGui::TreePop();
 			}
-			if ( ImGui::TreeNode( "Attack.Percents" ) )
+
+			if ( ImGui::TreeNode( "Attack.Chooser" ) )
 			{
-				int i = 0;
-				for ( auto &it : attackPercents )
+				static std::array<int, ALL_ATTACK_COUNT> chooserKinds{};
+				for ( int i = 0; i < ALL_ATTACK_COUNT; ++i )
 				{
-					ImGui::SliderInt( GetAttackName( i ).c_str(), &it, 1, 1024 );
-					i++;
+					ShowImGuiChooserNode( GetAttackName( i ), &pAttackChoosers[i], &chooserKinds[i] );
+					ImGui::Text( "" );
 				}
 
 				ImGui::TreePop();

@@ -62,7 +62,10 @@ float KnightParam::SlerpFactor( KnightAI::ActionState status )
 	switch ( status )
 	{
 	case KnightAI::ActionState::WAIT:				return m.idleSlerpFactor;	// break;
-	case KnightAI::ActionState::MOVE:				return m.moveSlerpFactor;	// break;
+	case KnightAI::ActionState::MOVE_GET_NEAR:		return m.moveSlerpFactor;	// break;
+	case KnightAI::ActionState::MOVE_GET_FAR:		return m.moveSlerpFactor;	// break;
+	case KnightAI::ActionState::MOVE_SIDE:			return m.moveSlerpFactor;	// break;
+	case KnightAI::ActionState::MOVE_AIM_SIDE:		return m.moveSlerpFactor;	// break;
 	case KnightAI::ActionState::ATTACK_EXPLOSION:	return m.explSlerpFactor;	// break;
 	case KnightAI::ActionState::ATTACK_SWING:		return m.swingSlerpFactor;	// break;
 	case KnightAI::ActionState::ATTACK_RAID:		return m.raidSlerpFactor;	// break;
@@ -76,7 +79,10 @@ float KnightParam::MoveSpeed( KnightAI::ActionState status )
 	switch ( status )
 	{
 	case KnightAI::ActionState::WAIT:				return 0.0f;				// break;
-	case KnightAI::ActionState::MOVE:				return m.moveMoveSpeed;		// break;
+	case KnightAI::ActionState::MOVE_GET_NEAR:		return m.moveMoveSpeed;		// break;
+	case KnightAI::ActionState::MOVE_GET_FAR:		return m.moveMoveSpeed;		// break;
+	case KnightAI::ActionState::MOVE_SIDE:			return m.moveMoveSpeed;		// break;
+	case KnightAI::ActionState::MOVE_AIM_SIDE:		return m.moveMoveSpeed;		// break;
 	case KnightAI::ActionState::ATTACK_EXPLOSION:	return m.explMoveSpeed;		// break;
 	case KnightAI::ActionState::ATTACK_SWING:		return m.swingMoveSpeed;	// break;
 	case KnightAI::ActionState::ATTACK_RAID:		return m.raidMoveSpeed;		// break;
@@ -364,7 +370,7 @@ void Knight::Update( TargetStatus target )
 
 #endif // USE_IMGUI
 
-	AI.Update();
+	AI.Update( CalcNormalizedDistance( target.pos ) );
 
 	ChangeStatus( target );
 	UpdateCurrentStatus( target );
@@ -392,7 +398,16 @@ void Knight::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Dony
 	case KnightAI::ActionState::WAIT:
 		FBXRender( models.pIdle.get(), HLSL, WVP, W );
 		break;
-	case KnightAI::ActionState::MOVE:
+	case KnightAI::ActionState::MOVE_GET_NEAR:
+		FBXRender( models.pRunFront.get(), HLSL, WVP, W );
+		break;
+	case KnightAI::ActionState::MOVE_GET_FAR:
+		FBXRender( models.pRunFront.get(), HLSL, WVP, W );
+		break;
+	case KnightAI::ActionState::MOVE_SIDE:
+		FBXRender( models.pRunFront.get(), HLSL, WVP, W );
+		break;
+	case KnightAI::ActionState::MOVE_AIM_SIDE:
 		FBXRender( models.pRunFront.get(), HLSL, WVP, W );
 		break;
 	case KnightAI::ActionState::ATTACK_EXPLOSION:
@@ -515,10 +530,6 @@ void Knight::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Dony
 		// Attacks collision.
 		switch ( status )
 		{
-		case KnightAI::ActionState::WAIT:
-			break;
-		case KnightAI::ActionState::MOVE:
-			break;
 		case KnightAI::ActionState::ATTACK_EXPLOSION:
 			{
 				const auto &wsSphere = CalcAttackHitBoxExplosion();
@@ -726,7 +737,10 @@ void Knight::ChangeStatus( TargetStatus target )
 	switch ( status )
 	{
 	case KnightAI::ActionState::WAIT:				WaitUninit();				break;
-	case KnightAI::ActionState::MOVE:				MoveUninit();				break;
+	case KnightAI::ActionState::MOVE_GET_NEAR:		MoveUninit();				break;
+	case KnightAI::ActionState::MOVE_GET_FAR:		MoveUninit();				break;
+	case KnightAI::ActionState::MOVE_SIDE:			MoveUninit();				break;
+	case KnightAI::ActionState::MOVE_AIM_SIDE:		MoveUninit();				break;
 	case KnightAI::ActionState::ATTACK_EXPLOSION:	AttackExplosionUninit();	break;
 	case KnightAI::ActionState::ATTACK_SWING:		AttackSwingUninit();		break;
 	case KnightAI::ActionState::ATTACK_RAID:		AttackRaidUninit();			break;
@@ -735,11 +749,14 @@ void Knight::ChangeStatus( TargetStatus target )
 	}
 	switch ( lotteryStatus )
 	{
-	case KnightAI::ActionState::WAIT:				WaitInit( target );				break;
-	case KnightAI::ActionState::MOVE:				MoveInit( target );				break;
-	case KnightAI::ActionState::ATTACK_EXPLOSION:	AttackExplosionInit( target );	break;
-	case KnightAI::ActionState::ATTACK_SWING:		AttackSwingInit( target );		break;
-	case KnightAI::ActionState::ATTACK_RAID:		AttackRaidInit( target );		break;
+	case KnightAI::ActionState::WAIT:				WaitInit( target );					break;
+	case KnightAI::ActionState::MOVE_GET_NEAR:		MoveInit( target, lotteryStatus );	break;
+	case KnightAI::ActionState::MOVE_GET_FAR:		MoveInit( target, lotteryStatus );	break;
+	case KnightAI::ActionState::MOVE_SIDE:			MoveInit( target, lotteryStatus );	break;
+	case KnightAI::ActionState::MOVE_AIM_SIDE:		MoveInit( target, lotteryStatus );	break;
+	case KnightAI::ActionState::ATTACK_EXPLOSION:	AttackExplosionInit( target );		break;
+	case KnightAI::ActionState::ATTACK_SWING:		AttackSwingInit( target );			break;
+	case KnightAI::ActionState::ATTACK_RAID:		AttackRaidInit( target );			break;
 	// case KnightAI::ActionState::END:				DefeatInit();		break; // Unnecessary.
 	default: break;
 	}
@@ -751,7 +768,10 @@ void Knight::UpdateCurrentStatus( TargetStatus target )
 	switch ( status )
 	{
 	case KnightAI::ActionState::WAIT:				WaitUpdate( target );				break;
-	case KnightAI::ActionState::MOVE:				MoveUpdate( target );				break;
+	case KnightAI::ActionState::MOVE_GET_NEAR:		MoveUpdate( target );				break;
+	case KnightAI::ActionState::MOVE_GET_FAR:		MoveUpdate( target );				break;
+	case KnightAI::ActionState::MOVE_SIDE:			MoveUpdate( target );				break;
+	case KnightAI::ActionState::MOVE_AIM_SIDE:		MoveUpdate( target );				break;
 	case KnightAI::ActionState::ATTACK_EXPLOSION:	AttackExplosionUpdate( target );	break;
 	case KnightAI::ActionState::ATTACK_SWING:		AttackSwingUpdate( target );		break;
 	case KnightAI::ActionState::ATTACK_RAID:		AttackRaidUpdate( target );			break;
@@ -785,9 +805,9 @@ void Knight::WaitUninit()
 	setAnimFlame( models.pIdle.get(), 0 );
 }
 
-void Knight::MoveInit( TargetStatus target )
+void Knight::MoveInit( TargetStatus target, KnightAI::ActionState statusDetail )
 {
-	status = KnightAI::ActionState::MOVE;
+	status = statusDetail;
 
 	slerpFactor = KnightParam::Get().SlerpFactor( status );
 
@@ -1061,7 +1081,10 @@ void Knight::UseImGui()
 				switch ( status )
 				{
 				case KnightAI::ActionState::WAIT:				return { "Wait" };				break;
-				case KnightAI::ActionState::MOVE:				return { "Move" };				break;
+				case KnightAI::ActionState::MOVE_GET_NEAR:		return { "Move.Near" };			break;
+				case KnightAI::ActionState::MOVE_GET_FAR:		return { "Move.Far" };			break;
+				case KnightAI::ActionState::MOVE_SIDE:			return { "Move.Side" };			break;
+				case KnightAI::ActionState::MOVE_AIM_SIDE:		return { "Move.AimSide" };		break;
 				case KnightAI::ActionState::ATTACK_EXPLOSION:	return { "Attack.Explosion" };	break;
 				case KnightAI::ActionState::ATTACK_SWING:		return { "Attack.Swing" };		break;
 				case KnightAI::ActionState::ATTACK_RAID:		return { "Attack.Raid" };		break;
