@@ -138,6 +138,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="AIBase.h" />
     <ClInclude Include="AssetLoader.h" />
     <ClInclude Include="baseScene.h" />
     <ClInclude Include="blend.h" />
@@ -204,6 +205,7 @@
     <ClInclude Include="XinputPad.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AIBase.cpp" />
     <ClCompile Include="AssetLoader.cpp" />
     <ClCompile Include="bloom.cpp" />
     <ClCompile Include="Camera.cpp" />

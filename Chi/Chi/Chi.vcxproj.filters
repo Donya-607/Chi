@@ -133,6 +133,7 @@
     <ClInclude Include="RivalAI.h" />
     <ClInclude Include="UI.h" />
     <ClInclude Include="StorageForScene.h" />
+    <ClInclude Include="AIBase.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp">
@@ -232,6 +233,7 @@
     <ClCompile Include="SceneGameOver.cpp" />
     <ClCompile Include="SceneResult.cpp" />
     <ClCompile Include="StorageForScene.cpp" />
+    <ClCompile Include="AIBase.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="geometric_phong_ps.hlsl">

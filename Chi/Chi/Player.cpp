@@ -316,8 +316,8 @@ void Player::Init( const Donya::Vector3 &wsInitPos, const Donya::Vector3 &initRa
 	LoadModel();
 	
 	pos				= wsInitPos;
-	lookDirection	= Donya::Vector3::Front();
 	orientation		= Donya::Quaternion::Make( initRadians.x, initRadians.y, initRadians.z );
+	lookDirection	= orientation.LocalFront();
 	wallCollisions	= wsWallCollisions;
 
 	IdleInit( Input::NoOperation() );
