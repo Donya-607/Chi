@@ -53,6 +53,14 @@ class LotteryBase
 public:
 	virtual void Init() = 0;
 	virtual void Uninit() = 0;
+private:
+	friend class cereal::access;
+	template<class Archive>
+	void serialize( Archive &archive, std::uint32_t version )
+	{
+
+		// No op.
+	}
 public:
 	virtual ActionStorage Lottery( float normalizedDistance ) = 0;
 
