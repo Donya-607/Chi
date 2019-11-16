@@ -941,21 +941,18 @@ void Player::AssignInputVelocity( Input input )
 void Player::ApplyVelocity( const std::vector<Donya::Circle> &xzCylinderWalls )
 {
 	/// <summary>
-	/// The "xzNAxis" is specify moving axis. please only set to { 1, 0 } or { 0, 1 }.
+	/// The "x Axis" is specify moving axis. please only set to { 1, 0 } or { 0, 1 }. This function  to be able to handle any axis.
 	/// </summary>
 	auto MoveSpecifiedAxis = [&]( Donya::Vector2 xzNAxis, float moveSpeed )->void
 	{
-		if ( ZeroEqual( moveSpeed ) ) { return; }
-		// else
-
 		// Only either X or Z is valid.
 		const Donya::Vector2 xzVelocity = xzNAxis * moveSpeed;
 		pos.x += xzVelocity.x;
 		pos.z += xzVelocity.y;
 
 		// Take a value of +1 or -1.
-		const float moveSign = scast<float>( Donya::SignBit( xzVelocity.x ) + Donya::SignBit( xzVelocity.y ) );
-		const auto  actualBody = PlayerParam::Get().HitBoxPhysic();
+		const float moveSign	= scast<float>( Donya::SignBit( xzVelocity.x ) + Donya::SignBit( xzVelocity.y ) );
+		const auto  actualBody	= PlayerParam::Get().HitBoxPhysic();
 
 		// VS Cylinder walls.
 		{
@@ -992,10 +989,15 @@ void Player::ApplyVelocity( const std::vector<Donya::Circle> &xzCylinderWalls )
 				// Calculating position contains "extraOffset", so I should except "extraOffset".
 				pos.x -= extraOffset.x;
 				pos.z -= extraOffset.z;
+
+				// We Must apply the repulsed position to hit-box for next collision.
+				xzBody.cx = GetPosition().x;
+				xzBody.cy = GetPosition().z;
 			}
 		}
 
 		// VS Rectangle walls.
+		if ( !ZeroEqual( moveSign ) ) // This process require the current move velocity(because using to calculate the repulse direction).
 		{
 			const float bodyWidth = actualBody.radius;
 
@@ -1043,19 +1045,23 @@ void Player::ApplyVelocity( const std::vector<Donya::Circle> &xzCylinderWalls )
 				// Calculating position contains "extraOffset", so I should except "extraOffset".
 				pos.x -= extraOffset.x;
 				pos.z -= extraOffset.z;
+
+				// We Must apply the repulsed position to hit-box for next collision.
+				xzBody.cx = GetPosition().x;
+				xzBody.cy = GetPosition().z;
 			}
 		}
 	};
 
+	// Move to X-axis with collision.
+	MoveSpecifiedAxis( Donya::Vector2{ 1.0f, 0.0f }, velocity.x );
+	// Move to Y-axis only.
+	pos.y += velocity.y;
+	// Move to Z-axis with collision.
+	MoveSpecifiedAxis( Donya::Vector2{ 0.0f, 1.0f }, velocity.z );
+
 	if ( !velocity.IsZero() )
 	{
-		// Move to X-axis with collision.
-		MoveSpecifiedAxis( Donya::Vector2{ 1.0f, 0.0f }, velocity.x );
-		// Move to Y-axis only.
-		pos.y += velocity.y;
-		// Move to Z-axis with collision.
-		MoveSpecifiedAxis( Donya::Vector2{ 0.0f, 1.0f }, velocity.z );
-
 		lookDirection = velocity.Normalized();
 	}
 
