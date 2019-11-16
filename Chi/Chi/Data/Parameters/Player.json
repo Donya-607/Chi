@@ -78,8 +78,8 @@
         "advanceStartFrame": 90,
         "advanceFinFrame": 150,
         "returnFinFrame": 180,
-        "advanceEaseKind": 0,
-        "advanceEaseType": 0,
+        "advanceEaseKind": 7,
+        "advanceEaseType": 1,
         "returnEaseKind": 8,
         "returnEaseType": 1,
         "advanceDistance": 64.0
