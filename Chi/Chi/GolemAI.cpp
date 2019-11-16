@@ -42,7 +42,7 @@ void GolemAI::Update( float normalizedTargetDistance )
 {
 #if USE_IMGUI
 
-	ImGui();
+	ImGui( normalizedTargetDistance );
 
 #endif // USE_IMGUI
 
@@ -192,7 +192,7 @@ void GolemAI::SaveParameter()
 	seria.Save( json, jsonPath.c_str(), SERIAL_ID, *this );
 }
 
-void GolemAI::ImGui()
+void GolemAI::ImGui( float normalizedTargetDistance )
 {
 	if ( ImGui::BeginIfAllowed( "GolemAI" ) )
 	{
@@ -248,6 +248,7 @@ void GolemAI::ImGui()
 			ImGui::Text( "Status : %d", scast<int>( status ) );
 			ImGui::Text( "Timer : %d", timer );
 			ImGui::Text( "CoolTime : %d", coolTime );
+			ImGui::Text( "Distance.Target : %f", normalizedTargetDistance );
 
 			// Show whole frame.
 			{

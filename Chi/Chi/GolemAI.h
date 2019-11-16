@@ -194,7 +194,7 @@ private:
 
 public:
 
-	void ImGui();
+	void ImGui( float normalizedTargetDistance );
 
 #endif // USE_IMGUI
 };

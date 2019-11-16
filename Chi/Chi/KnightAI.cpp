@@ -42,7 +42,7 @@ void KnightAI::Update( float targetDistance )
 {
 #if USE_IMGUI
 
-	ImGui();
+	ImGui( targetDistance );
 
 #endif // USE_IMGUI
 
@@ -192,7 +192,7 @@ void KnightAI::SaveParameter()
 	seria.Save( json, jsonPath.c_str(), SERIAL_ID, *this );
 }
 
-void KnightAI::ImGui()
+void KnightAI::ImGui( float targetDistance )
 {
 	if ( ImGui::BeginIfAllowed( "KnightAI" ) )
 	{
@@ -248,6 +248,7 @@ void KnightAI::ImGui()
 			ImGui::Text( "Status : %d", scast<int>( status ) );
 			ImGui::Text( "Timer : %d", timer );
 			ImGui::Text( "CoolTime : %d", coolTime );
+			ImGui::Text( "Distance.Target : %f", targetDistance );
 
 			// Show whole frame.
 			{
