@@ -2,6 +2,7 @@
 
 #include "Donya/Easing.h"
 #include "Donya/FilePath.h"
+#include "Donya/Random.h"
 #include "Donya/Useful.h"		// For IsShowCollision().
 
 #include "gameLib.h"
@@ -42,9 +43,12 @@ float GolemParam::MoveSpeed( GolemAI::ActionState status ) const
 {
 	switch ( status )
 	{
-	case GolemAI::ActionState::WAIT:				return 0.0f;					// break;
-	case GolemAI::ActionState::MOVE:				return moveMoveSpeed;			// break;
-	case GolemAI::ActionState::ATTACK_SWING:		return 0.0f;					// break;
+	case GolemAI::ActionState::WAIT:			return 0.0f;					// break;
+	case GolemAI::ActionState::MOVE_GET_NEAR:	return moveMoveSpeed;			// break;
+	case GolemAI::ActionState::MOVE_GET_FAR:	return moveMoveSpeed;			// break;
+	case GolemAI::ActionState::MOVE_SIDE:		return moveMoveSpeed;			// break;
+	case GolemAI::ActionState::MOVE_AIM_SIDE:	return moveMoveSpeed;			// break;
+	case GolemAI::ActionState::ATTACK_SWING:	return 0.0f;					// break;
 	case GolemAI::ActionState::ATTACK_FAST:		return attackFastMoveSpeed;		// break;
 	case GolemAI::ActionState::ATTACK_ROTATE:	return attackRotateMoveSpeed;	// break;
 	default: break;
@@ -56,9 +60,12 @@ float GolemParam::SlerpFactor( GolemAI::ActionState status ) const
 {
 	switch ( status )
 	{
-	case GolemAI::ActionState::WAIT:				return idleSlerpFactor;			// break;
-	case GolemAI::ActionState::MOVE:				return moveSlerpFactor;			// break;
-	case GolemAI::ActionState::ATTACK_SWING:		return 0.0f;					// break;
+	case GolemAI::ActionState::WAIT:			return idleSlerpFactor;			// break;
+	case GolemAI::ActionState::MOVE_GET_NEAR:	return moveSlerpFactor;			// break;
+	case GolemAI::ActionState::MOVE_GET_FAR:	return moveSlerpFactor;			// break;
+	case GolemAI::ActionState::MOVE_SIDE:		return moveSlerpFactor;			// break;
+	case GolemAI::ActionState::MOVE_AIM_SIDE:	return moveSlerpFactor;			// break;
+	case GolemAI::ActionState::ATTACK_SWING:	return 0.0f;					// break;
 	case GolemAI::ActionState::ATTACK_FAST:		return attackFastSlerpFactor;	// break;
 	case GolemAI::ActionState::ATTACK_ROTATE:	return attackRotateSlerpFactor;	// break;
 	default: break;
@@ -465,7 +472,7 @@ Golem::Golem() :
 	status( GolemAI::ActionState::WAIT ),
 	AI(),
 	stageNo( 1 ), timer(), swingTimer(),
-	fieldRadius(), slerpFactor( 1.0f ), easeFactor(),
+	moveSign(), fieldRadius(), slerpFactor( 1.0f ), easeFactor(),
 	pos(), velocity(), extraOffset(),
 	orientation(),
 	models()
@@ -523,7 +530,7 @@ void Golem::Update( TargetStatus target )
 
 #endif // USE_IMGUI
 
-	AI.Update();
+	AI.Update( CalcNormalizedDistance( target.pos ) );
 
 	ChangeStatus( target );
 	UpdateCurrentStatus( target );
@@ -547,7 +554,16 @@ void Golem::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya
 	case GolemAI::ActionState::WAIT:
 		FBXRender( models.pIdle.get(), HLSL, WVP, W );
 		break;
-	case GolemAI::ActionState::MOVE:
+	case GolemAI::ActionState::MOVE_GET_NEAR:
+		FBXRender( models.pIdle.get(), HLSL, WVP, W );
+		break;
+	case GolemAI::ActionState::MOVE_GET_FAR:
+		FBXRender( models.pIdle.get(), HLSL, WVP, W );
+		break;
+	case GolemAI::ActionState::MOVE_SIDE:
+		FBXRender( models.pIdle.get(), HLSL, WVP, W );
+		break;
+	case GolemAI::ActionState::MOVE_AIM_SIDE:
 		FBXRender( models.pIdle.get(), HLSL, WVP, W );
 		break;
 	case GolemAI::ActionState::ATTACK_SWING:
@@ -654,10 +670,6 @@ void Golem::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya
 		// Attacks collision.
 		switch ( status )
 		{
-		case GolemAI::ActionState::WAIT:
-			break;
-		case GolemAI::ActionState::MOVE:
-			break;
 		case GolemAI::ActionState::ATTACK_SWING:
 			{
 				const auto  *pOBBs = GolemParam::Get().OBBAtksSwing();
@@ -896,10 +908,6 @@ std::vector<Donya::OBB> Golem::RequireAttackHitBoxesOBB() const
 
 	switch ( status )
 	{
-	case GolemAI::ActionState::WAIT:
-		break;
-	case GolemAI::ActionState::MOVE:
-		break;
 	case GolemAI::ActionState::ATTACK_SWING:
 		{
 			const auto  *pOBBs = PARAM.OBBAtksSwing();
@@ -1053,7 +1061,10 @@ void Golem::ChangeStatus( TargetStatus target )
 	switch ( status )
 	{
 	case GolemAI::ActionState::WAIT:				WaitUninit();			break;
-	case GolemAI::ActionState::MOVE:				MoveUninit();			break;
+	case GolemAI::ActionState::MOVE_GET_NEAR:		MoveUninit();			break;
+	case GolemAI::ActionState::MOVE_GET_FAR:		MoveUninit();			break;
+	case GolemAI::ActionState::MOVE_SIDE:			MoveUninit();			break;
+	case GolemAI::ActionState::MOVE_AIM_SIDE:		MoveUninit();			break;
 	case GolemAI::ActionState::ATTACK_SWING:		AttackSwingUninit();	break;
 	case GolemAI::ActionState::ATTACK_FAST:			AttackFastUninit();		break;
 	case GolemAI::ActionState::ATTACK_ROTATE:		AttackRotateUninit();	break;
@@ -1062,11 +1073,14 @@ void Golem::ChangeStatus( TargetStatus target )
 	}
 	switch ( lotteryStatus )
 	{
-	case GolemAI::ActionState::WAIT:				WaitInit( target );			break;
-	case GolemAI::ActionState::MOVE:				MoveInit( target );			break;
-	case GolemAI::ActionState::ATTACK_SWING:		AttackSwingInit( target );	break;
-	case GolemAI::ActionState::ATTACK_FAST:			AttackFastInit( target );	break;
-	case GolemAI::ActionState::ATTACK_ROTATE:		AttackRotateInit( target );	break;
+	case GolemAI::ActionState::WAIT:				WaitInit( target );					break;
+	case GolemAI::ActionState::MOVE_GET_NEAR:		MoveInit( target, lotteryStatus );	break;
+	case GolemAI::ActionState::MOVE_GET_FAR:		MoveInit( target, lotteryStatus );	break;
+	case GolemAI::ActionState::MOVE_SIDE:			MoveInit( target, lotteryStatus );	break;
+	case GolemAI::ActionState::MOVE_AIM_SIDE:		MoveInit( target, lotteryStatus );	break;
+	case GolemAI::ActionState::ATTACK_SWING:		AttackSwingInit( target );			break;
+	case GolemAI::ActionState::ATTACK_FAST:			AttackFastInit( target );			break;
+	case GolemAI::ActionState::ATTACK_ROTATE:		AttackRotateInit( target );			break;
 	// case GolemAI::ActionState::END:					DefeatInit();				break; // Unnecessary
 	default: break;
 	}
@@ -1078,7 +1092,10 @@ void Golem::UpdateCurrentStatus( TargetStatus target )
 	switch ( status )
 	{
 	case GolemAI::ActionState::WAIT:				WaitUpdate( target );			break;
-	case GolemAI::ActionState::MOVE:				MoveUpdate( target );			break;
+	case GolemAI::ActionState::MOVE_GET_NEAR:		MoveUpdate( target );			break;
+	case GolemAI::ActionState::MOVE_GET_FAR:		MoveUpdate( target );			break;
+	case GolemAI::ActionState::MOVE_SIDE:			MoveUpdate( target );			break;
+	case GolemAI::ActionState::MOVE_AIM_SIDE:		MoveUpdate( target );			break;
 	case GolemAI::ActionState::ATTACK_SWING:		AttackSwingUpdate( target );	break;
 	case GolemAI::ActionState::ATTACK_FAST:			AttackFastUpdate( target );		break;
 	case GolemAI::ActionState::ATTACK_ROTATE:		AttackRotateUpdate( target );	break;
@@ -1112,43 +1129,47 @@ void Golem::WaitUninit()
 	setAnimFlame( models.pIdle.get(), 0 );
 }
 
-void Golem::MoveInit( TargetStatus target )
+void Golem::MoveInit( TargetStatus target, GolemAI::ActionState statusDetail )
 {
-	status = GolemAI::ActionState::MOVE;
+	status		= statusDetail;
+	slerpFactor	= GolemParam::Get().SlerpFactor( status );
 
-	slerpFactor = GolemParam::Get().SlerpFactor( status );
+	moveSign	= Donya::Random::GenerateInt( 2 ) ? +1.0f : -1.0f;
 
 	setAnimFlame( models.pIdle.get(), 0 );
 }
 void Golem::MoveUpdate( TargetStatus target )
 {
-	const float distNear  = GolemParam::Get().TargetDistNear();
-	const float distFar   = GolemParam::Get().TargetDistFar();
-	const float nDistance = CalcNormalizedDistance( target.pos );
-
-	if ( distNear <= nDistance && nDistance <= distFar )
-	{
-		velocity = 0.0f;
-		return;
-	}
-	// else
-
 	const float speed = GolemParam::Get().MoveSpeed( status );
-	const Donya::Vector3 front = orientation.LocalFront();
 
-	if ( nDistance < distNear )
+	switch ( status )
 	{
-		// Get far.
-		velocity = -front * speed;
-	}
-	else
-	{
-		// Get near.
-		velocity = front * speed;
+	case GolemAI::ActionState::MOVE_GET_NEAR:
+		velocity = orientation.LocalFront() * speed;
+		return;
+	case GolemAI::ActionState::MOVE_GET_FAR:
+		velocity = -orientation.LocalFront() * speed;
+		return;
+	case GolemAI::ActionState::MOVE_SIDE:
+		velocity = orientation.LocalRight() * moveSign * speed;
+		return;
+	case GolemAI::ActionState::MOVE_AIM_SIDE:
+		{
+			const float		distance	= ( target.pos - GetPos() ).Length();
+			Donya::Vector3	destination	= target.pos;
+			destination += ( orientation.LocalRight() * distance ) * moveSign;
+
+			Donya::Vector3	moveVector = ( destination - GetPos() ).Normalized();
+							moveVector.y = 0.0f; // Prevent Z-axis rotation by Quaternion::LookAt().
+			velocity = moveVector * speed;
+		}
+		return;
+	default: return;
 	}
 }
 void Golem::MoveUninit()
 {
+	moveSign = 0.0f;
 	setAnimFlame( models.pIdle.get(), 0 );
 }
 
@@ -1339,6 +1360,7 @@ void Golem::ApplyVelocity( TargetStatus target )
 	}
 
 	Donya::Vector3 dirToTarget = target.pos - GetPos();
+	dirToTarget.y = 0.0f; // Prevent Z-axis rotation by Quaternion::LookAt().
 	dirToTarget.Normalize();
 
 	Donya::Quaternion destination = Donya::Quaternion::LookAt( orientation, dirToTarget ).Normalized();
@@ -1376,11 +1398,14 @@ void Golem::UseImGui()
 			{
 				switch ( status )
 				{
-				case GolemAI::ActionState::WAIT:				return { "Wait" };			break;
-				case GolemAI::ActionState::MOVE:				return { "Move" };			break;
-				case GolemAI::ActionState::ATTACK_SWING:		return { "Attack.Swing" };	break;
-				case GolemAI::ActionState::ATTACK_FAST:		return { "Attack.Fast" };	break;
-				case GolemAI::ActionState::ATTACK_ROTATE:	return { "Attack.Rotate" };	break;
+				case GolemAI::ActionState::WAIT:			return { "Wait" };			// break;
+				case GolemAI::ActionState::MOVE_GET_NEAR:	return { "Move.Near" };		// break;
+				case GolemAI::ActionState::MOVE_GET_FAR:	return { "Move.Far" };		// break;
+				case GolemAI::ActionState::MOVE_SIDE:		return { "Move.Side" };		// break;
+				case GolemAI::ActionState::MOVE_AIM_SIDE:	return { "Move.AimSide" };	// break;
+				case GolemAI::ActionState::ATTACK_SWING:	return { "Attack.Swing" };	// break;
+				case GolemAI::ActionState::ATTACK_FAST:		return { "Attack.Fast" };	// break;
+				case GolemAI::ActionState::ATTACK_ROTATE:	return { "Attack.Rotate" };	// break;
 				default: break;
 				}
 

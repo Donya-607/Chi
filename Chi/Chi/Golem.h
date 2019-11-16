@@ -267,11 +267,12 @@ private:
 		std::shared_ptr<skinned_mesh> pAtkRotate{ nullptr };
 	};
 private:
-	GolemAI::ActionState		status;
+	GolemAI::ActionState	status;
 	GolemAI					AI;
 	int						stageNo;		// 1-based.
 	int						timer;			// Recycle between each state.
 	int						swingTimer;		// Use when status is attack of swing.
+	float					moveSign;		// Use when aim-move state. store destination sign(-1:left, +1:right).
 	float					fieldRadius;	// For collision to wall. the field is perfect-circle, so I can detect collide to wall by distance.
 	float					slerpFactor;	// 0.0f ~ 1.0f. Use orientation's rotation.
 	float					easeFactor;		// 0.0f ~ 1.0f.
@@ -322,7 +323,7 @@ private:
 	void WaitUpdate( TargetStatus target );
 	void WaitUninit();
 
-	void MoveInit( TargetStatus target );
+	void MoveInit( TargetStatus target, GolemAI::ActionState statusDetail );
 	void MoveUpdate( TargetStatus target );
 	void MoveUninit();
 

@@ -311,8 +311,8 @@ static void ResetCurrentSphereFN( KnightParam::SphereFrameWithName *pSphereFN )
 Knight::Knight() :
 	status( KnightAI::ActionState::WAIT ),
 	AI(),
-	timer(), reviveCollisionTime(), moveSign(),
-	fieldRadius(), slerpFactor( 1.0f ),
+	timer(), reviveCollisionTime(),
+	moveSign(), fieldRadius(), slerpFactor( 1.0f ),
 	pos(), velocity(), extraOffset(),
 	orientation(),
 	models()
@@ -817,49 +817,36 @@ void Knight::MoveInit( TargetStatus target, KnightAI::ActionState statusDetail )
 }
 void Knight::MoveUpdate( TargetStatus target )
 {
-	/*
-	const float distNear	= KnightParam::Open().targetDistNear;
-	const float distFar		= KnightParam::Open().targetDistFar;
-	const float nDistance	= CalcNormalizedDistance( target.pos );
-
-	if ( distNear <= nDistance && nDistance <= distFar )
-	{
-		velocity = 0.0f;
-		return;
-	}
-	// else
-	*/
-
 	const float speed = KnightParam::Get().MoveSpeed( status );
 	
 	switch ( status )
 	{
 	case KnightAI::ActionState::MOVE_GET_NEAR:
 		velocity = orientation.LocalFront() * speed;
-		break;
+		return;
 	case KnightAI::ActionState::MOVE_GET_FAR:
 		velocity = -orientation.LocalFront() * speed;
-		break;
+		return;
 	case KnightAI::ActionState::MOVE_SIDE:
 		velocity = orientation.LocalRight() * moveSign * speed;
-		break;
+		return;
 	case KnightAI::ActionState::MOVE_AIM_SIDE:
 		{
-			Donya::Vector3 destination = target.pos;
-			const float sideWidth = ( target.pos - GetPos() ).Length() ;
-			destination += ( orientation.LocalRight() * sideWidth ) * moveSign;
+			const float		distance	= ( target.pos - GetPos() ).Length() ;
+			Donya::Vector3	destination	= target.pos;
+			destination += ( orientation.LocalRight() * distance ) * moveSign;
 
-			Donya::Vector3 moveVector = ( destination - GetPos() ).Normalized();
-			moveVector.y = 0.0f; // Prevent Z-axis rotation by Quaternion::LookAt().
+			Donya::Vector3	moveVector = ( destination - GetPos() ).Normalized();
+							moveVector.y = 0.0f; // Prevent Z-axis rotation by Quaternion::LookAt().
 			velocity = moveVector * speed;
 		}
-		break;
-	default:break;
+		return;
+	default: return;
 	}
 }
 void Knight::MoveUninit()
 {
-	moveSign = 0;
+	moveSign = 0.0f;
 	setAnimFlame( models.pRunFront.get(), 0 );
 }
 
