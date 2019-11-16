@@ -24,13 +24,14 @@ void KnightAI::Init()
 
 	for ( auto &it : pAttackChoosers )
 	{
-		// Set temporary instance(prevent nullptr).
+		// Set temporary instance(prevent nullptr. The LoadParameter() requires the pointer(it) is not null).
 		if ( !it ) { ResetLotteryKind( &it, ChooserKind::Fixed ); }
 
 		it->LoadParameter();
 	}
 
 	timer	= initCoolTime;
+	storage	= initStorage;
 	status	= ToActionState( scast<WaitState>( initStorage.waitNo ) );
 
 	if ( gapIntervals.empty() ) { gapIntervals.resize( 1U ); }
@@ -211,7 +212,7 @@ void KnightAI::ImGui()
 
 			if ( ACTION_STATE_COUNT <= i ) { return "Error Name"; }
 			// else
-			return std::string{ NAMES[i] };
+			return NAMES[i];
 		};
 		auto GetWaitName	= []( int i )->std::string
 		{
@@ -226,7 +227,7 @@ void KnightAI::ImGui()
 
 			if ( WAIT_STATE_COUNT <= i ) { return "Error Name"; }
 			// else
-			return std::string{ NAMES[i] };
+			return NAMES[i];
 		};
 		auto GetAttackName	= []( int i )->std::string
 		{

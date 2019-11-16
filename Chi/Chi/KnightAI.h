@@ -73,7 +73,7 @@ private:
 	static constexpr int ALL_ATTACK_COUNT	= static_cast<int>( AttackState::END ) + 1;	// Contain an attack with gap.
 private:
 	ActionState		status{};
-	ActionStorage	storage{};	// Store next status7s data.
+	ActionStorage	storage{};	// Store next status's data.
 	ActionStorage	initStorage{};
 
 	int timer{};
@@ -125,7 +125,7 @@ private:
 	static constexpr const char *SERIAL_ID = "KnightAI";
 public:
 	void Init();
-	void Update( float targetDistance );
+	void Update( float normalizedTargetDistance );
 
 	void StopUpdate()	{ stopUpdate = true;  }
 	void ResumeUpdate()	{ stopUpdate = false; }
@@ -138,7 +138,7 @@ private:
 	AttackState ToAttackState( ActionState status ) const;
 
 	void AssignWaitState();
-	void AssignAttackState( float targetDistance );
+	void AssignAttackState( float normalizedTargetDistance );
 	ActionState LotteryAttack();
 
 	ActionState GetGapAttack() const;
