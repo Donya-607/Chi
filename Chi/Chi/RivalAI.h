@@ -10,6 +10,9 @@
 
 #include "Donya/UseImGui.h"
 
+
+#include "AIBase.h"
+
 class RivalAI
 {
 public:
@@ -19,7 +22,10 @@ public:
 	enum class ActionState
 	{
 		WAIT,
-		MOVE,
+		MOVE_GET_NEAR,
+		MOVE_GET_FAR,
+		MOVE_SIDE,
+		MOVE_AIM_SIDE,
 		ATTACK_BARRAGE,
 		ATTACK_LINE,
 		ATTACK_RAID,
@@ -48,7 +54,10 @@ private:
 	enum class WaitState
 	{
 		WAIT,
-		MOVE,
+		MOVE_GET_NEAR,
+		MOVE_GET_FAR,
+		MOVE_SIDE,
+		MOVE_AIM_SIDE,
 
 		END
 	};
@@ -67,15 +76,18 @@ private:
 	static constexpr int ATTACK_STATE_COUNT	= static_cast<int>( AttackState::END );		// Except an attack with gap.
 	static constexpr int ALL_ATTACK_COUNT	= static_cast<int>( AttackState::END ) + 1;	// Contain an attack with gap.
 private:
-	ActionState status{};
+	ActionState		status{};
+	ActionStorage	storage{};
+	ActionStorage	initStorage{};
 
 	int timer{};
 	int coolTime{};
+	int initCoolTime{};
 
 	std::array<int, ALL_ATTACK_COUNT>	wholeFrame{};		// An attack with gap is stored at back().
 	std::array<int, ALL_ATTACK_COUNT>	coolTimeFrame{};	// An attack with gap is stored at back().
-	std::array<int, WAIT_STATE_COUNT>	waitPercents{};
-	std::array<int, ATTACK_STATE_COUNT>	attackPercents{};
+	std::array<std::unique_ptr<LotteryBase>, ALL_ATTACK_COUNT>
+		pAttackChoosers{};				// 0:by distance. 1:fixed.
 
 	int attackTimes{};					// Store "gapIntervals" count.
 	int intervalIndex{};
@@ -93,13 +105,20 @@ private:
 		archive
 		(
 				CEREAL_NVP( wholeFrame ),
-				CEREAL_NVP( coolTimeFrame ),
-				CEREAL_NVP( waitPercents ),
-				CEREAL_NVP( attackPercents ),
-				CEREAL_NVP( gapIntervals ) 
+				CEREAL_NVP( coolTimeFrame )
 		);
 
 		if ( 1 <= version )
+		{
+			archive
+			(
+				CEREAL_NVP( pAttackChoosers ),
+				CEREAL_NVP( initStorage ),
+				CEREAL_NVP( initCoolTime ),
+				CEREAL_NVP( gapIntervals )
+			);
+		}
+		if ( 2 <= version )
 		{
 			// archive( CEREAL_NVP( x ) );
 		}
@@ -107,21 +126,23 @@ private:
 	static constexpr const char *SERIAL_ID = "RivalAI";
 public:
 	void Init();
-	void Update();
+	void Update( float normalizedTargetDistance );
 
 	void StopUpdate()	{ stopUpdate = true;  }
 	void ResumeUpdate()	{ stopUpdate = false; }
 	ActionState GetState() const { return status; }
 
 	void OverwriteState( ActionState newState );
-	void FinishCurrentState();
+	void FinishCurrentState( float normalizedTargetDistance );
 private:
 	ActionState ToActionState( WaitState status ) const;
 	ActionState ToActionState( AttackState status ) const;
+	AttackState ToAttackState( ActionState status ) const;
 
-	void LotteryState();
-	void LotteryWaitState();
-	void LotteryAttackState();
+	void AssignState( float normalizedTargetDistance );
+	void AssignWaitState();
+	void AssignAttackState( float normalizedTargetDistance );
+	ActionState LotteryAttack();
 
 	ActionState GetGapAttack() const;
 private:
@@ -133,8 +154,8 @@ private:
 
 public:
 
-	void ImGui();
+	void ImGui( float normalizedTargetDistance );
 
 #endif // USE_IMGUI
 };
-CEREAL_CLASS_VERSION( RivalAI, 0 )
+CEREAL_CLASS_VERSION( RivalAI, 1 )

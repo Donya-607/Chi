@@ -23,7 +23,9 @@ void ActionStorage::ShowImGuiNode( const std::string &prefix )
 		default:			ImGui::Text( "Error" );					break;
 		}
 
-		ImGui::SliderInt( "NextAttack", &nextAttackNo, -1, 4 );
+		// HACK:I should fetch the max of range from argument. because the user of "nextAttackNo" may be out of range.
+		constexpr int ENOUGH_RANGE = 3;
+		ImGui::SliderInt( "NextAttack", &nextAttackNo, -1, ENOUGH_RANGE );
 		if ( nextAttackNo == -1 ) { ImGui::Text( "Attack:[Random]" ); }
 		else { ImGui::Text( "Attack:[%d]", nextAttackNo ); }
 

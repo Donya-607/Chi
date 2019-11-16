@@ -19,8 +19,6 @@ void RivalAI::Init()
 
 	wholeFrame.fill( 1 );
 	coolTimeFrame.fill( 1 );
-	waitPercents.fill( 1 );
-	attackPercents.fill( 1 );
 
 	LoadParameter();
 
@@ -30,11 +28,11 @@ void RivalAI::Init()
 	}
 }
 
-void RivalAI::Update()
+void RivalAI::Update( float normalizedTargetDistance )
 {
 #if USE_IMGUI
 
-	ImGui();
+	ImGui( normalizedTargetDistance );
 
 #endif // USE_IMGUI
 
@@ -46,7 +44,7 @@ void RivalAI::Update()
 	{
 		timer = 0;
 
-		LotteryState();
+		AssignState( normalizedTargetDistance );
 	}
 }
 
@@ -54,10 +52,10 @@ void RivalAI::OverwriteState( ActionState newState )
 {
 	status = newState;
 }
-void RivalAI::FinishCurrentState()
+void RivalAI::FinishCurrentState( float normalizedTargetDistance )
 {
 	timer = 0;
-	LotteryState();
+	AssignState( normalizedTargetDistance );
 }
 
 RivalAI::ActionState RivalAI::ToActionState( WaitState waitStatus ) const
@@ -69,8 +67,11 @@ RivalAI::ActionState RivalAI::ToActionState( WaitState waitStatus ) const
 
 	switch ( waitStatus )
 	{
-	case WaitState::WAIT:	to = ActionState::WAIT;	break;
-	case WaitState::MOVE:	to = ActionState::MOVE;	break;
+	case WaitState::WAIT:			to = ActionState::WAIT;				break;
+	case WaitState::MOVE_GET_NEAR:	to = ActionState::MOVE_GET_NEAR;	break;
+	case WaitState::MOVE_GET_FAR:	to = ActionState::MOVE_GET_FAR;		break;
+	case WaitState::MOVE_SIDE:		to = ActionState::MOVE_SIDE;		break;
+	case WaitState::MOVE_AIM_SIDE:	to = ActionState::MOVE_AIM_SIDE;	break;
 	default: break;
 	}
 
@@ -93,83 +94,72 @@ RivalAI::ActionState RivalAI::ToActionState( AttackState attackStatus ) const
 
 	return to;
 }
+RivalAI::AttackState RivalAI::ToAttackState( ActionState status ) const
+{
+	AttackState to = AttackState::END;
 
-void RivalAI::LotteryState()
+	if ( status == ActionState::END ) { return to; }
+	// else
+
+	switch ( status )
+	{
+	case ActionState::ATTACK_BARRAGE:	to = AttackState::BARRAGE;	break;
+	case ActionState::ATTACK_LINE:		to = AttackState::LINE;		break;
+	case ActionState::ATTACK_RAID:		to = AttackState::RAID;		break;
+	default: break;
+	}
+
+	return to;
+}
+
+void RivalAI::AssignState( float normalizedTargetDistance )
 {
 	// Repeat wait-status <-> attack-status.
 
 	if ( IsAction( status ) )
 	{
-		LotteryWaitState();
+		AssignWaitState();
 	}
 	else
 	{
-		LotteryAttackState();
+		AssignAttackState( normalizedTargetDistance );
 	}
 }
-void RivalAI::LotteryWaitState()
+void RivalAI::AssignWaitState()
 {
-	timer = coolTime;
-
-	const int percentSum = std::accumulate( waitPercents.begin(), waitPercents.end(), 0 );
-
-	ActionState oldState = status;
-	while ( oldState == status )
-	{
-		const int percentRand = Donya::Random::GenerateInt( percentSum );
-
-		for ( int i = 0; i < WAIT_STATE_COUNT; ++i )
-		{
-			int partSum = ( i == WAIT_STATE_COUNT - 1 )
-			? percentSum
-			: std::accumulate( waitPercents.begin(), ( waitPercents.begin() + i + 1 ), 0 );
-
-			if ( percentRand <= partSum )
-			{
-				status = ToActionState( scast<WaitState>( i ) );
-				break;
-			}
-		}
-	}
+	timer	= coolTime;
+	status	= ToActionState( scast<WaitState>( storage.waitNo ) );
 }
-void RivalAI::LotteryAttackState()
+void RivalAI::AssignAttackState( float normalizedTargetDistance )
 {
 	if ( attackTimes <= 0 )
 	{
-		status		= GetGapAttack();
-		timer		= wholeFrame.back();
-		coolTime	= coolTimeFrame.back();
+		status			= GetGapAttack();
+		timer			= wholeFrame.back();
+		coolTime		= coolTimeFrame.back();
 
 		intervalIndex	= ( intervalIndex <= scast<int>( gapIntervals.size() ) - 1 ) ? 0 : intervalIndex + 1;
 		attackTimes		= gapIntervals[intervalIndex];
+
+		storage			= pAttackChoosers.back()->Lottery( normalizedTargetDistance );
 		return;
 	}
 	// else
 
 	attackTimes--;
+	
+	int attackNo = storage.nextAttackNo;
+	if ( attackNo < 0 ) { attackNo = scast<int>( ToAttackState( LotteryAttack() ) ); }
 
-	const int percentSum = std::accumulate( attackPercents.begin(), attackPercents.end(), 0 );
-
-	ActionState oldState = status;
-	while ( oldState == status )
-	{
-		const int percentRand = Donya::Random::GenerateInt( percentSum );
-
-		for ( int i = 0; i < ATTACK_STATE_COUNT; ++i )
-		{
-			int partSum = ( i == ATTACK_STATE_COUNT - 1 )
-			? percentSum
-			: std::accumulate( attackPercents.begin(), ( attackPercents.begin() + i + 1 ), 0 );
-
-			if ( percentRand <= partSum )
-			{
-				status = ToActionState( scast<AttackState>( i ) );
-				timer = wholeFrame[i];
-				coolTime = coolTimeFrame[i];
-				break;
-			}
-		}
-	}
+	status		= ToActionState( scast<AttackState>( attackNo ) );
+	timer		= wholeFrame[attackNo];
+	coolTime	= coolTimeFrame[attackNo];
+	storage		= pAttackChoosers[attackNo]->Lottery( normalizedTargetDistance );
+}
+RivalAI::ActionState RivalAI::LotteryAttack()
+{
+	const int lottery = Donya::Random::GenerateInt( ATTACK_STATE_COUNT );
+	return ToActionState( scast<AttackState>( lottery ) );
 }
 
 RivalAI::ActionState RivalAI::GetGapAttack() const
@@ -202,7 +192,7 @@ void RivalAI::SaveParameter()
 	seria.Save( json, jsonPath.c_str(), SERIAL_ID, *this );
 }
 
-void RivalAI::ImGui()
+void RivalAI::ImGui( float normalizedTargetDistance )
 {
 	if ( ImGui::BeginIfAllowed( "RivalAI" ) )
 	{
@@ -211,7 +201,10 @@ void RivalAI::ImGui()
 			constexpr std::array<const char *, ACTION_STATE_COUNT> NAMES
 			{
 				"Wait",
-				"Move",
+				"Move.Near",
+				"Move.Far",
+				"Move.Side",
+				"Move.AimSide",
 				"Attack.Barrage",
 				"Attack.Line",
 				"Attack.Raid",
@@ -220,19 +213,22 @@ void RivalAI::ImGui()
 
 			if ( ACTION_STATE_COUNT <= i ) { return "Error Name"; }
 			// else
-			return std::string{ NAMES[i] };
+			return NAMES[i];
 		};
 		auto GetWaitName	= []( int i )->std::string
 		{
 			constexpr std::array<const char *, WAIT_STATE_COUNT> NAMES
 			{
 				"Wait",
-				"Move",
+				"Move.Near",
+				"Move.Far",
+				"Move.Side",
+				"Move.AimSide",
 			};
 
 			if ( WAIT_STATE_COUNT <= i ) { return "Error Name"; }
 			// else
-			return std::string{ NAMES[i] };
+			return NAMES[i];
 		};
 		auto GetAttackName	= []( int i )->std::string
 		{
@@ -246,7 +242,7 @@ void RivalAI::ImGui()
 
 			if ( ALL_ATTACK_COUNT <= i ) { return "Error Name"; }
 			// else
-			return std::string{ NAMES[i] };
+			return NAMES[i];
 		};
 
 		if ( ImGui::TreeNode( "CurrentParameter" ) )
@@ -254,6 +250,7 @@ void RivalAI::ImGui()
 			ImGui::Text( "Status : %d", scast<int>( status ) );
 			ImGui::Text( "Timer : %d", timer );
 			ImGui::Text( "CoolTime : %d", coolTime );
+			ImGui::Text( "Distance.Target : %f", normalizedTargetDistance );
 
 			// Show whole frame.
 			{
@@ -280,26 +277,40 @@ void RivalAI::ImGui()
 			ImGui::TreePop();
 		}
 
+		if ( ImGui::TreeNode( "AttackNumberList" ) )
+		{
+			std::string atkName{};
+			for ( int i = 0; i < ALL_ATTACK_COUNT; ++i )
+			{
+				atkName = GetAttackName( i );
+
+				ImGui::Text( "[%d]:%s", i, atkName.c_str() );
+			}
+
+			ImGui::Text( "[%d ~ ]:Error", ALL_ATTACK_COUNT );
+
+			ImGui::TreePop();
+		}
+
 		if ( ImGui::TreeNode( "AdjustData" ) )
 		{
-			if ( ImGui::TreeNode( "Wait.Percents" ) )
+			if ( ImGui::TreeNode( "Initialize" ) )
 			{
-				int i = 0;
-				for ( auto &it : waitPercents )
-				{
-					ImGui::SliderInt( GetWaitName( i ).c_str(), &it, 1, 1024 );
-					i++;
-				}
+				ImGui::DragInt( "CoolTime", &initCoolTime );
+				initStorage.ShowImGuiNode( "FirstChoice" );
 
 				ImGui::TreePop();
 			}
-			if ( ImGui::TreeNode( "Attack.Percents" ) )
+
+			if ( ImGui::TreeNode( "Attack.Chooser" ) )
 			{
-				int i = 0;
-				for ( auto &it : attackPercents )
+				static std::array<int, ALL_ATTACK_COUNT> chooserKinds{};
+				std::string atkName{};
+				for ( int i = 0; i < ALL_ATTACK_COUNT; ++i )
 				{
-					ImGui::SliderInt( GetAttackName( i ).c_str(), &it, 1, 1024 );
-					i++;
+					atkName = GetAttackName( i );
+					ShowImGuiChooserNode( atkName, &pAttackChoosers[i], &chooserKinds[i] );
+					ImGui::Text( "" );
 				}
 
 				ImGui::TreePop();
