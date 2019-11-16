@@ -30,8 +30,9 @@ GolemParam::GolemParam() :
 {}
 GolemParam::~GolemParam() = default;
 
-void GolemParam::Init()
+void GolemParam::Init( size_t motionCount )
 {
+	motionSpeeds.resize( motionCount );
 	LoadParameter();
 }
 void GolemParam::Uninit()
@@ -127,6 +128,27 @@ void GolemParam::UseImGui()
 			ImGui::DragFloat3( "Initialize.Position", &initPos.x );
 			ImGui::DragFloat3( "DrawPosition.Offset", &drawOffset.x );
 
+			if ( ImGui::TreeNode( "Motion.Speed" ) )
+			{
+				const std::vector<std::string> motionNames
+				{
+					"Idle",
+					"Defeat",
+					"Attack.Swing",
+					"Attack.Fast",
+					"Attack.Rotate",
+				};
+				const size_t COUNT = motionSpeeds.size();
+				_ASSERT_EXPR( motionNames.size() == COUNT, L"Error : Logical error by human !" );
+				for ( size_t i = 0; i < COUNT; ++i )
+				{
+					ImGui::DragFloat( motionNames[i].c_str(), &motionSpeeds[i], 0.005f );
+				}
+
+				ImGui::TreePop();
+			}
+			ImGui::Text( "" );
+
 			if ( ImGui::TreeNode( "Defeat" ) )
 			{
 				ImGui::DragInt( "Motion.Length(Frame)", &defeatMotionLength );
@@ -135,7 +157,6 @@ void GolemParam::UseImGui()
 				ImGui::TreePop();
 			}
 			ImGui::Text( "" );
-
 			if ( ImGui::TreeNode( "SwingAttack" ) )
 			{
 				ImGui::DragInt  ( "StopFrame",			&swingStopFrame  );
@@ -473,6 +494,7 @@ Golem::Golem() :
 	AI(),
 	stageNo( 1 ), timer(), swingTimer(),
 	moveSign(), fieldRadius(), slerpFactor( 1.0f ), easeFactor(),
+	currentMotion( Idle ),
 	pos(), velocity(), extraOffset(),
 	orientation(),
 	models()
@@ -500,7 +522,7 @@ Golem::~Golem() = default;
 
 void Golem::Init( int stageNumber )
 {
-	GolemParam::Get().Init();
+	GolemParam::Get().Init( MOTION_COUNT );
 
 	LoadModel();
 
@@ -549,31 +571,33 @@ void Golem::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya
 	Donya::Vector4x4 W = CalcWorldMatrix() * DRAW_OFFSET;
 	Donya::Vector4x4 WVP = W * matView * matProjection;
 
+	float motionSpeed = GolemParam::Get().MotionSpeeds()->at( scast<int>( currentMotion ) );
+
 	switch ( status )
 	{
 	case GolemAI::ActionState::WAIT:
-		FBXRender( models.pIdle.get(), HLSL, WVP, W );
+		FBXRender( models.pIdle.get(), HLSL, WVP, W, motionSpeed );
 		break;
 	case GolemAI::ActionState::MOVE_GET_NEAR:
-		FBXRender( models.pIdle.get(), HLSL, WVP, W );
+		FBXRender( models.pIdle.get(), HLSL, WVP, W, motionSpeed );
 		break;
 	case GolemAI::ActionState::MOVE_GET_FAR:
-		FBXRender( models.pIdle.get(), HLSL, WVP, W );
+		FBXRender( models.pIdle.get(), HLSL, WVP, W, motionSpeed );
 		break;
 	case GolemAI::ActionState::MOVE_SIDE:
-		FBXRender( models.pIdle.get(), HLSL, WVP, W );
+		FBXRender( models.pIdle.get(), HLSL, WVP, W, motionSpeed );
 		break;
 	case GolemAI::ActionState::MOVE_AIM_SIDE:
-		FBXRender( models.pIdle.get(), HLSL, WVP, W );
+		FBXRender( models.pIdle.get(), HLSL, WVP, W, motionSpeed );
 		break;
 	case GolemAI::ActionState::ATTACK_SWING:
-		FBXRender( models.pAtkSwing.get(), HLSL, WVP, W );
+		FBXRender( models.pAtkSwing.get(), HLSL, WVP, W, motionSpeed );
 		break;
 	case GolemAI::ActionState::ATTACK_FAST:
-		FBXRender( models.pAtkFast.get(), HLSL, WVP, W );
+		FBXRender( models.pAtkFast.get(), HLSL, WVP, W, motionSpeed );
 		break;
 	case GolemAI::ActionState::ATTACK_ROTATE:
-		FBXRender( models.pAtkRotate.get(), HLSL, WVP, W );
+		FBXRender( models.pAtkRotate.get(), HLSL, WVP, W, motionSpeed );
 		break;
 	case GolemAI::ActionState::END:
 		{
@@ -586,7 +610,7 @@ void Golem::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya
 				drawAlpha -= GolemParam::Get().DefeatHideSpeed() * timeDiff;
 				drawAlpha = std::max( 0.0f, drawAlpha );
 			}
-			FBXRender( models.pDefeat.get(), HLSL, WVP, W, animeAccel, /* is_animation = */ true, { 1.0f, 1.0f, 1.0f, drawAlpha } );
+			FBXRender( models.pDefeat.get(), HLSL, WVP, W, motionSpeed * animeAccel, /* is_animation = */ true, { 1.0f, 1.0f, 1.0f, drawAlpha } );
 		}
 		break;
 	default: break;
@@ -1112,11 +1136,10 @@ XXXUninit : call by ChangeStatus when changing status. before YYYInit.
 
 void Golem::WaitInit( TargetStatus target )
 {
-	status = GolemAI::ActionState::WAIT;
-
-	slerpFactor = GolemParam::Get().SlerpFactor( status );
-
-	velocity = 0.0f;
+	status			= GolemAI::ActionState::WAIT;
+	slerpFactor		= GolemParam::Get().SlerpFactor( status );
+	velocity		= 0.0f;
+	currentMotion	= Idle;
 
 	setAnimFlame( models.pIdle.get(), 0 );
 }
@@ -1131,10 +1154,10 @@ void Golem::WaitUninit()
 
 void Golem::MoveInit( TargetStatus target, GolemAI::ActionState statusDetail )
 {
-	status		= statusDetail;
-	slerpFactor	= GolemParam::Get().SlerpFactor( status );
-
-	moveSign	= Donya::Random::GenerateInt( 2 ) ? +1.0f : -1.0f;
+	status			= statusDetail;
+	slerpFactor		= GolemParam::Get().SlerpFactor( status );
+	moveSign		= Donya::Random::GenerateInt( 2 ) ? +1.0f : -1.0f;
+	currentMotion	= Idle;
 
 	setAnimFlame( models.pIdle.get(), 0 );
 }
@@ -1175,11 +1198,12 @@ void Golem::MoveUninit()
 
 void Golem::AttackSwingInit( TargetStatus target )
 {
-	status		= GolemAI::ActionState::ATTACK_SWING;
-	timer		= GolemParam::Get().SwingStopFrame();
-	swingTimer	= 0;
-	slerpFactor	= GolemParam::Get().SlerpFactor( status );
-	velocity	= 0.0f;
+	status			= GolemAI::ActionState::ATTACK_SWING;
+	timer			= GolemParam::Get().SwingStopFrame();
+	swingTimer		= 0;
+	slerpFactor		= GolemParam::Get().SlerpFactor( status );
+	velocity		= 0.0f;
+	currentMotion	= AtkSwing;
 
 	ResetCurrentOBBFrames( GolemParam::Get().OBBAtksSwing() );
 	setAnimFlame( models.pAtkSwing.get(), 0 );
@@ -1251,9 +1275,9 @@ void Golem::AttackSwingUninit()
 
 void Golem::AttackFastInit( TargetStatus target )
 {
-	status = GolemAI::ActionState::ATTACK_FAST;
-
-	slerpFactor = GolemParam::Get().SlerpFactor( status );
+	status			= GolemAI::ActionState::ATTACK_FAST;
+	slerpFactor		= GolemParam::Get().SlerpFactor( status );
+	currentMotion	= AtkFast;
 
 	ResetCurrentOBBFNames( GolemParam::Get().OBBFAtksFast() );
 	setAnimFlame( models.pAtkFast.get(), 0 );
@@ -1278,11 +1302,11 @@ void Golem::AttackFastUninit()
 
 void Golem::AttackRotateInit( TargetStatus target )
 {
-	status = GolemAI::ActionState::ATTACK_ROTATE;
-
-	slerpFactor = GolemParam::Get().SlerpFactor( status );
-	easeFactor  = 0.0f;
-	extraOffset = 0.0f;
+	status			= GolemAI::ActionState::ATTACK_ROTATE;
+	slerpFactor		= GolemParam::Get().SlerpFactor( status );
+	easeFactor		= 0.0f;
+	extraOffset		= 0.0f;
+	currentMotion	= AtkRotate;
 
 	ResetCurrentSphereFrames( GolemParam::Get().RotateAtkCollisions() );
 	setAnimFlame( models.pAtkRotate.get(), 0 );
@@ -1342,6 +1366,7 @@ void Golem::DefeatInit()
 	timer			= 0;
 	velocity		= 0.0f;
 	slerpFactor		= 0.0f;
+	currentMotion	= Defeat;
 }
 void Golem::DefeatUpdate()
 {

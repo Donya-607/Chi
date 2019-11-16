@@ -71,6 +71,7 @@ private:
 	float							attackRotateSlerpFactor;// 0.0 ~ 1.0. Use when status is attack of rotate.
 	Donya::Vector3					initPos;
 	Donya::Vector3					drawOffset;
+	std::vector<float>				motionSpeeds;			// Magnification.
 	std::vector<Donya::Sphere>		hitBoxesBody;			// Body's hit boxes.
 	std::vector<Donya::OBBFrame>	OBBAttacksSwing;
 	std::vector<OBBFrameWithName>	OBBFAttacksFast;
@@ -154,6 +155,10 @@ private:
 			}
 			if ( 11 <= version )
 			{
+				archive( CEREAL_NVP( motionSpeeds ) );
+			}
+			if ( 12 <= version )
+			{
 				// archive( CEREAL_NVP( x ) );
 			}
 
@@ -203,7 +208,7 @@ private:
 	}
 	static constexpr const char *SERIAL_ID = "Golem";
 public:
-	void Init();
+	void Init( size_t motionCount );
 	void Uninit();
 public:
 	// These getter method for maintaining private member.
@@ -225,6 +230,8 @@ public:
 	float									DefeatHideSpeed()		const	{ return defeatHideSpeed; }
 	Donya::Vector3							GetInitPosition()		const	{ return initPos; }
 	Donya::Vector3							GetDrawOffset  ()		const	{ return drawOffset; }
+	std::vector<float>						*MotionSpeeds()					{ return &motionSpeeds; }
+	const std::vector<float>				*MotionSpeeds()			const	{ return &motionSpeeds; }
 	std::vector<Donya::OBBFrame>			*OBBAtksSwing()					{ return &OBBAttacksSwing; }
 	const std::vector<Donya::OBBFrame>		*OBBAtksSwing()			const	{ return &OBBAttacksSwing; }
 	std::vector<OBBFrameWithName>			*OBBFAtksFast()					{ return &OBBFAttacksFast; }
@@ -243,7 +250,7 @@ public:
 
 #endif // USE_IMGUI
 };
-CEREAL_CLASS_VERSION( GolemParam, 10 )
+CEREAL_CLASS_VERSION( GolemParam, 11 )
 CEREAL_CLASS_VERSION( GolemParam::OBBFrameWithName, 0 )
 
 struct fbx_shader; // Use for argument.
@@ -266,6 +273,16 @@ private:
 		std::shared_ptr<skinned_mesh> pAtkSwing{ nullptr };
 		std::shared_ptr<skinned_mesh> pAtkRotate{ nullptr };
 	};
+	enum MotionKind
+	{
+		Idle = 0,
+		Defeat,
+		AtkSwing,
+		AtkFast,
+		AtkRotate,
+
+		MOTION_COUNT
+	};
 private:
 	GolemAI::ActionState	status;
 	GolemAI					AI;
@@ -276,6 +293,7 @@ private:
 	float					fieldRadius;	// For collision to wall. the field is perfect-circle, so I can detect collide to wall by distance.
 	float					slerpFactor;	// 0.0f ~ 1.0f. Use orientation's rotation.
 	float					easeFactor;		// 0.0f ~ 1.0f.
+	MotionKind				currentMotion;
 	Donya::Vector3			pos;			// Contain world space position. actual position is "pos + extraOffset".
 	Donya::Vector3			velocity;
 	Donya::Vector3			extraOffset;	// Actual position is "pos + extraOffset".

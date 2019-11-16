@@ -1,6 +1,6 @@
 {
     "Golem": {
-        "cereal_class_version": 10,
+        "cereal_class_version": 11,
         "scale": 1.0,
         "hitBoxesBody": [
             {
@@ -186,6 +186,13 @@
         "swingStopFrame": 130,
         "swingStopLength": 4.0,
         "defeatMotionLength": 360,
-        "defeatHideSpeed": 0.0010000000474974514
+        "defeatHideSpeed": 0.0010000000474974514,
+        "motionSpeeds": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+        ]
     }
 }

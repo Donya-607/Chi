@@ -123,6 +123,7 @@ void PlayerParam::UseImGui()
 
 				ImGui::TreePop();
 			}
+			ImGui::Text( "" );
 
 			static std::array<char, 512U> lanceNameBuffer{};
 			ImGui::InputText( "MeshName.Lance", lanceNameBuffer.data(), lanceNameBuffer.size() );
