@@ -144,6 +144,7 @@
     <ClInclude Include="blend.h" />
     <ClInclude Include="bloom.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="Catapult.h" />
     <ClInclude Include="Donya\AudioSystem.h" />
     <ClInclude Include="Donya\ChiUtility.h" />
     <ClInclude Include="Donya\Collision.h" />
@@ -209,6 +210,7 @@
     <ClCompile Include="AssetLoader.cpp" />
     <ClCompile Include="bloom.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="Catapult.cpp" />
     <ClCompile Include="Donya\AudioSystem.cpp" />
     <ClCompile Include="Donya\ChiUtility.cpp" />
     <ClCompile Include="Donya\Collision.cpp" />

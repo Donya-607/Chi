@@ -2,11 +2,11 @@
 #include "scene.h"
 #include "sceneManager.h"
 #include "keyInput.h"
-#include "easing.h"
 
+#include "Donya/Easing.h"
+#include "Donya/FilePath.h"
 #include "Donya/Keyboard.h"	// Insert by Donya.
 #include "Donya/Useful.h"	// Insert by Donya.
-#include "Donya/FilePath.h"
 
 #define scast static_cast
 
@@ -135,6 +135,27 @@ void sceneTitle::CameraMove()
 	}
 	else
 	{
+		using namespace Donya::Easing;
+
+		float currentTime = static_cast<float>( moveCnt ) / static_cast<float>( MAX_MOVE_CNT );
+		float ease = Ease( Kind::Exponential, Type::Out, currentTime );
+
+		Donya::Vector3 posDiff		= camPos - camTitlePos;
+		Donya::Vector3 targetDiff	= camTarget - camTitleTarget;
+
+		Donya::Vector3 resultPos	= camTitlePos + ( posDiff * ease );
+		Donya::Vector3 resultTarget	= camTitleTarget + ( targetDiff * ease );
+
+		setCamPos( resultPos );
+		setTarget( resultTarget );
+
+		constexpr float START	= 3354.0f;
+		constexpr float LAST	= 4000.0f;
+		constexpr float DIFF	= LAST - START;
+		titlePos.y = START + ( DIFF * ease );
+
+		/*
+		// OLD process.
 		float posX = easing::OutExp(moveCnt, MAX_MOVE_CNT, camPos.x, camTitlePos.x);
 		float posY = easing::OutExp(moveCnt, MAX_MOVE_CNT, camPos.y, camTitlePos.y);
 		float posZ = easing::OutExp(moveCnt, MAX_MOVE_CNT, camPos.z, camTitlePos.z);
@@ -147,6 +168,7 @@ void sceneTitle::CameraMove()
 		setTarget(Donya::Vector3(targetX, targetY, targetZ));
 
 		titlePos.y = easing::OutExp(moveCnt, MAX_MOVE_CNT, 4000.0f, 3354.0f);
+		*/
 	}
 }
 

@@ -134,6 +134,7 @@
     <ClInclude Include="UI.h" />
     <ClInclude Include="StorageForScene.h" />
     <ClInclude Include="AIBase.h" />
+    <ClInclude Include="Catapult.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp">
@@ -234,6 +235,7 @@
     <ClCompile Include="SceneResult.cpp" />
     <ClCompile Include="StorageForScene.cpp" />
     <ClCompile Include="AIBase.cpp" />
+    <ClCompile Include="Catapult.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="geometric_phong_ps.hlsl">
