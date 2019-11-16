@@ -36,7 +36,7 @@ void ShowImGuiChooserNode( const std::string &prefix, std::unique_ptr<LotteryBas
 	ImGui::SliderInt( ( prefix + ".Kind" ).c_str(), pNowKind, 0, scast<int>( ChooserKind::CHOOSERS_COUNT ) - 1 );
 	if ( oldKind != *pNowKind )
 	{
-		ResetLotteryKind( ppChooserBase, scast<ChooserKind>( *pNowKind ) );
+		ResetLotteryKind( ppChooserBase, *pNowKind );
 	}
 
 	( *ppChooserBase )->ShowImGuiNode( prefix );
@@ -52,16 +52,15 @@ void ResetLotteryKind( std::unique_ptr<LotteryBase> *ppChooserBase, ChooserKind 
 {
 	_ASSERT_EXPR( chooserKind != ChooserKind::CHOOSERS_COUNT , L"Error : passed chooser's number is invalid !" );
 
-	std::unique_ptr<LotteryBase> &reference = *ppChooserBase;
 	switch ( chooserKind )
 	{
 	case ChooserKind::Distance:
-		reference.reset( nullptr );
-		reference = std::make_unique<DistanceLottery>();
+		ppChooserBase->reset( nullptr );
+		*ppChooserBase = std::make_unique<DistanceLottery>();
 		return;
 	case ChooserKind::Fixed:
-		reference.reset( nullptr );
-		reference = std::make_unique<FixedLottery>();
+		ppChooserBase->reset( nullptr );
+		*ppChooserBase = std::make_unique<FixedLottery>();
 		return;
 	default: return;
 	}

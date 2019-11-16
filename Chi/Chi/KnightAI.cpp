@@ -237,9 +237,9 @@ void KnightAI::ImGui()
 				"Attack.Explosion",
 			};
 
-			if ( ALL_ATTACK_COUNT <= i ) { return "Error Name"; }
+			if ( i < 0 || ALL_ATTACK_COUNT <= i ) { return "Error Name"; }
 			// else
-			return std::string{ NAMES[i] };
+			return NAMES[i];
 		};
 
 		if ( ImGui::TreeNode( "CurrentParameter" ) )

@@ -38,6 +38,7 @@ public:
 	/// Showing all members to ImGui::TreeNode().
 	/// </summary>
 	void ShowImGuiNode( const std::string &prefix );
+
 #endif // USE_IMGUI
 
 public:
@@ -50,6 +51,9 @@ CEREAL_CLASS_VERSION( ActionStorage, 0 )
 
 class LotteryBase
 {
+public:
+	LotteryBase() = default;
+	virtual ~LotteryBase() = default;
 public:
 	virtual void Init() = 0;
 	virtual void Uninit() = 0;
