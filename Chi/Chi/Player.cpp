@@ -40,8 +40,9 @@ PlayerParam::PlayerParam() :
 }
 PlayerParam::~PlayerParam() = default;
 
-void PlayerParam::Init()
+void PlayerParam::Init( size_t motionCount )
 {
+	motionSpeeds.resize( motionCount );
 	LoadParameter();
 }
 void PlayerParam::Uninit()
@@ -119,6 +120,26 @@ void PlayerParam::UseImGui()
 					strKind = Easing::KindName( returnEaseKind );
 					strType = Easing::TypeName( returnEaseType );
 					ImGui::Text( ( "Return.Easing : " + strKind + "." + strType ).c_str() );
+				}
+
+				ImGui::TreePop();
+			}
+			ImGui::Text( "" );
+
+			if ( ImGui::TreeNode( "Motion.Speed" ) )
+			{
+				const std::vector<std::string> motionNames
+				{
+					"Idle",
+					"Run",
+					"Defend",
+					"Attack",
+				};
+				const size_t COUNT = motionSpeeds.size();
+				_ASSERT_EXPR( motionNames.size() == COUNT, L"Error : Logical error by human !" );
+				for ( size_t i = 0; i < COUNT; ++i )
+				{
+					ImGui::DragFloat( motionNames[i].c_str(), &motionSpeeds[i], 0.005f );
 				}
 
 				ImGui::TreePop();
@@ -283,6 +304,7 @@ Player::Player() :
 	status( State::Idle ),
 	timer( 0 ), shieldsRecastTime( 0 ),
 	fieldRadius( 0 ),
+	currentMotion( Idle ),
 	pos(), velocity(), lookDirection(), extraOffset(),
 	orientation(),
 	models(),
@@ -311,7 +333,7 @@ Player::~Player() = default;
 
 void Player::Init( const Donya::Vector3 &wsInitPos, const Donya::Vector3 &initRadians, const std::vector<Donya::Box> &wsWallCollisions )
 {
-	PlayerParam::Get().Init();
+	PlayerParam::Get().Init( MOTION_COUNT );
 	SetFieldRadius( 0.0f ); // Set to body's radius.
 
 	LoadModel();
@@ -358,19 +380,20 @@ void Player::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Dony
 	Donya::Vector4x4 W = CalcWorldMatrix();
 	Donya::Vector4x4 WVP = W * matView * matProjection;
 
+	float motionSpeed = PlayerParam::Get().MotionSpeeds()->at( scast<int>( currentMotion ) );
 	switch ( status )
 	{
 	case Player::State::Idle:
-		FBXRender( models.pIdle.get(), HLSL, WVP, W );
+		FBXRender( models.pIdle.get(), HLSL, WVP, W, motionSpeed );
 		break;
 	case Player::State::Run:
-		FBXRender( models.pRun.get(), HLSL,WVP, W );
+		FBXRender( models.pRun.get(), HLSL,WVP, W, motionSpeed );
 		break;
 	case Player::State::Defend:
-		FBXRender( models.pDefend.get(), HLSL,WVP, W );
+		FBXRender( models.pDefend.get(), HLSL,WVP, W, motionSpeed );
 		break;
 	case Player::State::Attack:
-		FBXRender( models.pAttack.get(), HLSL, WVP, W );
+		FBXRender( models.pAttack.get(), HLSL, WVP, W, motionSpeed );
 		break;
 	default: break;
 	}
@@ -668,8 +691,9 @@ void Player::ChangeStatusFromIdle( Input input )
 }
 void Player::IdleInit( Input input )
 {
-	status   = State::Idle;
-	velocity = 0.0f; // Each member set to zero.
+	status			= State::Idle;
+	velocity		= 0.0f; // Each member set to zero.
+	currentMotion	= Idle;
 
 	setAnimFlame( models.pIdle.get(), 0 );
 }
@@ -711,6 +735,7 @@ void Player::ChangeStatusFromRun( Input input )
 void Player::RunInit( Input input )
 {
 	status = State::Run;
+	currentMotion = Run;
 
 	setAnimFlame( models.pRun.get(), 0 );
 }
@@ -759,8 +784,9 @@ void Player::ChangeStatusFromDefend( Input input )
 }
 void Player::DefendInit( Input input )
 {
-	status   = State::Defend;
-	velocity = 0.0f; // Each member set to zero.
+	status				= State::Defend;
+	velocity			= 0.0f; // Each member set to zero.
+	currentMotion		= Defend;
 	shieldsRecastTime	= 0;
 	wasSucceededDefence	= false;
 
@@ -825,6 +851,7 @@ void Player::AttackInit( Input input )
 {
 	status				= State::Attack;
 	timer				= PlayerParam::Get().FrameWholeAttacking();
+	currentMotion		= Attack;
 	velocity			= 0.0f; // Each member set to zero.
 	extraOffset			= 0.0f;
 	shieldsRecastTime	= 0;	// This allows attack cancel anytime.
