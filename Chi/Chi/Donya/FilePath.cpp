@@ -58,6 +58,12 @@ std::string GetModelPath( ModelAttribute modelAttribute )
 		return "./Data/model/Boss/Boss02/MDL_Boss02_Death.fbx";				// break;
 	case ModelAttribute::KnightRunFront:
 		return "./Data/model/Boss/Boss02/MDL_Boss02_Walk_Forward.fbx";		// break;
+	case ModelAttribute::KnightRunLeft:
+		return "./Data/model/Boss/Boss02/MDL_Boss02_Walk_Left.fbx";			// break;
+	case ModelAttribute::KnightRunRight:
+		return "./Data/model/Boss/Boss02/MDL_Boss02_Walk_Right.fbx";		// break;
+	case ModelAttribute::KnightRunBack:
+		return "./Data/model/Boss/Boss02/MDL_Boss02_Walk_Back.fbx";			// break;
 	case ModelAttribute::KnightAtkExplosion:
 		return "./Data/model/Boss/Boss02/MDL_Boss02_Attack_Explosion.fbx";	// break;
 	case ModelAttribute::KnightAtkSwing:
@@ -78,12 +84,16 @@ std::string GetModelPath( ModelAttribute modelAttribute )
 		return "./Data/model/Boss/Boss03/MDL_Boss03_Attack_Rotate.fbx";		// break;
 	case ModelAttribute::RivalIdle:
 		return "./Data/model/Boss/Boss04/Boss04_Wait.fbx";					// break;
-	case ModelAttribute::RivalRun:
+	case ModelAttribute::RivalRunFront:
 		return "./Data/model/Boss/Boss04/Boss04_Run.fbx";					// break;
+	case ModelAttribute::RivalRunLeft:
+		return "./Data/model/Boss/Boss04/Boss04_Left.fbx";					// break;
+	case ModelAttribute::RivalRunRight:
+		return "./Data/model/Boss/Boss04/Boss04_Right.fbx";					// break;
 	case ModelAttribute::RivalBreak:
 		return "./Data/model/Boss/Boss04/Boss04_Impact.fbx";				// break;
 	case ModelAttribute::RivalLeave:
-		return "./Data/model/Boss/Boss04/Boss04_TPose.fbx";					// break;
+		return "./Data/model/Boss/Boss04/Boss04_Back.fbx";					// break;
 	case ModelAttribute::RivalDefeat:
 		return "./Data/model/Boss/Boss04/Boss04_Death.fbx";					// break;
 	case ModelAttribute::RivalAtkBarrage:

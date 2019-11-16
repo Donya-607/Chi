@@ -215,6 +215,9 @@ private:
 		std::shared_ptr<skinned_mesh> pIdle{ nullptr };
 		std::shared_ptr<skinned_mesh> pDefeat{ nullptr };
 		std::shared_ptr<skinned_mesh> pRunFront{ nullptr };
+		std::shared_ptr<skinned_mesh> pRunLeft{ nullptr };
+		std::shared_ptr<skinned_mesh> pRunRight{ nullptr };
+		std::shared_ptr<skinned_mesh> pRunBack{ nullptr };
 		std::shared_ptr<skinned_mesh> pAtkExpl{ nullptr };
 		std::shared_ptr<skinned_mesh> pAtkSwing{ nullptr };
 		std::shared_ptr<skinned_mesh> pAtkRaid{ nullptr };

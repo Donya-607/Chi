@@ -328,6 +328,9 @@ Knight::Knight() :
 		&models.pIdle,
 		&models.pDefeat,
 		&models.pRunFront,
+		&models.pRunLeft,
+		&models.pRunRight,
+		&models.pRunBack,
 		&models.pAtkExpl,
 		&models.pAtkSwing,
 		&models.pAtkRaid,
@@ -403,13 +406,17 @@ void Knight::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Dony
 		FBXRender( models.pRunFront.get(), HLSL, WVP, W );
 		break;
 	case KnightAI::ActionState::MOVE_GET_FAR:
-		FBXRender( models.pRunFront.get(), HLSL, WVP, W );
+		FBXRender( models.pRunBack.get(), HLSL, WVP, W );
 		break;
 	case KnightAI::ActionState::MOVE_SIDE:
-		FBXRender( models.pRunFront.get(), HLSL, WVP, W );
+		( Donya::SignBit( moveSign ) == 1 ) // This sign is side of destination from target.
+		? FBXRender( models.pRunLeft.get(), HLSL, WVP, W )
+		: FBXRender( models.pRunRight.get(), HLSL, WVP, W );
 		break;
 	case KnightAI::ActionState::MOVE_AIM_SIDE:
-		FBXRender( models.pRunFront.get(), HLSL, WVP, W );
+		( Donya::SignBit( moveSign ) == 1 ) // This sign is side of destination from target.
+		? FBXRender( models.pRunLeft.get(), HLSL, WVP, W )
+		: FBXRender( models.pRunRight.get(), HLSL, WVP, W );
 		break;
 	case KnightAI::ActionState::ATTACK_EXPLOSION:
 		{
@@ -689,7 +696,13 @@ void Knight::LoadModel()
 	loadFBX( models.pDefeat.get(), GetModelPath( ModelAttribute::KnightDefeat ) );
 	Donya::OutputDebugStr( "Done KnightModel.Defeat.\n" );
 	loadFBX( models.pRunFront.get(), GetModelPath( ModelAttribute::KnightRunFront ) );
-	Donya::OutputDebugStr( "Done KnightModel.RunFront.\n" );
+	Donya::OutputDebugStr( "Done KnightModel.Run.Front.\n" );
+	loadFBX( models.pRunLeft.get(), GetModelPath( ModelAttribute::KnightRunLeft ) );
+	Donya::OutputDebugStr( "Done KnightModel.Run.Left.\n" );
+	loadFBX( models.pRunRight.get(), GetModelPath( ModelAttribute::KnightRunRight ) );
+	Donya::OutputDebugStr( "Done KnightModel.Run.Right.\n" );
+	loadFBX( models.pRunBack.get(), GetModelPath( ModelAttribute::KnightRunBack ) );
+	Donya::OutputDebugStr( "Done KnightModel.Run.Back.\n" );
 	loadFBX( models.pAtkExpl.get(), GetModelPath( ModelAttribute::KnightAtkExplosion ) );
 	Donya::OutputDebugStr( "Done KnightModel.Attack.Explosion.\n" );
 	loadFBX( models.pAtkSwing.get(), GetModelPath( ModelAttribute::KnightAtkSwing ) );

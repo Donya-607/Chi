@@ -4,6 +4,7 @@
 
 #include "Donya/Easing.h"
 #include "Donya/FilePath.h"
+#include "Donya/Random.h"
 #include "Donya/Sound.h"
 #include "Donya/Useful.h"		// For IsShowCollision().
 
@@ -65,7 +66,10 @@ float RivalParam::MoveSpeed( RivalAI::ActionState status )
 	switch ( status )
 	{
 	case RivalAI::ActionState::WAIT:				return 0.0f;				// break;
-	case RivalAI::ActionState::MOVE:				return m.move.moveSpeed;	// break;
+	case RivalAI::ActionState::MOVE_GET_NEAR:		return m.move.moveSpeed;	// break;
+	case RivalAI::ActionState::MOVE_GET_FAR:		return m.move.moveSpeed;	// break;
+	case RivalAI::ActionState::MOVE_SIDE:			return m.move.moveSpeed;	// break;
+	case RivalAI::ActionState::MOVE_AIM_SIDE:		return m.move.moveSpeed;	// break;
 	case RivalAI::ActionState::ATTACK_BARRAGE:		return m.barrage.moveSpeed;	// break;
 	case RivalAI::ActionState::ATTACK_LINE:			return m.line.moveSpeed;	// break;
 	case RivalAI::ActionState::ATTACK_RAID:			return m.raid.moveSpeed;	// break;
@@ -80,7 +84,10 @@ float RivalParam::SlerpFactor( RivalAI::ActionState status )
 	switch ( status )
 	{
 	case RivalAI::ActionState::WAIT:				return m.idleSlerpFactor;		// break;
-	case RivalAI::ActionState::MOVE:				return m.move.slerpFactor;		// break;
+	case RivalAI::ActionState::MOVE_GET_NEAR:		return m.move.slerpFactor;		// break;
+	case RivalAI::ActionState::MOVE_GET_FAR:		return m.move.slerpFactor;		// break;
+	case RivalAI::ActionState::MOVE_SIDE:			return m.move.slerpFactor;		// break;
+	case RivalAI::ActionState::MOVE_AIM_SIDE:		return m.move.slerpFactor;		// break;
 	case RivalAI::ActionState::ATTACK_BARRAGE:		return m.barrage.slerpFactor;	// break;
 	case RivalAI::ActionState::ATTACK_LINE:			return m.line.slerpFactor;		// break;
 	case RivalAI::ActionState::ATTACK_RAID:			return m.raid.slerpFactor;		// break;
@@ -423,7 +430,7 @@ Rival::Rival() :
 	status( RivalAI::ActionState::WAIT ), extraStatus( ExtraState::NONE ),
 	AI(),
 	timer(),
-	fieldRadius(), slerpFactor( 1.0f ),
+	moveSign(), fieldRadius(), slerpFactor( 1.0f ),
 	pos(), velocity(), extraOffset(),
 	orientation(),
 	models()
@@ -437,7 +444,9 @@ Rival::Rival() :
 	std::vector<std::shared_ptr<skinned_mesh> *> modelRefs
 	{
 		&models.pIdle,
-		&models.pRun,
+		&models.pRunFront,
+		&models.pRunLeft,
+		&models.pRunRight,
 		&models.pBreak,
 		&models.pLeave,
 		&models.pDefeat,
@@ -481,11 +490,11 @@ void Rival::Update( TargetStatus target )
 #if USE_IMGUI
 
 	RivalParam::Get().UseImGui();
-	UseImGui();
+	UseImGui( CalcNormalizedDistance( target.pos ) );
 
 #endif // USE_IMGUI
 
-	AI.Update();
+	AI.Update( CalcNormalizedDistance( target.pos ) );
 
 	ChangeStatus( target );
 	UpdateCurrentStatus( target );
@@ -547,8 +556,21 @@ void Rival::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya
 		case RivalAI::ActionState::WAIT:
 			FBXRender( models.pIdle.get(), HLSL, WVP, W, animeAccel );
 			break;
-		case RivalAI::ActionState::MOVE:
-			FBXRender( models.pRun.get(), HLSL, WVP, W, animeAccel );
+		case RivalAI::ActionState::MOVE_GET_NEAR:
+			FBXRender( models.pRunFront.get(), HLSL, WVP, W, animeAccel );
+			break;
+		case RivalAI::ActionState::MOVE_GET_FAR:
+			FBXRender( models.pLeave.get(), HLSL, WVP, W, animeAccel );
+			break;
+		case RivalAI::ActionState::MOVE_SIDE:
+			( Donya::SignBit( moveSign ) == 1 ) // This sign is side of destination from target.
+			? FBXRender( models.pRunLeft.get(), HLSL, WVP, W, animeAccel )
+			: FBXRender( models.pRunRight.get(), HLSL, WVP, W, animeAccel );
+			break;
+		case RivalAI::ActionState::MOVE_AIM_SIDE:
+			( Donya::SignBit( moveSign ) == 1 ) // This sign is side of destination from target.
+			? FBXRender( models.pRunLeft.get(), HLSL, WVP, W, animeAccel )
+			: FBXRender( models.pRunRight.get(), HLSL, WVP, W, animeAccel );
 			break;
 		case RivalAI::ActionState::ATTACK_BARRAGE:
 			FBXRender( models.pAtkBarrage.get(), HLSL, WVP, W, animeAccel );
@@ -658,10 +680,6 @@ void Rival::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya
 		// Attacks collision.
 		switch ( status )
 		{
-		case RivalAI::ActionState::WAIT:
-			break;
-		case RivalAI::ActionState::MOVE:
-			break;
 		case RivalAI::ActionState::ATTACK_BARRAGE:
 			{
 				const auto &localHitBoxes = BarragesLocalHitBoxes();
@@ -883,8 +901,12 @@ void Rival::LoadModel()
 
 	loadFBX( models.pIdle.get(), GetModelPath( ModelAttribute::RivalIdle ) );
 	Donya::OutputDebugStr( "Done RivalModel.Idle.\n" );
-	loadFBX( models.pRun.get(), GetModelPath( ModelAttribute::RivalRun ) );
-	Donya::OutputDebugStr( "Done RivalModel.Run.\n" );
+	loadFBX( models.pRunFront.get(), GetModelPath( ModelAttribute::RivalRunFront ) );
+	Donya::OutputDebugStr( "Done RivalModel.Run.Front.\n" );
+	loadFBX( models.pRunLeft.get(), GetModelPath( ModelAttribute::RivalRunLeft ) );
+	Donya::OutputDebugStr( "Done RivalModel.Run.Left.\n" );
+	loadFBX( models.pRunRight.get(), GetModelPath( ModelAttribute::RivalRunRight ) );
+	Donya::OutputDebugStr( "Done RivalModel.Run.RIght.\n" );
 	loadFBX( models.pBreak.get(), GetModelPath( ModelAttribute::RivalBreak ) );
 	Donya::OutputDebugStr( "Done RivalModel.Break.\n" );
 	loadFBX( models.pLeave.get(), GetModelPath( ModelAttribute::RivalLeave ) );
@@ -946,7 +968,10 @@ void Rival::ChangeStatus( TargetStatus target )
 	switch ( status )
 	{
 	case RivalAI::ActionState::WAIT:				WaitUninit();			break;
-	case RivalAI::ActionState::MOVE:				MoveUninit();			break;
+	case RivalAI::ActionState::MOVE_GET_NEAR:		MoveUninit();			break;
+	case RivalAI::ActionState::MOVE_GET_FAR:		MoveUninit();			break;
+	case RivalAI::ActionState::MOVE_SIDE:			MoveUninit();			break;
+	case RivalAI::ActionState::MOVE_AIM_SIDE:		MoveUninit();			break;
 	case RivalAI::ActionState::ATTACK_BARRAGE:		AttackBarrageUninit();	break;
 	case RivalAI::ActionState::ATTACK_LINE:			AttackLineUninit();		break;
 	case RivalAI::ActionState::ATTACK_RAID:			AttackRaidUninit();		break;
@@ -970,12 +995,15 @@ void Rival::ChangeStatus( TargetStatus target )
 
 	switch ( lotteryStatus )
 	{
-	case RivalAI::ActionState::WAIT:				WaitInit( target );				break;
-	case RivalAI::ActionState::MOVE:				MoveInit( target );				break;
-	case RivalAI::ActionState::ATTACK_BARRAGE:		AttackBarrageInit( target );	break;
-	case RivalAI::ActionState::ATTACK_LINE:			AttackLineInit( target );		break;
-	case RivalAI::ActionState::ATTACK_RAID:			AttackRaidInit( target );		break;
-	case RivalAI::ActionState::ATTACK_RUSH:			AttackRushInit( target );		break;
+	case RivalAI::ActionState::WAIT:				WaitInit( target );					break;
+	case RivalAI::ActionState::MOVE_GET_NEAR:		MoveInit( target, lotteryStatus );	break;
+	case RivalAI::ActionState::MOVE_GET_FAR:		MoveInit( target, lotteryStatus );	break;
+	case RivalAI::ActionState::MOVE_SIDE:			MoveInit( target, lotteryStatus );	break;
+	case RivalAI::ActionState::MOVE_AIM_SIDE:		MoveInit( target, lotteryStatus );	break;
+	case RivalAI::ActionState::ATTACK_BARRAGE:		AttackBarrageInit( target );		break;
+	case RivalAI::ActionState::ATTACK_LINE:			AttackLineInit( target );			break;
+	case RivalAI::ActionState::ATTACK_RAID:			AttackRaidInit( target );			break;
+	case RivalAI::ActionState::ATTACK_RUSH:			AttackRushInit( target );			break;
 	default: break;
 	}
 
@@ -1000,7 +1028,10 @@ void Rival::UpdateCurrentStatus( TargetStatus target )
 	switch ( status )
 	{
 	case RivalAI::ActionState::WAIT:				WaitUpdate( target );			break;
-	case RivalAI::ActionState::MOVE:				MoveUpdate( target );			break;
+	case RivalAI::ActionState::MOVE_GET_NEAR:		MoveUpdate( target );			break;
+	case RivalAI::ActionState::MOVE_GET_FAR:		MoveUpdate( target );			break;
+	case RivalAI::ActionState::MOVE_SIDE:			MoveUpdate( target );			break;
+	case RivalAI::ActionState::MOVE_AIM_SIDE:		MoveUpdate( target );			break;
 	case RivalAI::ActionState::ATTACK_BARRAGE:		AttackBarrageUpdate( target );	break;
 	case RivalAI::ActionState::ATTACK_LINE:			AttackLineUpdate( target );		break;
 	case RivalAI::ActionState::ATTACK_RAID:			AttackRaidUpdate( target );		break;
@@ -1042,47 +1073,48 @@ void Rival::WaitUninit()
 	setAnimFlame( models.pIdle.get(), 0 );
 }
 
-void Rival::MoveInit( TargetStatus target )
+void Rival::MoveInit( TargetStatus target, RivalAI::ActionState statusDetail )
 {
-	status		= RivalAI::ActionState::MOVE;
+	status		= statusDetail;
 	slerpFactor	= RivalParam::Get().SlerpFactor( status );
 	velocity	= 0.0f;
+	moveSign	= Donya::Random::GenerateInt( 2 ) ? +1.0f : -1.0f;
 
-	setAnimFlame( models.pRun.get(), 0 );
+	setAnimFlame( models.pRunFront.get(), 0 );
 }
 void Rival::MoveUpdate( TargetStatus target )
 {
-	const float distNear	= RivalParam::Open().targetDistNear;
-	const float distFar		= RivalParam::Open().targetDistFar;
-	const float nDistance	= CalcNormalizedDistance( target.pos );
-
-	if ( distNear <= nDistance && nDistance <= distFar )
-	{
-		AI.OverwriteState( RivalAI::ActionState::WAIT );
-
-		velocity = 0.0f;
-		return;
-	}
-	// else
-
 	const float speed = RivalParam::Get().MoveSpeed( status );
-	const Donya::Vector3 front = orientation.LocalFront();
+	
+	switch ( status )
+	{
+	case RivalAI::ActionState::MOVE_GET_NEAR:
+		velocity = orientation.LocalFront() * speed;
+		return;
+	case RivalAI::ActionState::MOVE_GET_FAR:
+		velocity = -orientation.LocalFront() * speed;
+		return;
+	case RivalAI::ActionState::MOVE_SIDE:
+		velocity = orientation.LocalRight() * moveSign * speed;
+		return;
+	case RivalAI::ActionState::MOVE_AIM_SIDE:
+		{
+			const float		distance	= ( target.pos - GetPos() ).Length() ;
+			Donya::Vector3	destination	= target.pos;
+			destination += ( orientation.LocalRight() * distance ) * moveSign;
 
-	if ( nDistance < distNear )
-	{
-		// Get far.
-		velocity = -front * speed;
-	}
-	else
-	{
-		// Get near.
-		velocity = front * speed;
+			Donya::Vector3	moveVector = ( destination - GetPos() ).Normalized();
+							moveVector.y = 0.0f; // Prevent Z-axis rotation by Quaternion::LookAt().
+			velocity = moveVector * speed;
+		}
+		return;
+	default: return;
 	}
 }
 void Rival::MoveUninit()
 {
 	velocity = 0.0f;
-	setAnimFlame( models.pRun.get(), 0 );
+	setAnimFlame( models.pRunFront.get(), 0 );
 }
 
 void Rival::AttackBarrageInit( TargetStatus target )
@@ -1333,7 +1365,7 @@ void Rival::AttackRushUpdate( TargetStatus target )
 			if ( models.pAtkRushSlash->getAnimFinFlg() )
 			{
 				AI.ResumeUpdate();
-				AI.FinishCurrentState();
+				AI.FinishCurrentState( CalcNormalizedDistance( target.pos ) );
 			}
 		}
 		break;
@@ -1414,7 +1446,7 @@ void Rival::BreakUpdate( TargetStatus target )
 
 				timer = 0;
 				AI.ResumeUpdate();
-				AI.FinishCurrentState();
+				AI.FinishCurrentState( CalcNormalizedDistance( target.pos ) );
 			}
 		}
 		break;
@@ -1488,7 +1520,7 @@ void Rival::CollideToWall()
 
 #if USE_IMGUI
 
-void Rival::UseImGui()
+void Rival::UseImGui( float normalizedTargetDistance )
 {
 	if ( ImGui::BeginIfAllowed() )
 	{
@@ -1498,12 +1530,15 @@ void Rival::UseImGui()
 			{
 				switch ( status )
 				{
-				case RivalAI::ActionState::WAIT:				return { "Wait" };				break;
-				case RivalAI::ActionState::MOVE:				return { "Move" };				break;
-				case RivalAI::ActionState::ATTACK_BARRAGE:		return { "Attack.Barrage" };	break;
-				case RivalAI::ActionState::ATTACK_LINE:			return { "Attack.Line" };		break;
-				case RivalAI::ActionState::ATTACK_RAID:			return { "Attack.Raid" };		break;
-				case RivalAI::ActionState::ATTACK_RUSH:			return { "Attack.Rush" };		break;
+				case RivalAI::ActionState::WAIT:				return { "Wait" };				// break;
+				case RivalAI::ActionState::MOVE_GET_NEAR:		return { "Move.Near" };			// break;
+				case RivalAI::ActionState::MOVE_GET_FAR:		return { "Move.Far" };			// break;
+				case RivalAI::ActionState::MOVE_SIDE:			return { "Move.Side" };			// break;
+				case RivalAI::ActionState::MOVE_AIM_SIDE:		return { "Move.AimSide" };		// break;
+				case RivalAI::ActionState::ATTACK_BARRAGE:		return { "Attack.Barrage" };	// break;
+				case RivalAI::ActionState::ATTACK_LINE:			return { "Attack.Line" };		// break;
+				case RivalAI::ActionState::ATTACK_RAID:			return { "Attack.Raid" };		// break;
+				case RivalAI::ActionState::ATTACK_RUSH:			return { "Attack.Rush" };		// break;
 				default: break;
 				}
 
@@ -1513,6 +1548,7 @@ void Rival::UseImGui()
 			ImGui::Text( statusCaption.c_str() );
 			ImGui::Text( "Timer : %d", timer );
 			ImGui::Text( "SlerpFactor : %5.3f", slerpFactor );
+			ImGui::Text( "Distance.Target : %5.3f", normalizedTargetDistance );
 			ImGui::Text( "" );
 
 			const std::string vec3Info{ "[X:%5.3f][Y:%5.3f][Z:%5.3f]" };
