@@ -358,7 +358,7 @@ void SceneEffect::imGui()
 	flashParticle.UseImGui();
 
 	ImGui::Begin("GolemAI");
-	bossAI.ImGui();
+	bossAI.ImGui( NULL );
 	ImGui::End();
 
 	ImGui::Begin("Camera");

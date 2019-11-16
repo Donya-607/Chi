@@ -367,7 +367,7 @@ void Knight::Update( TargetStatus target )
 #if USE_IMGUI
 
 	KnightParam::Get().UseImGui();
-	UseImGui();
+	UseImGui( CalcNormalizedDistance( target.pos ) );
 
 #endif // USE_IMGUI
 
@@ -1076,7 +1076,7 @@ void Knight::CollideToWall()
 
 #if USE_IMGUI
 
-void Knight::UseImGui()
+void Knight::UseImGui( float normalizedTargetDistance )
 {
 	if ( ImGui::BeginIfAllowed() )
 	{
@@ -1103,6 +1103,7 @@ void Knight::UseImGui()
 			ImGui::Text( statusCaption.c_str() );
 			ImGui::Text( "Timer : %d", timer );
 			ImGui::Text( "SlerpFactor : %5.3f", slerpFactor );
+			ImGui::Text( "Distance.Target : %f", normalizedTargetDistance );
 			ImGui::Text( "" );
 
 			const std::string vec3Info{ "[X:%5.3f][Y:%5.3f][Z:%5.3f]" };

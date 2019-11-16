@@ -1,0 +1,107 @@
+{
+    "GolemAI": {
+        "cereal_class_version": 5,
+        "wholeFrame": {
+            "value0": 305,
+            "value1": 208,
+            "value2": 410
+        },
+        "coolTimeFrame": {
+            "value0": 75,
+            "value1": 50,
+            "value2": 40
+        },
+        "pAttackChoosers": {
+            "value0": {
+                "polymorphic_id": 2147483649,
+                "polymorphic_name": "DistanceLottery",
+                "ptr_wrapper": {
+                    "valid": 1,
+                    "data": {
+                        "cereal_class_version": 0,
+                        "data": [
+                            {
+                                "cereal_class_version": 0,
+                                "distance": 0.11400000005960465,
+                                "action": {
+                                    "cereal_class_version": 0,
+                                    "waitNo": 2,
+                                    "nextAttackNo": -1
+                                }
+                            },
+                            {
+                                "distance": 0.5379999876022339,
+                                "action": {
+                                    "waitNo": 4,
+                                    "nextAttackNo": 1
+                                }
+                            },
+                            {
+                                "distance": 1.0,
+                                "action": {
+                                    "waitNo": 1,
+                                    "nextAttackNo": -1
+                                }
+                            }
+                        ]
+                    }
+                }
+            },
+            "value1": {
+                "polymorphic_id": 2147483650,
+                "polymorphic_name": "FixedLottery",
+                "ptr_wrapper": {
+                    "valid": 1,
+                    "data": {
+                        "cereal_class_version": 0,
+                        "action": {
+                            "waitNo": 4,
+                            "nextAttackNo": -1
+                        }
+                    }
+                }
+            },
+            "value2": {
+                "polymorphic_id": 1,
+                "ptr_wrapper": {
+                    "valid": 1,
+                    "data": {
+                        "data": [
+                            {
+                                "distance": 0.09099999815225601,
+                                "action": {
+                                    "waitNo": 2,
+                                    "nextAttackNo": 1
+                                }
+                            },
+                            {
+                                "distance": 0.46799999475479128,
+                                "action": {
+                                    "waitNo": 4,
+                                    "nextAttackNo": 0
+                                }
+                            },
+                            {
+                                "distance": 1.0,
+                                "action": {
+                                    "waitNo": 1,
+                                    "nextAttackNo": 0
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        "initStorage": {
+            "waitNo": 0,
+            "nextAttackNo": -1
+        },
+        "initCoolTime": 60,
+        "gapIntervals": [
+            3,
+            2,
+            1
+        ]
+    }
+}

@@ -354,7 +354,7 @@ private:
 private:
 #if USE_IMGUI
 
-	void UseImGui();
+	void UseImGui( float normalizedTargetDistance );
 
 #endif // USE_IMGUI
 };

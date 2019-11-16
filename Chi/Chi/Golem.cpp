@@ -526,7 +526,7 @@ void Golem::Update( TargetStatus target )
 #if USE_IMGUI
 
 	GolemParam::Get().UseImGui();
-	UseImGui();
+	UseImGui( CalcNormalizedDistance( target.pos ) );
 
 #endif // USE_IMGUI
 
@@ -1388,7 +1388,7 @@ void Golem::CollideToWall()
 
 #if USE_IMGUI
 
-void Golem::UseImGui()
+void Golem::UseImGui( float normalizedTargetDistance )
 {
 	if ( ImGui::BeginIfAllowed() )
 	{
@@ -1413,6 +1413,8 @@ void Golem::UseImGui()
 			};
 			std::string statusCaption = "Status : " + GetStatusName( status );
 			ImGui::Text( statusCaption.c_str() );
+			ImGui::Text( "Timer : %d", timer );
+			ImGui::Text( "Distance.Target : %f", normalizedTargetDistance );
 			ImGui::Text( "" );
 
 			const std::string vec3Info{ "[X:%5.3f][Y:%5.3f][Z:%5.3f]" };
