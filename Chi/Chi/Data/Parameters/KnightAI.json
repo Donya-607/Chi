@@ -14,6 +14,33 @@
         "pAttackChoosers": {
             "value0": {
                 "polymorphic_id": 2147483649,
+                "polymorphic_name": "FixedLottery",
+                "ptr_wrapper": {
+                    "valid": 1,
+                    "data": {
+                        "cereal_class_version": 0,
+                        "action": {
+                            "cereal_class_version": 0,
+                            "waitNo": 2,
+                            "nextAttackNo": -1
+                        }
+                    }
+                }
+            },
+            "value1": {
+                "polymorphic_id": 1,
+                "ptr_wrapper": {
+                    "valid": 1,
+                    "data": {
+                        "action": {
+                            "waitNo": 2,
+                            "nextAttackNo": -1
+                        }
+                    }
+                }
+            },
+            "value2": {
+                "polymorphic_id": 2147483650,
                 "polymorphic_name": "DistanceLottery",
                 "ptr_wrapper": {
                     "valid": 1,
@@ -22,47 +49,20 @@
                         "data": [
                             {
                                 "cereal_class_version": 0,
-                                "distance": 0.21799999475479127,
+                                "distance": 0.20000000298023225,
                                 "action": {
-                                    "cereal_class_version": 0,
-                                    "waitNo": 2,
-                                    "nextAttackNo": 1
+                                    "waitNo": 4,
+                                    "nextAttackNo": 0
                                 }
                             },
                             {
-                                "distance": 0.7390000224113464,
+                                "distance": 1.0,
                                 "action": {
-                                    "waitNo": 1,
-                                    "nextAttackNo": -1
+                                    "waitNo": 0,
+                                    "nextAttackNo": 1
                                 }
                             }
                         ]
-                    }
-                }
-            },
-            "value1": {
-                "polymorphic_id": 2147483650,
-                "polymorphic_name": "FixedLottery",
-                "ptr_wrapper": {
-                    "valid": 1,
-                    "data": {
-                        "cereal_class_version": 0,
-                        "action": {
-                            "waitNo": 3,
-                            "nextAttackNo": 0
-                        }
-                    }
-                }
-            },
-            "value2": {
-                "polymorphic_id": 2,
-                "ptr_wrapper": {
-                    "valid": 1,
-                    "data": {
-                        "action": {
-                            "waitNo": 4,
-                            "nextAttackNo": 0
-                        }
                     }
                 }
             }

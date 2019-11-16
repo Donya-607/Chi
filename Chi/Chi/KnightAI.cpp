@@ -273,6 +273,21 @@ void KnightAI::ImGui()
 			ImGui::TreePop();
 		}
 
+		if ( ImGui::TreeNode( "AttackNumberList" ) )
+		{
+			std::string atkName{};
+			for ( int i = 0; i < ALL_ATTACK_COUNT; ++i )
+			{
+				atkName = GetAttackName( i );
+
+				ImGui::Text( "[%d]:%s", i, atkName.c_str() );
+			}
+
+			ImGui::Text( "[%d ~ ]:Error", ALL_ATTACK_COUNT );
+
+			ImGui::TreePop();
+		}
+
 		if ( ImGui::TreeNode( "AdjustData" ) )
 		{
 			if ( ImGui::TreeNode( "Initialize" ) )
@@ -286,9 +301,11 @@ void KnightAI::ImGui()
 			if ( ImGui::TreeNode( "Attack.Chooser" ) )
 			{
 				static std::array<int, ALL_ATTACK_COUNT> chooserKinds{};
+				std::string atkName{};
 				for ( int i = 0; i < ALL_ATTACK_COUNT; ++i )
 				{
-					ShowImGuiChooserNode( GetAttackName( i ), &pAttackChoosers[i], &chooserKinds[i] );
+					atkName = GetAttackName( i );
+					ShowImGuiChooserNode( atkName, &pAttackChoosers[i], &chooserKinds[i] );
 					ImGui::Text( "" );
 				}
 

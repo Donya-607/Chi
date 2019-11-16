@@ -11,8 +11,8 @@ void ActionStorage::ShowImGuiNode( const std::string &prefix )
 	const std::string nodeCaption = prefix; ".Actions";
 	if ( ImGui::TreeNode( nodeCaption.c_str() ) )
 	{
-		ImGui::SliderInt( "Wait", &waitNo, 0, 5 );
-		enum WaitKind { Wait = 0, MoveNear, MoveFar, MoveSide, MoveAimSide };
+		enum WaitKind { Wait = 0, MoveNear, MoveFar, MoveSide, MoveAimSide, WAIT_KIND_COUNT };
+		ImGui::SliderInt( "Wait", &waitNo, 0, WAIT_KIND_COUNT - 1 );
 		switch ( waitNo )
 		{
 		case Wait:			ImGui::Text( "Wait:[Wait]" );			break;
@@ -25,6 +25,7 @@ void ActionStorage::ShowImGuiNode( const std::string &prefix )
 
 		ImGui::SliderInt( "NextAttack", &nextAttackNo, -1, 4 );
 		if ( nextAttackNo == -1 ) { ImGui::Text( "Attack:[Random]" ); }
+		else { ImGui::Text( "Attack:[%d]", nextAttackNo ); }
 
 		ImGui::TreePop();
 	}
