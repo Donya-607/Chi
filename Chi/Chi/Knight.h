@@ -84,6 +84,7 @@ public:
 		Donya::SphereFrame	hitBoxExpl{};			// Attack of explosion hit box.
 		SphereFrameWithName	hitBoxSwing{};			// Attack of swing hit box.
 		SphereFrameWithName	hitBoxRaid{};			// Attack of raid hit box.
+		std::vector<float>	motionSpeeds{};			// Magnification.
 	};
 private:
 	Member m{};
@@ -166,12 +167,16 @@ private:
 		}
 		if ( 8 <= version )
 		{
+			archive( CEREAL_NVP( m.motionSpeeds ) );
+		}
+		if ( 9 <= version )
+		{
 			// archive( CEREAL_NVP( x ) );
 		}
 	}
 	static constexpr const char *SERIAL_ID = "Knight";
 public:
-	void Init();
+	void Init( size_t motionCount );
 	void Uninit();
 public:
 	float SlerpFactor( KnightAI::ActionState status );
@@ -196,7 +201,7 @@ public:
 
 #endif // USE_IMGUI
 };
-CEREAL_CLASS_VERSION( KnightParam, 7 )
+CEREAL_CLASS_VERSION( KnightParam, 8 )
 
 struct fbx_shader; // Use for argument.
 /// <summary>
@@ -223,6 +228,21 @@ private:
 		std::shared_ptr<skinned_mesh> pAtkRaid{ nullptr };
 		std::shared_ptr<skinned_mesh> pFxExpl{ nullptr };
 	};
+	enum MotionKind
+	{
+		Idle = 0,
+		Defeat,
+		RunFront,
+		RunLeft,
+		RunRight,
+		RunBack,
+		AtkExpl,
+		AtkSwing,
+		AtkRaid,
+		FxExpl,
+
+		MOTION_COUNT
+	};
 private:
 	KnightAI::ActionState	status;
 	KnightAI				AI;
@@ -231,6 +251,7 @@ private:
 	float					moveSign;			// Use when aim-move state. store destination sign(-1:left, +1:right).
 	float					fieldRadius;		// For collision to wall. the field is perfect-circle, so I can detect collide to wall by distance.
 	float					slerpFactor;		// 0.0f ~ 1.0f. Use orientation's rotation.
+	MotionKind				currentMotion;
 	Donya::Vector3			pos;				// Contain world space position. actual position is "pos + extraOffset".
 	Donya::Vector3			velocity;
 	Donya::Vector3			extraOffset;		// Actual position is "pos + extraOffset".

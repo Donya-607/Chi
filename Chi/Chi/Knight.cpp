@@ -49,8 +49,9 @@ KnightParam::KnightParam() :
 {}
 KnightParam::~KnightParam() = default;
 
-void KnightParam::Init()
+void KnightParam::Init( size_t motionCount )
 {
+	m.motionSpeeds.resize( motionCount );
 	LoadParameter();
 }
 void KnightParam::Uninit()
@@ -154,6 +155,32 @@ void KnightParam::UseImGui()
 			ImGui::DragFloat3( "DrawPosition.Offset", &m.drawOffset.x );
 			ImGui::Text( "" );
 
+			if ( ImGui::TreeNode( "Motion.Speed" ) )
+			{
+				const std::vector<std::string> motionNames
+				{
+					"Idle",
+					"Defeat",
+					"RunFront",
+					"RunLeft",
+					"RunRight",
+					"RunBack",
+					"Attack.Expl",
+					"Attack.Swing",
+					"Attack.Raid",
+					"FX.Expl",
+				};
+				const size_t COUNT = m.motionSpeeds.size();
+				_ASSERT_EXPR( motionNames.size() == COUNT, L"Error : Logical error by human !" );
+				for ( size_t i = 0; i < COUNT; ++i )
+				{
+					ImGui::DragFloat( motionNames[i].c_str(), &m.motionSpeeds[i], 0.005f );
+				}
+
+				ImGui::TreePop();
+			}
+			ImGui::Text( "" );
+
 			if ( ImGui::TreeNode( "Defeat" ) )
 			{
 				ImGui::DragInt( "Motion.Length(Frame)", &m.defeatMotionLength );
@@ -161,6 +188,7 @@ void KnightParam::UseImGui()
 
 				ImGui::TreePop();
 			}
+			ImGui::Text( "" );
 
 			if ( ImGui::TreeNode( "Collisions" ) )
 			{
@@ -313,6 +341,7 @@ Knight::Knight() :
 	AI(),
 	timer(), reviveCollisionTime(),
 	moveSign(), fieldRadius(), slerpFactor( 1.0f ),
+	currentMotion( Idle ),
 	pos(), velocity(), extraOffset(),
 	orientation(),
 	models()
@@ -345,7 +374,7 @@ Knight::~Knight() = default;
 
 void Knight::Init( int stageNumber )
 {
-	KnightParam::Get().Init();
+	KnightParam::Get().Init( MOTION_COUNT );
 
 	LoadModel();
 
@@ -397,30 +426,31 @@ void Knight::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Dony
 	Donya::Vector4x4 W = CalcWorldMatrix() * DRAW_OFFSET;
 	Donya::Vector4x4 WVP = W * matView * matProjection;
 
+	float motionSpeed = KnightParam::Open().motionSpeeds[scast<int>( currentMotion )];
 	switch ( status )
 	{
 	case KnightAI::ActionState::WAIT:
-		FBXRender( models.pIdle.get(), HLSL, WVP, W );
+		FBXRender( models.pIdle.get(), HLSL, WVP, W, motionSpeed );
 		break;
 	case KnightAI::ActionState::MOVE_GET_NEAR:
-		FBXRender( models.pRunFront.get(), HLSL, WVP, W );
+		FBXRender( models.pRunFront.get(), HLSL, WVP, W, motionSpeed );
 		break;
 	case KnightAI::ActionState::MOVE_GET_FAR:
-		FBXRender( models.pRunBack.get(), HLSL, WVP, W );
+		FBXRender( models.pRunBack.get(), HLSL, WVP, W, motionSpeed );
 		break;
 	case KnightAI::ActionState::MOVE_SIDE:
 		( Donya::SignBit( moveSign ) == 1 )
-		? FBXRender( models.pRunRight.get(), HLSL, WVP, W )
-		: FBXRender( models.pRunLeft.get(), HLSL, WVP, W );
+		? FBXRender( models.pRunRight.get(), HLSL, WVP, W, motionSpeed )
+		: FBXRender( models.pRunLeft.get(), HLSL, WVP, W, motionSpeed );
 		break;
 	case KnightAI::ActionState::MOVE_AIM_SIDE:
 		( Donya::SignBit( moveSign ) == 1 )
-		? FBXRender( models.pRunRight.get(), HLSL, WVP, W )
-		: FBXRender( models.pRunLeft.get(), HLSL, WVP, W );
+		? FBXRender( models.pRunRight.get(), HLSL, WVP, W, motionSpeed )
+		: FBXRender( models.pRunLeft.get(), HLSL, WVP, W, motionSpeed );
 		break;
 	case KnightAI::ActionState::ATTACK_EXPLOSION:
 		{
-			FBXRender( models.pAtkExpl.get(), HLSL, WVP, W );
+			FBXRender( models.pAtkExpl.get(), HLSL, WVP, W, motionSpeed );
 
 			float drawScale = KnightParam::Get().HitBoxExplosion().collision.radius * PARAM.explScaleDraw;
 			Donya::Vector4x4 FX_S = Donya::Vector4x4::MakeScaling( drawScale );
@@ -437,14 +467,14 @@ void Knight::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Dony
 			float drawAlpha = ( VIVID_TIME <= timer )
 			? 1.0f - ( KnightParam::Open().explHideSpeed * ( timer - VIVID_TIME ) )
 			: 1.0f;
-			FBXRender( models.pFxExpl.get(), HLSL, FX_WVP, FX_W, 1.0f, /* is_animation = */ true, { 1.0f, 1.0f, 1.0f, drawAlpha } );
+			FBXRender( models.pFxExpl.get(), HLSL, FX_WVP, FX_W, KnightParam::Open().motionSpeeds.back(), /* is_animation = */ true, { 1.0f, 1.0f, 1.0f, drawAlpha } );
 		}
 		break;
 	case KnightAI::ActionState::ATTACK_SWING:
-		FBXRender( models.pAtkSwing.get(), HLSL, WVP, W );
+		FBXRender( models.pAtkSwing.get(), HLSL, WVP, W, motionSpeed );
 		break;
 	case KnightAI::ActionState::ATTACK_RAID:
-		FBXRender( models.pAtkRaid.get(), HLSL, WVP, W );
+		FBXRender( models.pAtkRaid.get(), HLSL, WVP, W, motionSpeed );
 		break;
 	case KnightAI::ActionState::END:
 		{
@@ -457,7 +487,7 @@ void Knight::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Dony
 				drawAlpha -= KnightParam::Open().defeatHideSpeed * timeDiff;
 				drawAlpha = std::max( 0.0f, drawAlpha );
 			}
-			FBXRender( models.pDefeat.get(), HLSL, WVP, W, animeAccel, /* is_animation = */ true, { 1.0f, 1.0f, 1.0f, drawAlpha } );
+			FBXRender( models.pDefeat.get(), HLSL, WVP, W, motionSpeed * animeAccel, /* is_animation = */ true, { 1.0f, 1.0f, 1.0f, drawAlpha } );
 		}
 		break;
 	default: break;
@@ -802,11 +832,10 @@ XXXUninit : call by ChangeStatus when changing status. before YYYInit.
 
 void Knight::WaitInit( TargetStatus target )
 {
-	status = KnightAI::ActionState::WAIT;
-
-	slerpFactor = KnightParam::Get().SlerpFactor( status );
-
-	velocity = 0.0f;
+	status			= KnightAI::ActionState::WAIT;
+	slerpFactor		= KnightParam::Get().SlerpFactor( status );
+	velocity		= 0.0f;
+	currentMotion	= Idle;
 
 	setAnimFlame( models.pIdle.get(), 0 );
 }
@@ -823,8 +852,16 @@ void Knight::MoveInit( TargetStatus target, KnightAI::ActionState statusDetail )
 {
 	status		= statusDetail;
 	slerpFactor	= KnightParam::Get().SlerpFactor( status );
-
 	moveSign	= Donya::Random::GenerateInt( 2 ) ? +1.0f : -1.0f;
+	
+	switch ( status )
+	{
+	case KnightAI::ActionState::MOVE_GET_NEAR:	currentMotion = RunFront;	break;
+	case KnightAI::ActionState::MOVE_GET_FAR:	currentMotion = RunBack;	break;
+	case KnightAI::ActionState::MOVE_SIDE:		currentMotion = ( 0.0f < moveSign ) ? RunRight : RunLeft;	break;
+	case KnightAI::ActionState::MOVE_AIM_SIDE:	currentMotion = ( 0.0f < moveSign ) ? RunRight : RunLeft;	break;
+	default: break;
+	}
 
 	setAnimFlame( models.pRunFront.get(), 0 );
 	setAnimFlame( models.pRunLeft.get(),  0 );
@@ -871,11 +908,12 @@ void Knight::MoveUninit()
 
 void Knight::AttackExplosionInit( TargetStatus target )
 {
-	status		= KnightAI::ActionState::ATTACK_EXPLOSION;
-	timer		= 0;
+	status			= KnightAI::ActionState::ATTACK_EXPLOSION;
+	timer			= 0;
 	reviveCollisionTime = 0;
-	slerpFactor	= KnightParam::Get().SlerpFactor( status );
-	velocity	= 0.0f;
+	slerpFactor		= KnightParam::Get().SlerpFactor( status );
+	velocity		= 0.0f;
+	currentMotion	= AtkExpl;
 
 	Donya::SphereFrame &hitBox = KnightParam::Get().HitBoxExplosion();
 	ResetCurrentSphereF( &hitBox );
@@ -944,9 +982,10 @@ void Knight::AttackExplosionUninit()
 
 void Knight::AttackSwingInit( TargetStatus target )
 {
-	status		= KnightAI::ActionState::ATTACK_SWING;;
-	slerpFactor	= KnightParam::Get().SlerpFactor( status );
-	velocity	= 0.0f;
+	status			= KnightAI::ActionState::ATTACK_SWING;;
+	slerpFactor		= KnightParam::Get().SlerpFactor( status );
+	velocity		= 0.0f;
+	currentMotion	= AtkSwing;
 
 	ResetCurrentSphereFN( &KnightParam::Get().HitBoxSwing() );
 	setAnimFlame( models.pAtkSwing.get(), 0 );
@@ -966,11 +1005,12 @@ void Knight::AttackSwingUninit()
 
 void Knight::AttackRaidInit( TargetStatus target )
 {
-	status		= KnightAI::ActionState::ATTACK_RAID;
-	timer		= 0;
-	slerpFactor	= KnightParam::Get().SlerpFactor( status );
-	extraOffset	= 0.0f;
-	velocity	= 0.0f;
+	status			= KnightAI::ActionState::ATTACK_RAID;
+	timer			= 0;
+	slerpFactor		= KnightParam::Get().SlerpFactor( status );
+	extraOffset		= 0.0f;
+	velocity		= 0.0f;
+	currentMotion	= AtkRaid;
 
 	ResetCurrentSphereFN( &KnightParam::Get().HitBoxRaid() );
 	setAnimFlame( models.pAtkRaid.get(), 0 );
@@ -1049,6 +1089,7 @@ void Knight::DefeatInit()
 	reviveCollisionTime	= 0;
 	velocity			= 0.0f;
 	slerpFactor			= 0.0f;
+	currentMotion		= Defeat;
 }
 void Knight::DefeatUpdate()
 {
