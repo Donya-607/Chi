@@ -293,6 +293,7 @@ public:
 	void SetFieldRadius( float fieldRadius );
 
 	Donya::Vector3 GetPos() const { return pos + extraOffset; }
+	KnightAI::ActionState GetStatus() const { return status; }
 
 	/// <summary>
 	/// Returns true when the status is "Defeat" and the defeat motion was finished completely.

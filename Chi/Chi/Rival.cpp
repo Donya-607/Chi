@@ -52,8 +52,9 @@ RivalParam::RivalParam() :
 {}
 RivalParam::~RivalParam() = default;
 
-void RivalParam::Init()
+void RivalParam::Init( size_t motionCount )
 {
+	m.motionSpeeds.resize( motionCount );
 	LoadParameter();
 }
 void RivalParam::Uninit()
@@ -185,6 +186,34 @@ void RivalParam::UseImGui()
 		// CommonSettings
 		#pragma endregion
 
+			if ( ImGui::TreeNode( "Motion.Speed" ) )
+			{
+				const std::vector<std::string> motionNames
+				{
+					"Idle",
+					"RunFront",
+					"RunLeft",
+					"RunRight",
+					"Break",
+					"Leave",
+					"Defeat",
+					"Attack.Barage",
+					"Attack.Line",
+					"Attack.Raid",
+					"Attack.Rush.Wait",
+					"Attack.Rush.Slash",
+				};
+				const size_t COUNT = m.motionSpeeds.size();
+				_ASSERT_EXPR( motionNames.size() == COUNT, L"Error : Logical error by human !" );
+				for ( size_t i = 0; i < COUNT; ++i )
+				{
+					ImGui::DragFloat( motionNames[i].c_str(), &m.motionSpeeds[i], 0.005f );
+				}
+
+				ImGui::TreePop();
+			}
+			ImGui::Text( "" );
+
 			if ( ImGui::TreeNode( "Defeat" ) )
 			{
 				ImGui::DragInt( "Motion.Length(Frame)", &m.defeat.motionLength );
@@ -192,6 +221,7 @@ void RivalParam::UseImGui()
 
 				ImGui::TreePop();
 			}
+			ImGui::Text( "" );
 
 			if ( ImGui::TreeNode( "Collisions" ) )
 			{
@@ -431,6 +461,7 @@ Rival::Rival() :
 	AI(),
 	timer(),
 	moveSign(), fieldRadius(), slerpFactor( 1.0f ),
+	currentMotion( Idle ),
 	pos(), velocity(), extraOffset(),
 	orientation(),
 	models()
@@ -465,7 +496,7 @@ Rival::~Rival() = default;
 
 void Rival::Init( int stageNumber )
 {
-	RivalParam::Get().Init();
+	RivalParam::Get().Init( MOTION_COUNT );
 
 	LoadModel();
 
@@ -513,24 +544,25 @@ void Rival::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya
 	Donya::Vector4x4 W = CalcWorldMatrix() * DRAW_OFFSET;
 	Donya::Vector4x4 WVP = W * matView * matProjection;
 
+	float motionSpeed = RivalParam::Open().motionSpeeds[scast<int>( currentMotion )];
 	if ( extraStatus != ExtraState::NONE )
 	{
 		switch ( extraStatus )
 		{
 		case ExtraState::RUSH_WAIT:
-			FBXRender( models.pAtkRushWait.get(), HLSL, WVP, W, animeAccel );
+			FBXRender( models.pAtkRushWait.get(), HLSL, WVP, W, motionSpeed );
 			break;
 		case ExtraState::RUSH_RUN:
-			FBXRender( models.pAtkRushSlash.get(), HLSL, WVP, W, animeAccel );
+			FBXRender( models.pAtkRushSlash.get(), HLSL, WVP, W, motionSpeed );
 			break;
 		case ExtraState::RUSH_SLASH:
-			FBXRender( models.pAtkRushSlash.get(), HLSL, WVP, W, animeAccel );
+			FBXRender( models.pAtkRushSlash.get(), HLSL, WVP, W, motionSpeed );
 			break;
 		case ExtraState::BREAK:
-			FBXRender( models.pBreak.get(), HLSL, WVP, W, animeAccel );
+			FBXRender( models.pBreak.get(), HLSL, WVP, W, motionSpeed );
 			break;
 		case ExtraState::LEAVE:
-			FBXRender( models.pLeave.get(), HLSL, WVP, W, animeAccel );
+			FBXRender( models.pLeave.get(), HLSL, WVP, W, motionSpeed );
 			break;
 		case ExtraState::DEFEAT:
 			{
@@ -543,7 +575,7 @@ void Rival::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya
 					drawAlpha -= RivalParam::Open().defeat.hideSpeed * timeDiff;
 					drawAlpha =  std::max( 0.0f, drawAlpha );
 				}
-				FBXRender( models.pDefeat.get(), HLSL, WVP, W, animeAccel, /* is_animation = */ true, { 1.0f, 1.0f, 1.0f, drawAlpha } );
+				FBXRender( models.pDefeat.get(), HLSL, WVP, W, motionSpeed * animeAccel, /* is_animation = */ true, { 1.0f, 1.0f, 1.0f, drawAlpha } );
 			}
 			break;
 		default: break;
@@ -554,32 +586,32 @@ void Rival::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya
 		switch ( status )
 		{
 		case RivalAI::ActionState::WAIT:
-			FBXRender( models.pIdle.get(), HLSL, WVP, W, animeAccel );
+			FBXRender( models.pIdle.get(), HLSL, WVP, W, motionSpeed );
 			break;
 		case RivalAI::ActionState::MOVE_GET_NEAR:
-			FBXRender( models.pRunFront.get(), HLSL, WVP, W, animeAccel );
+			FBXRender( models.pRunFront.get(), HLSL, WVP, W, motionSpeed );
 			break;
 		case RivalAI::ActionState::MOVE_GET_FAR:
-			FBXRender( models.pLeave.get(), HLSL, WVP, W, animeAccel );
+			FBXRender( models.pLeave.get(), HLSL, WVP, W, motionSpeed );
 			break;
 		case RivalAI::ActionState::MOVE_SIDE:
 			( Donya::SignBit( moveSign ) == 1 )
-			? FBXRender( models.pRunRight.get(), HLSL, WVP, W, animeAccel )
-			: FBXRender( models.pRunLeft.get(), HLSL, WVP, W, animeAccel );
+			? FBXRender( models.pRunRight.get(), HLSL, WVP, W, motionSpeed )
+			: FBXRender( models.pRunLeft.get(), HLSL, WVP, W, motionSpeed );
 			break;
 		case RivalAI::ActionState::MOVE_AIM_SIDE:
 			( Donya::SignBit( moveSign ) == 1 )
-			? FBXRender( models.pRunRight.get(), HLSL, WVP, W, animeAccel )
-			: FBXRender( models.pRunLeft.get(), HLSL, WVP, W, animeAccel );
+			? FBXRender( models.pRunRight.get(), HLSL, WVP, W, motionSpeed )
+			: FBXRender( models.pRunLeft.get(), HLSL, WVP, W, motionSpeed );
 			break;
 		case RivalAI::ActionState::ATTACK_BARRAGE:
-			FBXRender( models.pAtkBarrage.get(), HLSL, WVP, W, animeAccel );
+			FBXRender( models.pAtkBarrage.get(), HLSL, WVP, W, motionSpeed );
 			break;
 		case RivalAI::ActionState::ATTACK_LINE:
-			FBXRender( models.pAtkLine.get(), HLSL, WVP, W, animeAccel );
+			FBXRender( models.pAtkLine.get(), HLSL, WVP, W, motionSpeed );
 			break;
 		case RivalAI::ActionState::ATTACK_RAID:
-			FBXRender( models.pAtkRaid.get(), HLSL, WVP, W, animeAccel );
+			FBXRender( models.pAtkRaid.get(), HLSL, WVP, W, motionSpeed );
 			break;
 		default: break;
 		}
@@ -1048,9 +1080,10 @@ XXXUninit : call by ChangeStatus when changing status. before YYYInit.
 
 void Rival::WaitInit( TargetStatus target )
 {
-	status		= RivalAI::ActionState::WAIT;
-	slerpFactor	= RivalParam::Get().SlerpFactor( status );
-	velocity	= 0.0f;
+	status			= RivalAI::ActionState::WAIT;
+	slerpFactor		= RivalParam::Get().SlerpFactor( status );
+	velocity		= 0.0f;
+	currentMotion	= Idle;
 
 	setAnimFlame( models.pIdle.get(), 0 );
 }
@@ -1079,6 +1112,15 @@ void Rival::MoveInit( TargetStatus target, RivalAI::ActionState statusDetail )
 	slerpFactor	= RivalParam::Get().SlerpFactor( status );
 	velocity	= 0.0f;
 	moveSign	= Donya::Random::GenerateInt( 2 ) ? +1.0f : -1.0f;
+
+	switch ( status )
+	{
+	case RivalAI::ActionState::MOVE_GET_NEAR:	currentMotion = RunFront;	break;
+	case RivalAI::ActionState::MOVE_GET_FAR:	currentMotion = Leave;		break;
+	case RivalAI::ActionState::MOVE_SIDE:		currentMotion = ( 0.0f < moveSign ) ? RunRight : RunLeft;	break;
+	case RivalAI::ActionState::MOVE_AIM_SIDE:	currentMotion = ( 0.0f < moveSign ) ? RunRight : RunLeft;	break;
+	default: break;
+	}
 
 	setAnimFlame( models.pRunFront.get(), 0 );
 	setAnimFlame( models.pRunLeft.get(),  0 );
@@ -1126,9 +1168,10 @@ void Rival::MoveUninit()
 
 void Rival::AttackBarrageInit( TargetStatus target )
 {
-	status		= RivalAI::ActionState::ATTACK_BARRAGE;
-	slerpFactor	= RivalParam::Get().SlerpFactor( status );
-	velocity	= 0.0f;
+	status			= RivalAI::ActionState::ATTACK_BARRAGE;
+	slerpFactor		= RivalParam::Get().SlerpFactor( status );
+	velocity		= 0.0f;
+	currentMotion	= AtkBarrage;
 
 	RivalParam::Get().ResetBarrage();
 	setAnimFlame( models.pAtkBarrage.get(), 0 );
@@ -1166,10 +1209,11 @@ void Rival::AttackBarrageUninit()
 
 void Rival::AttackLineInit( TargetStatus target )
 {
-	status		= RivalAI::ActionState::ATTACK_LINE;
-	timer		= 0;
-	slerpFactor	= RivalParam::Get().SlerpFactor( status );
-	velocity	= 0.0f;
+	status			= RivalAI::ActionState::ATTACK_LINE;
+	timer			= 0;
+	slerpFactor		= RivalParam::Get().SlerpFactor( status );
+	velocity		= 0.0f;
+	currentMotion	= AtkLine;
 
 	// Revive the effects collision flags.
 	{
@@ -1208,11 +1252,12 @@ void Rival::AttackLineUninit()
 
 void Rival::AttackRaidInit( TargetStatus target )
 {
-	status		= RivalAI::ActionState::ATTACK_RAID;
-	timer		= 0;
-	slerpFactor	= RivalParam::Get().SlerpFactor( status );
-	extraOffset	= 0.0f;
-	velocity	= 0.0f;
+	status			= RivalAI::ActionState::ATTACK_RAID;
+	timer			= 0;
+	slerpFactor		= RivalParam::Get().SlerpFactor( status );
+	extraOffset		= 0.0f;
+	velocity		= 0.0f;
+	currentMotion	= AtkRaid;
 
 	ResetCurrentSphereFN( &RivalParam::Get().RaidHitBox() );
 	setAnimFlame( models.pAtkRaid.get(), 0 );
@@ -1283,11 +1328,12 @@ void Rival::AttackRaidUninit()
 
 void Rival::AttackRushInit( TargetStatus target )
 {
-	status		= RivalAI::ActionState::ATTACK_RUSH;
-	extraStatus	= ExtraState::RUSH_WAIT;
-	timer		= RivalParam::Open().rush.waitLength;
-	slerpFactor	= RivalParam::Get().SlerpFactor( status );
-	velocity	= 0.0f;
+	status			= RivalAI::ActionState::ATTACK_RUSH;
+	extraStatus		= ExtraState::RUSH_WAIT;
+	timer			= RivalParam::Open().rush.waitLength;
+	slerpFactor		= RivalParam::Get().SlerpFactor( status );
+	velocity		= 0.0f;
+	currentMotion	= AtkRushWait;
 
 	AI.StopUpdate();
 
@@ -1306,8 +1352,9 @@ void Rival::AttackRushUpdate( TargetStatus target )
 			timer--;
 			if ( timer <= 0 )
 			{
-				timer = RivalParam::Open().rush.slashStopAnimeFrame;
-				extraStatus = ExtraState::RUSH_RUN;
+				timer			= RivalParam::Open().rush.slashStopAnimeFrame;
+				extraStatus		= ExtraState::RUSH_RUN;
+				currentMotion	= AtkRushSlash;
 
 				// HACK:May be set to not zero.
 				slerpFactor = 0.0f;
@@ -1393,12 +1440,13 @@ void Rival::AttackRushUninit()
 void Rival::BreakInit()
 {
 	const auto temporaryActionState = RivalAI::ActionState::ATTACK_RUSH; // If this action is attack, after break status is wait. if this action is wait, after break status is attack.
-	status		= temporaryActionState;
-	extraStatus	= ExtraState::BREAK;
-	timer		= RivalParam::Open().breakdown.breakFrame;
-	slerpFactor	= 0.0f;
-	velocity	= 0.0f;
-	extraOffset	= 0.0f;
+	status			= temporaryActionState;
+	extraStatus		= ExtraState::BREAK;
+	timer			= RivalParam::Open().breakdown.breakFrame;
+	slerpFactor		= 0.0f;
+	velocity		= 0.0f;
+	extraOffset		= 0.0f;
+	currentMotion	= Break;
 
 	// Should align the status.
 	AI.OverwriteState( temporaryActionState );
@@ -1425,8 +1473,9 @@ void Rival::BreakUpdate( TargetStatus target )
 			timer--;
 			if ( timer <= 0 )
 			{
-				timer = 0;
-				extraStatus = ExtraState::LEAVE;
+				timer			= 0;
+				extraStatus		= ExtraState::LEAVE;
+				currentMotion	= Leave;
 			}
 		}
 		break;
@@ -1474,14 +1523,15 @@ void Rival::BreakUninit()
 void Rival::DefeatInit()
 {
 	const auto endState = decltype( status )::END;
-	status		= endState;
-	extraStatus	= ExtraState::DEFEAT;
+	status			= endState;
+	extraStatus		= ExtraState::DEFEAT;
 	AI.OverwriteState( endState );
 	AI.StopUpdate();
 
-	timer		= 0;
-	velocity	= 0.0f;
-	slerpFactor	= 0.0f;
+	timer			= 0;
+	velocity		= 0.0f;
+	slerpFactor		= 0.0f;
+	currentMotion	= Defeat;
 }
 void Rival::DefeatUpdate()
 {

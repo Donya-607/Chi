@@ -323,6 +323,7 @@ public:
 		Rush				rush{};					// Use when status is attack of rush.
 		Break				breakdown{};			// Use when status is attack of break.
 		Defeat				defeat{};				// Use when status is attack of defeat.
+		std::vector<float>	motionSpeeds{};			// Magnification.
 	};
 private:
 	Member m{};
@@ -362,12 +363,16 @@ private:
 		}
 		if ( 3 <= version )
 		{
+			archive( CEREAL_NVP( m.motionSpeeds ) );
+		}
+		if ( 4 <= version )
+		{
 			// archive( CEREAL_NVP( x ) );
 		}
 	}
 	static constexpr const char *SERIAL_ID = "Rival";
 public:
-	void Init();
+	void Init( size_t motionCount );
 	void Uninit();
 public:
 	float MoveSpeed( RivalAI::ActionState status );
@@ -402,7 +407,7 @@ public:
 
 #endif // USE_IMGUI
 };
-CEREAL_CLASS_VERSION( RivalParam, 2 )
+CEREAL_CLASS_VERSION( RivalParam, 3 )
 CEREAL_CLASS_VERSION( RivalParam::IntervalSpeed,	0 )
 CEREAL_CLASS_VERSION( RivalParam::Member::Move,		0 )
 CEREAL_CLASS_VERSION( RivalParam::Member::Barrage,	1 )
@@ -449,6 +454,23 @@ private:
 		DEFEAT,
 		NONE
 	};
+	enum MotionKind
+	{
+		Idle = 0,
+		RunFront,
+		RunLeft,
+		RunRight,
+		Break,
+		Leave,
+		Defeat,
+		AtkBarrage,
+		AtkLine,
+		AtkRaid,
+		AtkRushWait,
+		AtkRushSlash,
+
+		MOTION_COUNT
+	};
 private:
 	RivalAI::ActionState	status;
 	ExtraState				extraStatus;	// Internal status.
@@ -457,6 +479,7 @@ private:
 	float					moveSign;		// Use when aim-move state. store destination sign(-1:left, +1:right).
 	float					fieldRadius;	// For collision to wall. the field is perfect-circle, so I can detect collide to wall by distance.
 	float					slerpFactor;	// 0.0f ~ 1.0f. Use orientation's rotation.
+	MotionKind				currentMotion;
 	Donya::Vector3			pos;			// Contain world space position. actual position is "pos + extraOffset".
 	Donya::Vector3			velocity;
 	Donya::Vector3			extraOffset;	// Actual position is "pos + extraOffset".
@@ -495,6 +518,7 @@ public:
 	void SetFieldRadius( float fieldRadius );
 
 	Donya::Vector3 GetPos() const { return pos + extraOffset; }
+	RivalAI::ActionState GetStatus() const { return status; }
 
 	/// <summary>
 	/// Returns true when the status is "Defeat" and the defeat motion was finished completely.

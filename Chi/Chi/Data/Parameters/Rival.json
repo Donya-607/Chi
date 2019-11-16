@@ -1,6 +1,6 @@
 {
     "Rival": {
-        "cereal_class_version": 2,
+        "cereal_class_version": 3,
         "m.scale": 1.0,
         "m.stageBodyRadius": 16.0,
         "m.targetDistNear": 0.07999999821186066,
@@ -181,6 +181,20 @@
             "cereal_class_version": 0,
             "motionLength": 333,
             "hideSpeed": 0.009999999776482582
-        }
+        },
+        "m.motionSpeeds": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+        ]
     }
 }
