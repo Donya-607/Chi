@@ -563,14 +563,14 @@ void Rival::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya
 			FBXRender( models.pLeave.get(), HLSL, WVP, W, animeAccel );
 			break;
 		case RivalAI::ActionState::MOVE_SIDE:
-			( Donya::SignBit( moveSign ) == 1 ) // This sign is side of destination from target.
-			? FBXRender( models.pRunLeft.get(), HLSL, WVP, W, animeAccel )
-			: FBXRender( models.pRunRight.get(), HLSL, WVP, W, animeAccel );
+			( Donya::SignBit( moveSign ) == 1 )
+			? FBXRender( models.pRunRight.get(), HLSL, WVP, W, animeAccel )
+			: FBXRender( models.pRunLeft.get(), HLSL, WVP, W, animeAccel );
 			break;
 		case RivalAI::ActionState::MOVE_AIM_SIDE:
-			( Donya::SignBit( moveSign ) == 1 ) // This sign is side of destination from target.
-			? FBXRender( models.pRunLeft.get(), HLSL, WVP, W, animeAccel )
-			: FBXRender( models.pRunRight.get(), HLSL, WVP, W, animeAccel );
+			( Donya::SignBit( moveSign ) == 1 )
+			? FBXRender( models.pRunRight.get(), HLSL, WVP, W, animeAccel )
+			: FBXRender( models.pRunLeft.get(), HLSL, WVP, W, animeAccel );
 			break;
 		case RivalAI::ActionState::ATTACK_BARRAGE:
 			FBXRender( models.pAtkBarrage.get(), HLSL, WVP, W, animeAccel );
@@ -1081,6 +1081,10 @@ void Rival::MoveInit( TargetStatus target, RivalAI::ActionState statusDetail )
 	moveSign	= Donya::Random::GenerateInt( 2 ) ? +1.0f : -1.0f;
 
 	setAnimFlame( models.pRunFront.get(), 0 );
+	setAnimFlame( models.pRunLeft.get(),  0 );
+	setAnimFlame( models.pRunRight.get(), 0 );
+	setAnimFlame( models.pLeave.get(),    0 );
+	setLoopFlg( models.pLeave.get(), /* is_loop = */ true );
 }
 void Rival::MoveUpdate( TargetStatus target )
 {
@@ -1115,6 +1119,9 @@ void Rival::MoveUninit()
 {
 	velocity = 0.0f;
 	setAnimFlame( models.pRunFront.get(), 0 );
+	setAnimFlame( models.pRunLeft.get(),  0 );
+	setAnimFlame( models.pRunRight.get(), 0 );
+	setAnimFlame( models.pLeave.get(),    0 );
 }
 
 void Rival::AttackBarrageInit( TargetStatus target )

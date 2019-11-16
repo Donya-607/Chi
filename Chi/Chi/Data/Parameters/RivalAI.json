@@ -1,6 +1,6 @@
 {
     "RivalAI": {
-        "cereal_class_version": 0,
+        "cereal_class_version": 1,
         "wholeFrame": {
             "value0": 235,
             "value1": 230,
@@ -13,18 +13,108 @@
             "value2": 60,
             "value3": 60
         },
-        "waitPercents": {
-            "value0": 10,
-            "value1": 50
+        "pAttackChoosers": {
+            "value0": {
+                "polymorphic_id": 2147483649,
+                "polymorphic_name": "DistanceLottery",
+                "ptr_wrapper": {
+                    "valid": 1,
+                    "data": {
+                        "cereal_class_version": 0,
+                        "data": [
+                            {
+                                "cereal_class_version": 0,
+                                "distance": 0.2240000069141388,
+                                "action": {
+                                    "cereal_class_version": 0,
+                                    "waitNo": 2,
+                                    "nextAttackNo": 0
+                                }
+                            },
+                            {
+                                "distance": 0.5379999876022339,
+                                "action": {
+                                    "waitNo": 4,
+                                    "nextAttackNo": -1
+                                }
+                            },
+                            {
+                                "distance": 1.0,
+                                "action": {
+                                    "waitNo": 4,
+                                    "nextAttackNo": 1
+                                }
+                            }
+                        ]
+                    }
+                }
+            },
+            "value1": {
+                "polymorphic_id": 1,
+                "ptr_wrapper": {
+                    "valid": 1,
+                    "data": {
+                        "data": [
+                            {
+                                "distance": 0.19900000095367433,
+                                "action": {
+                                    "waitNo": 2,
+                                    "nextAttackNo": 0
+                                }
+                            },
+                            {
+                                "distance": 0.6639999747276306,
+                                "action": {
+                                    "waitNo": 4,
+                                    "nextAttackNo": 2
+                                }
+                            },
+                            {
+                                "distance": 1.0,
+                                "action": {
+                                    "waitNo": 2,
+                                    "nextAttackNo": -1
+                                }
+                            }
+                        ]
+                    }
+                }
+            },
+            "value2": {
+                "polymorphic_id": 2147483650,
+                "polymorphic_name": "FixedLottery",
+                "ptr_wrapper": {
+                    "valid": 1,
+                    "data": {
+                        "cereal_class_version": 0,
+                        "action": {
+                            "waitNo": 4,
+                            "nextAttackNo": 0
+                        }
+                    }
+                }
+            },
+            "value3": {
+                "polymorphic_id": 2,
+                "ptr_wrapper": {
+                    "valid": 1,
+                    "data": {
+                        "action": {
+                            "waitNo": 3,
+                            "nextAttackNo": 0
+                        }
+                    }
+                }
+            }
         },
-        "attackPercents": {
-            "value0": 65,
-            "value1": 65,
-            "value2": 65
+        "initStorage": {
+            "waitNo": 0,
+            "nextAttackNo": -1
         },
+        "initCoolTime": 120,
         "gapIntervals": [
-            16,
-            16
+            3,
+            2
         ]
     }
 }

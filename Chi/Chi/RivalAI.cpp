@@ -22,10 +22,20 @@ void RivalAI::Init()
 
 	LoadParameter();
 
-	if ( gapIntervals.empty() )
+	for ( auto &it : pAttackChoosers )
 	{
-		gapIntervals.resize( 1U );
+		// Set temporary instance(prevent nullptr. The LoadParameter() requires the pointer(it) is not null).
+		if ( !it ) { ResetLotteryKind( &it, ChooserKind::Fixed ); }
+
+		it->LoadParameter();
 	}
+
+	timer		= initCoolTime;
+	storage		= initStorage;
+	status		= ToActionState( scast<WaitState>( initStorage.waitNo ) );
+
+	if ( gapIntervals.empty() ) { gapIntervals.resize( 1U ); }
+	attackTimes = gapIntervals.front();
 }
 
 void RivalAI::Update( float normalizedTargetDistance )

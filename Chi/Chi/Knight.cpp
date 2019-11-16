@@ -409,14 +409,14 @@ void Knight::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Dony
 		FBXRender( models.pRunBack.get(), HLSL, WVP, W );
 		break;
 	case KnightAI::ActionState::MOVE_SIDE:
-		( Donya::SignBit( moveSign ) == 1 ) // This sign is side of destination from target.
-		? FBXRender( models.pRunLeft.get(), HLSL, WVP, W )
-		: FBXRender( models.pRunRight.get(), HLSL, WVP, W );
+		( Donya::SignBit( moveSign ) == 1 )
+		? FBXRender( models.pRunRight.get(), HLSL, WVP, W )
+		: FBXRender( models.pRunLeft.get(), HLSL, WVP, W );
 		break;
 	case KnightAI::ActionState::MOVE_AIM_SIDE:
-		( Donya::SignBit( moveSign ) == 1 ) // This sign is side of destination from target.
-		? FBXRender( models.pRunLeft.get(), HLSL, WVP, W )
-		: FBXRender( models.pRunRight.get(), HLSL, WVP, W );
+		( Donya::SignBit( moveSign ) == 1 )
+		? FBXRender( models.pRunRight.get(), HLSL, WVP, W )
+		: FBXRender( models.pRunLeft.get(), HLSL, WVP, W );
 		break;
 	case KnightAI::ActionState::ATTACK_EXPLOSION:
 		{
@@ -827,6 +827,9 @@ void Knight::MoveInit( TargetStatus target, KnightAI::ActionState statusDetail )
 	moveSign	= Donya::Random::GenerateInt( 2 ) ? +1.0f : -1.0f;
 
 	setAnimFlame( models.pRunFront.get(), 0 );
+	setAnimFlame( models.pRunLeft.get(),  0 );
+	setAnimFlame( models.pRunRight.get(), 0 );
+	setAnimFlame( models.pRunBack.get(),  0 );
 }
 void Knight::MoveUpdate( TargetStatus target )
 {
@@ -861,6 +864,9 @@ void Knight::MoveUninit()
 {
 	moveSign = 0.0f;
 	setAnimFlame( models.pRunFront.get(), 0 );
+	setAnimFlame( models.pRunLeft.get(),  0 );
+	setAnimFlame( models.pRunRight.get(), 0 );
+	setAnimFlame( models.pRunBack.get(),  0 );
 }
 
 void Knight::AttackExplosionInit( TargetStatus target )
