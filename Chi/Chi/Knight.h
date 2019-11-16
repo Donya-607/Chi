@@ -225,6 +225,7 @@ private:
 	KnightAI				AI;
 	int						timer;				// Recycle between each state.
 	int						reviveCollisionTime;// Use when disable collision.
+	float					moveSign;			// Use when aim-move state. store destination sign(-1:left, +1:right).
 	float					fieldRadius;		// For collision to wall. the field is perfect-circle, so I can detect collide to wall by distance.
 	float					slerpFactor;		// 0.0f ~ 1.0f. Use orientation's rotation.
 	Donya::Vector3			pos;				// Contain world space position. actual position is "pos + extraOffset".

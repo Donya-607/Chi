@@ -7,7 +7,7 @@
         "m.targetDistFar": 0.17000000178813935,
         "m.idleSlerpFactor": 0.10000000149011612,
         "m.moveMoveSpeed": 8.0,
-        "m.moveSlerpFactor": 0.009999999776482582,
+        "m.moveSlerpFactor": 0.10000000149011612,
         "m.explMoveSpeed": 0.0,
         "m.explSlerpFactor": 0.0,
         "m.swingMoveSpeed": 0.0,

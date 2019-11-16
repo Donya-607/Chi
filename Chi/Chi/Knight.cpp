@@ -4,6 +4,7 @@
 
 #include "Donya/Easing.h"
 #include "Donya/FilePath.h"
+#include "Donya/Random.h"
 #include "Donya/Useful.h"		// For IsShowCollision().
 
 #include "gameLib.h"
@@ -310,7 +311,7 @@ static void ResetCurrentSphereFN( KnightParam::SphereFrameWithName *pSphereFN )
 Knight::Knight() :
 	status( KnightAI::ActionState::WAIT ),
 	AI(),
-	timer(), reviveCollisionTime(),
+	timer(), reviveCollisionTime(), moveSign(),
 	fieldRadius(), slerpFactor( 1.0f ),
 	pos(), velocity(), extraOffset(),
 	orientation(),
@@ -807,14 +808,16 @@ void Knight::WaitUninit()
 
 void Knight::MoveInit( TargetStatus target, KnightAI::ActionState statusDetail )
 {
-	status = statusDetail;
+	status		= statusDetail;
+	slerpFactor	= KnightParam::Get().SlerpFactor( status );
 
-	slerpFactor = KnightParam::Get().SlerpFactor( status );
+	moveSign	= Donya::Random::GenerateInt( 2 ) ? +1.0f : -1.0f;
 
 	setAnimFlame( models.pRunFront.get(), 0 );
 }
 void Knight::MoveUpdate( TargetStatus target )
 {
+	/*
 	const float distNear	= KnightParam::Open().targetDistNear;
 	const float distFar		= KnightParam::Open().targetDistFar;
 	const float nDistance	= CalcNormalizedDistance( target.pos );
@@ -825,23 +828,38 @@ void Knight::MoveUpdate( TargetStatus target )
 		return;
 	}
 	// else
+	*/
 
 	const float speed = KnightParam::Get().MoveSpeed( status );
-	const Donya::Vector3 front = orientation.LocalFront();
+	
+	switch ( status )
+	{
+	case KnightAI::ActionState::MOVE_GET_NEAR:
+		velocity = orientation.LocalFront() * speed;
+		break;
+	case KnightAI::ActionState::MOVE_GET_FAR:
+		velocity = -orientation.LocalFront() * speed;
+		break;
+	case KnightAI::ActionState::MOVE_SIDE:
+		velocity = orientation.LocalRight() * moveSign * speed;
+		break;
+	case KnightAI::ActionState::MOVE_AIM_SIDE:
+		{
+			Donya::Vector3 destination = target.pos;
+			const float sideWidth = ( target.pos - GetPos() ).Length() ;
+			destination += ( orientation.LocalRight() * sideWidth ) * moveSign;
 
-	if ( nDistance < distNear )
-	{
-		// Get far.
-		velocity = -front * speed;
-	}
-	else
-	{
-		// Get near.
-		velocity = front * speed;
+			Donya::Vector3 moveVector = ( destination - GetPos() ).Normalized();
+			moveVector.y = 0.0f; // Prevent Z-axis rotation by Quaternion::LookAt().
+			velocity = moveVector * speed;
+		}
+		break;
+	default:break;
 	}
 }
 void Knight::MoveUninit()
 {
+	moveSign = 0;
 	setAnimFlame( models.pRunFront.get(), 0 );
 }
 
@@ -1043,6 +1061,7 @@ void Knight::ApplyVelocity( TargetStatus target )
 	}
 
 	Donya::Vector3 dirToTarget = target.pos - GetPos();
+	dirToTarget.y = 0.0f; // Prevent Z-axis rotation by Quaternion::LookAt().
 	dirToTarget.Normalize();
 
 	Donya::Quaternion destination = Donya::Quaternion::LookAt( orientation, dirToTarget ).Normalized();
