@@ -245,7 +245,7 @@ void KnightAI::ImGui( float targetDistance )
 
 		if ( ImGui::TreeNode( "CurrentParameter" ) )
 		{
-			ImGui::Text( "Status : %d", scast<int>( status ) );
+			ImGui::Text( "Status : %s", GetActionName( scast<int>( status ) ).c_str() );
 			ImGui::Text( "Timer : %d", timer );
 			ImGui::Text( "CoolTime : %d", coolTime );
 			ImGui::Text( "Distance.Target : %f", targetDistance );

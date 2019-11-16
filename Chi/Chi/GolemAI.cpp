@@ -245,7 +245,7 @@ void GolemAI::ImGui( float normalizedTargetDistance )
 
 		if ( ImGui::TreeNode( "CurrentParameter" ) )
 		{
-			ImGui::Text( "Status : %d", scast<int>( status ) );
+			ImGui::Text( "Status : %d", GetActionName( scast<int>( status ) ).c_str() );
 			ImGui::Text( "Timer : %d", timer );
 			ImGui::Text( "CoolTime : %d", coolTime );
 			ImGui::Text( "Distance.Target : %f", normalizedTargetDistance );
