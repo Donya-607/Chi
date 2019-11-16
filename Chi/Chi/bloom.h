@@ -14,6 +14,7 @@ class bloom
 {
 	ID3D11VertexShader* m_vertex;
 	ID3D11PixelShader* m_pixel;
+	ID3D11PixelShader* m_first_pixel;
 	ID3D11VertexShader* m_vertex_SRV;
 	ID3D11PixelShader* m_pixel_SRV;
 	ID3D11InputLayout* m_input;
@@ -42,10 +43,15 @@ class bloom
 
 public:
 	bloom() {}
-	~bloom() {}
+	~bloom() 
+	{
+		ResourceManager::ReleasePixelShader(m_pixel);
+		ResourceManager::ReleasePixelShader(m_pixel_SRV);
+	}
 	void init(ID3D11Device* _device);
+	void firstRender(ID3D11DeviceContext* _dContext, ID3D11ShaderResourceView** _SRV)const;
 	void Render(ID3D11DeviceContext* _dContext, ID3D11ShaderResourceView** _SRV,
-		float _blur_value, DirectX::XMFLOAT4 _judge_color) const;
+		float _blur_value) const;
 	void createSRV(ID3D11DeviceContext* _dContext, ID3D11ShaderResourceView** _SRV,
 		DirectX::XMFLOAT4 _judge_color);
 

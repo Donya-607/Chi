@@ -23,8 +23,8 @@ static const float weight[9] = {
 struct VSInput
 {
 	float4 Position : POSITION;
-	float2 Tex      : TEXCOORD;
 	float4 Color    : COLOR;
+	float2 Tex      : TEXCOORD;
 };
 
 struct PSInput

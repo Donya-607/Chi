@@ -276,6 +276,19 @@
     <FxCompile Include="bloomSRV.hlsl">
       <Filter>shader</Filter>
     </FxCompile>
+    <FxCompile Include="bloom_first_ps.hlsl">
+      <Filter>shader</Filter>
+    </FxCompile>
+    <FxCompile Include="skinned_mesh_z_ps.hlsl">
+      <Filter>shader</Filter>
+    </FxCompile>
+    <FxCompile Include="skinned_mesh_bloom_ps.hlsl">
+      <Filter>shader</Filter>
+    </FxCompile>
+    <FxCompile Include="geometric_primitive_z_ps.hlsl" />
+    <FxCompile Include="geometric_primitive_bloom_ps.hlsl" />
+    <FxCompile Include="obj_z_ps.hlsl" />
+    <FxCompile Include="obj_bloom_ps.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <None Include="geometric_primitive.hlsli">

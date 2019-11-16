@@ -34,6 +34,23 @@ void clearWindow(const DirectX::XMFLOAT4& color)
 	GameLib::clear(color);
 }
 
+
+//RenderTarget
+bool setRenderTarget(ID3D11RenderTargetView** _renderTarget)
+{
+	return GameLib::setRenderTarget(_renderTarget);
+}
+bool resetRendertarget()
+{
+	return GameLib::resetRendertarget();
+}
+void clearRendertarget(ID3D11RenderTargetView* _renderTarget, const DirectX::XMFLOAT4& color)
+{
+	GameLib::clearRT(_renderTarget, color);
+}
+
+
+//ShaderResourceView
 bool createSRV(ID3D11ShaderResourceView** _SRV,ID3D11RenderTargetView** RT)
 {
 	return GameLib::createSRV(_SRV,RT);
@@ -44,9 +61,13 @@ void postEffect_Bloom_SRV(ID3D11ShaderResourceView** _shaderResource, DirectX::X
 	GameLib::postEffect_Bloom_SRV(_shaderResource, _judge_color);
 }
 
-void postEffect_Bloom(ID3D11ShaderResourceView** _shaderResource, float _blur_value, DirectX::XMFLOAT4 _judge_color)
+void postEffect_Bloom(float _blur_value, bool flg)
 {
-	GameLib::postEffect_Bloom(_shaderResource, _blur_value, _judge_color);
+	GameLib::postEffect_Bloom(_blur_value,flg);
+}
+void setBloomRT()
+{
+	GameLib::setBloomRT();
 }
 
 //BLENDMODE//
@@ -442,13 +463,13 @@ DirectX::XMFLOAT4 getCamTarget()
 
 //light//
 
-void setLightAmbient(const DirectX::XMFLOAT4& _lightAmbient,const DirectX::XMFLOAT4& _lightColor)
+void setLineLight(const DirectX::XMFLOAT4& _position,const DirectX::XMFLOAT4& _lightAmbient,const DirectX::XMFLOAT4& _lightColor)
 {
-	GameLib::light::setLineLight(_lightAmbient,_lightColor);
+	GameLib::light::setLineLight(_position,_lightAmbient,_lightColor);
 }
-void setLightAmbient(const float x, const float y, const float z, const float w,const float r,const float g, const float b, const float a)
+void setLineLight(const float px,const float py,const float pz,const float pw,const float x, const float y, const float z, const float w,const float r,const float g, const float b, const float a)
 {
-	GameLib::light::setLineLight({ x, y, z, w }, {r,g,b,a});
+	GameLib::light::setLineLight({px,py,pz,pw}, { x, y, z, w }, { r,g,b,a });
 }
 
 line_light& getLineLight()
@@ -523,16 +544,26 @@ void OBJRender(static_mesh* staticMesh, const DirectX::XMFLOAT4X4&SynthesisMatri
 	GameLib::staticMesh::staticMeshRender(staticMesh, SynthesisMatrix,worldMatrix, getCamPos(), getLineLight(),getPointLight(), materialColor, wireFlg);
 }
 
-void billboardRender(static_mesh* _mesh, const DirectX::XMFLOAT4X4& view_projection, const DirectX::XMFLOAT4& _pos, const DirectX::XMFLOAT2 _scale, const float _angle, const DirectX::XMFLOAT4& _cam_pos, const DirectX::XMFLOAT2& texpos, const DirectX::XMFLOAT2& texsize)
+void billboardRender(static_mesh* _mesh, const DirectX::XMFLOAT4X4& view_projection, const DirectX::XMFLOAT4& _pos, const DirectX::XMFLOAT2 _scale, const float _angle, const DirectX::XMFLOAT4& _cam_pos, const DirectX::XMFLOAT2& texpos, const DirectX::XMFLOAT2& texsize,const float alpha,const DirectX::XMFLOAT3& color)
 {
-	GameLib::staticMesh::builboradRender(_mesh, view_projection, _pos, _scale, _angle, _cam_pos, texpos, texsize);
+	GameLib::staticMesh::builboradRender(_mesh, view_projection, _pos, _scale, _angle, _cam_pos, texpos, texsize,alpha,color);
+}
+
+void billboard_z_Render(static_mesh* _mesh, const DirectX::XMFLOAT4X4& view_projection, const DirectX::XMFLOAT4&_pos, const DirectX::XMFLOAT2 _scale, const float angle, const DirectX::XMFLOAT4& _cam_pos, const DirectX::XMFLOAT2& texpos, const DirectX::XMFLOAT2& texsize, const float alpha, const DirectX::XMFLOAT3& color)
+{
+	GameLib::staticMesh::builborad_z_Render(_mesh, view_projection, _pos, _scale, angle, _cam_pos, texpos, texsize, alpha, color);
+}
+
+void billboard_bloom_Render(static_mesh* _mesh, const DirectX::XMFLOAT4X4&view_projection, const DirectX::XMFLOAT4&_pos, const DirectX::XMFLOAT2 _scale, const float angle, const DirectX::XMFLOAT4& _cam_pos, const DirectX::XMFLOAT2& texpos, const DirectX::XMFLOAT2& texsize, const DirectX::XMFLOAT4& judge_color, const float alpha, const DirectX::XMFLOAT3& color)
+{
+	GameLib::staticMesh::builborad_bloom_Render(_mesh, view_projection, _pos, _scale, angle, _cam_pos, texpos, texsize, alpha, color, judge_color);
 }
 
 
 //skinned_mesh//
-void loadFBX(skinned_mesh* skinnedMesh, const std::string& FBXName)
+void loadFBX(skinned_mesh* skinnedMesh, const std::string& FBXName, bool load_cerealize,bool isTpose)
 {
-	GameLib::skinnedMesh::loadFBX(skinnedMesh, FBXName);
+	GameLib::skinnedMesh::loadFBX(skinnedMesh, FBXName, load_cerealize,isTpose);
 }
 
 void loadShader(fbx_shader& shader, std::string vertex, std::string pixel, std::string noBoneVertex, std::string notexPS)
@@ -540,10 +571,11 @@ void loadShader(fbx_shader& shader, std::string vertex, std::string pixel, std::
 	GameLib::skinnedMesh::loadShader(shader, vertex, pixel, noBoneVertex, notexPS);
 }
 
-void setLoopFlg(skinned_mesh* _mesh, const bool _is_loop)
+void setLoopFlg(skinned_mesh* _mesh, const bool _loop_flg)
 {
-	GameLib::skinnedMesh::setLoopFlg(_mesh, _is_loop);
+	GameLib::skinnedMesh::setLoopanimation(_mesh,_loop_flg);
 }
+
 void setStopAnimation(skinned_mesh* _mesh, const bool _is_stop)
 {
 	GameLib::skinnedMesh::setStopAnimation(_mesh, _is_stop);
@@ -559,7 +591,7 @@ void setAnimFlame(skinned_mesh* _mesh, const int _anim_flame)
 	GameLib::skinnedMesh::setAnimFlame(_mesh, _anim_flame);
 }
 
-const int getAnimFlame(skinned_mesh* _mesh)
+const int getAnimFlame(skinned_mesh*_mesh)
 {
 	return GameLib::skinnedMesh::getAnimFlame(_mesh);
 }
@@ -569,10 +601,62 @@ bool calcTransformedPosBySpecifyMesh(skinned_mesh* _mesh, DirectX::XMFLOAT3& _po
 	return GameLib::skinnedMesh::calcTransformedPosBySpecifyMesh(_mesh, _pos, _mesh_name);
 }
 
-void FBXRender(skinned_mesh* skinnedMesh, fbx_shader& hlsl,const DirectX::XMFLOAT4X4&SynthesisMatrix, const DirectX::XMFLOAT4X4&worldMatrix, const DirectX::XMFLOAT4&materialColor, bool wireFlg)
+bool calcTransformedPosBySpecifyMesh(skinned_mesh* _mesh, DirectX::XMFLOAT3& _pos, std::string _mesh_name,bone_animation* anim)
 {
-	GameLib::skinnedMesh::skinnedMeshRender(skinnedMesh,hlsl, SynthesisMatrix, worldMatrix,getCamPos(),getLineLight(),getPointLight(), materialColor, wireFlg);
+	return GameLib::skinnedMesh::calcTransformedPosBySpecifyMesh(_mesh, _pos, _mesh_name,anim);
 }
+
+void FBXRender(skinned_mesh* _mesh, fbx_shader& hlsl, const DirectX::XMFLOAT4X4& SynthesisMatrix, const DirectX::XMFLOAT4X4& worldMatrix,float magnification, bool animation_flg, const DirectX::XMFLOAT4& materialColor, bool wireFlg)
+{
+	GameLib::skinnedMesh::skinnedMeshRender(_mesh, hlsl, magnification, SynthesisMatrix, worldMatrix, getCamPos(), getLineLight(), getPointLight(), materialColor, wireFlg,animation_flg);
+}
+
+void z_render(skinned_mesh* _mesh, fbx_shader& hlsl, const DirectX::XMFLOAT4X4& SynthesisMatrix, const DirectX::XMFLOAT4X4& worldMatrix)
+{
+	GameLib::skinnedMesh::z_render(_mesh, hlsl, SynthesisMatrix, worldMatrix);
+}
+
+void bloom_SRVrender(skinned_mesh* _mesh, fbx_shader& hlsl, const DirectX::XMFLOAT4X4& SynthesisMatrix, const DirectX::XMFLOAT4X4& worldMatrix, const DirectX::XMFLOAT3& judge_color,const DirectX::XMFLOAT4& materialColor)
+{
+	GameLib::skinnedMesh::bloom_SRVrender(_mesh, hlsl, SynthesisMatrix, worldMatrix, materialColor, judge_color);
+}
+
+void FBXRender(skinned_mesh* skinnedMesh, fbx_shader& hlsl,bone_animation* anim,const DirectX::XMFLOAT4X4&SynthesisMatrix, const DirectX::XMFLOAT4X4&worldMatrix, const DirectX::XMFLOAT4&materialColor, bool wireFlg)
+{
+	GameLib::skinnedMesh::skinnedMeshRender(skinnedMesh,hlsl,anim, SynthesisMatrix, worldMatrix,getCamPos(),getLineLight(),getPointLight(), materialColor, wireFlg);
+}
+
+
+void loadAnimation(bone_animation* _anim, std::string _anim_name)
+{
+	GameLib::skinnedMesh::loadAnimation(_anim, _anim_name);
+}
+
+void playAnimation(bone_animation* _anim,float magnification, bool _is_loop)
+{
+	GameLib::skinnedMesh::playAnimation(_anim, magnification, _is_loop);
+}
+
+void setStopAnimation(bone_animation* _anim, const bool _is_stop)
+{
+	GameLib::skinnedMesh::setStopAnimation(_anim, _is_stop);
+}
+
+void setStopTime(bone_animation* _anim, const float _stop_time)
+{
+	GameLib::skinnedMesh::setStopTime(_anim, _stop_time);
+}
+
+void setAnimFlame(bone_animation* _anim, const int _anim_flame)
+{
+	GameLib::skinnedMesh::setAnimFlame(_anim, _anim_flame);
+}
+
+const int getAnimFlame(bone_animation* _anim)
+{
+	return GameLib::skinnedMesh::getAnimFlame(_anim);
+}
+
 
 
 //Xinput_pad

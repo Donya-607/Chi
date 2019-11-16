@@ -30,7 +30,9 @@ private:
 		XMFLOAT3  model_scale;
 		XMFLOAT3  model_angle;
 		bool  is_enable;
+		float stop_timer;
 		std::vector<ImTextureID> tex_SRV;
+		DirectX::XMFLOAT3 judge_color;
 	};
 
 	float camPos[3] = { 0,6,-10 };
@@ -47,7 +49,6 @@ private:
 	DirectX::XMINT2 mousePos, prevMPos, moveVol;
 	bool mouse_right;
 	fbx_shader shader;
-
 	std::vector<model> models;
 
 	static_mesh builborad;
@@ -56,8 +57,18 @@ private:
 	DirectX::XMFLOAT2 builborad_size;
 	DirectX::XMFLOAT2 texpos;
 	DirectX::XMFLOAT2 texsize;
-
-
+	float alpha;
+	DirectX::XMFLOAT3 color;
+	DirectX::XMFLOAT4 billbord_judge;
+	//bloom test
+	ID3D11ShaderResourceView* SRV;
+	ID3D11RenderTargetView* RT;
+	ImTextureID screen_SRV;
+	ImTextureID bloom_SRV;
+	ImTextureID z_SRV;
+	float blur;
+	DirectX::XMFLOAT4 judged_color;
+	bool enable_bloom;
 public:
 	sceneTitle(){}
 	~sceneTitle()

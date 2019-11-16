@@ -16,12 +16,19 @@ DirectX::XMINT2 getWindowSize();
 void clearWindow(const float r = 1.0f, const float g = 1.0f, const float b = 1.0f, const float a = 1.0f);
 void clearWindow(const DirectX::XMFLOAT4& color = { 1.0f,1.0f,1.0f,1.0f });
 
+//RenderTarget
+bool setRenderTarget(ID3D11RenderTargetView** _renderTarget);
+bool resetRendertarget();
+void clearRendertarget(ID3D11RenderTargetView* _renderTarget, const DirectX::XMFLOAT4& color);
 
 //CreateShaderResourceView
 bool createSRV(ID3D11ShaderResourceView** _SRV, ID3D11RenderTargetView** RT);
 
 void postEffect_Bloom_SRV(ID3D11ShaderResourceView** _shaderResource, DirectX::XMFLOAT4 _judge_color);
-void postEffect_Bloom(ID3D11ShaderResourceView** _shaderResource, float _blur_value, DirectX::XMFLOAT4 _judge_color);
+void postEffect_Bloom(float _blur_value, bool flg = true);
+
+void setBloomRT();
+
 
 
 //BLENDMODE//
@@ -138,8 +145,8 @@ DirectX::XMFLOAT4 getCamPos();
 DirectX::XMFLOAT4 getCamTarget();
 
 //light//
-void setLightAmbient(const DirectX::XMFLOAT4& _lightAmbient, const DirectX::XMFLOAT4& lightColor);
-void setLightAmbient(const float x, const float y, const float z, const float w, const float r, const float g, const float b, const float a);
+void setLineLight(const DirectX::XMFLOAT4& position,const DirectX::XMFLOAT4& _lightAmbient, const DirectX::XMFLOAT4& lightColor);
+void setLineLight(const float px,const float py,const float pz,const float pw,const float x, const float y, const float z, const float w, const float r, const float g, const float b, const float a);
 
 line_light& getLineLight();
 
@@ -167,27 +174,58 @@ static_mesh::primitive_material& getPrimitiveMaterial(static_mesh* _mesh);
 
 void OBJRender(static_mesh* staticMesh, const DirectX::XMFLOAT4X4& SynthesisMatrix, const DirectX::XMFLOAT4X4& worldMatrix, const DirectX::XMFLOAT4& materialColor = { 1.0f,1.0f,1.0f,1.0f }, bool wireFlg = false);
 
-void billboardRender(static_mesh* _mesh, const DirectX::XMFLOAT4X4&, const DirectX::XMFLOAT4&, const DirectX::XMFLOAT2, const float, const DirectX::XMFLOAT4&, const DirectX::XMFLOAT2& texpos, const DirectX::XMFLOAT2& texsize);
+void billboardRender(static_mesh* _mesh, const DirectX::XMFLOAT4X4&, const DirectX::XMFLOAT4&, const DirectX::XMFLOAT2, const float, const DirectX::XMFLOAT4&, const DirectX::XMFLOAT2& texpos, const DirectX::XMFLOAT2& texsize, const float alpha = 1.0f, const DirectX::XMFLOAT3& color = {1.0f,1.0f,1.0f});
+void billboard_z_Render(static_mesh* _mesh, const DirectX::XMFLOAT4X4&, const DirectX::XMFLOAT4&, const DirectX::XMFLOAT2, const float, const DirectX::XMFLOAT4&, const DirectX::XMFLOAT2& texpos, const DirectX::XMFLOAT2& texsize, const float alpha = 1.0f, const DirectX::XMFLOAT3& color = { 1.0f,1.0f,1.0f });
+void billboard_bloom_Render(static_mesh* _mesh, const DirectX::XMFLOAT4X4&, const DirectX::XMFLOAT4&, const DirectX::XMFLOAT2, const float, const DirectX::XMFLOAT4&, const DirectX::XMFLOAT2& texpos, const DirectX::XMFLOAT2& texsize, const DirectX::XMFLOAT4& judge_color = {1.0f,1.0f,1.0f,1.0f}, const float alpha = 1.0f, const DirectX::XMFLOAT3& color = { 1.0f,1.0f,1.0f });
 
 
 //skinned_mesh//
-void loadFBX(skinned_mesh* skinnedMesh, const std::string& FBXName);
+void loadFBX(skinned_mesh* skinnedMesh, const std::string& FBXName, bool load_cerealize = true,bool isTpose = false);
 
 void loadShader(fbx_shader& shader, std::string vertex, std::string pixel, std::string noBoneVertex, std::string notexPS);
 
-void setLoopFlg(skinned_mesh* _mesh, const bool _is_loop);
 
+
+void setLoopFlg(skinned_mesh* _mesh, const bool _loop_flg);
 void setStopAnimation(skinned_mesh* _mesh, const bool _is_stop);
-
-void setStopTime(skinned_mesh* _mesh, const float _stop_time_per_second);
-
+void setStopTime(skinned_mesh* _mesh, const float _stop_time);
 void setAnimFlame(skinned_mesh* _mesh, const int _anim_flame);
-
 const int getAnimFlame(skinned_mesh*);
 
 bool calcTransformedPosBySpecifyMesh(skinned_mesh* _mesh, DirectX::XMFLOAT3& _pos, std::string _mesh_name);
+bool calcTransformedPosBySpecifyMesh(skinned_mesh* _mesh, DirectX::XMFLOAT3& _pos, std::string _mesh_name, bone_animation* anim);
 
-void FBXRender(skinned_mesh* skinnedMesh, fbx_shader& hlsl,const DirectX::XMFLOAT4X4& SynthesisMatrix, const DirectX::XMFLOAT4X4& worldMatrix, const DirectX::XMFLOAT4& materialColor = { 1.0f,1.0f,1.0f,1.0f }, bool wireFlg = false);
+void FBXRender(skinned_mesh* _mesh,fbx_shader& hlsl,const DirectX::XMFLOAT4X4& SynthesisMatrix,const DirectX::XMFLOAT4X4& worldMatrix,float magnification = 1.0f,bool animation_flg = true, const DirectX::XMFLOAT4& materialColor = {1.0f,1.0f,1.0f,1.0f}, bool wireFlg = false);
+
+void z_render(
+	skinned_mesh* _mesh,
+	fbx_shader& hlsl,
+	const DirectX::XMFLOAT4X4& SynthesisMatrix,
+	const DirectX::XMFLOAT4X4& worldMatrix
+);
+
+void bloom_SRVrender(
+	skinned_mesh* _mesh,
+	fbx_shader& hlsl,
+	const DirectX::XMFLOAT4X4& SynthesisMatrix,
+	const DirectX::XMFLOAT4X4& worldMatrix,
+	const DirectX::XMFLOAT3& judge_color,
+	const DirectX::XMFLOAT4& materialColor = {1.0f,1.0f,1.0f,1.0f}
+);
+
+void FBXRender(skinned_mesh* skinnedMesh, fbx_shader& hlsl, bone_animation* anim, const DirectX::XMFLOAT4X4& SynthesisMatrix, const DirectX::XMFLOAT4X4& worldMatrix, const DirectX::XMFLOAT4& materialColor = { 1.0f,1.0f,1.0f,1.0f }, bool wireFlg = false);
+
+void loadAnimation(bone_animation* _anim, std::string _anim_name);
+
+void playAnimation(bone_animation* _anim, float magnification = 1.0f, bool _is_loop = true);
+
+void setStopAnimation(bone_animation* _anim, const bool _is_stop);
+
+void setStopTime(bone_animation* _anim, const float _stop_time_per_second);
+
+void setAnimFlame(bone_animation* _anim, const int _anim_flame);
+
+const int getAnimFlame(bone_animation*);
 
 
 //Xinput_Pad

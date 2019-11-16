@@ -8,11 +8,13 @@
 
 void sceneTitle::init()
 {
+	setCamPos(0.0f, 18.0f, -108.0f);
+	setTarget(0, 23, 0);
 	isStack = false;
 	flg = false;
 	pos = { getCamPos().x,getCamPos().y,getCamPos().z };
 	target = { getCamTarget().x,getCamTarget().y,getCamTarget().z };
-	setLightAmbient({ .1f,-1,0,1 }, { 1,1,1,1 });
+	setLineLight({ 0,0,0,1 }, { .1f, -1, 0, 1 }, { 1,1,1,1 });
 	zoomSpeed = 2.0f;
 	moveSpeed = 10.0f;
 	mouse = std::make_unique<Mouse>();
@@ -24,17 +26,45 @@ void sceneTitle::init()
 	cam_angle = 90;
 	models.clear();
 	loadShader(shader, "./Data/shader/skinned_mesh_has_born_vs.cso", "./Data/shader/skinned_mesh_ps.cso", "./Data/shader/skinned_mesh_vs.cso", "./Data/shader/skinned_mesh_no_uv_ps.cso");
+	models.emplace_back();
+	loadFBX(&models.back().mesh, "./Data/Boss04_3Attack.fbx");
+	models.back().model_pos = { 0,0,0 };
+	models.back().model_angle = { 0,3.1,0 };
+	models.back().model_scale = { 0.1f,0.1f,0.1f };
+	models.back().is_enable = true;
+	models.back().stop_timer = 2.0f;
+	models.back().judge_color = { 1,1,1 };
+	for (int i = 0; i < models.back().mesh.getMeshCount(); i++)
+	{
+		for (auto& p : models.back().mesh.getMesh(i).subsets)
+		{
+			models.back().tex_SRV.emplace_back();
+			models.back().tex_SRV.back() = (void*)p.diffuse.shader_resource_view;
+		}
+	}
 
-	createBillboard(&builborad, L"./Data/SpeedRing.png");
+	createBillboard(&builborad, L"./Data/bag001.png");
 	builboard_pos = { 0,0,0,1 };
 	builborad_angle = 0;
 	builborad_size = { 1.0f,1.0f };
 	texpos = { 0,0 };
 	texsize = { 64,64 };
+	alpha = 1.0f;
+	color = { 1.0f,1.0f,1.0f };
+
+	createSRV(&SRV, &RT);
+	screen_SRV = (void*)SRV;
+	z_SRV = (void*)SRV;
+	bloom_SRV = (void*)SRV;
+	blur = 0;
+	judged_color = { 1.0f,1.0f,1.0f,1.0f };
+	enable_bloom = true;
+	billbord_judge = { 1.0f,1.0f,1.0f,1.0f };
 }
 
 void sceneTitle::update()
 {
+
 	//model loading
 	while (GameLib::getLoadFlg())
 	{
@@ -46,17 +76,19 @@ void sceneTitle::update()
 		name = sample.substr(start, sample.size() - start);
 
 		// std::string dummy(name.begin(), name.end());
-		std::string dummy = Donya::WideToMulti( name );
+		std::string dummy = Donya::WideToMulti(name);
 
 		std::string file_name = "./Data/" + dummy;
 		start = dummy.find_last_of(".") + 1;
 		std::string extend = dummy.substr(start, dummy.size() - start);
 		models.emplace_back();
-		loadFBX(&models.back().mesh, file_name);
+		loadFBX(&models.back().mesh, file_name, false);
 		models.back().model_pos = { 0,0,0 };
-		models.back().model_angle = { 0,0,0 };
+		models.back().model_angle = { 0,3.1f,0 };
 		models.back().model_scale = { 0.1f,0.1f,0.1f };
 		models.back().is_enable = true;
+		models.back().stop_timer = 2.0f;
+		models.back().judge_color = { 1,1,1 };
 		for (int i = 0; i < models.back().mesh.getMeshCount(); i++)
 		{
 			for (auto& p : models.back().mesh.getMesh(i).subsets)
@@ -168,52 +200,153 @@ void sceneTitle::update()
 
 	}
 
-	if (GetAsyncKeyState('1') < 0)
-		pSceneManager->setNextScene(new scenePose, true);
+	if (getKeyState(KEY_INPUT_M) == 1)
+	{
+		for (model* pt = models.data(); pt < models.data() + models.size(); pt++)
+		{
+			setStopTime(&pt->mesh, pt->stop_timer);
+		}
+	}
+
+	if (getKeyState(KEY_INPUT_SPACE))
+	{
+		for (model* pt = models.data(); pt < models.data() + models.size(); pt++)
+		{
+			setStopAnimation(&pt->mesh, true);
+		}
+	}
+	else
+	{
+		for (model* pt = models.data(); pt < models.data() + models.size(); pt++)
+		{
+			setStopAnimation(&pt->mesh, false);
+		}
+
+	}
 }
 
 void sceneTitle::render()
 {
+
 	clearWindow(0.5f, 0.5f, 0.5f, 1.0f);
 	setString({ 0,0 }, L"sceneTitle %d : %f", 1, 20.2f);
-	//textOut(L"TITLE", .0f, 0.f);
-
-	if (!models.empty())
-		for (model* p = models.data(); p < models.data() + models.size(); p++)
-		{
-			if (!p->is_enable)
-				continue;
-			XMFLOAT4X4 W, WVP;
-
-			DirectX::XMMATRIX worldM;
-			DirectX::XMMATRIX S, R, Rx, Ry, Rz, T;
-			T = DirectX::XMMatrixTranslation(p->model_pos.x, p->model_pos.y, p->model_pos.z);
-
-			//	Šg‘åEk¬
-			S = DirectX::XMMatrixScaling(p->model_scale.x, p->model_scale.y, p->model_scale.z);
-
-			//	‰ñ“]
-			Rx = DirectX::XMMatrixRotationX(p->model_angle.x);				//	XŽ²‚ðŠî€‚Æ‚µ‚½‰ñ“]s—ñ
-			Ry = DirectX::XMMatrixRotationY(p->model_angle.y);				//	YŽ²‚ðŠî€‚Æ‚µ‚½‰ñ“]s—ñ
-			Rz = DirectX::XMMatrixRotationZ(p->model_angle.z);				//	ZŽ²‚ðŠî€‚Æ‚µ‚½‰ñ“]s—ñ
-			R = Rz * Rx * Ry;
-
-			//	•½sˆÚ“®
-
-			//	ƒ[ƒ‹ƒh•ÏŠ·s—ñ
-			worldM = S * R * T;
-
-			//	Matrix -> Float4x4 •ÏŠ·
-			DirectX::XMStoreFloat4x4(&WVP, worldM * getViewMatrix() * getProjectionMatrix());
-			DirectX::XMStoreFloat4x4(&W, worldM);
-
-
-			FBXRender(&p->mesh, shader, WVP, W);
-		}
-
+	
 	DirectX::XMFLOAT4X4 view_projection;
 	DirectX::XMStoreFloat4x4(&view_projection, getViewMatrix() * getProjectionMatrix());
-	billboardRender(&builborad, view_projection, builboard_pos, builborad_size, builborad_angle, getCamPos(), texpos, texsize);
+	//textOut(L"TITLE", .0f, 0.f);
+	for (model* p = models.data(); p < models.data() + models.size(); p++)
+	{
+		if (!p->is_enable)
+			continue;
+		XMFLOAT4X4 W, WVP;
+
+		DirectX::XMMATRIX worldM;
+		DirectX::XMMATRIX S, R, Rx, Ry, Rz, T;
+		T = DirectX::XMMatrixTranslation(p->model_pos.x, p->model_pos.y, p->model_pos.z);
+
+		//	Šg‘åEk¬
+		S = DirectX::XMMatrixScaling(p->model_scale.x, p->model_scale.y, p->model_scale.z);
+
+		//	‰ñ“]
+		Rx = DirectX::XMMatrixRotationX(p->model_angle.x);				//	XŽ²‚ðŠî€‚Æ‚µ‚½‰ñ“]s—ñ
+		Ry = DirectX::XMMatrixRotationY(p->model_angle.y);				//	YŽ²‚ðŠî€‚Æ‚µ‚½‰ñ“]s—ñ
+		Rz = DirectX::XMMatrixRotationZ(p->model_angle.z);				//	ZŽ²‚ðŠî€‚Æ‚µ‚½‰ñ“]s—ñ
+		R = Rz * Rx * Ry;
+
+		//	•½sˆÚ“®
+
+		//	ƒ[ƒ‹ƒh•ÏŠ·s—ñ
+		worldM = S * R * T;
+
+		//	Matrix -> Float4x4 •ÏŠ·
+		DirectX::XMStoreFloat4x4(&WVP, worldM * getViewMatrix() * getProjectionMatrix());
+		DirectX::XMStoreFloat4x4(&W, worldM);
+
+
+		FBXRender(&p->mesh, shader, WVP, W);
+
+
+	}
+	billboardRender(&builborad, view_projection, builboard_pos, builborad_size, builborad_angle, getCamPos(), texpos, texsize, alpha, color);
+	GameLib::clearDepth();
+
+	for (model* p = models.data(); p < models.data() + models.size(); p++)
+	{
+		if (!p->is_enable)
+			continue;
+		XMFLOAT4X4 W, WVP;
+
+		DirectX::XMMATRIX worldM;
+		DirectX::XMMATRIX S, R, Rx, Ry, Rz, T;
+		T = DirectX::XMMatrixTranslation(p->model_pos.x, p->model_pos.y, p->model_pos.z);
+
+		//	Šg‘åEk¬
+		S = DirectX::XMMatrixScaling(p->model_scale.x, p->model_scale.y, p->model_scale.z);
+
+		//	‰ñ“]
+		Rx = DirectX::XMMatrixRotationX(p->model_angle.x);				//	XŽ²‚ðŠî€‚Æ‚µ‚½‰ñ“]s—ñ
+		Ry = DirectX::XMMatrixRotationY(p->model_angle.y);				//	YŽ²‚ðŠî€‚Æ‚µ‚½‰ñ“]s—ñ
+		Rz = DirectX::XMMatrixRotationZ(p->model_angle.z);				//	ZŽ²‚ðŠî€‚Æ‚µ‚½‰ñ“]s—ñ
+		R = Rz * Rx * Ry;
+
+		//	•½sˆÚ“®
+
+		//	ƒ[ƒ‹ƒh•ÏŠ·s—ñ
+		worldM = S * R * T;
+
+		//	Matrix -> Float4x4 •ÏŠ·
+		DirectX::XMStoreFloat4x4(&WVP, worldM * getViewMatrix() * getProjectionMatrix());
+		DirectX::XMStoreFloat4x4(&W, worldM);
+
+
+		z_render(&p->mesh, shader, WVP, W);
+
+
+	}
+	GameLib::clearDepth();
+
+	for (model* p = models.data(); p < models.data() + models.size(); p++)
+	{
+		if (!p->is_enable)
+			continue;
+		XMFLOAT4X4 W, WVP;
+
+		DirectX::XMMATRIX worldM;
+		DirectX::XMMATRIX S, R, Rx, Ry, Rz, T;
+		T = DirectX::XMMatrixTranslation(p->model_pos.x, p->model_pos.y, p->model_pos.z);
+
+		//	Šg‘åEk¬
+		S = DirectX::XMMatrixScaling(p->model_scale.x, p->model_scale.y, p->model_scale.z);
+
+		//	‰ñ“]
+		Rx = DirectX::XMMatrixRotationX(p->model_angle.x);				//	XŽ²‚ðŠî€‚Æ‚µ‚½‰ñ“]s—ñ
+		Ry = DirectX::XMMatrixRotationY(p->model_angle.y);				//	YŽ²‚ðŠî€‚Æ‚µ‚½‰ñ“]s—ñ
+		Rz = DirectX::XMMatrixRotationZ(p->model_angle.z);				//	ZŽ²‚ðŠî€‚Æ‚µ‚½‰ñ“]s—ñ
+		R = Rz * Rx * Ry;
+
+		//	•½sˆÚ“®
+
+		//	ƒ[ƒ‹ƒh•ÏŠ·s—ñ
+		worldM = S * R * T;
+
+		//	Matrix -> Float4x4 •ÏŠ·
+		DirectX::XMStoreFloat4x4(&WVP, worldM * getViewMatrix() * getProjectionMatrix());
+		DirectX::XMStoreFloat4x4(&W, worldM);
+
+
+		bloom_SRVrender(&p->mesh, shader, WVP, W, p->judge_color);
+
+
+	}
+	billboard_bloom_Render(&builborad, view_projection, builboard_pos, builborad_size, builborad_angle, getCamPos(), texpos, texsize, billbord_judge, alpha, color);
+	GameLib::clearDepth();
+
+
+
+	screen_SRV = (void*)GameLib::getOriginalScreen();
+	bloom_SRV = (void*)GameLib::getBloomScreen();
+	z_SRV = (void*)GameLib::getZScreen();
+	postEffect_Bloom(blur, enable_bloom);
 }
 
 void sceneTitle::uninit()
@@ -275,6 +408,19 @@ void sceneTitle::imGui()
 			ImGui::Text("texsize");
 			ImGui::DragFloat("x##texsize", &texsize.x);
 			ImGui::DragFloat("y##texsize", &texsize.y);
+			ImGui::NewLine();
+			ImGui::Text("color");
+			ImGui::DragFloat("r##color", &color.x);
+			ImGui::DragFloat("g##color", &color.y);
+			ImGui::DragFloat("b##color", &color.z);
+			ImGui::NewLine();
+			ImGui::DragFloat("alpha", &alpha);
+
+			ImGui::NewLine();
+			ImGui::Text("judge_color");
+			ImGui::DragFloat("r##billbord", &billbord_judge.x, 0.01, 0, 1.5);
+			ImGui::DragFloat("g##billbord", &billbord_judge.y, 0.01, 0, 1.5);
+			ImGui::DragFloat("b##billbord", &billbord_judge.z, 0.01, 0, 1.5);
 			ImGui::TreePop();
 		}
 
@@ -288,7 +434,7 @@ void sceneTitle::imGui()
 				ImGui::DragInt("index", &index, 1, 0, models.size() - 1);
 				if (ImGui::Button("+"))
 				{
-					if (index < static_cast<int>( models.size() ) - 1)
+					if (index < static_cast<int>(models.size()) - 1)
 						index++;
 				}
 				ImGui::SameLine();
@@ -333,12 +479,19 @@ void sceneTitle::imGui()
 					ImGui::DragFloat("drag_speed##angle", &dragPower[2], 0.01f, 0);
 					ImGui::NewLine();
 
+					ImGui::DragFloat("stop_time", &models[index].stop_timer, 0.01, 0, 100);
+					ImGui::NewLine();
+
+					ImGui::Text("judge_color");
+					ImGui::DragFloat("r##judge_color_for_fbx", &models[index].judge_color.x, 0.01, 0, 1);
+					ImGui::DragFloat("g##judge_color_for_fbx", &models[index].judge_color.y, 0.01, 0, 1);
+					ImGui::DragFloat("b##judge_color_for_fbx", &models[index].judge_color.z, 0.01, 0, 1);
 					ImGui::TreePop();
 				}
 
 				if (ImGui::TreeNode("material"))
 				{
-					const int SIZE = static_cast<int>( models[index].tex_SRV.size() );
+					const int SIZE = static_cast<int>(models[index].tex_SRV.size());
 					for (int i = 0; i < SIZE; i++)
 					{
 						ImGui::Image(models[index].tex_SRV[i], { 512,512 });
@@ -357,6 +510,48 @@ void sceneTitle::imGui()
 
 		ImGui::End();
 	}
+
+	{}
+	//bloom info ImGui
+	{
+		ImGui::SetNextWindowSize(ImVec2(500.0f, getWindowSize().y / 2.0f), ImGuiSetCond_Once);
+		ImGui::SetNextWindowPos(ImVec2(.0f, getWindowSize().y / 2.0f), ImGuiSetCond_Once);
+		ImGui::Begin("bloom", NULL, ImGuiWindowFlags_MenuBar);
+
+		if (ImGui::Button("enable"))
+		{
+			enable_bloom ^= 1;
+		}
+
+		if (ImGui::TreeNode("parameter"))
+		{
+			ImGui::DragFloat("blur", &blur, 0.1, 0, 10000);
+			ImGui::NewLine();
+
+			ImGui::Text("judged_color");
+			ImGui::DragFloat("r##bloom", &judged_color.x, 0.01, 0, 10.0);
+			ImGui::DragFloat("g##bloom", &judged_color.y, 0.01, 0, 10.0);
+			ImGui::DragFloat("b##bloom", &judged_color.z, 0.01, 0, 10.0);
+
+			ImGui::TreePop();
+		}
+
+		if (ImGui::TreeNode("screen"))
+		{
+			ImGui::Text("original_screen");
+			ImGui::Image(screen_SRV, { 480,270 });
+			ImGui::NewLine();
+			ImGui::Text("z_screen");
+			ImGui::Image(z_SRV, { 480,270 });
+			ImGui::NewLine();
+			ImGui::Text("bloom_screen");
+			ImGui::Image(bloom_SRV, { 480,270 });
+			ImGui::TreePop();
+		}
+
+		ImGui::End();
+	}
+
 
 	//camera_info ImGui
 	{

@@ -14,29 +14,32 @@
 //   struct lineLight
 //   {
 //       
-//       float4 direction;              // Offset:  144
-//       float4 color;                  // Offset:  160
+//       float4 position;               // Offset:  144
+//       float4 direction;              // Offset:  160
+//       float4 color;                  // Offset:  176
 //
-//   } line_light;                      // Offset:  144 Size:    32
+//   } line_light;                      // Offset:  144 Size:    48
 //   
 //   struct Light
 //   {
 //       
-//       float4 pos;                    // Offset:  176
-//       float4 color;                  // Offset:  192
-//       float4 attenuate;              // Offset:  208
+//       float4 pos;                    // Offset:  192
+//       float4 color;                  // Offset:  208
+//       float4 attenuate;              // Offset:  224
 //
-//   } pntLight[5];                     // Offset:  176 Size:   240
+//   } pntLight[5];                     // Offset:  192 Size:   240
 //   
 //   struct Material
 //   {
 //       
-//       float4 ambient;                // Offset:  416
-//       float4 diffuse;                // Offset:  432
-//       float4 specular;               // Offset:  448
+//       float4 ambient;                // Offset:  432
+//       float4 diffuse;                // Offset:  448
+//       float4 specular;               // Offset:  464
 //
-//   } material;                        // Offset:  416 Size:    48
-//   row_major float4x4 bone_transforms[64];// Offset:  464 Size:  4096 [unused]
+//   } material;                        // Offset:  432 Size:    48
+//   row_major float4x4 bone_transforms[64];// Offset:  480 Size:  4096 [unused]
+//   float4 judge_color;                // Offset: 4576 Size:    16 [unused]
+//   float4 screen_size;                // Offset: 4592 Size:    16 [unused]
 //
 // }
 //
@@ -57,9 +60,10 @@
 // -------------------- ----- ------ -------- -------- ------- ------
 // SV_POSITION              0   xyzw        0      POS   float       
 // POSITION                 0   xyzw        1     NONE   float   xyz 
-// COLOR                    0   xyzw        2     NONE   float      w
-// NORMAL                   0   xyzw        3     NONE   float   xyz 
-// TEXCOORD                 0   xy          4     NONE   float   xy  
+// POSITION                 2   xyzw        2     NONE   float       
+// COLOR                    0   xyzw        3     NONE   float      w
+// NORMAL                   0   xyzw        4     NONE   float   xyz 
+// TEXCOORD                 0   xy          5     NONE   float   xy  
 //
 //
 // Output signature:
@@ -70,26 +74,27 @@
 //
 ps_5_0
 dcl_globalFlags refactoringAllowed | skipOptimization
-dcl_constantbuffer CB0[29], dynamicIndexed
+dcl_constantbuffer CB0[30], dynamicIndexed
 dcl_sampler s0, mode_default
 dcl_resource_texture2d (float,float,float,float) t0
 dcl_input_ps linear v1.xyz
-dcl_input_ps linear v2.w
-dcl_input_ps linear v3.xyz
-dcl_input_ps linear v4.xy
+dcl_input_ps linear v3.w
+dcl_input_ps linear v4.xyz
+dcl_input_ps linear v5.xy
 dcl_output o0.xyzw
 dcl_temps 12
 //
 // Initial variable locations:
 //   v0.x <- pin.position.x; v0.y <- pin.position.y; v0.z <- pin.position.z; v0.w <- pin.position.w; 
 //   v1.x <- pin.posw.x; v1.y <- pin.posw.y; v1.z <- pin.posw.z; v1.w <- pin.posw.w; 
-//   v2.x <- pin.color.x; v2.y <- pin.color.y; v2.z <- pin.color.z; v2.w <- pin.color.w; 
-//   v3.x <- pin.normal.x; v3.y <- pin.normal.y; v3.z <- pin.normal.z; v3.w <- pin.normal.w; 
-//   v4.x <- pin.texcoord.x; v4.y <- pin.texcoord.y; 
+//   v2.x <- pin.pos.x; v2.y <- pin.pos.y; v2.z <- pin.pos.z; v2.w <- pin.pos.w; 
+//   v3.x <- pin.color.x; v3.y <- pin.color.y; v3.z <- pin.color.z; v3.w <- pin.color.w; 
+//   v4.x <- pin.normal.x; v4.y <- pin.normal.y; v4.z <- pin.normal.z; v4.w <- pin.normal.w; 
+//   v5.x <- pin.texcoord.x; v5.y <- pin.texcoord.y; 
 //   o0.x <- <main return value>.x; o0.y <- <main return value>.y; o0.z <- <main return value>.z; o0.w <- <main return value>.w
 //
 #line 74 "D:\Git\fps_shooting\Chi\Chi\Chi\skinned_mesh_ps.hlsl"
-mov r0.xyz, v3.xyzx  // r0.x <- N.x; r0.y <- N.y; r0.z <- N.z
+mov r0.xyz, v4.xyzx  // r0.x <- N.x; r0.y <- N.y; r0.z <- N.z
 
 #line 75
 mov r1.xyz, -v1.xyzx
@@ -99,15 +104,15 @@ rsq r0.w, r0.w
 mul r1.xyz, r0.wwww, r1.xyzx  // r1.x <- V.x; r1.y <- V.y; r1.z <- V.z
 
 #line 78
-sample_indexable(texture2d)(float,float,float,float) r2.xyzw, v4.xyxx, t0.xyzw, s0  // r2.x <- sampleColor.x; r2.y <- sampleColor.y; r2.z <- sampleColor.z; r2.w <- sampleColor.w
+sample_indexable(texture2d)(float,float,float,float) r2.xyzw, v5.xyxx, t0.xyzw, s0  // r2.x <- sampleColor.x; r2.y <- sampleColor.y; r2.z <- sampleColor.z; r2.w <- sampleColor.w
 
 #line 81
 mov r2.xyz, r2.xyzx  // r2.x <- color.x; r2.y <- color.y; r2.z <- color.z
 
 #line 83
 nop 
-mov r3.xyz, cb0[10].xyzx
-mov r4.xyz, cb0[27].xyzx
+mov r3.xyz, cb0[11].xyzx
+mov r4.xyz, cb0[28].xyzx
 
 #line 24
 mul r3.xyz, r3.xyzx, r4.xyzx  // r3.x <- <Diffuse_test return value>.x; r3.y <- <Diffuse_test return value>.y; r3.z <- <Diffuse_test return value>.z
@@ -126,7 +131,7 @@ loop
 #line 89
   imul null, r3.w, r1.w, l(3)
   itof r4.w, l(0)
-  eq r3.w, r4.w, cb0[r3.w + 11].w
+  eq r3.w, r4.w, cb0[r3.w + 12].w
   if_nz r3.w
 
 #line 90
@@ -137,7 +142,7 @@ loop
 #line 92
   imul null, r3.w, r1.w, l(3)
   mov r5.xyz, -v1.xyzx
-  add r5.xyz, r5.xyzx, cb0[r3.w + 11].xyzx  // r5.x <- L.x; r5.y <- L.y; r5.z <- L.z
+  add r5.xyz, r5.xyzx, cb0[r3.w + 12].xyzx  // r5.x <- L.x; r5.y <- L.y; r5.z <- L.z
 
 #line 93
   dp3 r3.w, r5.xyzx, r5.xyzx
@@ -151,10 +156,10 @@ loop
 #line 95
   imul null, r4.w, r1.w, l(3)
   imul null, r5.w, r1.w, l(3)
-  mul r5.w, r3.w, cb0[r5.w + 13].y
-  add r4.w, r5.w, cb0[r4.w + 13].x
+  mul r5.w, r3.w, cb0[r5.w + 14].y
+  add r4.w, r5.w, cb0[r4.w + 14].x
   imul null, r5.w, r1.w, l(3)
-  mul r5.w, r3.w, cb0[r5.w + 13].z
+  mul r5.w, r3.w, cb0[r5.w + 14].z
   mul r3.w, r3.w, r5.w
   add r3.w, r3.w, r4.w
   div r3.w, l(1.000000), r3.w
@@ -166,8 +171,8 @@ loop
   mov r6.xyz, r0.xyzx
   mov r5.xyz, r5.xyzx
   imul null, r4.w, r1.w, l(3)
-  mov r7.xyz, cb0[r4.w + 12].xyzx
-  mov r8.xyz, cb0[27].xyzx
+  mov r7.xyz, cb0[r4.w + 13].xyzx
+  mov r8.xyz, cb0[28].xyzx
   mov r3.w, r3.w
 
 #line 11
@@ -191,10 +196,10 @@ loop
   mov r7.xyz, r0.xyzx
   mov r5.xyz, r5.xyzx
   imul null, r4.w, r1.w, l(3)
-  mov r8.xyz, cb0[r4.w + 12].xyzx
+  mov r8.xyz, cb0[r4.w + 13].xyzx
   mov r9.xyz, r1.xyzx
-  mov r10.xyz, cb0[28].xyzx
-  mov r4.w, cb0[28].w
+  mov r10.xyz, cb0[29].xyzx
+  mov r4.w, cb0[29].w
   mov r3.w, r3.w
 
 #line 32
@@ -244,6 +249,6 @@ mul r0.xyz, r2.xyzx, r4.xyzx  // r0.x <- color.x; r0.y <- color.y; r0.z <- color
 #line 106
 max r0.xyz, r0.xyzx, l(0.000000, 0.000000, 0.000000, 0.000000)
 min o0.xyz, r0.xyzx, l(1.000000, 1.000000, 1.000000, 0.000000)
-mul o0.w, r2.w, v2.w
+mul o0.w, r2.w, v3.w
 ret 
 // Approximately 95 instruction slots used

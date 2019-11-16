@@ -45,6 +45,12 @@ public:
 	Golem			boss;
 	// Knight			boss;
 	fbx_shader		shader;
+	ID3D11ShaderResourceView* SRV;
+	ID3D11RenderTargetView* RT;
+	ImTextureID screen_SRV;
+	float blur;
+	DirectX::XMFLOAT4 judged_color;
+
 public:
 	Impl() :
 		fieldRadius(), cameraLeaveDistance(),
@@ -93,6 +99,12 @@ public:
 	{
 		LoadParameter();
 
+		createSRV(&SRV, &RT);
+		screen_SRV = (void*)SRV;
+		blur = 0;
+		judged_color = { 1.0f,1.0f,1.0f,1.0f };
+
+
 		if ( !LoadSounds() )
 		{
 			_ASSERT_EXPR( 0, L"Failed : Loading sound." );
@@ -103,7 +115,7 @@ public:
 		Donya::Sound::Load( SE_ID,  "./Data/Sounds/Test/SE.wav",  false );
 #endif // DEBUG_MODE
 
-		getLineLight().setLineLight( lights.direction.direction, lights.direction.color );
+		getLineLight().setLineLight( lights.direction.position,lights.direction.direction, lights.direction.color );
 
 		resetPointLight();
 		for ( const auto i : lights.points )
@@ -282,6 +294,9 @@ public:
 
 	void Draw()
 	{
+		setRenderTarget(&RT);
+		clearRendertarget(RT, { 0,0,0,0 });
+
 		clearWindow( 0.1f, 0.1f, 0.1f, 1.0f );
 		setBlendMode_ALPHA( 1.0f );
 
@@ -295,6 +310,12 @@ public:
 		boss.Draw( shader, V, P );
 
 		EffectManager::GetInstance()->Render( shader );
+
+		resetRendertarget();
+		screen_SRV = (void*)SRV;
+
+		postEffect_Bloom(blur, true);
+
 
 	#if DEBUG_MODE
 		/*
@@ -615,7 +636,7 @@ public:
 						ImGui::ColorEdit4( "Color", &lights.direction.color.x );
 						ImGui::SliderFloat3( "Direction", &lights.direction.direction.x, -8.0f, 8.0f );
 
-						getLineLight().setLineLight( lights.direction.direction, lights.direction.color );
+						getLineLight().setLineLight(lights.direction.position, lights.direction.direction, lights.direction.color );
 
 						ImGui::TreePop();
 					}
@@ -682,6 +703,35 @@ public:
 
 			ImGui::End();
 		}
+		//bloom info ImGui
+	{
+	ImGui::SetNextWindowSize(ImVec2(500.0f, getWindowSize().y / 2.0f), ImGuiSetCond_Once);
+	ImGui::SetNextWindowPos(ImVec2(.0f, getWindowSize().y / 2.0f), ImGuiSetCond_Once);
+	ImGui::Begin("bloom", NULL, ImGuiWindowFlags_MenuBar);
+
+	if (ImGui::TreeNode("parameter"))
+	{
+		ImGui::DragFloat("blur", &blur, 0.1, 0, 10000);
+		ImGui::NewLine();
+
+		ImGui::Text("judged_color");
+		ImGui::DragFloat("r##bloom", &judged_color.x, 0.01, 0, 10.0);
+		ImGui::DragFloat("g##bloom", &judged_color.y, 0.01, 0, 10.0);
+		ImGui::DragFloat("b##bloom", &judged_color.z, 0.01, 0, 10.0);
+
+		ImGui::TreePop();
+	}
+
+	if (ImGui::TreeNode("screen"))
+	{
+		ImGui::Image(screen_SRV, { 480,270 });
+		ImGui::TreePop();
+	}
+
+	ImGui::End();
+	}
+
+
 
 #endif // USE_IMGUI
 	}

@@ -1,6 +1,6 @@
 #ifndef GAMELIB_H_
 #define GAMELIB_H_
-
+#define _WIN32_DCOM
 #include <Windows.h>
 #include <d3d11.h>
 #include <DirectXMath.h>
@@ -8,6 +8,9 @@
 #include <xaudio2.h>
 #include <mmsystem.h>
 #include <ctime>
+#include <dshow.h>
+#include <d3d9.h>
+#include <Vmr9.h>
 #include "util.h"
 #include "misc.h"
 #include "dragDrop.h"
@@ -28,8 +31,8 @@ namespace GameLib
 {
 
 	HWND  getHandle();
-	ID3D11Device*	getDevice();
-	ID3D11DeviceContext*  getContext();
+	ID3D11Device* getDevice();
+	ID3D11DeviceContext* getContext();
 	float getDeltaTime();
 
 	//ライブラリ
@@ -52,8 +55,11 @@ namespace GameLib
 
 	//シャドウマップ周り　
 	bool createRT(ID3D11RenderTargetView** _renderTarget);
-	bool createSRV(ID3D11ShaderResourceView** _shaderResource,ID3D11RenderTargetView** RT);
+	bool createSRV(ID3D11ShaderResourceView** _shaderResource, ID3D11RenderTargetView** RT);
 
+	//judge_color
+	void setJudgeColor(const DirectX::XMFLOAT4& color);
+	DirectX::XMFLOAT4 getJudgeColor(const int index);
 
 	//画面を指定色にクリア
 	void clear(const DirectX::XMFLOAT4&);
@@ -64,9 +70,17 @@ namespace GameLib
 	void loadFile(LPWSTR _filename);
 
 
+	//depth stensilしょきか
+	void clearDepth();
+
 	void postEffect_Bloom_SRV(ID3D11ShaderResourceView** _shaderResource, DirectX::XMFLOAT4 _judge_color);
-	void postEffect_Bloom(ID3D11ShaderResourceView** _shaderResource,float _blur_value,DirectX::XMFLOAT4 _judge_color);
-	
+	void postEffect_Bloom(float _blur_value, bool flg);
+	void setBloomRT();
+	void clearBloomRT();
+
+	ID3D11ShaderResourceView* getOriginalScreen();
+	ID3D11ShaderResourceView* getZScreen();
+	ID3D11ShaderResourceView* getBloomScreen();
 	//other
 	std::wstring getLoadedFileName();
 	int getLoadedFileCount();
@@ -253,10 +267,10 @@ namespace GameLib
 	//light
 	namespace light
 	{
-		void setLineLight(const DirectX::XMFLOAT4& _lightDirection,const DirectX::XMFLOAT4& _lightColor);
-		void setLineLight(const float x, const float y, const float z, const float w,const float r,const float g,const float b,const float cw);
+		void setLineLight(const DirectX::XMFLOAT4& _position, const DirectX::XMFLOAT4& _lightDirection, const DirectX::XMFLOAT4& _lightColor);
+		void setLineLight(const float px, const float py, const float pz, const float pw, const float x, const float y, const float z, const float w, const float r, const float g, const float b, const float cw);
 
-		line_light &getLineLight();
+		line_light& getLineLight();
 
 		void setPointLight(const PointLight& _info);
 		void setPointlightInfo(const int index, const PointLight& _info);
@@ -276,38 +290,81 @@ namespace GameLib
 		void loadMeshMTL(static_mesh* _mesh, const wchar_t* objName, const wchar_t* mtlName);
 		static_mesh::primitive_material& getPrimitiveMaterial(static_mesh* _mesh);
 		void staticMeshRender(static_mesh* _mesh, const DirectX::XMFLOAT4X4&, const DirectX::XMFLOAT4X4&, const DirectX::XMFLOAT4&, line_light& _line_light, std::vector<point_light>& _point_light, const DirectX::XMFLOAT4&, bool);
-		void builboradRender(static_mesh* _mesh,const DirectX::XMFLOAT4X4&,const DirectX::XMFLOAT4&,const DirectX::XMFLOAT2,const float,const DirectX::XMFLOAT4&,const DirectX::XMFLOAT2& texpos,const DirectX::XMFLOAT2& texsize);
+		void builboradRender(static_mesh* _mesh, const DirectX::XMFLOAT4X4&, const DirectX::XMFLOAT4&, const DirectX::XMFLOAT2, const float, const DirectX::XMFLOAT4&, const DirectX::XMFLOAT2& texpos, const DirectX::XMFLOAT2& texsize, const float alpha, const DirectX::XMFLOAT3& color);
+		void builborad_z_Render(static_mesh* _mesh, const DirectX::XMFLOAT4X4& view_projection, const DirectX::XMFLOAT4& _pos, const DirectX::XMFLOAT2 _scale, const float _angle, const DirectX::XMFLOAT4& camPos, const DirectX::XMFLOAT2& texpos, const DirectX::XMFLOAT2& texsize, const float alpha, const DirectX::XMFLOAT3& color);
+		void builborad_bloom_Render(static_mesh* _mesh, const DirectX::XMFLOAT4X4& view_projection, const DirectX::XMFLOAT4& _pos, const DirectX::XMFLOAT2 _scale, const float _angle, const DirectX::XMFLOAT4& _cam_pos, const DirectX::XMFLOAT2& texpos, const DirectX::XMFLOAT2& texsize, const float alpha, const DirectX::XMFLOAT3& color, const DirectX::XMFLOAT4& judge_color);
+
+
 		void staticMeshShadowRender1(static_mesh* _mesh, const DirectX::XMFLOAT4X4&, const DirectX::XMFLOAT4X4&);
-		void staticMeshShadowRender2(static_mesh* _mesh, const DirectX::XMFLOAT4X4&, const DirectX::XMFLOAT4X4&, const DirectX::XMFLOAT4&,const DirectX::XMFLOAT4&,ID3D11ShaderResourceView* ,bool);
+		void staticMeshShadowRender2(static_mesh* _mesh, const DirectX::XMFLOAT4X4&, const DirectX::XMFLOAT4X4&, const DirectX::XMFLOAT4&, const DirectX::XMFLOAT4&, ID3D11ShaderResourceView*, bool);
 	}
 
 	//skinned_mesh
 	namespace skinnedMesh
 	{
-		void loadFBX(skinned_mesh*, const std::string& _fbxName);
+		void loadFBX(skinned_mesh*, const std::string& _fbxName, bool load_cerealize, bool is_Tpose);
 
 		void loadShader(fbx_shader& shader, std::string vertex, std::string pixel, std::string noBoneVertex, std::string notexPS);
 
-		void setLoopFlg(skinned_mesh* _mesh, const bool _is_loop);
+		void setLoopanimation(skinned_mesh* _mesh, const bool _loop_flg);
 		void setStopAnimation(skinned_mesh* _mesh, const bool _is_stop);
 		void setStopTime(skinned_mesh* _mesh, const float _stop_time);
 		void setAnimFlame(skinned_mesh* _mesh, const int _anim_flame);
 		const int getAnimFlame(skinned_mesh*);
 
 		bool calcTransformedPosBySpecifyMesh(skinned_mesh* _mesh, DirectX::XMFLOAT3& _pos, std::string _mesh_name);
-
+		bool calcTransformedPosBySpecifyMesh(skinned_mesh* _mesh, DirectX::XMFLOAT3& _pos, std::string _mesh_name, bone_animation* anim);
 
 		void skinnedMeshRender(
 			skinned_mesh* _mesh,
 			fbx_shader& hlsl,
-			const DirectX::XMFLOAT4X4&SynthesisMatrix,
-			const DirectX::XMFLOAT4X4&worldMatrix,
-			const DirectX::XMFLOAT4&camPos,
+			float magnification,
+			const DirectX::XMFLOAT4X4& SynthesisMatrix,
+			const DirectX::XMFLOAT4X4& worldMatrix,
+			const DirectX::XMFLOAT4& camPos,
 			line_light& lineLight,
 			std::vector<point_light>& _point_light,
-			const DirectX::XMFLOAT4&materialColor,
+			const DirectX::XMFLOAT4& materialColor,
+			bool wireFlg,
+			bool animation_flg
+		);
+
+		void z_render(
+			skinned_mesh* _mesh,
+			fbx_shader& hlsl,
+			const DirectX::XMFLOAT4X4& SynthesisMatrix,
+			const DirectX::XMFLOAT4X4& worldMatrix
+		);
+
+		void bloom_SRVrender(
+			skinned_mesh* _mesh,
+			fbx_shader& hlsl,
+			const DirectX::XMFLOAT4X4& SynthesisMatrix,
+			const DirectX::XMFLOAT4X4& worldMatrix,
+			const DirectX::XMFLOAT4& materialColor,
+			const DirectX::XMFLOAT3& judge_color
+		);
+
+		void skinnedMeshRender(
+			skinned_mesh* _mesh,
+			fbx_shader& hlsl,
+			bone_animation* anim,
+			const DirectX::XMFLOAT4X4& SynthesisMatrix,
+			const DirectX::XMFLOAT4X4& worldMatrix,
+			const DirectX::XMFLOAT4& camPos,
+			line_light& lineLight,
+			std::vector<point_light>& _point_light,
+			const DirectX::XMFLOAT4& materialColor,
 			bool wireFlg
 		);
+
+		void loadAnimation(bone_animation*, std::string _anim_name);
+		void playAnimation(bone_animation* anim, float magnification = 1.0f, bool _is_loop = true);
+
+		void setStopAnimation(bone_animation* _mesh, const bool _is_stop);
+		void setStopTime(bone_animation* _mesh, const float _stop_time);
+		void setAnimFlame(bone_animation* _mesh, const int _anim_flame);
+		const int getAnimFlame(bone_animation*);
 
 	}
 

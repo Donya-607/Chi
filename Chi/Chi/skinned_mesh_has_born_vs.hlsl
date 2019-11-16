@@ -36,7 +36,6 @@ VS_OUT main(float4 position : POSITION, float4 normal : NORMAL, float2 texcoord 
 	vout.posw = mul(position, world);
 	vout.normal = normalize(mul(normal, world));
 
-
 	vout.color = material.ambient;
 	vout.texcoord = texcoord;
 	return vout;
