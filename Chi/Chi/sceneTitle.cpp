@@ -2,255 +2,513 @@
 #include "scene.h"
 #include "sceneManager.h"
 #include "keyInput.h"
+#include "easing.h"
 
 #include "Donya/Keyboard.h"	// Insert by Donya.
 #include "Donya/Useful.h"	// Insert by Donya.
+#include "Donya/FilePath.h"
 
-#include "StorageForScene.h"
+#define scast static_cast
+
 
 void sceneTitle::init()
 {
-	setCamPos( 0.0f, 18.0f, -63.0f );
-	setTarget( 0, 3, 0 );
+	setCamPos(camPos);
+	setTarget(camTarget);
+	cameraDistance = 1000.0f;
+
 	isStack = false;
-	flg = false;
-	pos = { getCamPos().x,getCamPos().y,getCamPos().z };
-	target = { getCamTarget().x,getCamTarget().y,getCamTarget().z };
-	setLightAmbient( { .1f,-1,0,1 }, { 1,1,1,1 } );
-	zoomSpeed = 2.0f;
-	moveSpeed = 10.0f;
-	mouse = std::make_unique<Mouse>();
-	mousePos = { mouse->GetState().x,mouse->GetState().y };
-	prevMPos = mousePos;
-	moveVol = { 0,0 };
-	mouse_right = false;
-	prevMPos = mousePos;
-	cam_angle = 90;
-	models.clear();
-	loadShader( shader, "./Data/shader/skinned_mesh_has_born_vs.cso", "./Data/shader/skinned_mesh_ps.cso", "./Data/shader/skinned_mesh_vs.cso", "./Data/shader/skinned_mesh_no_uv_ps.cso" );
-	models.emplace_back();
-	//loadFBX(&models.back().mesh, "./Data/Boss04_3Attack.fbx");
-	models.back().model_pos = { 0,0,0 };
-	models.back().model_angle = { 0,3.1f,0 };
-	models.back().model_scale = { 0.1f,0.1f,0.1f };
-	models.back().is_enable = true;
-	for ( int i = 0; i < models.back().mesh.getMeshCount(); i++ )
+	setLightAmbient({ .1f,-1,0,1 }, { 1,1,1,1 });
+	loadShader(shader, "./Data/shader/skinned_mesh_has_born_vs.cso", "./Data/shader/skinned_mesh_ps.cso", "./Data/shader/skinned_mesh_vs.cso", "./Data/shader/skinned_mesh_no_uv_ps.cso");
+
+	lights.direction.color = Donya::Vector4(1.0f, 1.0f, 1.0f, 1.0f);
+	getLineLight().setLineLight(lights.direction.direction, lights.direction.color);
+
+	resetPointLight();
+	for (const auto i : lights.points)
 	{
-		for ( auto &p : models.back().mesh.getMesh( i ).subsets )
-		{
-			models.back().tex_SRV.emplace_back();
-			models.back().tex_SRV.back() = (void *)p.diffuse.shader_resource_view;
-		}
+		setPointLight(i);
 	}
 
-	createBillboard( &builborad, L"./Data/bag001.png" );
-	builboard_pos = { 0,0,0,1 };
-	builborad_angle = 0;
-	builborad_size = { 1.0f,1.0f };
-	texpos = { 0,0 };
-	texsize = { 64,64 };
-	alpha = 1.0f;
-	color = { 1.0f,1.0f,1.0f };
+	loadFBX(pStageModel.get(), GetModelPath(ModelAttribute::TutorialStage));
+	loadFBX(pTitleModel.get(), "./Data/model/title01.fbx");
 
-	createSRV( &SRV, &RT );
-	screen_SRV = (void *)SRV;
-	blur = 0;
-	judged_color = { 1.0f,1.0f,1.0f,1.0f };
+	std::vector<Donya::Box> wallHitBox_vector;
+	Donya::Box wallHitBox;
 
-	StorageForScene::ResetStorage();
+	// left
+	wallHitBox.cx = 650.0f;
+	wallHitBox.cy = 0.0f;
+	wallHitBox.w = 10.0f;
+	wallHitBox.h = 16000.0f;
+	wallHitBox_vector.push_back(wallHitBox);
+
+	// right
+	wallHitBox.cx = -650.0f;
+	wallHitBox.cy = 0.0f;
+	wallHitBox.w = 10.0f;
+	wallHitBox.h = 16000.0f;
+	wallHitBox_vector.push_back(wallHitBox);
+
+	// left block
+	wallHitBox.cx = 650.0f;
+	wallHitBox.cy = 14000.0f;
+	wallHitBox.w = 160.0f;
+	wallHitBox.h = 300.0f;
+	wallHitBox_vector.push_back(wallHitBox);
+
+	// right block
+	wallHitBox.cx = -650.0f;
+	wallHitBox.cy = 14000.0f;
+	wallHitBox.w = 160.0f;
+	wallHitBox.h = 300.0f;
+	wallHitBox_vector.push_back(wallHitBox);
+
+	// front
+	wallHitBox.cx = 0.0f;
+	wallHitBox.cy = 4750.0f;
+	wallHitBox.w = 881.0f;
+	wallHitBox.h = 1000.0f;
+	wallHitBox_vector.push_back(wallHitBox);
+
+	// back
+	wallHitBox.cx = 0.0f;
+	wallHitBox.cy = 14200.0f;
+	wallHitBox.w = 1000.0f;
+	wallHitBox.h = 150.0f;
+	wallHitBox_vector.push_back(wallHitBox);
+
+	player.Init(Donya::Vector3(0.0f, 2222.5f, 14000.0f), Donya::Vector3(0.0f, 0.0f * 0.01745f, 0.0f), wallHitBox_vector);
+	player.SetFieldRadius(9999999.0f);
+
+	catapult.Init(Donya::Vector3(0.0f, 2208.0f, 4981.0f), Donya::Vector3(1.0f, 1.0f, 1.0f), Donya::Vector3(0.0f, 0.0f, 0.0f));
+
+	titlePos = Donya::Vector3(0.0f, 3354.0f, 11531.0f);
+	titleScale = Donya::Vector3(250.0f, 250.0f, 250.0f);
+	cubePos = Donya::Vector3(0.0f, 2230.0f, 11531.0f);
+	cubeScale = Donya::Vector3(100.0f, 250.0f, 100.0f);
+
+	sceneState = 0;
+	tutorialState = 0;
+
+	moveCnt = 0;
+	titleExist = true;
 }
 
 void sceneTitle::update()
 {
-
-	//model loading
-	while (GameLib::getLoadFlg())
+	switch (sceneState)
 	{
-		if (GameLib::getLoadedFileCount() <= 0)
-			break;
-		std::wstring sample = GameLib::getLoadedFileName();
-		std::wstring name;
-		size_t start = sample.find_last_of(L"\\") + 1;
-		name = sample.substr(start, sample.size() - start);
+	case SceneState::TITLE:
+		TitleUpdate();
+		break;
+	case SceneState::CAMERA_MOVE:
+		CameraMove();
+		break;
+	case SceneState::TUTORIAL:
+		TutorialUpdate();
+		break;
+	}
+}
 
-		// std::string dummy(name.begin(), name.end());
-		std::string dummy = Donya::WideToMulti(name);
+void sceneTitle::TitleUpdate()
+{
+	setCamPos(camTitlePos);
+	setTarget(camTitleTarget);
 
-		std::string file_name = "./Data/" + dummy;
-		start = dummy.find_last_of(".") + 1;
-		std::string extend = dummy.substr(start, dummy.size() - start);
-		models.emplace_back();
-		loadFBX(&models.back().mesh, file_name);
-		models.back().model_pos = { 0,0,0 };
-		models.back().model_angle = { 0,3.1f,0 };
-		models.back().model_scale = { 0.1f,0.1f,0.1f };
-		models.back().is_enable = true;
-		for (int i = 0; i < models.back().mesh.getMeshCount(); i++)
+	if (Donya::Keyboard::Trigger('T'))
+	{
+		sceneState++;
+	}
+}
+
+void sceneTitle::CameraMove()
+{
+	if (MAX_MOVE_CNT <= moveCnt++)
+	{
+		setCamPos(camPos);
+		setTarget(camTarget);
+
+		moveCnt = 0;
+		titleExist = false;
+		sceneState++;
+	}
+	else
+	{
+		float posX = easing::OutExp(moveCnt, MAX_MOVE_CNT, camPos.x, camTitlePos.x);
+		float posY = easing::OutExp(moveCnt, MAX_MOVE_CNT, camPos.y, camTitlePos.y);
+		float posZ = easing::OutExp(moveCnt, MAX_MOVE_CNT, camPos.z, camTitlePos.z);
+
+		float targetX = easing::OutExp(moveCnt, MAX_MOVE_CNT, camTarget.x, camTitleTarget.x);
+		float targetY = easing::OutExp(moveCnt, MAX_MOVE_CNT, camTarget.y, camTitleTarget.y);
+		float targetZ = easing::OutExp(moveCnt, MAX_MOVE_CNT, camTarget.z, camTitleTarget.z);
+
+		setCamPos(Donya::Vector3(posX, posY, posZ));
+		setTarget(Donya::Vector3(targetX, targetY, targetZ));
+
+		titlePos.y = easing::OutExp(moveCnt, MAX_MOVE_CNT, 4000.0f, 3354.0f);
+	}
+}
+
+void sceneTitle::TutorialUpdate()
+{
+	switch (tutorialState)
+	{
+	case sceneTitle::START:
+		TutorialStartUpdate();
+		break;
+	case sceneTitle::GUARD:
+		TutorialGuardUpdate();
+		break;
+	case sceneTitle::ATTACK:
+		TutorialAttackUpdate();
+		break;
+	case sceneTitle::END:
+		TutorialEndUpdate();
+		break;
+	}
+}
+
+void sceneTitle::TutorialStartUpdate()
+{
+	setCamPos(camPos);
+	setTarget(camTarget);
+
+	auto MakePlayerInput = [](Donya::Vector4x4 viewMat)->Player::Input
+	{
+		Player::Input input{};
+
+#if !DEBUG_MODE
+		// TODO : コントローラーがあるか判定する
+		constexpr bool IS_CONTROLLER_CONNECTED = true;
+		if (IS_CONTROLLER_CONNECTED)
+#endif // !DEBUG_MODE
 		{
-			for (auto& p : models.back().mesh.getMesh(i).subsets)
-			{
-				models.back().tex_SRV.emplace_back();
-				models.back().tex_SRV.back() = (void*)p.diffuse.shader_resource_view;
-			}
+			// XINPUT_GAMEPAD : https://docs.microsoft.com/ja-jp/windows/win32/api/xinput/ns-xinput-xinput_gamepad
+
+			constexpr int   PAD_NO = 0;
+			constexpr float STICK_RANGE_MAX = 32768.0f;
+			const auto leftStick = GameLib::input::xInput::getThumbL(PAD_NO);
+			if (leftStick.x != 0) { input.moveVector.x = scast<float>(leftStick.x) / STICK_RANGE_MAX; }
+			if (leftStick.y != 0) { input.moveVector.z = scast<float>(leftStick.y) / STICK_RANGE_MAX; }
+
+			constexpr int TRIGGER_FLAG = 1;
+			if (GameLib::input::xInput::pressedButtons(PAD_NO, XboxPad_Button::RIGHT_SHOULDER) == TRIGGER_FLAG) { input.doDefend = true; }
+			if (GameLib::input::xInput::pressedButtons(PAD_NO, XboxPad_Button::X) == TRIGGER_FLAG) { input.doAttack = true; }
 		}
+#if !DEBUG_MODE
+		// else
+#endif // !DEBUG_MODE
+		{
+			if (Donya::Keyboard::Press(VK_UP)) { input.moveVector.z = +1.0f; }
+			if (Donya::Keyboard::Press(VK_DOWN)) { input.moveVector.z = -1.0f; }
+			if (Donya::Keyboard::Press(VK_LEFT)) { input.moveVector.x = -1.0f; }
+			if (Donya::Keyboard::Press(VK_RIGHT)) { input.moveVector.x = +1.0f; }
+
+			if (Donya::Keyboard::Trigger('Z')) { input.doDefend = true; }
+			if (Donya::Keyboard::Trigger('X')) { input.doAttack = true; }
+		}
+
+		input.moveVector.Normalize();
+
+		// Transform to camera space from world space.
+		{
+			Donya::Vector4x4 cameraRotation{};
+			{
+				// Extract inverse rotation matrix here.
+				cameraRotation = viewMat;
+				cameraRotation._14 = 0.0f;
+				cameraRotation._24 = 0.0f;
+				cameraRotation._34 = 0.0f;
+				cameraRotation._41 = 0.0f;
+				cameraRotation._42 = 0.0f;
+				cameraRotation._43 = 0.0f;
+				cameraRotation._44 = 1.0f;
+
+				// XXX : If "viewMat" is invalid matrix, Inverse() will returns NaN.
+
+				cameraRotation = cameraRotation.Inverse();
+			}
+
+			Donya::Vector4 moveVector4{};
+			moveVector4.x = input.moveVector.x;
+			moveVector4.y = input.moveVector.y;
+			moveVector4.z = input.moveVector.z;
+			moveVector4.w = 0.0f;
+
+			moveVector4 = cameraRotation * moveVector4;
+
+			input.moveVector.x = moveVector4.x;
+			input.moveVector.z = moveVector4.z;
+		}
+
+		return input;
+	};
+	player.Update(MakePlayerInput(Donya::Vector4x4::FromMatrix(GameLib::camera::GetViewMatrix())));
+
+	std::vector<Donya::Circle> nullBodies;
+	player.PhysicUpdate(nullBodies);
+
+	if (11431.0f - 100.0f / 2.0f <= player.GetPosition().z && player.GetPosition().z <= 11431.0f + 100.0f / 2.0f
+		&& -100.0f / 2.0f <= player.GetPosition().x && player.GetPosition().x <= 100.0f / 2.0f)
+	{
+		catapult.StartAnim();
+		tutorialState++;
 	}
 
-	//camera moving
+	CameraUpdate(camTarget);
+}
+
+void sceneTitle::TutorialGuardUpdate()
+{
+	setCamPos(camPos);
+	setTarget(camTarget);
+
+	auto MakePlayerInput = [](Donya::Vector4x4 viewMat)->Player::Input
 	{
-		mousePos = { mouse->GetState().x,mouse->GetState().y };
-		moveVol = { prevMPos.x - mousePos.x,prevMPos.y - mousePos.y };
+		Player::Input input{};
 
-		pos = { getCamPos().x,getCamPos().y,getCamPos().z };
-		target = { getCamTarget().x,getCamTarget().y,getCamTarget().z };
-
-		//ズーム用のベクトル(単位ベクトル)
-		zoomVec = { target.x - pos.x,target.y - pos.y,target.z - pos.z };
-		float scalar = sqrtf(zoomVec.x * zoomVec.x + zoomVec.y * zoomVec.y + zoomVec.z * zoomVec.z);
-		zoomVec = { zoomVec.x / scalar,zoomVec.y / scalar,zoomVec.z / scalar };
-
-		if (mouse->GetState().scrollWheelValue > 0)
+#if !DEBUG_MODE
+		// TODO : コントローラーがあるか判定する
+		constexpr bool IS_CONTROLLER_CONNECTED = true;
+		if (IS_CONTROLLER_CONNECTED)
+#endif // !DEBUG_MODE
 		{
-			pos.x += zoomVec.x * zoomSpeed;
-			pos.y += zoomVec.y * zoomSpeed;
-			pos.z += zoomVec.z * zoomSpeed;
-		}
-		if (mouse->GetState().scrollWheelValue < 0)
-		{
-			pos.x -= zoomVec.x * zoomSpeed;
-			pos.y -= zoomVec.y * zoomSpeed;
-			pos.z -= zoomVec.z * zoomSpeed;
-		}
-		//マウスホイール値のリセット
-		mouse->ResetScrollWheelValue();
-		float radius = sqrtf(zoomVec.x * zoomVec.x * scalar * scalar + zoomVec.z * zoomVec.z * scalar * scalar);
-		target.x = pos.x + cosf(DirectX::XMConvertToRadians(cam_angle)) * radius;
-		target.z = pos.z + sinf(DirectX::XMConvertToRadians(cam_angle)) * radius;
+			// XINPUT_GAMEPAD : https://docs.microsoft.com/ja-jp/windows/win32/api/xinput/ns-xinput-xinput_gamepad
 
-		//カメラ回転
-		if (mouse->GetState().leftButton && getKeyState(KEY_INPUT_LMENU))
-		{
-			if (moveVol.x > 0)
-			{
-				cam_angle += 0.025f * moveSpeed;
-			}
-			else if (moveVol.x < 0)
-			{
-				cam_angle -= 0.025f * moveSpeed;
-
-			}
-			if (moveVol.y > 0)
-			{
-				target.y += moveSpeed;
-			}
-			else if (moveVol.y < 0)
-			{
-				target.y -= moveSpeed;
-			}
-
+			constexpr int   PAD_NO = 0;
+			constexpr int TRIGGER_FLAG = 1;
+			if (GameLib::input::xInput::pressedButtons(PAD_NO, XboxPad_Button::RIGHT_SHOULDER) == TRIGGER_FLAG) { input.doDefend = true; }
 		}
 
-		//カメラ移動
-		if (mouse->GetState().middleButton && getKeyState(KEY_INPUT_LMENU))
+#if !DEBUG_MODE
+		// else
+#endif // !DEBUG_MODE
 		{
-			rightVec = { zoomVec.z,0,-zoomVec.x };
-			upVec = { zoomVec.y * rightVec.z - zoomVec.z * rightVec.y, zoomVec.z * rightVec.x - zoomVec.x * rightVec.z, zoomVec.x * rightVec.y - zoomVec.y * rightVec.x };
-
-			if (moveVol.x < 0)
-			{
-				pos.z -= rightVec.z * moveSpeed;
-				pos.x -= rightVec.x * moveSpeed;
-				target.z -= rightVec.z * moveSpeed;
-				target.x -= rightVec.x * moveSpeed;
-			}
-			else if (moveVol.x > 0)
-			{
-				pos.z += rightVec.z * moveSpeed;
-				pos.x += rightVec.x * moveSpeed;
-				target.z += rightVec.z * moveSpeed;
-				target.x += rightVec.x * moveSpeed;
-			}
-			if (moveVol.y > 0)
-			{
-				pos.x -= upVec.x * moveSpeed;
-				pos.y -= upVec.y * moveSpeed;
-				pos.z -= upVec.z * moveSpeed;
-				target.x -= upVec.x * moveSpeed;
-				target.y -= upVec.y * moveSpeed;
-				target.z -= upVec.z * moveSpeed;
-			}
-			else if (moveVol.y < 0)
-			{
-				pos.x += upVec.x * moveSpeed;
-				pos.y += upVec.y * moveSpeed;
-				pos.z += upVec.z * moveSpeed;
-				target.x += upVec.x * moveSpeed;
-				target.y += upVec.y * moveSpeed;
-				target.z += upVec.z * moveSpeed;
-			}
-
+			if (Donya::Keyboard::Trigger('Z')) { input.doDefend = true; }
 		}
-		setCamPos(pos);
-		setTarget(target);
-		prevMPos = mousePos;
-		mouse_right = mouse->GetState().rightButton;
 
+		return input;
+	};
+	player.Update(MakePlayerInput(Donya::Vector4x4::FromMatrix(GameLib::camera::GetViewMatrix())));
+
+	std::vector<Donya::Circle> nullBodies;
+	player.PhysicUpdate(nullBodies);
+
+	ProcessCollision();
+
+	catapult.Update(player.GetPosition());
+}
+
+void sceneTitle::TutorialAttackUpdate()
+{
+	setCamPos(camPos);
+	setTarget(camTarget);
+
+	auto MakePlayerInput = [](Donya::Vector4x4 viewMat)->Player::Input
+	{
+		Player::Input input{};
+
+#if !DEBUG_MODE
+		// TODO : コントローラーがあるか判定する
+		constexpr bool IS_CONTROLLER_CONNECTED = true;
+		if (IS_CONTROLLER_CONNECTED)
+#endif // !DEBUG_MODE
+		{
+			// XINPUT_GAMEPAD : https://docs.microsoft.com/ja-jp/windows/win32/api/xinput/ns-xinput-xinput_gamepad
+
+			constexpr int   PAD_NO = 0;
+			constexpr float STICK_RANGE_MAX = 32768.0f;
+			const auto leftStick = GameLib::input::xInput::getThumbL(PAD_NO);
+			if (leftStick.x != 0) { input.moveVector.x = scast<float>(leftStick.x) / STICK_RANGE_MAX; }
+			if (leftStick.y != 0) { input.moveVector.z = scast<float>(leftStick.y) / STICK_RANGE_MAX; }
+
+			constexpr int TRIGGER_FLAG = 1;
+			if (GameLib::input::xInput::pressedButtons(PAD_NO, XboxPad_Button::RIGHT_SHOULDER) == TRIGGER_FLAG) { input.doDefend = true; }
+			if (GameLib::input::xInput::pressedButtons(PAD_NO, XboxPad_Button::X) == TRIGGER_FLAG) { input.doAttack = true; }
+		}
+#if !DEBUG_MODE
+		// else
+#endif // !DEBUG_MODE
+		{
+			if (Donya::Keyboard::Press(VK_UP)) { input.moveVector.z = +1.0f; }
+			if (Donya::Keyboard::Press(VK_DOWN)) { input.moveVector.z = -1.0f; }
+			if (Donya::Keyboard::Press(VK_LEFT)) { input.moveVector.x = -1.0f; }
+			if (Donya::Keyboard::Press(VK_RIGHT)) { input.moveVector.x = +1.0f; }
+
+			if (Donya::Keyboard::Trigger('Z')) { input.doDefend = true; }
+			if (Donya::Keyboard::Trigger('X')) { input.doAttack = true; }
+		}
+
+		input.moveVector.Normalize();
+
+		// Transform to camera space from world space.
+		{
+			Donya::Vector4x4 cameraRotation{};
+			{
+				// Extract inverse rotation matrix here.
+				cameraRotation = viewMat;
+				cameraRotation._14 = 0.0f;
+				cameraRotation._24 = 0.0f;
+				cameraRotation._34 = 0.0f;
+				cameraRotation._41 = 0.0f;
+				cameraRotation._42 = 0.0f;
+				cameraRotation._43 = 0.0f;
+				cameraRotation._44 = 1.0f;
+
+				// XXX : If "viewMat" is invalid matrix, Inverse() will returns NaN.
+
+				cameraRotation = cameraRotation.Inverse();
+			}
+
+			Donya::Vector4 moveVector4{};
+			moveVector4.x = input.moveVector.x;
+			moveVector4.y = input.moveVector.y;
+			moveVector4.z = input.moveVector.z;
+			moveVector4.w = 0.0f;
+
+			moveVector4 = cameraRotation * moveVector4;
+
+			input.moveVector.x = moveVector4.x;
+			input.moveVector.z = moveVector4.z;
+		}
+
+		return input;
+	};
+	player.Update(MakePlayerInput(Donya::Vector4x4::FromMatrix(GameLib::camera::GetViewMatrix())));
+
+	std::vector<Donya::Circle> nullBodies;
+	player.PhysicUpdate(nullBodies);
+
+	ProcessCollision();
+
+	CameraUpdate(camTarget);
+}
+
+void sceneTitle::TutorialEndUpdate()
+{
+	pSceneManager->setNextScene(new SceneGame, false);
+}
+
+void sceneTitle::CameraUpdate(const Donya::Vector3& targetPosition)
+{
+#if 0
+	DirectX::XMFLOAT3 originVec(0.0f, 0.0f, 1.0f);
+	DirectX::XMFLOAT3 boss_Player_Vec(player.GetPosition().x - boss.pos.x, player.GetPosition().y - boss.pos.y, player.GetPosition().z - boss.pos.z);
+	DirectX::XMFLOAT3 _boss_Player_Vec(player.GetPosition().x - boss.pos.x, player.GetPosition().y - boss.pos.y, player.GetPosition().z - boss.pos.z);
+
+	float l1, l2;
+	l1 = sqrtf((originVec.x * originVec.x) + (originVec.y * originVec.y) + (originVec.z * originVec.z));
+	l2 = sqrtf((boss_Player_Vec.x * boss_Player_Vec.x) + 0.0f + (boss_Player_Vec.z * boss_Player_Vec.z));
+	boss_Player_Vec.x /= l2;
+	boss_Player_Vec.y /= l2;
+	boss_Player_Vec.z /= l2;
+
+	float dot = 0.0f;
+	float angle = 0.0f;
+	l2 = sqrtf((boss_Player_Vec.x * boss_Player_Vec.x) + 0.0f + (boss_Player_Vec.z * boss_Player_Vec.z));
+	dot = (originVec.x * boss_Player_Vec.x) + 0.0f + (originVec.z * boss_Player_Vec.z);
+	angle = acos(dot / (l1 * l2)) / (3.141592f / 180.0f);
+
+	if (_boss_Player_Vec.x < 0)
+	{
+		angle *= -1;
 	}
+	float distance = 1000.0f;
+	DirectX::XMFLOAT3 _player_pos = player.GetPosition();
+	cameraPos.x = _player_pos.x + sinf(angle * 0.01745f) * distance;
+	cameraPos.y = 400.0f;
+	cameraPos.z = _player_pos.z + cosf(angle * 0.01745f) * distance;
+#elif 0
+	Donya::Vector3 boss_Player_Vec(player.GetPosition().x - boss.pos.x, 0.0f, player.GetPosition().z - boss.pos.z);
+	Donya::Vector3 boss_Player_Vec_N = boss_Player_Vec;
+	boss_Player_Vec_N.Normalize();
 
-	if (GetAsyncKeyState('1') < 0)
-		pSceneManager->setNextScene(new scenePose, true);
+	float add_length = 1000.0f;
+
+	cameraPos.x = boss_Player_Vec_N.x * (boss_Player_Vec.Length() + add_length);
+	cameraPos.y = player.GetPosition().y + add_length;
+	cameraPos.z = boss_Player_Vec_N.z * (boss_Player_Vec.Length() + add_length);
+#else
+	Donya::Vector3 playerPos = player.GetPosition();
+	Donya::Vector3 targetPos = targetPosition;
+
+	// DirectX::XMFLOAT3 player_to_target_vec = DirectX::XMFLOAT3( targetPos.x - playerPos.x, targetPos.y - playerPos.y, targetPos.z - playerPos.z );
+	Donya::Vector3 player_to_target_vec = targetPos - playerPos;
+	if (player_to_target_vec.IsZero())
+	{
+		// Prevent NaN when calculate Player's input.
+		player_to_target_vec = -Donya::Vector3::Front();
+	}
+	float distPlayerBoss = player_to_target_vec.Length();
+	Donya::Vector3 unitvec_player_to_target = player_to_target_vec.Normalized();
+
+	camPos = Donya::Vector3
+	{
+		playerPos.x - unitvec_player_to_target.x * cameraDistance,
+		camPos.y,
+		playerPos.z - unitvec_player_to_target.z * cameraDistance
+	};
+
+#if 0
+	DirectX::XMFLOAT3 cameraTarget = DirectX::XMFLOAT3(targetPos.x + unitvec_player_to_target.x, targetPos.y + unitvec_player_to_target.y, targetPos.z + unitvec_player_to_target.z);
+#else
+	// TODO : 後々、変更するかも。
+	float tanY = tanf(90.0f);
+	float cameraFocusY = tanY * (distPlayerBoss / 8.0f);
+	// DirectX::XMFLOAT3 cameraTarget = DirectX::XMFLOAT3( targetPos.x + unitvec_player_to_target.x, targetY, targetPos.z + unitvec_player_to_target.z );
+	Donya::Vector3 cameraTarget = Donya::Vector3
+	{
+		targetPos.x + unitvec_player_to_target.x,
+		cameraFocusY,
+		targetPos.z + unitvec_player_to_target.z
+	};
+#endif
+
+#endif
 }
 
 void sceneTitle::render()
 {
-	setRenderTarget(&RT);
-	clearRendertarget(RT, { 0,0,0,0 });
 	clearWindow(0.5f, 0.5f, 0.5f, 1.0f);
-	setString({ 0,0 }, L"sceneTitle %d : %f", 1, 20.2f);
-	//textOut(L"TITLE", .0f, 0.f);
-	if (!models.empty())
-		for (model* p = models.data(); p < models.data() + models.size(); p++)
-		{
-			if (!p->is_enable)
-				continue;
-			XMFLOAT4X4 W, WVP;
+//	setString({ 0,0 }, L"sceneTitle %d : %f", 1, 20.2f);
 
-			DirectX::XMMATRIX worldM;
-			DirectX::XMMATRIX S, R, Rx, Ry, Rz, T;
-			T = DirectX::XMMatrixTranslation(p->model_pos.x, p->model_pos.y, p->model_pos.z);
+	Donya::Vector4x4 V = Donya::Vector4x4::FromMatrix(getViewMatrix());
+	Donya::Vector4x4 P = Donya::Vector4x4::FromMatrix(getProjectionMatrix());
 
-			//	拡大・縮小
-			S = DirectX::XMMatrixScaling(p->model_scale.x, p->model_scale.y, p->model_scale.z);
+	Donya::Vector4x4 W = Donya::Vector4x4::Identity();
+	Donya::Vector4x4 WVP = W * V * P;
+	FBXRender(pStageModel.get(), shader, WVP, W);
 
-			//	回転
-			Rx = DirectX::XMMatrixRotationX(p->model_angle.x);				//	X軸を基準とした回転行列
-			Ry = DirectX::XMMatrixRotationY(p->model_angle.y);				//	Y軸を基準とした回転行列
-			Rz = DirectX::XMMatrixRotationZ(p->model_angle.z);				//	Z軸を基準とした回転行列
-			R = Rz * Rx * Ry;
+	if (titleExist)
+	{
+		Donya::Vector4x4 S = Donya::Vector4x4::MakeScaling(titleScale);
+		Donya::Vector4x4 R = Donya::Vector4x4::MakeRotationEuler(Donya::Vector3(0.0f, 0.0f, 0.0f));
+		Donya::Vector4x4 T = Donya::Vector4x4::MakeTranslation(titlePos);
+		W = S * R * T;
+		WVP = W * V * P;
+		FBXRender(pTitleModel.get(), shader, WVP, W);
+	}
 
-			//	平行移動
+	player.Draw(shader, V, P);
+	catapult.Draw(shader, V, P);
 
-			//	ワールド変換行列
-			worldM = S * R * T;
+	auto GenerateCube = []()->std::shared_ptr<static_mesh>
+	{
+		std::shared_ptr<static_mesh> tmpCube = std::make_shared<static_mesh>();
+		createCube(tmpCube.get());
+		return tmpCube;
+	};
+	static std::shared_ptr<static_mesh> pCube = GenerateCube();
+	
+	Donya::Vector4x4 CS = Donya::Vector4x4::MakeScaling(cubeScale); // Half size->Whole size.
+	Donya::Vector4x4 CR = Donya::Vector4x4::MakeRotationEuler(Donya::Vector3(0.0f, 0.0f, 0.0f));
+	Donya::Vector4x4 CT = Donya::Vector4x4::MakeTranslation(cubePos);
+	Donya::Vector4x4 CW = CS * CR * CT;
+	Donya::Vector4x4 CWVP = CW * V * P;
 
-			//	Matrix -> Float4x4 変換
-			DirectX::XMStoreFloat4x4(&WVP, worldM * getViewMatrix() * getProjectionMatrix());
-			DirectX::XMStoreFloat4x4(&W, worldM);
+	OBJRender(pCube.get(), CWVP, CW, Donya::Vector4(0.0f, 0.8f, 0.3f, 0.6f));
 
-
-			FBXRender(&p->mesh, shader, WVP, W);
-		}
-
-	DirectX::XMFLOAT4X4 view_projection;
-	DirectX::XMStoreFloat4x4(&view_projection, getViewMatrix() * getProjectionMatrix());
-	setBlendMode_ALPHA(255);
-
-	billboardRender(&builborad, view_projection, builboard_pos, builborad_size, builborad_angle, getCamPos(), texpos, texsize, alpha, color);
-	setBlendMode_NONE(255);
-
-	resetRendertarget();
-	screen_SRV = (void*)SRV;
-
-	postEffect_Bloom(&SRV, blur, judged_color);
 }
 
 void sceneTitle::uninit()
@@ -273,12 +531,43 @@ void sceneTitle::imGui()
 		pSceneManager->setNextScene(new SceneGame(), false);
 	}
 	else
-		if (ImGui::Button("Effect"))
-		{
-			pSceneManager->setNextScene(new SceneEffect, false);
-		}
+	if (ImGui::Button("Effect"))
+	{
+		pSceneManager->setNextScene(new SceneEffect, false);
+	}
+	else if (ImGui::Button("Result"))
+	{
+		pSceneManager->setNextScene(new SceneResult(60), false);
+	}
+	else if (ImGui::Button("GameOver"))
+	{
+		pSceneManager->setNextScene(new SceneGameOver, false);
+	}
 
 	ImGui::End();
+
+	ImGui::Begin("Camera");
+	ImGui::DragFloat3("pos", &camPos.x);
+	ImGui::DragFloat3("target", &camTarget.x);
+	ImGui::DragFloat3("Title camera pos", &camTitlePos.x);
+	ImGui::DragFloat3("Title camera target", &camTitleTarget.x);
+	ImGui::End();
+
+	ImGui::Begin("OBJ Para");
+	ImGui::DragFloat3("Title pos", &titlePos.x);
+	ImGui::DragFloat3("Title scale", &titleScale.x);
+	ImGui::DragFloat3("cube pos", &cubePos.x);
+	ImGui::DragFloat3("cube scale", &cubeScale.x);
+	ImGui::End();
+
+	ImGui::Begin("Player");
+	Donya::Vector3 _pos = player.GetPosition();
+	ImGui::Text("pos.x : %f, pos.y : %f, pos.z : %f", _pos.x, _pos.y, _pos.z);
+	ImGui::End();
+
+	catapult.ImGui();
+
+#if 0
 	static int index = 0;
 	static float dragPower[3] = { 1.0f };
 
@@ -458,5 +747,41 @@ void sceneTitle::imGui()
 
 		ImGui::End();
 	}
+#endif
+}
 
+void sceneTitle::ProcessCollision()
+{
+	const Donya::OBB playerBodyBox = player.GetHurtBox();
+	const Donya::OBB playerShieldBox = player.GetShieldHitBox();
+	const Donya::OBB playerAttackBox = player.CalcAttackHitBox();
+
+	bool wasHitToShield = false;
+
+	if (Donya::OBB::IsHitSphere(playerShieldBox, catapult.stone.hitSphere))
+	{
+		setStopAnimation(catapult.pModel.get(), true);
+		catapult.stone.exist = false;
+		catapult.stone.hitSphere.exist = false;
+		catapult.stone.hitSphere.enable = false;
+		wasHitToShield = true;
+		player.SucceededDefence();
+		tutorialState++;
+	}
+	if (!wasHitToShield && Donya::OBB::IsHitSphere(playerBodyBox, catapult.stone.hitSphere))
+	{
+		player.ReceiveImpact();
+		pSceneManager->setNextScene(new sceneTitle(), false);
+	}
+
+	// PlayerAttack VS CatapuletBudy
+	{
+		if (tutorialState == TutorialState::ATTACK && Donya::OBB::IsHitOBB(playerAttackBox, catapult.hitOBB))
+		{
+			catapult.hitOBB.exist = false;
+			tutorialState++;
+		}
+	}
+
+	wasHitToShield = false;
 }

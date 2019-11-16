@@ -10,6 +10,8 @@
 
 #include "Sprite.h"
 #include "Particle.h"
+#include "Player.h"
+#include "Catapult.h"
 #include "GolemAI.h"
 #include "OBB.h"
 #include "Effect.h"
@@ -24,6 +26,49 @@ using namespace DirectX;
 class sceneTitle : public baseScene
 {
 private:
+	Donya::Vector3 camPos = { 0.0f, 2450.0f, 15000.0f };
+	Donya::Vector3 camTarget = { 0.0f, 2000.0f, 0.0f };
+	float cameraDistance;
+
+	Donya::Vector3 camTitlePos = { 0.0f, 2226.0f, 14446.0f };
+	Donya::Vector3 camTitleTarget = { 0.0f, 5294.0f, 0.0f };
+	fbx_shader shader;
+	Lights	lights;
+
+	Player	player;
+	Catapult catapult;
+	Donya::Vector3 titlePos;
+	Donya::Vector3 titleScale;
+	Donya::Vector3 cubePos;
+	Donya::Vector3 cubeScale;
+	std::unique_ptr<skinned_mesh> pStageModel;
+	std::unique_ptr<skinned_mesh> pTitleModel;
+
+	enum SceneState
+	{
+		TITLE,
+		CAMERA_MOVE,
+		TUTORIAL
+	};
+	int sceneState;
+
+	enum TutorialState
+	{
+		START,
+		GUARD,
+		ATTACK,
+		END
+	};
+	int tutorialState;
+
+
+	static const int MAX_MOVE_CNT = 120;
+	int moveCnt;
+
+	bool titleExist;
+
+
+#if 0
 	struct model
 	{
 		skinned_mesh mesh;
@@ -65,8 +110,16 @@ private:
 	ImTextureID screen_SRV;
 	float blur;
 	DirectX::XMFLOAT4 judged_color;
+#endif
+
 public:
-	sceneTitle(){}
+	sceneTitle() : 
+		shader(),
+		lights(),
+		player(),
+		pStageModel(std::make_unique<skinned_mesh>()),
+		pTitleModel(std::make_unique<skinned_mesh>())
+	{}
 	~sceneTitle()
 	{
 		uninit();
@@ -76,6 +129,16 @@ public:
 	void render();
 	void uninit();
 	void imGui();
+
+	void TitleUpdate();
+	void CameraMove();
+	void TutorialUpdate();
+	void TutorialStartUpdate();
+	void TutorialGuardUpdate();
+	void TutorialAttackUpdate();
+	void TutorialEndUpdate();
+	void ProcessCollision();
+	void CameraUpdate(const Donya::Vector3& targetPosition);
 };
 
 #include <memory>
