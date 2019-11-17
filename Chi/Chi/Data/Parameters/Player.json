@@ -29,7 +29,7 @@
             "radius": 16.0,
             "exist": true
         },
-        "frameUnfoldableDefence": 120,
+        "frameUnfoldableDefence": 0,
         "frameCancelableAttack": 50,
         "frameWholeAttacking": 185,
         "hitBoxShield": {
@@ -72,7 +72,7 @@
             }
         },
         "lanceMeshName": "MDL_Spear",
-        "shieldsRecastFrame": 30,
+        "shieldsRecastFrame": 20,
         "frameStopAnime": 90,
         "frameStopTiming": 1,
         "advanceStartFrame": 90,

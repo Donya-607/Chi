@@ -193,6 +193,7 @@
     <ClInclude Include="RivalAI.h" />
     <ClInclude Include="scene.h" />
     <ClInclude Include="sceneManager.h" />
+    <ClInclude Include="Shield.h" />
     <ClInclude Include="skinned_mesh.h" />
     <ClInclude Include="Sprite.h" />
     <ClInclude Include="Stage.h" />
@@ -254,6 +255,7 @@
     <ClCompile Include="scenePose.cpp" />
     <ClCompile Include="SceneResult.cpp" />
     <ClCompile Include="sceneTitle.cpp" />
+    <ClCompile Include="Shield.cpp" />
     <ClCompile Include="skinned_mesh.cpp" />
     <ClCompile Include="Sprite.cpp" />
     <ClCompile Include="Stage.cpp" />

@@ -13,6 +13,8 @@
 #include "Donya/UseImGui.h"
 #include "Donya/Vector.h"
 
+#include "Shield.h"
+
 /// <summary>
 /// Player's serialize parameter.
 /// </summary>
@@ -231,8 +233,10 @@ private:
 	Donya::Vector3			extraOffset;		// Actual position is "pos + extraOffset".
 	Donya::Quaternion		orientation;
 	Models					models;
+	Shield					shield;
 	std::vector<Donya::Box>	wallCollisions;		// Stored hit-boxes belongs world space, XZ plane. This variable only assigned at Init().
-	bool				wasSucceededDefence;
+	bool					wasSucceededDefence;
+	bool					isContinuingDefence;// Prevent continuous unfold since finished the shield's remaining frame.
 public:
 	Player();
 	~Player();
@@ -324,6 +328,9 @@ private:
 	/// If the position("pos") without to field range, clamp to field range.
 	/// </summary>
 	void CollideToStagesWall();
+private:
+	void ShieldUpdate();
+	bool CanUnfoldShield() const;
 private:
 #if USE_IMGUI
 

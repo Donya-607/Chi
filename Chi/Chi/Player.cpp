@@ -81,7 +81,7 @@ void PlayerParam::UseImGui()
 	{
 		if ( ImGui::TreeNode( "Player.AdjustData" ) )
 		{
-			ImGui::SliderInt( "Defence.WholeExpandingFrame",	&frameUnfoldableDefence,	1, 120 );
+			// Unused. // ImGui::SliderInt( "Defence.MaxUnfoldableFrame",		&frameUnfoldableDefence,	1, 360 );
 			ImGui::SliderInt( "Defence.RecastFrame",			&shieldsRecastFrame,		0, 360 );
 			ImGui::SliderInt( "Attack.StopAnime.Timing(Frame)",	&frameStopTiming,			1, 360 );
 			ImGui::SliderInt( "Attack.StopAnime.Lenth(Frame)",	&frameStopAnime,			1, 360 );
@@ -148,6 +148,8 @@ void PlayerParam::UseImGui()
 
 			static std::array<char, 512U> lanceNameBuffer{};
 			ImGui::InputText( "MeshName.Lance", lanceNameBuffer.data(), lanceNameBuffer.size() );
+			ImGui::Text( "" );
+
 			if ( ImGui::Button( "Apply MeshName.Lance" ) )
 			{
 				lanceMeshName = lanceNameBuffer.data();
@@ -241,15 +243,18 @@ Player::Input Player::Input::MakeByExternalInput( Donya::Vector4x4 viewMat )
 	{
 		// XINPUT_GAMEPAD : https://docs.microsoft.com/ja-jp/windows/win32/api/xinput/ns-xinput-xinput_gamepad
 
+		using namespace GameLib::input;
+
 		constexpr int   PAD_NO = 0;
 		constexpr float STICK_RANGE_MAX = 32768.0f;
-		const auto leftStick = GameLib::input::xInput::getThumbL( PAD_NO );
+		const auto leftStick = xInput::getThumbL( PAD_NO );
 		if ( leftStick.x != 0 ) { input.moveVector.x = scast<float>( leftStick.x ) / STICK_RANGE_MAX; }
 		if ( leftStick.y != 0 ) { input.moveVector.z = scast<float>( leftStick.y ) / STICK_RANGE_MAX; }
 
-		constexpr int TRIGGER_FLAG = 1;
-		if ( GameLib::input::xInput::pressedButtons( PAD_NO, XboxPad_Button::RIGHT_SHOULDER ) == TRIGGER_FLAG ) { input.doDefend = true; }
-		if ( GameLib::input::xInput::pressedButtons( PAD_NO, XboxPad_Button::X ) == TRIGGER_FLAG ) { input.doAttack = true; }
+		constexpr int TRIGGER_FLAG	= 1;
+		constexpr int PRESS_FLAG	= 2;
+		if ( TRIGGER_FLAG	== xInput::pressedButtons( PAD_NO, XboxPad_Button::RIGHT_SHOULDER	) ) { input.doDefend = true; }
+		if ( PRESS_FLAG		== xInput::pressedButtons( PAD_NO, XboxPad_Button::X				) ) { input.doAttack = true; }
 	}
 #if !DEBUG_MODE
 	// else
@@ -260,7 +265,7 @@ Player::Input Player::Input::MakeByExternalInput( Donya::Vector4x4 viewMat )
 		if ( Donya::Keyboard::Press( VK_LEFT	) ) { input.moveVector.x = -1.0f; }
 		if ( Donya::Keyboard::Press( VK_RIGHT	) ) { input.moveVector.x = +1.0f; }
 
-		if ( Donya::Keyboard::Trigger( 'Z' ) ) { input.doDefend = true; }
+		if ( Donya::Keyboard::Press  ( 'Z' ) ) { input.doDefend = true; }
 		if ( Donya::Keyboard::Trigger( 'X' ) ) { input.doAttack = true; }
 	}
 
@@ -308,8 +313,9 @@ Player::Player() :
 	pos(), velocity(), lookDirection(), extraOffset(),
 	orientation(),
 	models(),
+	shield(),
 	wallCollisions(),
-	wasSucceededDefence( false )
+	wasSucceededDefence( false ), isContinuingDefence( false )
 {
 	auto InitializeModel = []( std::shared_ptr<skinned_mesh> *ppMesh )
 	{
@@ -337,6 +343,8 @@ void Player::Init( const Donya::Vector3 &wsInitPos, const Donya::Vector3 &initRa
 	SetFieldRadius( 0.0f ); // Set to body's radius.
 
 	LoadModel();
+
+	shield.Init();
 	
 	pos				= wsInitPos;
 	orientation		= Donya::Quaternion::Make( initRadians.x, initRadians.y, initRadians.z );
@@ -347,6 +355,8 @@ void Player::Init( const Donya::Vector3 &wsInitPos, const Donya::Vector3 &initRa
 }
 void Player::Uninit()
 {
+	shield.Uninit();
+
 	PlayerParam::Get().Uninit();
 
 	models.pIdle.reset();
@@ -368,6 +378,8 @@ void Player::Update( Input input )
 
 	ChangeStatus( input );
 	UpdateCurrentStatus( input );
+
+	ShieldUpdate();
 }
 void Player::PhysicUpdate( const std::vector<Donya::Circle> &xzCylinderWalls )
 {
@@ -397,6 +409,8 @@ void Player::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Dony
 		break;
 	default: break;
 	}
+
+	shield.Draw( HLSL, matView, matProjection, W );
 
 	// For debug, helpers of drawing primitive. and drawing collisions.
 #if DEBUG_MODE
@@ -459,14 +473,6 @@ void Player::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Dony
 		if ( BODY.exist   ) { DrawCube  ( BODY.pos,   BODY.size,     BODY_COLOR   ); }
 		if ( PHYSIC.exist ) { DrawSphere( PHYSIC.pos, PHYSIC.radius, PHYSIC_COLOR ); }
 
-		if ( status == State::Defend )
-		{
-			constexpr Donya::Vector4 SHIELD_COLOR{ 0.2f, 0.8f, 0.2f, 0.6f };
-			constexpr Donya::Vector4 SHIELD_COLOR_SUCCEEDED{ 0.8f, 1.0f, 1.0f, 0.6f };
-			const auto SHIELD = PARAM.HitBoxShield();
-			Donya::Vector4 color = ( wasSucceededDefence ) ? SHIELD_COLOR_SUCCEEDED : SHIELD_COLOR;
-			DrawCube( SHIELD.pos, SHIELD.size, color );
-		}
 		if ( status == State::Attack )
 		{
 			constexpr Donya::Vector4 LANCE_COLOR_VALID{ 1.0f, 0.8f, 0.5f, 0.6f };
@@ -483,10 +489,10 @@ void Player::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Dony
 static Donya::OBB MakeOBB( const Donya::AABB &AABB, const Donya::Vector3 &wsPos, const Donya::Quaternion &orientation )
 {
 	Donya::OBB OBB{};
-	OBB.pos		= AABB.pos + wsPos;
-	OBB.size	= AABB.size;
+	OBB.pos			= AABB.pos + wsPos;
+	OBB.size		= AABB.size;
 	OBB.orientation = orientation;
-	OBB.exist	= AABB.exist;
+	OBB.exist		= AABB.exist;
 	return OBB;
 }
 Donya::OBB Player::GetHurtBox() const
@@ -498,9 +504,8 @@ Donya::OBB Player::GetHurtBox() const
 }
 Donya::OBB Player::GetShieldHitBox() const
 {
-	const auto &HITBOX = PlayerParam::Get().HitBoxShield();
-
-	Donya::OBB wsOBB = MakeOBB( HITBOX, GetPosition(), orientation );
+	Donya::AABB shieldLocal = shield.GetHitBox();
+	Donya::OBB  wsOBB = MakeOBB( shieldLocal, GetPosition(), orientation );
 	if ( status != State::Defend ) { wsOBB.exist = false; }
 	return wsOBB;
 }
@@ -564,14 +569,15 @@ Donya::OBB Player::CalcAttackHitBox() const
 
 void Player::SucceededDefence()
 {
+	shield.Recover();
 	wasSucceededDefence = true;
 	Donya::Sound::Play( scast<int>( MusicAttribute::PlayerProtected ) );
 }
 
 void Player::ReceiveImpact()
 {
-	status = State::Dead;
-	velocity = 0.0f;
+	status		= State::Dead;
+	velocity	= 0.0f;
 }
 
 void Player::SetFieldRadius( float newFieldRadius )
@@ -632,6 +638,10 @@ void Player::ChangeStatus( Input input )
 	{
 		shieldsRecastTime--;
 	}
+	if ( !input.doDefend && isContinuingDefence )
+	{
+		isContinuingDefence = false;
+	}
 
 	// These method is change my status if needs.
 
@@ -665,7 +675,7 @@ XXXUninit : call by ChangeStatusXXX when changing status. before YYYInit.
 
 void Player::ChangeStatusFromIdle( Input input )
 {
-	if ( input.doDefend && !shieldsRecastTime )
+	if ( input.doDefend && CanUnfoldShield() )
 	{
 		IdleUninit();
 		DefendInit( input );
@@ -708,7 +718,7 @@ void Player::IdleUninit()
 
 void Player::ChangeStatusFromRun( Input input )
 {
-	if ( input.doDefend && !shieldsRecastTime )
+	if ( input.doDefend && CanUnfoldShield() )
 	{
 		RunUninit();
 		DefendInit( input );
@@ -750,28 +760,13 @@ void Player::RunUninit()
 
 void Player::ChangeStatusFromDefend( Input input )
 {
-	bool cancelable = wasSucceededDefence;
-	bool doCancel   = cancelable && ( !input.moveVector.IsZero() || input.doAttack );
-	if ( doCancel )
+	auto ForkByInput = [&]( Input input, bool isAllowAttack = true )
 	{
-		DefendUninit();
-
-		if ( input.doAttack )
+		if ( input.doAttack && isAllowAttack )
 		{
 			AttackInit( input );
 		}
 		else
-		{
-			RunInit( input );
-		}
-	}
-	else
-	if ( timer <= 0 )
-	{
-		DefendUninit();
-
-		// If allows hold attack button, insert AttackInit() here.
-
 		if ( input.moveVector.IsZero() )
 		{
 			IdleInit( input );
@@ -780,15 +775,39 @@ void Player::ChangeStatusFromDefend( Input input )
 		{
 			RunInit( input );
 		}
+	};
+
+	if ( !input.doDefend )
+	{
+		DefendUninit();
+
+		ForkByInput( input );
+		return;
+	}
+	// else
+	if ( !shield.CanUnfold() )
+	{
+		DefendUninit();
+
+		// This process only doing if remain frame of shield is zero.
+		if ( shield.GetRemainingFrame() == 0 && !wasSucceededDefence )
+		{
+			shieldsRecastTime = PlayerParam::Get().FrameReuseShield();
+		}
+
+		ForkByInput( input );
+		return;
 	}
 }
 void Player::DefendInit( Input input )
 {
 	status				= State::Defend;
+	timer				= 0;
 	velocity			= 0.0f; // Each member set to zero.
 	currentMotion		= Defend;
 	shieldsRecastTime	= 0;
 	wasSucceededDefence	= false;
+	isContinuingDefence	= true;
 
 	const auto &PARAM = PlayerParam::Get();
 	timer = PARAM.FrameWholeDefence();
@@ -799,8 +818,6 @@ void Player::DefendInit( Input input )
 }
 void Player::DefendUpdate( Input input )
 {
-	timer--;
-
 	if ( !input.moveVector.IsZero() )
 	{
 		lookDirection = input.moveVector.Normalized();
@@ -809,7 +826,6 @@ void Player::DefendUpdate( Input input )
 void Player::DefendUninit()
 {
 	timer = 0;
-	shieldsRecastTime	= ( wasSucceededDefence ) ? 0 : PlayerParam::Get().FrameReuseShield();
 	wasSucceededDefence	= false;
 
 	setAnimFlame( models.pDefend.get(), 0 );
@@ -838,7 +854,7 @@ void Player::ChangeStatusFromAttack( Input input )
 	const int  WHOLE_FRAME	= PARAM.FrameWholeAttacking();
 	const int  CANCELABLE	= PARAM.FrameCancelableAttack();
 	const bool withinCancelableRange = ( WHOLE_FRAME - CANCELABLE ) <= timer;
-	if ( input.doDefend && !shieldsRecastTime && withinCancelableRange )
+	if ( input.doDefend && CanUnfoldShield() && withinCancelableRange )
 	{
 		AttackUninit();
 		DefendInit( input );
@@ -1127,13 +1143,23 @@ void Player::CollideToStagesWall()
 	}
 }
 
+void Player::ShieldUpdate()
+{
+	bool nowUnfolding = ( status == State::Defend ) ? true : false;
+	shield.Update( nowUnfolding );
+}
+bool Player::CanUnfoldShield() const
+{
+	return ( shield.CanUnfold() && !shieldsRecastTime && !isContinuingDefence ) ? true : false;
+}
+
 #if USE_IMGUI
 
 void Player::UseImGui()
 {
 	if ( ImGui::BeginIfAllowed() )
 	{
-		if ( ImGui::TreeNode( u8"Player.CurrentParameter" ) )
+		if ( ImGui::TreeNode( "Player.CurrentParameter" ) )
 		{
 			auto GetStatusName = []( Player::State status )->std::string
 			{
