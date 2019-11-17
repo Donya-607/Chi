@@ -27,7 +27,7 @@ void sceneTitle::init()
 	models.clear();
 	loadShader(shader, "./Data/shader/skinned_mesh_has_born_vs.cso", "./Data/shader/skinned_mesh_ps.cso", "./Data/shader/skinned_mesh_vs.cso", "./Data/shader/skinned_mesh_no_uv_ps.cso");
 	models.emplace_back();
-	loadFBX(&models.back().mesh, "./Data/Boss04_3Attack.fbx");
+	loadFBX(&models.back().mesh, "./Data/Boss04_3Attack.fbx",false);
 	models.back().model_pos = { 0,0,0 };
 	models.back().model_angle = { 0,3.1,0 };
 	models.back().model_scale = { 0.1f,0.1f,0.1f };

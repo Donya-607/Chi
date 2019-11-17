@@ -140,7 +140,7 @@ INT WINAPI wWinMain(HINSTANCE instance, HINSTANCE prev_instance, LPWSTR cmd_line
 		::CoInitialize(NULL);
 
 		// çƒê∂Ç∑ÇÈìÆâÊÉtÉ@ÉCÉã
-		std::wstring strFilePath = L"./Data/WANTED-GIRL.mp4";
+		std::wstring strFilePath = L"./Data/Boss04_motion_1.wmv";
 
 		// IGraphBuilder
 		IGraphBuilder* pGraphBuilder = NULL;
@@ -228,7 +228,7 @@ INT WINAPI wWinMain(HINSTANCE instance, HINSTANCE prev_instance, LPWSTR cmd_line
 
 
 		GameLib::present(0, 0);
-#if 1
+#if 0
 		static OPENFILENAME ofn;
 
 		static wchar_t cfilename[MAX_PATH];
