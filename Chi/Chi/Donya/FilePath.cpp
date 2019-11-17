@@ -55,7 +55,7 @@ std::string GetModelPath( ModelAttribute modelAttribute )
 	case ModelAttribute::TutorialStage:
 		return "./Data/model/Tutorial/MDL_TutorialMap.fbx";					// break;
 	case ModelAttribute::TutorialBoss:
-		return "./Data/model/Tutorial/MDL_MDL_Catapult_Attack.fbx";			// break;
+		return "./Data/model/Tutorial/MDL_Catapult_Attack.fbx";				// break;
 	case ModelAttribute::TutorialBossStone:
 		return "./Data/model/Tutorial/MDL_Stone.fbx";						// break;
 	case ModelAttribute::KnightIdle:

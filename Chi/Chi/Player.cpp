@@ -751,6 +751,14 @@ void Player::RunInit( Input input )
 }
 void Player::RunUpdate( Input input )
 {
+	if ( input.onlyRotation )
+	{
+		lookDirection = input.moveVector.Normalized();
+		velocity = 0.0f;
+		return;
+	}
+	// else
+
 	AssignInputVelocity( input );
 }
 void Player::RunUninit()

@@ -1,0 +1,3288 @@
+{
+    "TestMove.json": {
+        "cereal_class_version": 0,
+        "meshes": [
+            {
+                "cereal_class_version": 0,
+                "vertices": [
+                    {
+                        "cereal_class_version": 0,
+                        "position.x": 0.5,
+                        "position.y": 0.5,
+                        "position.z": 4.0358967781066898,
+                        "normal.x": 0.0,
+                        "normal.y": 0.0,
+                        "normal.z": 1.0,
+                        "texcoord.x": 0.625,
+                        "texcoord.y": 0.75,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": -0.5,
+                        "position.y": 0.5,
+                        "position.z": 4.0358967781066898,
+                        "normal.x": 0.0,
+                        "normal.y": 0.0,
+                        "normal.z": 1.0,
+                        "texcoord.x": 0.375,
+                        "texcoord.y": 0.75,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": -0.5,
+                        "position.y": -0.5,
+                        "position.z": 4.0358967781066898,
+                        "normal.x": 0.0,
+                        "normal.y": 0.0,
+                        "normal.z": 1.0,
+                        "texcoord.x": 0.375,
+                        "texcoord.y": 1.0,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": 0.5,
+                        "position.y": 0.5,
+                        "position.z": 4.0358967781066898,
+                        "normal.x": 0.0,
+                        "normal.y": 0.0,
+                        "normal.z": 1.0,
+                        "texcoord.x": 0.625,
+                        "texcoord.y": 0.75,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": -0.5,
+                        "position.y": -0.5,
+                        "position.z": 4.0358967781066898,
+                        "normal.x": 0.0,
+                        "normal.y": 0.0,
+                        "normal.z": 1.0,
+                        "texcoord.x": 0.375,
+                        "texcoord.y": 1.0,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": 0.5,
+                        "position.y": -0.5,
+                        "position.z": 4.0358967781066898,
+                        "normal.x": 0.0,
+                        "normal.y": 0.0,
+                        "normal.z": 1.0,
+                        "texcoord.x": 0.625,
+                        "texcoord.y": 1.0,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": 0.5,
+                        "position.y": 0.5,
+                        "position.z": 0.5,
+                        "normal.x": 0.0,
+                        "normal.y": 1.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.625,
+                        "texcoord.y": 0.75,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": 0.5,
+                        "position.y": 0.5,
+                        "position.z": -0.5,
+                        "normal.x": 0.0,
+                        "normal.y": 1.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.625,
+                        "texcoord.y": 0.5,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": -0.5,
+                        "position.y": 0.5,
+                        "position.z": 0.5,
+                        "normal.x": 0.0,
+                        "normal.y": 1.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.375,
+                        "texcoord.y": 0.75,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": -0.5,
+                        "position.y": 0.5,
+                        "position.z": 0.5,
+                        "normal.x": 0.0,
+                        "normal.y": 1.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.375,
+                        "texcoord.y": 0.75,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": 0.5,
+                        "position.y": 0.5,
+                        "position.z": -0.5,
+                        "normal.x": 0.0,
+                        "normal.y": 1.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.625,
+                        "texcoord.y": 0.5,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": -0.5,
+                        "position.y": 0.5,
+                        "position.z": -0.5,
+                        "normal.x": 0.0,
+                        "normal.y": 1.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.375,
+                        "texcoord.y": 0.5,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": 0.5,
+                        "position.y": -0.5,
+                        "position.z": -4.0358967781066898,
+                        "normal.x": 0.0,
+                        "normal.y": 0.0,
+                        "normal.z": -1.0,
+                        "texcoord.x": 0.625,
+                        "texcoord.y": 0.25,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": -0.5,
+                        "position.y": -0.5,
+                        "position.z": -4.0358967781066898,
+                        "normal.x": 0.0,
+                        "normal.y": 0.0,
+                        "normal.z": -1.0,
+                        "texcoord.x": 0.375,
+                        "texcoord.y": 0.25,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": -0.5,
+                        "position.y": 0.5,
+                        "position.z": -4.0358967781066898,
+                        "normal.x": 0.0,
+                        "normal.y": 0.0,
+                        "normal.z": -1.0,
+                        "texcoord.x": 0.375,
+                        "texcoord.y": 0.5,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": 0.5,
+                        "position.y": -0.5,
+                        "position.z": -4.0358967781066898,
+                        "normal.x": 0.0,
+                        "normal.y": 0.0,
+                        "normal.z": -1.0,
+                        "texcoord.x": 0.625,
+                        "texcoord.y": 0.25,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": -0.5,
+                        "position.y": 0.5,
+                        "position.z": -4.0358967781066898,
+                        "normal.x": 0.0,
+                        "normal.y": 0.0,
+                        "normal.z": -1.0,
+                        "texcoord.x": 0.375,
+                        "texcoord.y": 0.5,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": 0.5,
+                        "position.y": 0.5,
+                        "position.z": -4.0358967781066898,
+                        "normal.x": 0.0,
+                        "normal.y": 0.0,
+                        "normal.z": -1.0,
+                        "texcoord.x": 0.625,
+                        "texcoord.y": 0.5,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": 0.5,
+                        "position.y": -0.5,
+                        "position.z": 0.5,
+                        "normal.x": 0.0,
+                        "normal.y": -1.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.625,
+                        "texcoord.y": 0.0,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": -0.5,
+                        "position.y": -0.5,
+                        "position.z": 0.5,
+                        "normal.x": 0.0,
+                        "normal.y": -1.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.375,
+                        "texcoord.y": 0.0,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": -0.5,
+                        "position.y": -0.5,
+                        "position.z": -0.5,
+                        "normal.x": 0.0,
+                        "normal.y": -1.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.375,
+                        "texcoord.y": 0.25,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": 0.5,
+                        "position.y": -0.5,
+                        "position.z": 0.5,
+                        "normal.x": 0.0,
+                        "normal.y": -1.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.625,
+                        "texcoord.y": 0.0,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": -0.5,
+                        "position.y": -0.5,
+                        "position.z": -0.5,
+                        "normal.x": 0.0,
+                        "normal.y": -1.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.375,
+                        "texcoord.y": 0.25,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": 0.5,
+                        "position.y": -0.5,
+                        "position.z": -0.5,
+                        "normal.x": 0.0,
+                        "normal.y": -1.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.625,
+                        "texcoord.y": 0.25,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": 4.0358967781066898,
+                        "position.y": 0.5,
+                        "position.z": 0.5,
+                        "normal.x": 1.0,
+                        "normal.y": 0.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.625,
+                        "texcoord.y": 0.75,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": 4.0358967781066898,
+                        "position.y": -0.5,
+                        "position.z": 0.5,
+                        "normal.x": 1.0,
+                        "normal.y": 0.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.625,
+                        "texcoord.y": 1.0,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": 4.0358967781066898,
+                        "position.y": 0.5,
+                        "position.z": -0.5,
+                        "normal.x": 1.0,
+                        "normal.y": 0.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.875,
+                        "texcoord.y": 0.75,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": 4.0358967781066898,
+                        "position.y": -0.5,
+                        "position.z": 0.5,
+                        "normal.x": 1.0,
+                        "normal.y": 0.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.625,
+                        "texcoord.y": 1.0,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": 4.0358967781066898,
+                        "position.y": -0.5,
+                        "position.z": -0.5,
+                        "normal.x": 1.0,
+                        "normal.y": 0.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.875,
+                        "texcoord.y": 1.0,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": 4.0358967781066898,
+                        "position.y": 0.5,
+                        "position.z": -0.5,
+                        "normal.x": 1.0,
+                        "normal.y": 0.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.875,
+                        "texcoord.y": 0.75,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": -4.0358967781066898,
+                        "position.y": 0.5,
+                        "position.z": 0.5,
+                        "normal.x": -1.0,
+                        "normal.y": 0.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.375,
+                        "texcoord.y": 0.75,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": -4.0358967781066898,
+                        "position.y": -0.5,
+                        "position.z": -0.5,
+                        "normal.x": -1.0,
+                        "normal.y": 0.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.125,
+                        "texcoord.y": 1.0,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": -4.0358967781066898,
+                        "position.y": -0.5,
+                        "position.z": 0.5,
+                        "normal.x": -1.0,
+                        "normal.y": 0.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.375,
+                        "texcoord.y": 1.0,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": -4.0358967781066898,
+                        "position.y": -0.5,
+                        "position.z": -0.5,
+                        "normal.x": -1.0,
+                        "normal.y": 0.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.125,
+                        "texcoord.y": 1.0,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": -4.0358967781066898,
+                        "position.y": 0.5,
+                        "position.z": 0.5,
+                        "normal.x": -1.0,
+                        "normal.y": 0.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.375,
+                        "texcoord.y": 0.75,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": -4.0358967781066898,
+                        "position.y": 0.5,
+                        "position.z": -0.5,
+                        "normal.x": -1.0,
+                        "normal.y": 0.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.125,
+                        "texcoord.y": 0.75,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": -0.5,
+                        "position.y": -0.5,
+                        "position.z": 4.0358967781066898,
+                        "normal.x": 0.0,
+                        "normal.y": -1.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.375,
+                        "texcoord.y": 1.0,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": -0.5,
+                        "position.y": -0.5,
+                        "position.z": 0.5,
+                        "normal.x": 0.0,
+                        "normal.y": -1.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.375,
+                        "texcoord.y": 1.0,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": 0.5,
+                        "position.y": -0.5,
+                        "position.z": 4.0358967781066898,
+                        "normal.x": 0.0,
+                        "normal.y": -1.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.625,
+                        "texcoord.y": 1.0,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": 0.5,
+                        "position.y": -0.5,
+                        "position.z": 4.0358967781066898,
+                        "normal.x": 0.0,
+                        "normal.y": -1.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.625,
+                        "texcoord.y": 1.0,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": -0.5,
+                        "position.y": -0.5,
+                        "position.z": 0.5,
+                        "normal.x": 0.0,
+                        "normal.y": -1.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.375,
+                        "texcoord.y": 1.0,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": 0.5,
+                        "position.y": -0.5,
+                        "position.z": 0.5,
+                        "normal.x": 0.0,
+                        "normal.y": -1.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.625,
+                        "texcoord.y": 1.0,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": 0.5,
+                        "position.y": -0.5,
+                        "position.z": 4.0358967781066898,
+                        "normal.x": 1.0,
+                        "normal.y": 0.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.625,
+                        "texcoord.y": 1.0,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": 0.5,
+                        "position.y": -0.5,
+                        "position.z": 0.5,
+                        "normal.x": 1.0,
+                        "normal.y": 0.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.625,
+                        "texcoord.y": 1.0,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": 0.5,
+                        "position.y": 0.5,
+                        "position.z": 4.0358967781066898,
+                        "normal.x": 1.0,
+                        "normal.y": 0.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.625,
+                        "texcoord.y": 0.75,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": 0.5,
+                        "position.y": 0.5,
+                        "position.z": 4.0358967781066898,
+                        "normal.x": 1.0,
+                        "normal.y": 0.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.625,
+                        "texcoord.y": 0.75,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": 0.5,
+                        "position.y": -0.5,
+                        "position.z": 0.5,
+                        "normal.x": 1.0,
+                        "normal.y": 0.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.625,
+                        "texcoord.y": 1.0,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": 0.5,
+                        "position.y": 0.5,
+                        "position.z": 0.5,
+                        "normal.x": 1.0,
+                        "normal.y": 0.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.625,
+                        "texcoord.y": 0.75,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": 0.5,
+                        "position.y": 0.5,
+                        "position.z": 4.0358967781066898,
+                        "normal.x": 0.0,
+                        "normal.y": 1.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.625,
+                        "texcoord.y": 0.75,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": 0.5,
+                        "position.y": 0.5,
+                        "position.z": 0.5,
+                        "normal.x": 0.0,
+                        "normal.y": 1.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.625,
+                        "texcoord.y": 0.75,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": -0.5,
+                        "position.y": 0.5,
+                        "position.z": 4.0358967781066898,
+                        "normal.x": 0.0,
+                        "normal.y": 1.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.375,
+                        "texcoord.y": 0.75,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": -0.5,
+                        "position.y": 0.5,
+                        "position.z": 4.0358967781066898,
+                        "normal.x": 0.0,
+                        "normal.y": 1.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.375,
+                        "texcoord.y": 0.75,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": 0.5,
+                        "position.y": 0.5,
+                        "position.z": 0.5,
+                        "normal.x": 0.0,
+                        "normal.y": 1.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.625,
+                        "texcoord.y": 0.75,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": -0.5,
+                        "position.y": 0.5,
+                        "position.z": 0.5,
+                        "normal.x": 0.0,
+                        "normal.y": 1.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.375,
+                        "texcoord.y": 0.75,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": -0.5,
+                        "position.y": 0.5,
+                        "position.z": 4.0358967781066898,
+                        "normal.x": -1.0,
+                        "normal.y": 0.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.375,
+                        "texcoord.y": 0.75,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": -0.5,
+                        "position.y": 0.5,
+                        "position.z": 0.5,
+                        "normal.x": -1.0,
+                        "normal.y": 0.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.375,
+                        "texcoord.y": 0.75,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": -0.5,
+                        "position.y": -0.5,
+                        "position.z": 4.0358967781066898,
+                        "normal.x": -1.0,
+                        "normal.y": 0.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.375,
+                        "texcoord.y": 1.0,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": -0.5,
+                        "position.y": -0.5,
+                        "position.z": 4.0358967781066898,
+                        "normal.x": -1.0,
+                        "normal.y": 0.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.375,
+                        "texcoord.y": 1.0,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": -0.5,
+                        "position.y": 0.5,
+                        "position.z": 0.5,
+                        "normal.x": -1.0,
+                        "normal.y": 0.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.375,
+                        "texcoord.y": 0.75,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": -0.5,
+                        "position.y": -0.5,
+                        "position.z": 0.5,
+                        "normal.x": -1.0,
+                        "normal.y": 0.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.375,
+                        "texcoord.y": 1.0,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": 0.5,
+                        "position.y": 0.5,
+                        "position.z": -4.0358967781066898,
+                        "normal.x": 0.0,
+                        "normal.y": 1.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.625,
+                        "texcoord.y": 0.5,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": -0.5,
+                        "position.y": 0.5,
+                        "position.z": -0.5,
+                        "normal.x": 0.0,
+                        "normal.y": 1.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.375,
+                        "texcoord.y": 0.5,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": 0.5,
+                        "position.y": 0.5,
+                        "position.z": -0.5,
+                        "normal.x": 0.0,
+                        "normal.y": 1.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.625,
+                        "texcoord.y": 0.5,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": -0.5,
+                        "position.y": 0.5,
+                        "position.z": -0.5,
+                        "normal.x": 0.0,
+                        "normal.y": 1.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.375,
+                        "texcoord.y": 0.5,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": 0.5,
+                        "position.y": 0.5,
+                        "position.z": -4.0358967781066898,
+                        "normal.x": 0.0,
+                        "normal.y": 1.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.625,
+                        "texcoord.y": 0.5,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": -0.5,
+                        "position.y": 0.5,
+                        "position.z": -4.0358967781066898,
+                        "normal.x": 0.0,
+                        "normal.y": 1.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.375,
+                        "texcoord.y": 0.5,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": 0.5,
+                        "position.y": -0.5,
+                        "position.z": -4.0358967781066898,
+                        "normal.x": 1.0,
+                        "normal.y": 0.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.625,
+                        "texcoord.y": 0.25,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": 0.5,
+                        "position.y": 0.5,
+                        "position.z": -0.5,
+                        "normal.x": 1.0,
+                        "normal.y": 0.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.625,
+                        "texcoord.y": 0.5,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": 0.5,
+                        "position.y": -0.5,
+                        "position.z": -0.5,
+                        "normal.x": 1.0,
+                        "normal.y": 0.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.625,
+                        "texcoord.y": 0.25,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": 0.5,
+                        "position.y": 0.5,
+                        "position.z": -0.5,
+                        "normal.x": 1.0,
+                        "normal.y": 0.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.625,
+                        "texcoord.y": 0.5,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": 0.5,
+                        "position.y": -0.5,
+                        "position.z": -4.0358967781066898,
+                        "normal.x": 1.0,
+                        "normal.y": 0.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.625,
+                        "texcoord.y": 0.25,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": 0.5,
+                        "position.y": 0.5,
+                        "position.z": -4.0358967781066898,
+                        "normal.x": 1.0,
+                        "normal.y": 0.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.625,
+                        "texcoord.y": 0.5,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": -0.5,
+                        "position.y": -0.5,
+                        "position.z": -4.0358967781066898,
+                        "normal.x": 0.0,
+                        "normal.y": -1.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.375,
+                        "texcoord.y": 0.25,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": 0.5,
+                        "position.y": -0.5,
+                        "position.z": -0.5,
+                        "normal.x": 0.0,
+                        "normal.y": -1.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.625,
+                        "texcoord.y": 0.25,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": -0.5,
+                        "position.y": -0.5,
+                        "position.z": -0.5,
+                        "normal.x": 0.0,
+                        "normal.y": -1.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.375,
+                        "texcoord.y": 0.25,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": 0.5,
+                        "position.y": -0.5,
+                        "position.z": -0.5,
+                        "normal.x": 0.0,
+                        "normal.y": -1.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.625,
+                        "texcoord.y": 0.25,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": -0.5,
+                        "position.y": -0.5,
+                        "position.z": -4.0358967781066898,
+                        "normal.x": 0.0,
+                        "normal.y": -1.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.375,
+                        "texcoord.y": 0.25,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": 0.5,
+                        "position.y": -0.5,
+                        "position.z": -4.0358967781066898,
+                        "normal.x": 0.0,
+                        "normal.y": -1.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.625,
+                        "texcoord.y": 0.25,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": -0.5,
+                        "position.y": 0.5,
+                        "position.z": -4.0358967781066898,
+                        "normal.x": -1.0,
+                        "normal.y": 0.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.375,
+                        "texcoord.y": 0.5,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": -0.5,
+                        "position.y": -0.5,
+                        "position.z": -0.5,
+                        "normal.x": -1.0,
+                        "normal.y": 0.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.375,
+                        "texcoord.y": 0.25,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": -0.5,
+                        "position.y": 0.5,
+                        "position.z": -0.5,
+                        "normal.x": -1.0,
+                        "normal.y": 0.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.375,
+                        "texcoord.y": 0.5,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": -0.5,
+                        "position.y": -0.5,
+                        "position.z": -0.5,
+                        "normal.x": -1.0,
+                        "normal.y": 0.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.375,
+                        "texcoord.y": 0.25,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": -0.5,
+                        "position.y": 0.5,
+                        "position.z": -4.0358967781066898,
+                        "normal.x": -1.0,
+                        "normal.y": 0.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.375,
+                        "texcoord.y": 0.5,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": -0.5,
+                        "position.y": -0.5,
+                        "position.z": -4.0358967781066898,
+                        "normal.x": -1.0,
+                        "normal.y": 0.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.375,
+                        "texcoord.y": 0.25,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": 0.5,
+                        "position.y": -0.5,
+                        "position.z": -0.5,
+                        "normal.x": 0.0,
+                        "normal.y": -1.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.875,
+                        "texcoord.y": 1.0,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": 4.0358967781066898,
+                        "position.y": -0.5,
+                        "position.z": -0.5,
+                        "normal.x": 0.0,
+                        "normal.y": -1.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.875,
+                        "texcoord.y": 1.0,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": 0.5,
+                        "position.y": -0.5,
+                        "position.z": 0.5,
+                        "normal.x": 0.0,
+                        "normal.y": -1.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.625,
+                        "texcoord.y": 1.0,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": 4.0358967781066898,
+                        "position.y": -0.5,
+                        "position.z": 0.5,
+                        "normal.x": 0.0,
+                        "normal.y": -1.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.625,
+                        "texcoord.y": 1.0,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": 0.5,
+                        "position.y": -0.5,
+                        "position.z": 0.5,
+                        "normal.x": 0.0,
+                        "normal.y": -1.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.625,
+                        "texcoord.y": 1.0,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": 4.0358967781066898,
+                        "position.y": -0.5,
+                        "position.z": -0.5,
+                        "normal.x": 0.0,
+                        "normal.y": -1.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.875,
+                        "texcoord.y": 1.0,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": 0.5,
+                        "position.y": 0.5,
+                        "position.z": -0.5,
+                        "normal.x": 0.0,
+                        "normal.y": 0.0,
+                        "normal.z": -1.0,
+                        "texcoord.x": 0.875,
+                        "texcoord.y": 0.75,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": 4.0358967781066898,
+                        "position.y": 0.5,
+                        "position.z": -0.5,
+                        "normal.x": 0.0,
+                        "normal.y": 0.0,
+                        "normal.z": -1.0,
+                        "texcoord.x": 0.875,
+                        "texcoord.y": 0.75,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": 0.5,
+                        "position.y": -0.5,
+                        "position.z": -0.5,
+                        "normal.x": 0.0,
+                        "normal.y": 0.0,
+                        "normal.z": -1.0,
+                        "texcoord.x": 0.875,
+                        "texcoord.y": 1.0,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": 4.0358967781066898,
+                        "position.y": -0.5,
+                        "position.z": -0.5,
+                        "normal.x": 0.0,
+                        "normal.y": 0.0,
+                        "normal.z": -1.0,
+                        "texcoord.x": 0.875,
+                        "texcoord.y": 1.0,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": 0.5,
+                        "position.y": -0.5,
+                        "position.z": -0.5,
+                        "normal.x": 0.0,
+                        "normal.y": 0.0,
+                        "normal.z": -1.0,
+                        "texcoord.x": 0.875,
+                        "texcoord.y": 1.0,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": 4.0358967781066898,
+                        "position.y": 0.5,
+                        "position.z": -0.5,
+                        "normal.x": 0.0,
+                        "normal.y": 0.0,
+                        "normal.z": -1.0,
+                        "texcoord.x": 0.875,
+                        "texcoord.y": 0.75,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": 4.0358967781066898,
+                        "position.y": 0.5,
+                        "position.z": 0.5,
+                        "normal.x": 0.0,
+                        "normal.y": 1.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.625,
+                        "texcoord.y": 0.75,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": 0.5,
+                        "position.y": 0.5,
+                        "position.z": -0.5,
+                        "normal.x": 0.0,
+                        "normal.y": 1.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.875,
+                        "texcoord.y": 0.75,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": 0.5,
+                        "position.y": 0.5,
+                        "position.z": 0.5,
+                        "normal.x": 0.0,
+                        "normal.y": 1.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.625,
+                        "texcoord.y": 0.75,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": 0.5,
+                        "position.y": 0.5,
+                        "position.z": -0.5,
+                        "normal.x": 0.0,
+                        "normal.y": 1.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.875,
+                        "texcoord.y": 0.75,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": 4.0358967781066898,
+                        "position.y": 0.5,
+                        "position.z": 0.5,
+                        "normal.x": 0.0,
+                        "normal.y": 1.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.625,
+                        "texcoord.y": 0.75,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": 4.0358967781066898,
+                        "position.y": 0.5,
+                        "position.z": -0.5,
+                        "normal.x": 0.0,
+                        "normal.y": 1.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.875,
+                        "texcoord.y": 0.75,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": 0.5,
+                        "position.y": -0.5,
+                        "position.z": 0.5,
+                        "normal.x": 0.0,
+                        "normal.y": 0.0,
+                        "normal.z": 1.0,
+                        "texcoord.x": 0.625,
+                        "texcoord.y": 1.0,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": 4.0358967781066898,
+                        "position.y": -0.5,
+                        "position.z": 0.5,
+                        "normal.x": 0.0,
+                        "normal.y": 0.0,
+                        "normal.z": 1.0,
+                        "texcoord.x": 0.625,
+                        "texcoord.y": 1.0,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": 0.5,
+                        "position.y": 0.5,
+                        "position.z": 0.5,
+                        "normal.x": 0.0,
+                        "normal.y": 0.0,
+                        "normal.z": 1.0,
+                        "texcoord.x": 0.625,
+                        "texcoord.y": 0.75,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": 4.0358967781066898,
+                        "position.y": 0.5,
+                        "position.z": 0.5,
+                        "normal.x": 0.0,
+                        "normal.y": 0.0,
+                        "normal.z": 1.0,
+                        "texcoord.x": 0.625,
+                        "texcoord.y": 0.75,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": 0.5,
+                        "position.y": 0.5,
+                        "position.z": 0.5,
+                        "normal.x": 0.0,
+                        "normal.y": 0.0,
+                        "normal.z": 1.0,
+                        "texcoord.x": 0.625,
+                        "texcoord.y": 0.75,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": 4.0358967781066898,
+                        "position.y": -0.5,
+                        "position.z": 0.5,
+                        "normal.x": 0.0,
+                        "normal.y": 0.0,
+                        "normal.z": 1.0,
+                        "texcoord.x": 0.625,
+                        "texcoord.y": 1.0,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": -4.0358967781066898,
+                        "position.y": -0.5,
+                        "position.z": 0.5,
+                        "normal.x": 0.0,
+                        "normal.y": -1.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.375,
+                        "texcoord.y": 1.0,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": -0.5,
+                        "position.y": -0.5,
+                        "position.z": -0.5,
+                        "normal.x": 0.0,
+                        "normal.y": -1.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.125,
+                        "texcoord.y": 1.0,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": -0.5,
+                        "position.y": -0.5,
+                        "position.z": 0.5,
+                        "normal.x": 0.0,
+                        "normal.y": -1.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.375,
+                        "texcoord.y": 1.0,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": -0.5,
+                        "position.y": -0.5,
+                        "position.z": -0.5,
+                        "normal.x": 0.0,
+                        "normal.y": -1.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.125,
+                        "texcoord.y": 1.0,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": -4.0358967781066898,
+                        "position.y": -0.5,
+                        "position.z": 0.5,
+                        "normal.x": 0.0,
+                        "normal.y": -1.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.375,
+                        "texcoord.y": 1.0,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": -4.0358967781066898,
+                        "position.y": -0.5,
+                        "position.z": -0.5,
+                        "normal.x": 0.0,
+                        "normal.y": -1.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.125,
+                        "texcoord.y": 1.0,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": -4.0358967781066898,
+                        "position.y": 0.5,
+                        "position.z": 0.5,
+                        "normal.x": 0.0,
+                        "normal.y": 0.0,
+                        "normal.z": 1.0,
+                        "texcoord.x": 0.375,
+                        "texcoord.y": 0.75,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": -0.5,
+                        "position.y": -0.5,
+                        "position.z": 0.5,
+                        "normal.x": 0.0,
+                        "normal.y": 0.0,
+                        "normal.z": 1.0,
+                        "texcoord.x": 0.375,
+                        "texcoord.y": 1.0,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": -0.5,
+                        "position.y": 0.5,
+                        "position.z": 0.5,
+                        "normal.x": 0.0,
+                        "normal.y": 0.0,
+                        "normal.z": 1.0,
+                        "texcoord.x": 0.375,
+                        "texcoord.y": 0.75,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": -0.5,
+                        "position.y": -0.5,
+                        "position.z": 0.5,
+                        "normal.x": 0.0,
+                        "normal.y": 0.0,
+                        "normal.z": 1.0,
+                        "texcoord.x": 0.375,
+                        "texcoord.y": 1.0,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": -4.0358967781066898,
+                        "position.y": 0.5,
+                        "position.z": 0.5,
+                        "normal.x": 0.0,
+                        "normal.y": 0.0,
+                        "normal.z": 1.0,
+                        "texcoord.x": 0.375,
+                        "texcoord.y": 0.75,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": -4.0358967781066898,
+                        "position.y": -0.5,
+                        "position.z": 0.5,
+                        "normal.x": 0.0,
+                        "normal.y": 0.0,
+                        "normal.z": 1.0,
+                        "texcoord.x": 0.375,
+                        "texcoord.y": 1.0,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": -0.5,
+                        "position.y": 0.5,
+                        "position.z": -0.5,
+                        "normal.x": 0.0,
+                        "normal.y": 1.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.125,
+                        "texcoord.y": 0.75,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": -4.0358967781066898,
+                        "position.y": 0.5,
+                        "position.z": -0.5,
+                        "normal.x": 0.0,
+                        "normal.y": 1.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.125,
+                        "texcoord.y": 0.75,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": -0.5,
+                        "position.y": 0.5,
+                        "position.z": 0.5,
+                        "normal.x": 0.0,
+                        "normal.y": 1.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.375,
+                        "texcoord.y": 0.75,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": -4.0358967781066898,
+                        "position.y": 0.5,
+                        "position.z": 0.5,
+                        "normal.x": 0.0,
+                        "normal.y": 1.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.375,
+                        "texcoord.y": 0.75,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": -0.5,
+                        "position.y": 0.5,
+                        "position.z": 0.5,
+                        "normal.x": 0.0,
+                        "normal.y": 1.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.375,
+                        "texcoord.y": 0.75,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": -4.0358967781066898,
+                        "position.y": 0.5,
+                        "position.z": -0.5,
+                        "normal.x": 0.0,
+                        "normal.y": 1.0,
+                        "normal.z": 0.0,
+                        "texcoord.x": 0.125,
+                        "texcoord.y": 0.75,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": -4.0358967781066898,
+                        "position.y": -0.5,
+                        "position.z": -0.5,
+                        "normal.x": 0.0,
+                        "normal.y": 0.0,
+                        "normal.z": -1.0,
+                        "texcoord.x": 0.125,
+                        "texcoord.y": 1.0,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": -0.5,
+                        "position.y": 0.5,
+                        "position.z": -0.5,
+                        "normal.x": 0.0,
+                        "normal.y": 0.0,
+                        "normal.z": -1.0,
+                        "texcoord.x": 0.125,
+                        "texcoord.y": 0.75,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": -0.5,
+                        "position.y": -0.5,
+                        "position.z": -0.5,
+                        "normal.x": 0.0,
+                        "normal.y": 0.0,
+                        "normal.z": -1.0,
+                        "texcoord.x": 0.125,
+                        "texcoord.y": 1.0,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": -0.5,
+                        "position.y": 0.5,
+                        "position.z": -0.5,
+                        "normal.x": 0.0,
+                        "normal.y": 0.0,
+                        "normal.z": -1.0,
+                        "texcoord.x": 0.125,
+                        "texcoord.y": 0.75,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": -4.0358967781066898,
+                        "position.y": -0.5,
+                        "position.z": -0.5,
+                        "normal.x": 0.0,
+                        "normal.y": 0.0,
+                        "normal.z": -1.0,
+                        "texcoord.x": 0.125,
+                        "texcoord.y": 1.0,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    },
+                    {
+                        "position.x": -4.0358967781066898,
+                        "position.y": 0.5,
+                        "position.z": -0.5,
+                        "normal.x": 0.0,
+                        "normal.y": 0.0,
+                        "normal.z": -1.0,
+                        "texcoord.x": 0.125,
+                        "texcoord.y": 0.75,
+                        "bone_weights": {
+                            "value0": 1.0,
+                            "value1": 0.0,
+                            "value2": 0.0,
+                            "value3": 0.0
+                        },
+                        "bone_indices": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0
+                        }
+                    }
+                ],
+                "indices": [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15,
+                    16,
+                    17,
+                    18,
+                    19,
+                    20,
+                    21,
+                    22,
+                    23,
+                    24,
+                    25,
+                    26,
+                    27,
+                    28,
+                    29,
+                    30,
+                    31,
+                    32,
+                    33,
+                    34,
+                    35,
+                    36,
+                    37,
+                    38,
+                    39,
+                    40,
+                    41,
+                    42,
+                    43,
+                    44,
+                    45,
+                    46,
+                    47,
+                    48,
+                    49,
+                    50,
+                    51,
+                    52,
+                    53,
+                    54,
+                    55,
+                    56,
+                    57,
+                    58,
+                    59,
+                    60,
+                    61,
+                    62,
+                    63,
+                    64,
+                    65,
+                    66,
+                    67,
+                    68,
+                    69,
+                    70,
+                    71,
+                    72,
+                    73,
+                    74,
+                    75,
+                    76,
+                    77,
+                    78,
+                    79,
+                    80,
+                    81,
+                    82,
+                    83,
+                    84,
+                    85,
+                    86,
+                    87,
+                    88,
+                    89,
+                    90,
+                    91,
+                    92,
+                    93,
+                    94,
+                    95,
+                    96,
+                    97,
+                    98,
+                    99,
+                    100,
+                    101,
+                    102,
+                    103,
+                    104,
+                    105,
+                    106,
+                    107,
+                    108,
+                    109,
+                    110,
+                    111,
+                    112,
+                    113,
+                    114,
+                    115,
+                    116,
+                    117,
+                    118,
+                    119,
+                    120,
+                    121,
+                    122,
+                    123,
+                    124,
+                    125,
+                    126,
+                    127,
+                    128,
+                    129,
+                    130,
+                    131
+                ],
+                "index": 0,
+                "subsets": [
+                    {
+                        "cereal_class_version": 0,
+                        "ambient": {
+                            "cereal_class_version": 0,
+                            "factor": 1.0,
+                            "color.x": 0.0,
+                            "color.y": 0.0,
+                            "color.z": 0.0,
+                            "color.w": 1.0,
+                            "texture_filename": "",
+                            "scale_u": 1.0,
+                            "scale_v": 1.0
+                        },
+                        "diffuse": {
+                            "factor": 1.0,
+                            "color.x": 0.5,
+                            "color.y": 0.5,
+                            "color.z": 0.5,
+                            "color.w": 1.0,
+                            "texture_filename": "",
+                            "scale_u": 1.0,
+                            "scale_v": 1.0
+                        },
+                        "specular": {
+                            "factor": 1.0,
+                            "color.x": 0.800000011920929,
+                            "color.y": 0.800000011920929,
+                            "color.z": 0.800000011920929,
+                            "color.w": 1.0,
+                            "texture_filename": "",
+                            "scale_u": 1.0,
+                            "scale_v": 1.0
+                        },
+                        "transparent": {
+                            "factor": 1.0,
+                            "color.x": 0.0,
+                            "color.y": 0.0,
+                            "color.z": 0.0,
+                            "color.w": 1.0,
+                            "texture_filename": "",
+                            "scale_u": 1.0,
+                            "scale_v": 1.0
+                        },
+                        "index_start": 0,
+                        "index_count": 132
+                    }
+                ],
+                "node_name": "pCube1",
+                "anim": [
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    []
+                ],
+                "global_transform._11": 100.0,
+                "global_transform._12": 0.0,
+                "global_transform._13": 0.0,
+                "global_transform._14": 0.0,
+                "global_transform._21": 0.0,
+                "global_transform._22": 100.0,
+                "global_transform._23": 0.0,
+                "global_transform._24": 0.0,
+                "global_transform._31": 0.0,
+                "global_transform._32": 0.0,
+                "global_transform._33": 100.0,
+                "global_transform._34": 0.0,
+                "global_transform._41": 0.0,
+                "global_transform._42": 0.0,
+                "global_transform._43": 0.0,
+                "global_transform._44": 1.0,
+                "bone_weights": {
+                    "value0": 1.0,
+                    "value1": 0.0,
+                    "value2": 0.0,
+                    "value3": 0.0
+                },
+                "bone_indices": {
+                    "value0": 0,
+                    "value1": 0,
+                    "value2": 0,
+                    "value3": 0
+                },
+                "pos.x": -4.0358967781066898,
+                "pos.y": 0.5,
+                "pos.z": -0.5,
+                "pos.w": 1.0
+            }
+        ],
+        "have_uv": false,
+        "have_born": false,
+        "have_material": true,
+        "numIndices": 0
+    }
+}

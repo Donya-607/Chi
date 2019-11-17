@@ -178,16 +178,19 @@ public:
 		Donya::Vector3 moveVector;	// Normalized.
 		bool doDefend;
 		bool doAttack;
+		bool onlyRotation;	// If you want only rotate by "moveVector", enable this.
 	public:
 		Input() :
 			moveVector(),
 			doDefend( false ),
-			doAttack( false )
+			doAttack( false ),
+			onlyRotation( false )
 		{}
-		Input( const Donya::Vector3 &moveVector, bool doDefend, bool doAttack ) :
+		Input( const Donya::Vector3 &moveVector, bool doDefend, bool doAttack, bool onlyRotation = false ) :
 			moveVector( moveVector ),
 			doDefend( doDefend ),
-			doAttack( doAttack )
+			doAttack( doAttack ),
+			onlyRotation( onlyRotation )
 		{}
 	public:
 		static Input NoOperation()

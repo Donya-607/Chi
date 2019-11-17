@@ -31,7 +31,7 @@ void sceneTitle::init()
 	}
 
 	loadFBX(pStageModel.get(), GetModelPath(ModelAttribute::TutorialStage));
-	loadFBX(pTitleModel.get(), "./Data/model/title01.fbx");
+	loadFBX(pTitleModel.get(), "./Data/model/TestMove.fbx");
 
 	std::vector<Donya::Box> wallHitBox_vector;
 	Donya::Box wallHitBox;
@@ -196,83 +196,26 @@ void sceneTitle::TutorialStartUpdate()
 	setCamPos(camPos);
 	setTarget(camTarget);
 
-	auto MakePlayerInput = [](Donya::Vector4x4 viewMat)->Player::Input
-	{
-		Player::Input input{};
+	Donya::Vector4x4 matView = Donya::Vector4x4::FromMatrix( GameLib::camera::GetViewMatrix() );
+	player.Update(Player::Input::MakeByExternalInput(matView));
 
-#if !DEBUG_MODE
-		// TODO : コントローラーがあるか判定する
-		constexpr bool IS_CONTROLLER_CONNECTED = true;
-		if (IS_CONTROLLER_CONNECTED)
-#endif // !DEBUG_MODE
-		{
-			// XINPUT_GAMEPAD : https://docs.microsoft.com/ja-jp/windows/win32/api/xinput/ns-xinput-xinput_gamepad
-
-			constexpr int   PAD_NO = 0;
-			constexpr float STICK_RANGE_MAX = 32768.0f;
-			const auto leftStick = GameLib::input::xInput::getThumbL(PAD_NO);
-			if (leftStick.x != 0) { input.moveVector.x = scast<float>(leftStick.x) / STICK_RANGE_MAX; }
-			if (leftStick.y != 0) { input.moveVector.z = scast<float>(leftStick.y) / STICK_RANGE_MAX; }
-
-			constexpr int TRIGGER_FLAG = 1;
-			if (GameLib::input::xInput::pressedButtons(PAD_NO, XboxPad_Button::RIGHT_SHOULDER) == TRIGGER_FLAG) { input.doDefend = true; }
-			if (GameLib::input::xInput::pressedButtons(PAD_NO, XboxPad_Button::X) == TRIGGER_FLAG) { input.doAttack = true; }
-		}
-#if !DEBUG_MODE
-		// else
-#endif // !DEBUG_MODE
-		{
-			if (Donya::Keyboard::Press(VK_UP)) { input.moveVector.z = +1.0f; }
-			if (Donya::Keyboard::Press(VK_DOWN)) { input.moveVector.z = -1.0f; }
-			if (Donya::Keyboard::Press(VK_LEFT)) { input.moveVector.x = -1.0f; }
-			if (Donya::Keyboard::Press(VK_RIGHT)) { input.moveVector.x = +1.0f; }
-
-			if (Donya::Keyboard::Trigger('Z')) { input.doDefend = true; }
-			if (Donya::Keyboard::Trigger('X')) { input.doAttack = true; }
-		}
-
-		input.moveVector.Normalize();
-
-		// Transform to camera space from world space.
-		{
-			Donya::Vector4x4 cameraRotation{};
-			{
-				// Extract inverse rotation matrix here.
-				cameraRotation = viewMat;
-				cameraRotation._14 = 0.0f;
-				cameraRotation._24 = 0.0f;
-				cameraRotation._34 = 0.0f;
-				cameraRotation._41 = 0.0f;
-				cameraRotation._42 = 0.0f;
-				cameraRotation._43 = 0.0f;
-				cameraRotation._44 = 1.0f;
-
-				// XXX : If "viewMat" is invalid matrix, Inverse() will returns NaN.
-
-				cameraRotation = cameraRotation.Inverse();
-			}
-
-			Donya::Vector4 moveVector4{};
-			moveVector4.x = input.moveVector.x;
-			moveVector4.y = input.moveVector.y;
-			moveVector4.z = input.moveVector.z;
-			moveVector4.w = 0.0f;
-
-			moveVector4 = cameraRotation * moveVector4;
-
-			input.moveVector.x = moveVector4.x;
-			input.moveVector.z = moveVector4.z;
-		}
-
-		return input;
-	};
-	player.Update(MakePlayerInput(Donya::Vector4x4::FromMatrix(GameLib::camera::GetViewMatrix())));
-
-	std::vector<Donya::Circle> nullBodies;
+	std::vector<Donya::Circle> nullBodies{};
 	player.PhysicUpdate(nullBodies);
 
-	if (11431.0f - 100.0f / 2.0f <= player.GetPosition().z && player.GetPosition().z <= 11431.0f + 100.0f / 2.0f
-		&& -100.0f / 2.0f <= player.GetPosition().x && player.GetPosition().x <= 100.0f / 2.0f)
+	auto WithinStartupArea = [&]()->bool
+	{
+		return
+		(
+			11431.0f - 100.0f / 2.0f <= player.GetPosition().z
+			&& player.GetPosition().z <= 11431.0f + 100.0f / 2.0f
+
+			&& -100.0f / 2.0f <= player.GetPosition().x
+			&& player.GetPosition().x <= 100.0f / 2.0f
+		)
+		? true
+		: false;
+	};
+	if ( WithinStartupArea() )
 	{
 		catapult.StartAnim();
 		tutorialState++;
@@ -286,35 +229,13 @@ void sceneTitle::TutorialGuardUpdate()
 	setCamPos(camPos);
 	setTarget(camTarget);
 
-	auto MakePlayerInput = [](Donya::Vector4x4 viewMat)->Player::Input
-	{
-		Player::Input input{};
+	Donya::Vector4x4 matView = Donya::Vector4x4::FromMatrix( GameLib::camera::GetViewMatrix() );
+	Player::Input input = Player::Input::MakeByExternalInput( matView );
+	// input.doAttack = false;
+	input.onlyRotation = true;
+	player.Update( input );
 
-#if !DEBUG_MODE
-		// TODO : コントローラーがあるか判定する
-		constexpr bool IS_CONTROLLER_CONNECTED = true;
-		if (IS_CONTROLLER_CONNECTED)
-#endif // !DEBUG_MODE
-		{
-			// XINPUT_GAMEPAD : https://docs.microsoft.com/ja-jp/windows/win32/api/xinput/ns-xinput-xinput_gamepad
-
-			constexpr int   PAD_NO = 0;
-			constexpr int TRIGGER_FLAG = 1;
-			if (GameLib::input::xInput::pressedButtons(PAD_NO, XboxPad_Button::RIGHT_SHOULDER) == TRIGGER_FLAG) { input.doDefend = true; }
-		}
-
-#if !DEBUG_MODE
-		// else
-#endif // !DEBUG_MODE
-		{
-			if (Donya::Keyboard::Trigger('Z')) { input.doDefend = true; }
-		}
-
-		return input;
-	};
-	player.Update(MakePlayerInput(Donya::Vector4x4::FromMatrix(GameLib::camera::GetViewMatrix())));
-
-	std::vector<Donya::Circle> nullBodies;
+	std::vector<Donya::Circle> nullBodies{};
 	player.PhysicUpdate(nullBodies);
 
 	ProcessCollision();
@@ -327,79 +248,10 @@ void sceneTitle::TutorialAttackUpdate()
 	setCamPos(camPos);
 	setTarget(camTarget);
 
-	auto MakePlayerInput = [](Donya::Vector4x4 viewMat)->Player::Input
-	{
-		Player::Input input{};
+	Donya::Vector4x4 matView = Donya::Vector4x4::FromMatrix( GameLib::camera::GetViewMatrix() );
+	player.Update( Player::Input::MakeByExternalInput( matView ) );
 
-#if !DEBUG_MODE
-		// TODO : コントローラーがあるか判定する
-		constexpr bool IS_CONTROLLER_CONNECTED = true;
-		if (IS_CONTROLLER_CONNECTED)
-#endif // !DEBUG_MODE
-		{
-			// XINPUT_GAMEPAD : https://docs.microsoft.com/ja-jp/windows/win32/api/xinput/ns-xinput-xinput_gamepad
-
-			constexpr int   PAD_NO = 0;
-			constexpr float STICK_RANGE_MAX = 32768.0f;
-			const auto leftStick = GameLib::input::xInput::getThumbL(PAD_NO);
-			if (leftStick.x != 0) { input.moveVector.x = scast<float>(leftStick.x) / STICK_RANGE_MAX; }
-			if (leftStick.y != 0) { input.moveVector.z = scast<float>(leftStick.y) / STICK_RANGE_MAX; }
-
-			constexpr int TRIGGER_FLAG = 1;
-			if (GameLib::input::xInput::pressedButtons(PAD_NO, XboxPad_Button::RIGHT_SHOULDER) == TRIGGER_FLAG) { input.doDefend = true; }
-			if (GameLib::input::xInput::pressedButtons(PAD_NO, XboxPad_Button::X) == TRIGGER_FLAG) { input.doAttack = true; }
-		}
-#if !DEBUG_MODE
-		// else
-#endif // !DEBUG_MODE
-		{
-			if (Donya::Keyboard::Press(VK_UP)) { input.moveVector.z = +1.0f; }
-			if (Donya::Keyboard::Press(VK_DOWN)) { input.moveVector.z = -1.0f; }
-			if (Donya::Keyboard::Press(VK_LEFT)) { input.moveVector.x = -1.0f; }
-			if (Donya::Keyboard::Press(VK_RIGHT)) { input.moveVector.x = +1.0f; }
-
-			if (Donya::Keyboard::Trigger('Z')) { input.doDefend = true; }
-			if (Donya::Keyboard::Trigger('X')) { input.doAttack = true; }
-		}
-
-		input.moveVector.Normalize();
-
-		// Transform to camera space from world space.
-		{
-			Donya::Vector4x4 cameraRotation{};
-			{
-				// Extract inverse rotation matrix here.
-				cameraRotation = viewMat;
-				cameraRotation._14 = 0.0f;
-				cameraRotation._24 = 0.0f;
-				cameraRotation._34 = 0.0f;
-				cameraRotation._41 = 0.0f;
-				cameraRotation._42 = 0.0f;
-				cameraRotation._43 = 0.0f;
-				cameraRotation._44 = 1.0f;
-
-				// XXX : If "viewMat" is invalid matrix, Inverse() will returns NaN.
-
-				cameraRotation = cameraRotation.Inverse();
-			}
-
-			Donya::Vector4 moveVector4{};
-			moveVector4.x = input.moveVector.x;
-			moveVector4.y = input.moveVector.y;
-			moveVector4.z = input.moveVector.z;
-			moveVector4.w = 0.0f;
-
-			moveVector4 = cameraRotation * moveVector4;
-
-			input.moveVector.x = moveVector4.x;
-			input.moveVector.z = moveVector4.z;
-		}
-
-		return input;
-	};
-	player.Update(MakePlayerInput(Donya::Vector4x4::FromMatrix(GameLib::camera::GetViewMatrix())));
-
-	std::vector<Donya::Circle> nullBodies;
+	std::vector<Donya::Circle> nullBodies{};
 	player.PhysicUpdate(nullBodies);
 
 	ProcessCollision();
@@ -515,22 +367,24 @@ void sceneTitle::render()
 	player.Draw(shader, V, P);
 	catapult.Draw(shader, V, P);
 
-	auto GenerateCube = []()->std::shared_ptr<static_mesh>
+	if ( Donya::IsShowCollision() )
 	{
-		std::shared_ptr<static_mesh> tmpCube = std::make_shared<static_mesh>();
-		createCube(tmpCube.get());
-		return tmpCube;
-	};
-	static std::shared_ptr<static_mesh> pCube = GenerateCube();
-	
-	Donya::Vector4x4 CS = Donya::Vector4x4::MakeScaling(cubeScale); // Half size->Whole size.
-	Donya::Vector4x4 CR = Donya::Vector4x4::MakeRotationEuler(Donya::Vector3(0.0f, 0.0f, 0.0f));
-	Donya::Vector4x4 CT = Donya::Vector4x4::MakeTranslation(cubePos);
-	Donya::Vector4x4 CW = CS * CR * CT;
-	Donya::Vector4x4 CWVP = CW * V * P;
+		auto GenerateCube = []()->std::shared_ptr<static_mesh>
+		{
+			std::shared_ptr<static_mesh> tmpCube = std::make_shared<static_mesh>();
+			createCube( tmpCube.get() );
+			return tmpCube;
+		};
+		static std::shared_ptr<static_mesh> pCube = GenerateCube();
 
-	OBJRender(pCube.get(), CWVP, CW, Donya::Vector4(0.0f, 0.8f, 0.3f, 0.6f));
+		Donya::Vector4x4 CS = Donya::Vector4x4::MakeScaling( cubeScale ); // Half size->Whole size.
+		Donya::Vector4x4 CR = Donya::Vector4x4::MakeRotationEuler( Donya::Vector3( 0.0f, 0.0f, 0.0f ) );
+		Donya::Vector4x4 CT = Donya::Vector4x4::MakeTranslation( cubePos );
+		Donya::Vector4x4 CW = CS * CR * CT;
+		Donya::Vector4x4 CWVP = CW * V * P;
 
+		OBJRender( pCube.get(), CWVP, CW, Donya::Vector4( 0.0f, 0.8f, 0.3f, 0.6f ) );
+	}
 }
 
 void sceneTitle::uninit()
@@ -540,6 +394,8 @@ void sceneTitle::uninit()
 
 void sceneTitle::imGui()
 {
+#if USE_IMGUI
+
 	ImGui::SetNextWindowSize(ImVec2(500.0f, getWindowSize().y / 2.0f), ImGuiSetCond_Once);
 	ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiSetCond_Once);
 	ImGui::Begin("Scene", NULL, ImGuiWindowFlags_MenuBar);
@@ -589,7 +445,7 @@ void sceneTitle::imGui()
 
 	catapult.ImGui();
 
-#if 0
+#if BILLBOARD_BLOOM_TEST
 	static int index = 0;
 	static float dragPower[3] = { 1.0f };
 
@@ -770,6 +626,8 @@ void sceneTitle::imGui()
 		ImGui::End();
 	}
 #endif
+
+#endif // USE_IMGUI
 }
 
 void sceneTitle::ProcessCollision()
@@ -796,7 +654,7 @@ void sceneTitle::ProcessCollision()
 		pSceneManager->setNextScene(new sceneTitle(), false);
 	}
 
-	// PlayerAttack VS CatapuletBudy
+	// PlayerAttack VS CatapultBudy
 	{
 		if (tutorialState == TutorialState::ATTACK && Donya::OBB::IsHitOBB(playerAttackBox, catapult.hitOBB))
 		{
