@@ -44,6 +44,12 @@ std::string GetModelPath( ModelAttribute modelAttribute )
 		return "./Data/model/Player/MDL_Player_Attack.fbx";					// break;
 	case ModelAttribute::PlayerDefend:
 		return "./Data/model/Player/MDL_Player_Shield.fbx";					// break;
+	case ModelAttribute::ShieldOpen:
+		return "./Data/model/Effect/EFE_Player_Shield_Open.fbx";			// break;
+	case ModelAttribute::ShieldIdle:
+		return "./Data/model/Effect/EFE_Player_Shield.fbx";					// break;
+	case ModelAttribute::ShieldReact:
+		return "./Data/model/Effect/EFE_Player_Shield_Impact.fbx";			// break;
 	case ModelAttribute::Stage01:
 		return "./Data/model/Stage/MDL_Stage01.fbx";						// break;
 	case ModelAttribute::TutorialStage:

@@ -109,6 +109,7 @@ private:
 private:
 	State		status;
 	int			unfoldTimer;
+	int			fluctuation;	// Will add to "unfoldTimer" at last in Update().
 	MotionKind	currentMotion;
 	Models		models;
 	bool		nowUnfolding;	// Store old status. Used for "moment of unfold" judgement.
@@ -125,12 +126,29 @@ public:
 public:
 	bool CanUnfold() const;
 
+	/// <summary>
+	/// Returns local space AABB.
+	/// </summary>
+	Donya::AABB GetHitBox() const;
+	/// <summary>
+	/// Returns local space OBB.
+	/// </summary>
 	Donya::OBB GetHitBox( const Donya::Quaternion &parentOrientation ) const;
 
 	/// <summary>
 	/// Recover internal timer of unfoldable.
 	/// </summary>
 	void Recover();
+private:
+	void LoadModels();
+
+	void AddTimer( int addition );
+
+	void ApplyState( bool isUnfolding );
+
+	void Fluctuate();
+
+	void Elapse();
 
 #if USE_IMGUI
 
