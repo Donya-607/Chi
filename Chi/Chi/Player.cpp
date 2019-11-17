@@ -44,6 +44,11 @@ void PlayerParam::Init( size_t motionCount )
 {
 	motionSpeeds.resize( motionCount );
 	LoadParameter();
+
+	if ( motionSpeeds.size() != motionCount )
+	{
+		motionSpeeds.resize( motionCount );
+	}
 }
 void PlayerParam::Uninit()
 {
@@ -134,6 +139,7 @@ void PlayerParam::UseImGui()
 					"Run",
 					"Defend",
 					"Attack",
+					"Defeat",
 				};
 				const size_t COUNT = motionSpeeds.size();
 				_ASSERT_EXPR( motionNames.size() == COUNT, L"Error : Logical error by human !" );
@@ -329,6 +335,7 @@ Player::Player() :
 		&models.pRun,
 		&models.pDefend,
 		&models.pAttack,
+		&models.pDefeat,
 	};
 	for ( auto &it : modelRefs )
 	{
@@ -406,6 +413,9 @@ void Player::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Dony
 		break;
 	case Player::State::Attack:
 		FBXRender( models.pAttack.get(), HLSL, WVP, W, motionSpeed );
+		break;
+	case Player::State::Dead:
+		FBXRender( models.pDefeat.get(), HLSL, WVP, W, motionSpeed );
 		break;
 	default: break;
 	}
@@ -486,6 +496,11 @@ void Player::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Dony
 #endif // DEBUG_MODE
 }
 
+bool Player::IsDefeated() const
+{
+	return ( status == State::Dead && models.pDefeat->getAnimFinFlg() ) ? true : false;
+}
+
 static Donya::OBB MakeOBB( const Donya::AABB &AABB, const Donya::Vector3 &wsPos, const Donya::Quaternion &orientation )
 {
 	Donya::OBB OBB{};
@@ -500,6 +515,7 @@ Donya::OBB Player::GetHurtBox() const
 	const auto &HITBOX = PlayerParam::Get().HitBoxBody();
 
 	Donya::OBB wsOBB = MakeOBB( HITBOX, GetPosition(), orientation );
+	if ( status == State::Dead ) { wsOBB.enable = false; }
 	return wsOBB;
 }
 Donya::OBB Player::GetShieldHitBox() const
@@ -576,8 +592,7 @@ void Player::SucceededDefence()
 
 void Player::ReceiveImpact()
 {
-	status		= State::Dead;
-	velocity	= 0.0f;
+	DefeatInit();
 }
 
 void Player::SetFieldRadius( float newFieldRadius )
@@ -598,11 +613,14 @@ void Player::LoadModel()
 	Donya::OutputDebugStr( "Done PlayerModel.Defend\n" );
 	loadFBX( models.pAttack.get(),	GetModelPath( ModelAttribute::PlayerAtk		) );
 	Donya::OutputDebugStr( "Done PlayerModel.Attack\n" );
+	loadFBX( models.pDefeat.get(),	GetModelPath( ModelAttribute::PlayerDefeat	) );
+	Donya::OutputDebugStr( "Done PlayerModel.Defeat\n" );
 
 	std::vector<std::shared_ptr<skinned_mesh> *> dontLoopModels
 	{
 		&models.pDefend,
 		&models.pAttack,
+		&models.pDefeat,
 	};
 	for ( auto &it : dontLoopModels )
 	{
@@ -616,24 +634,12 @@ Donya::Vector4x4 Player::CalcWorldMatrix() const
 {
 	Donya::Vector4x4 S = Donya::Vector4x4::MakeScaling( PlayerParam::Get().Scale() );
 	Donya::Vector4x4 R = orientation.RequireRotationMatrix();
-#if DEBUG_MODE
-	if ( status == State::Dead ) { R = Donya::Quaternion::Make( Donya::Vector3::Front(), ToRadian( 180.0f ) ).RequireRotationMatrix(); }
-#endif // DEBUG_MODE
 	Donya::Vector4x4 T = Donya::Vector4x4::MakeTranslation( GetPosition() );
 	return S * R * T;
 }
 
 void Player::ChangeStatus( Input input )
 {
-#if DEBUG_MODE
-
-	if ( status == State::Dead && input.doAttack )
-	{
-		status = State::Idle;
-	}
-
-#endif // DEBUG_MODE
-
 	if ( 0 < shieldsRecastTime )
 	{
 		shieldsRecastTime--;
@@ -651,6 +657,7 @@ void Player::ChangeStatus( Input input )
 	case Player::State::Run:	ChangeStatusFromRun   ( input );	break;
 	case Player::State::Defend:	ChangeStatusFromDefend( input );	break;
 	case Player::State::Attack:	ChangeStatusFromAttack( input );	break;
+	case Player::State::Dead:	break;
 	default: break;
 	}
 }
@@ -662,6 +669,7 @@ void Player::UpdateCurrentStatus( Input input )
 	case Player::State::Run:	RunUpdate   ( input );	break;
 	case Player::State::Defend:	DefendUpdate( input );	break;
 	case Player::State::Attack:	AttackUpdate( input );	break;
+	case Player::State::Dead:	DefeatUpdate();			break;
 	default: break;
 	}
 }
@@ -982,6 +990,26 @@ void Player::AttackUninit()
 	Donya::OBBFrame *pOBBF = PlayerParam::Get().HitBoxAttackF();
 	pOBBF->currentFrame = 0;
 	setAnimFlame( models.pAttack.get(), 0 );
+}
+
+void Player::DefeatInit()
+{
+	status			= State::Dead;
+	velocity		= 0.0f;
+	currentMotion	= Defeat;
+	extraOffset = 0.0f;
+
+	setAnimFlame( models.pDefeat.get(), 0 );
+}
+void Player::DefeatUpdate()
+{
+	timer++;
+}
+void Player::DefeatUninit()
+{
+	timer = 0;
+
+	setAnimFlame( models.pDefeat.get(), 0 );
 }
 
 void Player::AssignInputVelocity( Input input )

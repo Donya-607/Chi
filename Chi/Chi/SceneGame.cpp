@@ -366,6 +366,13 @@ public:
 		{
 			status = State::Win;
 		}
+		else // TODO : Prevent the competition between the boss's defeat and player's defeat.
+		if ( player.IsDefeated() )
+		{
+			SetStageNo( 0 );
+
+			pSceneManager->setNextScene( new SceneGameOver, false );
+		}
 	}
 
 	void WinUpdate()
@@ -388,20 +395,15 @@ public:
 
 		if ( shouldChangeScene )
 		{
-			using namespace StorageForScene;
-			Storage storage{};
-
 			if ( IsLastStage( stageNo ) )
 			{
-				storage.stageNo = 0;
-				SetStorage( storage );
+				SetStageNo( 0 );
 
 				pSceneManager->setNextScene( new SceneResult( NULL ), false );
 			}
 			else
 			{
-				storage.stageNo = stageNo + 1;
-				SetStorage( storage );
+				SetStageNo( stageNo + 1 );
 
 				pSceneManager->setNextScene( new SceneGame(), false );
 			}
@@ -496,6 +498,13 @@ public:
 		}
 
 		return false;
+	}
+
+	void SetStageNo( int setStageNumber )
+	{
+		StorageForScene::Storage storage{};
+		storage.stageNo = setStageNumber;
+		StorageForScene::SetStorage( storage );
 	}
 
 	Donya::Vector3 GetCameraTargetPos() const

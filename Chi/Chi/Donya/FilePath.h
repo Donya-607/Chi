@@ -20,6 +20,7 @@ enum class ModelAttribute
 	PlayerRun,
 	PlayerAtk,
 	PlayerDefend,
+	PlayerDefeat,
 	ShieldOpen,
 	ShieldIdle,
 	ShieldReact,

@@ -326,7 +326,8 @@ void sceneTitle::TutorialEndUpdate()
 
 void sceneTitle::TutorialReturnTitle()
 {
-	if (MAX_RETRUN_TITLE_CNT <= returnTitleCnt++)
+	// if (MAX_RETRUN_TITLE_CNT <= returnTitleCnt++)
+	if ( player.IsDefeated() )
 	{
 		returnTitleCnt = 0;
 		// TODO : Ž€–S‰‰o’Ç‰Á‚É‚æ‚è•ÏX‚ ‚è

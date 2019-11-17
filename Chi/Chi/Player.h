@@ -206,6 +206,7 @@ private:
 		std::shared_ptr<skinned_mesh> pRun{ nullptr };
 		std::shared_ptr<skinned_mesh> pDefend{ nullptr };
 		std::shared_ptr<skinned_mesh> pAttack{ nullptr };
+		std::shared_ptr<skinned_mesh> pDefeat{ nullptr };
 	};
 	enum class State
 	{
@@ -221,6 +222,7 @@ private:
 		Run,
 		Defend,
 		Attack,
+		Defeat,
 
 		MOTION_COUNT
 	};
@@ -255,6 +257,8 @@ public:
 
 	void Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matProjection );
 public:
+	bool IsDefeated() const;
+
 	/// <summary>
 	/// Returns world-space position.
 	/// </summary>
@@ -320,6 +324,10 @@ private:
 	void AttackInit( Input input );
 	void AttackUpdate( Input input );
 	void AttackUninit();
+
+	void DefeatInit();
+	void DefeatUpdate();
+	void DefeatUninit();
 private:
 	void AssignInputVelocity( Input input );
 
