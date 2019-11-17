@@ -541,6 +541,7 @@ void Golem::Init( int stageNumber )
 void Golem::Uninit()
 {
 	GolemParam::Get().Uninit();
+	EffectManager::GetInstance()->EruptionEffectReSetCollision();
 }
 
 void Golem::Update( TargetStatus target )

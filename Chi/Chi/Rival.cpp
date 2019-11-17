@@ -514,6 +514,17 @@ void Rival::Init( int stageNumber )
 void Rival::Uninit()
 {
 	RivalParam::Get().Uninit();
+
+	// Disable the effect's collision.
+	auto &effects = EffectManager::GetInstance()->GetLongAttackEffectVector();
+	for ( auto &it : effects )
+	{
+		auto &collisions = it.GetHitSphereVector();
+		for ( auto &i : collisions )
+		{
+			i.enable = false;
+		}
+	}
 }
 
 void Rival::Update( TargetStatus target )
@@ -1530,6 +1541,17 @@ void Rival::DefeatInit()
 	velocity		= 0.0f;
 	slerpFactor		= 0.0f;
 	currentMotion	= Defeat;
+
+	// Disable the effect's collision.
+	auto &effects = EffectManager::GetInstance()->GetLongAttackEffectVector();
+	for ( auto &it : effects )
+	{
+		auto &collisions = it.GetHitSphereVector();
+		for ( auto &i : collisions )
+		{
+			i.enable = false;
+		}
+	}
 }
 void Rival::DefeatUpdate()
 {
