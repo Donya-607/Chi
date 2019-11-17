@@ -2,16 +2,16 @@
     "RivalAI": {
         "cereal_class_version": 1,
         "wholeFrame": {
-            "value0": 235,
+            "value0": 140,
             "value1": 230,
             "value2": 150,
-            "value3": 180
+            "value3": 100
         },
         "coolTimeFrame": {
-            "value0": 60,
-            "value1": 60,
-            "value2": 60,
-            "value3": 60
+            "value0": 30,
+            "value1": 30,
+            "value2": 0,
+            "value3": 30
         },
         "pAttackChoosers": {
             "value0": {
@@ -24,24 +24,31 @@
                         "data": [
                             {
                                 "cereal_class_version": 0,
-                                "distance": 0.2240000069141388,
+                                "distance": 0.20000000298023225,
                                 "action": {
                                     "cereal_class_version": 0,
-                                    "waitNo": 2,
+                                    "waitNo": 4,
                                     "nextAttackNo": 0
                                 }
                             },
                             {
-                                "distance": 0.5379999876022339,
+                                "distance": 0.5,
                                 "action": {
                                     "waitNo": 4,
-                                    "nextAttackNo": -1
+                                    "nextAttackNo": 2
+                                }
+                            },
+                            {
+                                "distance": 0.699999988079071,
+                                "action": {
+                                    "waitNo": 3,
+                                    "nextAttackNo": 3
                                 }
                             },
                             {
                                 "distance": 1.0,
                                 "action": {
-                                    "waitNo": 4,
+                                    "waitNo": 0,
                                     "nextAttackNo": 1
                                 }
                             }
@@ -56,24 +63,38 @@
                     "data": {
                         "data": [
                             {
-                                "distance": 0.19900000095367433,
+                                "distance": 0.30000001192092898,
                                 "action": {
                                     "waitNo": 2,
                                     "nextAttackNo": 0
                                 }
                             },
                             {
-                                "distance": 0.6639999747276306,
+                                "distance": 0.6000000238418579,
                                 "action": {
-                                    "waitNo": 4,
+                                    "waitNo": 0,
+                                    "nextAttackNo": 0
+                                }
+                            },
+                            {
+                                "distance": 0.7250000238418579,
+                                "action": {
+                                    "waitNo": 2,
                                     "nextAttackNo": 2
+                                }
+                            },
+                            {
+                                "distance": 0.8500000238418579,
+                                "action": {
+                                    "waitNo": 2,
+                                    "nextAttackNo": 1
                                 }
                             },
                             {
                                 "distance": 1.0,
                                 "action": {
-                                    "waitNo": 2,
-                                    "nextAttackNo": -1
+                                    "waitNo": 0,
+                                    "nextAttackNo": 1
                                 }
                             }
                         ]
@@ -81,6 +102,30 @@
                 }
             },
             "value2": {
+                "polymorphic_id": 1,
+                "ptr_wrapper": {
+                    "valid": 1,
+                    "data": {
+                        "data": [
+                            {
+                                "distance": 0.4000000059604645,
+                                "action": {
+                                    "waitNo": 0,
+                                    "nextAttackNo": 0
+                                }
+                            },
+                            {
+                                "distance": 1.0,
+                                "action": {
+                                    "waitNo": 2,
+                                    "nextAttackNo": 2
+                                }
+                            }
+                        ]
+                    }
+                }
+            },
+            "value3": {
                 "polymorphic_id": 2147483650,
                 "polymorphic_name": "FixedLottery",
                 "ptr_wrapper": {
@@ -93,27 +138,17 @@
                         }
                     }
                 }
-            },
-            "value3": {
-                "polymorphic_id": 2,
-                "ptr_wrapper": {
-                    "valid": 1,
-                    "data": {
-                        "action": {
-                            "waitNo": 3,
-                            "nextAttackNo": 0
-                        }
-                    }
-                }
             }
         },
         "initStorage": {
             "waitNo": 0,
-            "nextAttackNo": -1
+            "nextAttackNo": 0
         },
-        "initCoolTime": 120,
+        "initCoolTime": 90,
         "gapIntervals": [
             3,
+            2,
+            4,
             2
         ]
     }

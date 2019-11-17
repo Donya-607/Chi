@@ -6,13 +6,13 @@
         "m.targetDistNear": 0.05000000074505806,
         "m.targetDistFar": 0.17000000178813935,
         "m.idleSlerpFactor": 0.10000000149011612,
-        "m.moveMoveSpeed": 8.0,
+        "m.moveMoveSpeed": 15.0,
         "m.moveSlerpFactor": 0.10000000149011612,
         "m.explMoveSpeed": 0.0,
         "m.explSlerpFactor": 0.0,
         "m.swingMoveSpeed": 0.0,
         "m.swingSlerpFactor": 0.0,
-        "m.raidMoveSpeed": 8.0,
+        "m.raidMoveSpeed": 15.0,
         "m.raidSlerpFactor": 0.004999999888241291,
         "m.initPos": {
             "cereal_class_version": 0,
@@ -39,15 +39,15 @@
             "cereal_class_version": 0,
             "sphereF": {
                 "cereal_class_version": 0,
-                "enableFrameStart": 50,
-                "enableFrameLast": 72,
+                "enableFrameStart": 35,
+                "enableFrameLast": 55,
                 "collision": {
                     "pos": {
                         "x": 0.0,
                         "y": 0.0,
-                        "z": 0.0
+                        "z": -40.0
                     },
-                    "radius": 80.0,
+                    "radius": 100.0,
                     "exist": false
                 }
             },
@@ -55,23 +55,23 @@
         },
         "m.hitBoxRaid": {
             "sphereF": {
-                "enableFrameStart": 100,
+                "enableFrameStart": 34,
                 "enableFrameLast": 130,
                 "collision": {
                     "pos": {
                         "x": 0.0,
                         "y": 0.0,
-                        "z": 0.0
+                        "z": -25.0
                     },
-                    "radius": 80.0,
-                    "exist": false
+                    "radius": 100.0,
+                    "exist": true
                 }
             },
             "meshName": "MDL_Ax"
         },
         "m.explRotationSpeed": 0.07999999821186066,
         "m.explScaleStart": 0.0010000000474974514,
-        "m.explScaleLast": 600.0,
+        "m.explScaleLast": 1000.0,
         "m.explScalingFrame": 120,
         "m.explChargeFrame": 45,
         "m.explReviveColFrame": 10,
@@ -84,30 +84,30 @@
                     "y": 0.0,
                     "z": 0.0
                 },
-                "radius": 600.0,
-                "exist": false
+                "radius": 0.0,
+                "exist": true
             }
         },
         "m.explScaleDraw": 100.0,
         "m.explHideSpeed": 0.03500000014901161,
-        "m.raidJumpStartFrame": 20,
-        "m.raidJumpLastFrame": 80,
+        "m.raidJumpStartFrame": 50,
+        "m.raidJumpLastFrame": 60,
         "m.raidJumpDistance": 666.0,
         "m.raidEaseKind": 7,
         "m.raidEaseType": 1,
         "m.defeatMotionLength": 230,
         "m.defeatHideSpeed": 0.0010000000474974514,
         "m.motionSpeeds": [
-            1.0,
-            1.0,
-            1.0,
-            1.0,
-            1.0,
-            1.0,
-            1.0,
-            1.0,
-            1.0,
-            1.0
+            1.5,
+            1.5,
+            2.0,
+            2.0,
+            2.0,
+            2.0,
+            1.5,
+            1.5,
+            1.5,
+            1.5
         ]
     }
 }

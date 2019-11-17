@@ -746,7 +746,12 @@ public:
 		{
 			if ( ImGui::Button( "GotoTitle" ) )
 			{
-				pSceneManager->setNextScene(new sceneTitle(), false);
+				using namespace StorageForScene;
+				Storage storage{};
+				storage.stageNo = 0;
+				SetStorage( storage );
+
+				pSceneManager->setNextScene( new sceneTitle(), false );
 			}
 			ImGui::Text( "" );
 

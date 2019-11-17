@@ -33,19 +33,19 @@
         },
         "m.move": {
             "cereal_class_version": 0,
-            "moveSpeed": 9.5,
+            "moveSpeed": 15.0,
             "slerpFactor": 0.10000000149011612
         },
         "m.barrage": {
             "cereal_class_version": 1,
-            "moveSpeed": 3.0,
+            "moveSpeed": 8.0,
             "slerpFactor": 0.10000000149011612,
             "collideMeshName": "MDL_BlackSword",
             "collisions": [
                 {
                     "cereal_class_version": 0,
-                    "enableFrameStart": 42,
-                    "enableFrameLast": 52,
+                    "enableFrameStart": 20,
+                    "enableFrameLast": 40,
                     "collision": {
                         "cereal_class_version": 0,
                         "pos": {
@@ -53,26 +53,26 @@
                             "y": 0.0,
                             "z": 32.0
                         },
-                        "radius": 0.0,
-                        "exist": false
+                        "radius": 30.0,
+                        "exist": true
                     }
                 },
                 {
-                    "enableFrameStart": 90,
-                    "enableFrameLast": 100,
+                    "enableFrameStart": 50,
+                    "enableFrameLast": 70,
                     "collision": {
                         "pos": {
                             "x": 0.0,
                             "y": 0.0,
                             "z": 32.0
                         },
-                        "radius": 0.0,
+                        "radius": 30.0,
                         "exist": false
                     }
                 },
                 {
-                    "enableFrameStart": 150,
-                    "enableFrameLast": 160,
+                    "enableFrameStart": 90,
+                    "enableFrameLast": 110,
                     "collision": {
                         "pos": {
                             "x": 0.0,
@@ -92,13 +92,13 @@
                     "speed": 9.0
                 },
                 {
-                    "start": 65,
-                    "last": 85,
+                    "start": 50,
+                    "last": 70,
                     "speed": 9.0
                 },
                 {
-                    "start": 110,
-                    "last": 130,
+                    "start": 90,
+                    "last": 110,
                     "speed": 9.0
                 }
             ]
@@ -107,22 +107,22 @@
             "cereal_class_version": 1,
             "moveSpeed": 0.0,
             "slerpFactor": 0.10000000149011612,
-            "generateFrame": 4
+            "generateFrame": 1
         },
         "m.raid": {
             "cereal_class_version": 1,
-            "moveSpeed": 2.0,
+            "moveSpeed": 3.0,
             "slerpFactor": 0.05999999865889549,
             "easingKind": 7,
             "easingType": 1,
-            "jumpStartFrame": 40,
-            "jumpLastFrame": 60,
+            "jumpStartFrame": 10,
+            "jumpLastFrame": 80,
             "jumpDistance": 600.0,
             "hitBox": {
                 "cereal_class_version": 0,
                 "sphereF": {
-                    "enableFrameStart": 60,
-                    "enableFrameLast": 80,
+                    "enableFrameStart": 40,
+                    "enableFrameLast": 60,
                     "collision": {
                         "pos": {
                             "x": 0.0,
@@ -141,7 +141,7 @@
             "moveSpeed": 0.0,
             "slerpFactor": 0.10000000149011612,
             "waitLength": 60,
-            "rushSpeed": 24.0,
+            "rushSpeed": 50.0,
             "slashStopAnimeFrame": 8,
             "slashOccurRange": {
                 "pos": {
@@ -153,8 +153,8 @@
                 "exist": true
             },
             "hitBox": {
-                "enableFrameStart": 57,
-                "enableFrameLast": 70,
+                "enableFrameStart": 20,
+                "enableFrameLast": 40,
                 "collision": {
                     "pos": {
                         "x": 0.0,
@@ -183,18 +183,18 @@
             "hideSpeed": 0.009999999776482582
         },
         "m.motionSpeeds": [
+            1.5,
+            1.5,
+            1.5,
+            1.5,
             1.0,
-            1.0,
-            1.0,
-            1.0,
-            1.0,
-            1.0,
-            1.0,
-            1.0,
-            1.0,
-            1.0,
-            1.0,
-            1.0
+            1.5,
+            1.5,
+            1.5,
+            1.5,
+            1.5,
+            1.2999999523162842,
+            2.5
         ]
     }
 }

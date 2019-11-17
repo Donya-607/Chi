@@ -46,8 +46,8 @@
         "OBBAttacksSwing": [
             {
                 "cereal_class_version": 0,
-                "enableFrameStart": -1,
-                "enableFrameLast": -1,
+                "enableFrameStart": 8,
+                "enableFrameLast": 79,
                 "OBB": {
                     "cereal_class_version": 0,
                     "pos": {
@@ -75,8 +75,8 @@
             {
                 "cereal_class_version": 0,
                 "OBBF": {
-                    "enableFrameStart": 50,
-                    "enableFrameLast": 75,
+                    "enableFrameStart": 30,
+                    "enableFrameLast": 55,
                     "OBB": {
                         "pos": {
                             "x": 96.0,
@@ -101,8 +101,8 @@
             },
             {
                 "OBBF": {
-                    "enableFrameStart": 145,
-                    "enableFrameLast": 170,
+                    "enableFrameStart": 100,
+                    "enableFrameLast": 125,
                     "OBB": {
                         "pos": {
                             "x": -64.0,
@@ -127,8 +127,8 @@
             },
             {
                 "OBBF": {
-                    "enableFrameStart": 250,
-                    "enableFrameLast": 275,
+                    "enableFrameStart": 185,
+                    "enableFrameLast": 210,
                     "OBB": {
                         "pos": {
                             "x": 96.0,
@@ -155,25 +155,25 @@
         "stageBodyRadius": -29.0,
         "targetDistNear": 0.20000000298023225,
         "targetDistFar": 0.44999998807907107,
-        "moveMoveSpeed": 6.0,
+        "moveMoveSpeed": 10.0,
         "attackFastMoveSpeed": 6.0,
         "idleSlerpFactor": 0.30000001192092898,
         "moveSlerpFactor": 0.15000000596046449,
         "attackFastSlerpFactor": 0.009999999776482582,
-        "attackRotateMoveSpeed": 0.0,
+        "attackRotateMoveSpeed": 2.0,
         "attackRotateSlerpFactor": 1.0,
         "rotateAttackCollisions": [
             {
                 "cereal_class_version": 0,
                 "enableFrameStart": 45,
-                "enableFrameLast": 100,
+                "enableFrameLast": 120,
                 "collision": {
                     "pos": {
                         "x": 0.0,
                         "y": 0.0,
                         "z": 0.0
                     },
-                    "radius": 230.0,
+                    "radius": 401.0,
                     "exist": false
                 }
             }
@@ -188,11 +188,11 @@
         "defeatMotionLength": 360,
         "defeatHideSpeed": 0.0010000000474974514,
         "motionSpeeds": [
+            1.5,
+            1.5,
             1.0,
-            1.0,
-            1.0,
-            1.0,
-            1.0
+            1.2999999523162842,
+            1.2999999523162842
         ]
     }
 }
