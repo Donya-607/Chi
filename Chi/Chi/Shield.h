@@ -131,6 +131,11 @@ public:
 	bool CanUnfold() const;
 
 	/// <summary>
+	/// Returns remaining unfoldable frame.
+	/// </summary>
+	int GetRemainingFrame() const { return unfoldTimer; }
+
+	/// <summary>
 	/// Returns local space AABB.
 	/// </summary>
 	Donya::AABB GetHitBox() const;

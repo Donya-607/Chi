@@ -236,6 +236,7 @@ private:
 	Shield					shield;
 	std::vector<Donya::Box>	wallCollisions;		// Stored hit-boxes belongs world space, XZ plane. This variable only assigned at Init().
 	bool					wasSucceededDefence;
+	bool					isContinuingDefence;// Prevent continuous unfold since finished the shield's remaining frame.
 public:
 	Player();
 	~Player();
@@ -329,6 +330,7 @@ private:
 	void CollideToStagesWall();
 private:
 	void ShieldUpdate();
+	bool CanUnfoldShield() const;
 private:
 #if USE_IMGUI
 
