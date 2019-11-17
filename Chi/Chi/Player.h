@@ -232,7 +232,7 @@ private:
 	Donya::Quaternion		orientation;
 	Models					models;
 	std::vector<Donya::Box>	wallCollisions;		// Stored hit-boxes belongs world space, XZ plane. This variable only assigned at Init().
-	bool				wasSucceededDefence;
+	bool					wasSucceededDefence;
 public:
 	Player();
 	~Player();
