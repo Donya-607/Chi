@@ -37,7 +37,7 @@ public:
 	{
 		for (int i = 0; i < MAX_SIZE; i++)
 		{
-			createBillboard(&data[i].pMesh, L"./Data/Images/hpUI.png");
+			createBillboard(&data[i].pMesh, L"./Data/Images/UI/hpUI.png");
 		}
 	}
 	~HP_UI() {}
