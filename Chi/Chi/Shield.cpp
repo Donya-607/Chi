@@ -31,6 +31,11 @@ ShieldParam::Member ShieldParam::Open()
 	return Get().Content();
 }
 
+float ShieldParam::CalcUnfoldPercent( int currentTime )
+{
+	return scast<float>( currentTime ) / scast<float>( m.maxUnfoldableFrame );
+}
+
 void ShieldParam::LoadParameter( bool isBinary )
 {
 	Donya::Serializer::Extension ext = ( isBinary )
@@ -69,7 +74,8 @@ void ShieldParam::UseImGui()
 			ImGui::DragInt( "Frame.When.Protected.RecoveryAmount", &m.recoveryAmount );
 			ImGui::Text( "" );
 
-			ImGui::DragFloat ( "Draw.Scale",  &m.drawScale );
+			ImGui::DragFloat ( "Draw.Scale.Maximum", &m.drawScaleMax );
+			ImGui::DragFloat ( "Draw.Scale.Minimum", &m.drawScaleMin );
 			ImGui::DragFloat3( "Draw.Offset", &m.drawOffset.x );
 			ImGui::Text( "" );
 
@@ -119,7 +125,7 @@ void ShieldParam::UseImGui()
 				}
 				if ( ImGui::TreeNode( "Minimum Size" ) )
 				{
-					ShowAABB( "HitBox", &m.hitBoxMax );
+					ShowAABB( "HitBox", &m.hitBoxMin );
 					ImGui::TreePop();
 				}
 
@@ -196,6 +202,17 @@ void Shield::Uninit()
 
 void Shield::Update( bool isUnfolding )
 {
+#if USE_IMGUI
+
+	ShieldParam::Get().UseImGui();
+	UseImGui();
+
+#endif // USE_IMGUI
+
+	// I want detect the end after once call to FBXRender() from after change the motion.
+	// Because the end flag of animation is update in FBXRender(), so if not call, the flag is not updated(will detected a "true" immediately).
+	DetectEndAnimation();
+
 	ApplyState( isUnfolding );
 
 	Fluctuate();
@@ -213,7 +230,17 @@ void Shield::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Dony
 	const Donya::Vector3 drawOffset = PARAM.drawOffset;
 	const Donya::Vector4x4 DRAW_OFFSET = Donya::Vector4x4::MakeTranslation( drawOffset );
 
-	Donya::Vector4x4 S = Donya::Vector4x4::MakeScaling( ShieldParam::Open().drawScale );
+	auto CalcCurrentScale = []( int currentUnfoldTimer )
+	{
+		float	percent	= ShieldParam::Get().CalcUnfoldPercent( currentUnfoldTimer );
+		float	max		= ShieldParam::Open().drawScaleMax;
+		float	min		= ShieldParam::Open().drawScaleMin;
+		float	diff	= max - min;
+
+		return	min + ( diff * percent );
+	};
+
+	Donya::Vector4x4 S = Donya::Vector4x4::MakeScaling( CalcCurrentScale( unfoldTimer ) );
 	Donya::Vector4x4 M = S * DRAW_OFFSET;
 	Donya::Vector4x4 W = M * matParent;
 	Donya::Vector4x4 WVP = W * matView * matProjection;
@@ -314,9 +341,9 @@ void Shield::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Dony
 		setBlendMode_ALPHA( 0.5f );
 
 		constexpr Donya::Vector4 COLOR{ 0.2f, 0.8f, 0.2f, 0.6f };
-		Donya::OBB wsHitBox = GetHitBox( Donya::Quaternion::Identity() );
+		Donya::OBB lsHitBox = GetHitBox( Donya::Quaternion::Identity() );
 
-		DrawOBB( wsHitBox, COLOR, /* applyParentMatrix = */ false );
+		DrawOBB( lsHitBox, COLOR );
 	}
 
 #endif // DEBUG_MODE
@@ -332,15 +359,14 @@ Donya::AABB Shield::GetHitBox() const
 	Donya::AABB maximum = ShieldParam::Open().hitBoxMax;
 	Donya::AABB minimum = ShieldParam::Open().hitBoxMin;
 
-	const int maxUnfoldTime = ShieldParam::Open().maxUnfoldableFrame;
-	float percent = scast<float>( unfoldTimer ) / scast<float>( maxUnfoldTime );
+	float percent = ShieldParam::Get().CalcUnfoldPercent( unfoldTimer );
 
-	Donya::Vector3 diffPos  = minimum.pos  - maximum.pos;
-	Donya::Vector3 diffSize = minimum.size - maximum.size;
+	Donya::Vector3 diffPos  = maximum.pos  - minimum.pos;
+	Donya::Vector3 diffSize = maximum.size - minimum.size;
 	
 	Donya::AABB localHitBox{};
-	localHitBox.pos		= maximum.pos  + ( diffPos  * percent );
-	localHitBox.size	= maximum.size + ( diffSize * percent );
+	localHitBox.pos		= minimum.pos  + ( diffPos  * percent );
+	localHitBox.size	= minimum.size + ( diffSize * percent );
 	localHitBox.exist	= true;
 	localHitBox.enable	= true;
 	return localHitBox;
@@ -361,6 +387,8 @@ Donya::OBB Shield::GetHitBox( const Donya::Quaternion &parentOrientation ) const
 void Shield::Recover()
 {
 	AddTimer( ShieldParam::Open().recoveryAmount );
+
+	ChangeMotion( State::React );
 }
 
 void Shield::LoadModels()
@@ -404,9 +432,15 @@ void Shield::ApplyState( bool isUnfolding )
 	if ( IsUnfoldTiming( nowUnfolding, isUnfolding ) )
 	{
 		fluctuation -= ShieldParam::Open().consumptionAmount;
+		
+		ChangeMotion( State::Open );
 	}
 
 	nowUnfolding = isUnfolding;
+	if ( !nowUnfolding )
+	{
+		ChangeMotion( State::NotExist );
+	}
 }
 
 void Shield::Fluctuate()
@@ -422,11 +456,112 @@ void Shield::Elapse()
 	fluctuation = 0;
 }
 
+void Shield::ChangeMotion( State newStatus )
+{
+	status = newStatus;
+
+	auto StopAllAnimation = []( Models *pModels )
+	{
+		auto Stop = []( std::shared_ptr<skinned_mesh> *ppMesh )
+		{
+			setStopAnimation( ppMesh->get(), /* is_stop = */ true );
+		};
+		std::vector<std::shared_ptr<skinned_mesh> *> stopModels
+		{
+			&pModels->pOpen,
+			&pModels->pIdle,
+			&pModels->pReact,
+		};
+		for ( auto &it : stopModels )
+		{
+			Stop( it );
+		}
+	};
+	StopAllAnimation( &models );
+
+	switch ( status )
+	{
+	case Shield::State::NotExist:
+		currentMotion = Idle;
+		setAnimFlame( models.pOpen.get(), 0 );
+		return;
+	case Shield::State::Open:
+		currentMotion = Open;
+		setAnimFlame	( models.pOpen.get(), 0 );
+		setStopAnimation( models.pOpen.get(), /* is_stop = */ false );
+		return;
+	case Shield::State::Idle:
+		currentMotion = Idle;
+		setAnimFlame	( models.pIdle.get(), 0 );
+		setStopAnimation( models.pIdle.get(), /* is_stop = */ false );
+		return;
+	case Shield::State::React:
+		currentMotion = React;
+		setAnimFlame	( models.pReact.get(), 0 );
+		setStopAnimation( models.pReact.get(), /* is_stop = */ false );
+		return;
+	default: return;
+	}
+}
+
+void Shield::DetectEndAnimation()
+{
+	if ( currentMotion == Idle || currentMotion == MOTION_COUNT ) { return; }
+	// else
+
+	if ( models.pOpen->getAnimFinFlg() || models.pReact->getAnimFinFlg() )
+	{
+		ChangeMotion( State::Idle );
+	}
+}
+
 #if USE_IMGUI
 
 void Shield::UseImGui()
 {
+	if ( ImGui::BeginIfAllowed() )
+	{
+		if ( ImGui::TreeNode( "Shield.CurrentParameter" ) )
+		{
+			auto GetStatusName = []( State status )->std::string
+			{
+				switch ( status )
+				{
+				case State::NotExist:	return { "NotExist" };	// break;
+				case State::Open:		return { "Open" };		// break;
+				case State::Idle:		return { "Idle" };		// break;
+				case State::React:		return { "React" };		// break;
+				default: break;
+				}
 
+				return { "Unsupported status" };
+			};
+			std::string statusCaption = "Status : " + GetStatusName( status );
+			ImGui::Text( statusCaption.c_str() );
+			ImGui::Text( "Timer : %d", unfoldTimer );
+			ImGui::Text( "NowUnfolding : %d", nowUnfolding ? 1 : 0 );
+			ImGui::Text( "" );
+
+			const std::string vec3Info{ "[X:%5.3f][Y:%5.3f][Z:%5.3f]" };
+			const std::string vec4Info{ "[X:%5.3f][Y:%5.3f][Z:%5.3f][W:%5.3f]" };
+			auto ShowVec3 = [&vec3Info]( std::string name, const Donya::Vector3 &param )
+			{
+				ImGui::Text( ( name + vec3Info ).c_str(), param.x, param.y, param.z );
+			};
+			auto ShowVec4 = [&vec4Info]( std::string name, const Donya::Vector4 &param )
+			{
+				ImGui::Text( ( name + vec4Info ).c_str(), param.x, param.y, param.z, param.w );
+			};
+			auto ShowQuaternion = [&vec4Info]( std::string name, const Donya::Quaternion &param )
+			{
+				ImGui::Text( ( name + vec4Info ).c_str(), param.x, param.y, param.z, param.w );
+			};
+
+			ImGui::TreePop();
+		}
+
+		ImGui::End();
+	}
 }
 
 #endif // USE_IMGUI

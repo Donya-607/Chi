@@ -1,0 +1,50 @@
+{
+    "Shield": {
+        "cereal_class_version": 0,
+        "m.maxUnfoldableFrame": 120,
+        "m.consumptionAmount": 10,
+        "m.decreaseSpeed": 1,
+        "m.increaseSpeed": 264,
+        "m.recoveryAmount": 25,
+        "m.drawScaleMax": 1.0,
+        "m.drawScaleMin": 0.5,
+        "m.drawOffset": {
+            "cereal_class_version": 0,
+            "x": 0.0,
+            "y": 80.0,
+            "z": 64.0
+        },
+        "m.hitBoxMax": {
+            "cereal_class_version": 0,
+            "pos": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 64.0
+            },
+            "size": {
+                "x": 64.0,
+                "y": 1024.0,
+                "z": 64.0
+            },
+            "exist": true
+        },
+        "m.hitBoxMin": {
+            "pos": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 96.0
+            },
+            "size": {
+                "x": 48.0,
+                "y": 1024.0,
+                "z": 48.0
+            },
+            "exist": true
+        },
+        "m.motionSpeeds": [
+            6.0,
+            1.0,
+            1.0
+        ]
+    }
+}

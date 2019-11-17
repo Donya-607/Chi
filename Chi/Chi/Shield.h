@@ -25,7 +25,8 @@ public:
 		int					decreaseSpeed{};		// Subtract to the frame of unfoldable while unfolding.
 		int					increaseSpeed{};		// Add to the frame of unfoldable while does not unfolding.
 		int					recoveryAmount{};
-		float				drawScale{};
+		float				drawScaleMax{};			// Maximum scale.
+		float				drawScaleMin{};			// Minimum scale.
 		Donya::Vector3		drawOffset{};
 		Donya::AABB			hitBoxMax{};			// Maximum size hit box.
 		Donya::AABB			hitBoxMin{};			// Minimum size hit box.
@@ -49,7 +50,8 @@ private:
 			CEREAL_NVP( m.decreaseSpeed ),
 			CEREAL_NVP( m.increaseSpeed ),
 			CEREAL_NVP( m.recoveryAmount ),
-			CEREAL_NVP( m.drawScale ),
+			CEREAL_NVP( m.drawScaleMax ),
+			CEREAL_NVP( m.drawScaleMin ),
 			CEREAL_NVP( m.drawOffset ),
 			CEREAL_NVP( m.hitBoxMax ),
 			CEREAL_NVP( m.hitBoxMin ),
@@ -68,6 +70,8 @@ public:
 public:
 	Member Content() const { return m; }
 	static Member Open();
+
+	float CalcUnfoldPercent( int currentTime );
 public:
 	void LoadParameter( bool isBinary = true );
 
@@ -149,6 +153,10 @@ private:
 	void Fluctuate();
 
 	void Elapse();
+
+	void ChangeMotion( State newStatus );
+
+	void DetectEndAnimation();
 
 #if USE_IMGUI
 

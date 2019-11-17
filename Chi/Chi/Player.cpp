@@ -308,6 +308,7 @@ Player::Player() :
 	pos(), velocity(), lookDirection(), extraOffset(),
 	orientation(),
 	models(),
+	shield(),
 	wallCollisions(),
 	wasSucceededDefence( false )
 {
@@ -337,6 +338,8 @@ void Player::Init( const Donya::Vector3 &wsInitPos, const Donya::Vector3 &initRa
 	SetFieldRadius( 0.0f ); // Set to body's radius.
 
 	LoadModel();
+
+	shield.Init();
 	
 	pos				= wsInitPos;
 	orientation		= Donya::Quaternion::Make( initRadians.x, initRadians.y, initRadians.z );
@@ -347,6 +350,8 @@ void Player::Init( const Donya::Vector3 &wsInitPos, const Donya::Vector3 &initRa
 }
 void Player::Uninit()
 {
+	shield.Uninit();
+
 	PlayerParam::Get().Uninit();
 
 	models.pIdle.reset();
@@ -368,6 +373,8 @@ void Player::Update( Input input )
 
 	ChangeStatus( input );
 	UpdateCurrentStatus( input );
+
+	ShieldUpdate();
 }
 void Player::PhysicUpdate( const std::vector<Donya::Circle> &xzCylinderWalls )
 {
@@ -397,6 +404,8 @@ void Player::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Dony
 		break;
 	default: break;
 	}
+
+	shield.Draw( HLSL, matView, matProjection, W );
 
 	// For debug, helpers of drawing primitive. and drawing collisions.
 #if DEBUG_MODE
@@ -459,14 +468,6 @@ void Player::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Dony
 		if ( BODY.exist   ) { DrawCube  ( BODY.pos,   BODY.size,     BODY_COLOR   ); }
 		if ( PHYSIC.exist ) { DrawSphere( PHYSIC.pos, PHYSIC.radius, PHYSIC_COLOR ); }
 
-		if ( status == State::Defend )
-		{
-			constexpr Donya::Vector4 SHIELD_COLOR{ 0.2f, 0.8f, 0.2f, 0.6f };
-			constexpr Donya::Vector4 SHIELD_COLOR_SUCCEEDED{ 0.8f, 1.0f, 1.0f, 0.6f };
-			const auto SHIELD = PARAM.HitBoxShield();
-			Donya::Vector4 color = ( wasSucceededDefence ) ? SHIELD_COLOR_SUCCEEDED : SHIELD_COLOR;
-			DrawCube( SHIELD.pos, SHIELD.size, color );
-		}
 		if ( status == State::Attack )
 		{
 			constexpr Donya::Vector4 LANCE_COLOR_VALID{ 1.0f, 0.8f, 0.5f, 0.6f };
@@ -483,10 +484,10 @@ void Player::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Dony
 static Donya::OBB MakeOBB( const Donya::AABB &AABB, const Donya::Vector3 &wsPos, const Donya::Quaternion &orientation )
 {
 	Donya::OBB OBB{};
-	OBB.pos		= AABB.pos + wsPos;
-	OBB.size	= AABB.size;
+	OBB.pos			= AABB.pos + wsPos;
+	OBB.size		= AABB.size;
 	OBB.orientation = orientation;
-	OBB.exist	= AABB.exist;
+	OBB.exist		= AABB.exist;
 	return OBB;
 }
 Donya::OBB Player::GetHurtBox() const
@@ -498,9 +499,8 @@ Donya::OBB Player::GetHurtBox() const
 }
 Donya::OBB Player::GetShieldHitBox() const
 {
-	const auto &HITBOX = PlayerParam::Get().HitBoxShield();
-
-	Donya::OBB wsOBB = MakeOBB( HITBOX, GetPosition(), orientation );
+	Donya::AABB shieldLocal = shield.GetHitBox();
+	Donya::OBB  wsOBB = MakeOBB( shieldLocal, GetPosition(), orientation );
 	if ( status != State::Defend ) { wsOBB.exist = false; }
 	return wsOBB;
 }
@@ -564,14 +564,15 @@ Donya::OBB Player::CalcAttackHitBox() const
 
 void Player::SucceededDefence()
 {
+	shield.Recover();
 	wasSucceededDefence = true;
 	Donya::Sound::Play( scast<int>( MusicAttribute::PlayerProtected ) );
 }
 
 void Player::ReceiveImpact()
 {
-	status = State::Dead;
-	velocity = 0.0f;
+	status		= State::Dead;
+	velocity	= 0.0f;
 }
 
 void Player::SetFieldRadius( float newFieldRadius )
@@ -1127,13 +1128,19 @@ void Player::CollideToStagesWall()
 	}
 }
 
+void Player::ShieldUpdate()
+{
+	bool nowUnfolding = ( status == State::Defend ) ? true : false;
+	shield.Update( nowUnfolding );
+}
+
 #if USE_IMGUI
 
 void Player::UseImGui()
 {
 	if ( ImGui::BeginIfAllowed() )
 	{
-		if ( ImGui::TreeNode( u8"Player.CurrentParameter" ) )
+		if ( ImGui::TreeNode( "Player.CurrentParameter" ) )
 		{
 			auto GetStatusName = []( Player::State status )->std::string
 			{
