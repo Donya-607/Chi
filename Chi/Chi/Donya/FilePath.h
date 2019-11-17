@@ -25,6 +25,8 @@ enum class ModelAttribute
 	ShieldIdle,
 	ShieldReact,
 	Stage01,
+	Stage02,
+	Stage03,
 	TutorialStage,
 	TutorialBoss,
 	TutorialBossStone,
