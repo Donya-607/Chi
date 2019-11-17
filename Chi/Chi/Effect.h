@@ -98,7 +98,9 @@ public:
 	void SetData(Donya::Vector3 _pos, int _startTimer = 0);
 
 	void Update();
-	void Render( fbx_shader &HLSL );
+	void Render(fbx_shader& HLSL);
+	void z_Render(fbx_shader& HLSL);
+	void bloom_Render(fbx_shader& HLSL);
 
 	bool GetActivated() const { return activated; }
 	std::vector<Donya::Sphere> &GetHitSphereVector() { return hitSphere; }
@@ -213,7 +215,9 @@ public:
 
 	// _bossPos : ボス座標, _playerPos : プレイヤー座標,
 	void Update();
-	void Render( fbx_shader &HLSL );
+	void Render(fbx_shader& HLSL);
+	void z_Render(fbx_shader& HLSL);
+	void bloom_Render(fbx_shader& HLSL);
 
 	std::vector<EruptionEffect> &GetEruptionEffectVector() { return eruptionEffect; }
 };
@@ -258,6 +262,8 @@ public:
 
 	void Update();
 	void Render(fbx_shader& HLSL);
+	void z_Render(fbx_shader& HLSL);
+	void bloom_Render(fbx_shader& HLSL);
 
 	bool GetActivated() const { return activated; }
 	std::vector<Donya::Sphere>& GetHitSphereVector() { return hitSphere; }
@@ -330,6 +336,8 @@ public:
 	// _bossPos : ボス座標, _playerPos : プレイヤー座標,
 	void Update();
 	void Render(fbx_shader& HLSL);
+	void z_Render(fbx_shader& HLSL);
+	void bloom_Render(fbx_shader& HLSL);
 
 	std::vector<LongAttackEffect>& GetLongAttackEffectVector() { return longAttackEffect; }
 };
@@ -353,6 +361,7 @@ public:
 
 	void Update();
 	void Render(fbx_shader& HLSL);
+	void bloom_Render(fbx_shader& HLSL);
 };
 
 class SparkEffect
@@ -375,6 +384,7 @@ public:
 
 	void Update();
 	void Render(fbx_shader& HLSL);
+	void bloom_Render(fbx_shader& HLSL);
 };
 
 class JumpEffect
@@ -394,6 +404,7 @@ public:
 
 	void Update();
 	void Render(fbx_shader& HLSL);
+	void bloom_Render(fbx_shader& HLSL);
 };
 
 class BossAttackMomentEffect
@@ -458,6 +469,21 @@ public:
 		}
 		setBlendMode_ALPHA(1.0f);
 	}
+	void bloom_Draw()
+	{
+		setBlendMode_ADD(1.0f);
+		DirectX::XMFLOAT4X4 viewProjection;
+		DirectX::XMStoreFloat4x4(&viewProjection, getViewMatrix() * getProjectionMatrix());
+		if (data.GetExist())
+		{
+			billboard_bloom_Render(&data.pMesh, viewProjection, data.GetPos(), data.GetScale(), data.GetAngle(), getCamPos(), data.GetTexPos(), data.GetTexSize(), {1.0f,1.0f,1.0f,1.0f}, data.GetColor().w);
+			//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
+			//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
+			//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
+		}
+		setBlendMode_ALPHA(1.0f);
+	}
+
 };
 
 class EffectManager
@@ -495,7 +521,9 @@ public:
 	void Update();
 	void AccelEffectUpdate(Donya::Vector3 pos, Donya::Vector3 dir);
 	void BossAttackMomentEffectUpdate(Donya::Vector3 bossPos, Donya::Vector3 playerPos);
-	void Render( fbx_shader &HLSL );
+	void Render(fbx_shader& HLSL);
+	void z_Render(fbx_shader& HLSL);
+	void bloom_Render(fbx_shader& HLSL);
 
 	//// effectType : エフェクト番号(EffectType参照), pos : 出現位置, startTime : 関数がコールされてから動き始める時間
 	//void Set(EffectType effectType, Donya::Vector3 pos, int startTime = 0);

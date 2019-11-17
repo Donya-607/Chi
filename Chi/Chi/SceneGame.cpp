@@ -148,7 +148,7 @@ public:
 			"./Data/shader/skinned_mesh_no_uv_ps.cso"
 		);
 
-		getLineLight().setLineLight( lights.direction.direction, lights.direction.color );
+		getLineLight().setLineLight(lights.direction.position, lights.direction.direction, lights.direction.color );
 
 		resetPointLight();
 		for ( const auto i : lights.points )
@@ -242,64 +242,108 @@ public:
 
 	void Draw()
 	{
-		clearWindow( 0.5f, 0.5f, 0.5f, 1.0f );
-		setBlendMode_ALPHA( 1.0f );
+		clearWindow(0.5f, 0.5f, 0.5f, 1.0f);
+		setBlendMode_ALPHA(1.0f);
 
-		Donya::Vector4x4 V = Donya::Vector4x4::FromMatrix( getViewMatrix() );
-		Donya::Vector4x4 P = Donya::Vector4x4::FromMatrix( getProjectionMatrix() );
+		Donya::Vector4x4 V = Donya::Vector4x4::FromMatrix(getViewMatrix());
+		Donya::Vector4x4 P = Donya::Vector4x4::FromMatrix(getProjectionMatrix());
 
-		stage.Draw( shader, V, P );
-
-		player.Draw( shader, V, P );
-
-		switch ( stageNo )
+		//original screen
 		{
-		case KnightNo:	knight.Draw( shader, V, P );	break;
-		case GolemNo:	golem.Draw( shader, V, P );		break;
-		case RivalNo:	rival.Draw( shader, V, P );		break;
-		default:		Donya::OutputDebugStr( "Error : The boss does not draw !\n" );	break;
-		}
+			stage.Draw(shader, V, P);
 
-		EffectManager::GetInstance()->Render( shader );
+			player.Draw(shader, V, P);
 
-	#if DEBUG_MODE
-		if ( !wallCollisions.empty() )
-		{
-			constexpr float HEIGHT = 1024.0f;
-			constexpr Donya::Vector4 COLOR = { 0.7f, 0.2f, 0.7f, 0.6f };
-
-			auto GenerateCube = []()->std::shared_ptr<static_mesh>
+			switch (stageNo)
 			{
-				std::shared_ptr<static_mesh> tmpCube = std::make_shared<static_mesh>();
-				createCube( tmpCube.get() );
-				return tmpCube;
-			};
-			static std::shared_ptr<static_mesh> pCube = GenerateCube();
-
-			auto DrawAABB = [&V, &P]( const Donya::AABB &AABB, const Donya::Vector4 &color )
-			{
-				Donya::Vector4x4 S = Donya::Vector4x4::MakeScaling( AABB.size * 2.0f ); // Half size->Whole size.
-				Donya::Vector4x4 T = Donya::Vector4x4::MakeTranslation( AABB.pos );
-				Donya::Vector4x4 W = ( S * T );
-				Donya::Vector4x4 WVP = W * V * P;
-
-				OBJRender( pCube.get(), WVP, W, color );
-			};
-
-			Donya::AABB wall{};
-			wall.size.y = HEIGHT;
-			for ( const auto &it : wallCollisions )
-			{
-				wall.pos.x = it.cx;
-				wall.pos.z = it.cy;
-				wall.size.x = it.w;
-				wall.size.z = it.h;
-				
-				DrawAABB( wall, COLOR );
+			case KnightNo:	knight.Draw(shader, V, P);	break;
+			case GolemNo:	golem.Draw(shader, V, P);		break;
+			case RivalNo:	rival.Draw(shader, V, P);		break;
+			default:		Donya::OutputDebugStr("Error : The boss does not draw !\n");	break;
 			}
+
+			EffectManager::GetInstance()->Render(shader);
+
+#if DEBUG_MODE
+			if (!wallCollisions.empty())
+			{
+				constexpr float HEIGHT = 1024.0f;
+				constexpr Donya::Vector4 COLOR = { 0.7f, 0.2f, 0.7f, 0.6f };
+
+				auto GenerateCube = []()->std::shared_ptr<static_mesh>
+				{
+					std::shared_ptr<static_mesh> tmpCube = std::make_shared<static_mesh>();
+					createCube(tmpCube.get());
+					return tmpCube;
+				};
+				static std::shared_ptr<static_mesh> pCube = GenerateCube();
+
+				auto DrawAABB = [&V, &P](const Donya::AABB& AABB, const Donya::Vector4& color)
+				{
+					Donya::Vector4x4 S = Donya::Vector4x4::MakeScaling(AABB.size * 2.0f); // Half size->Whole size.
+					Donya::Vector4x4 T = Donya::Vector4x4::MakeTranslation(AABB.pos);
+					Donya::Vector4x4 W = (S * T);
+					Donya::Vector4x4 WVP = W * V * P;
+
+					OBJRender(pCube.get(), WVP, W, color);
+				};
+
+				Donya::AABB wall{};
+				wall.size.y = HEIGHT;
+				for (const auto& it : wallCollisions)
+				{
+					wall.pos.x = it.cx;
+					wall.pos.z = it.cy;
+					wall.size.x = it.w;
+					wall.size.z = it.h;
+
+					DrawAABB(wall, COLOR);
+				}
+			}
+#endif // DEBUG_MODE
 		}
-	#endif // DEBUG_MODE
+
+		//z screen
+		{
+			stage.z_Draw(shader, V, P);
+
+			player.z_Draw(shader, V, P);
+
+			switch (stageNo)
+			{
+			case KnightNo:	knight.z_Draw(shader, V, P);	break;
+			case GolemNo:	golem.z_Draw(shader, V, P);		break;
+			case RivalNo:	rival.z_Draw(shader, V, P);		break;
+			default:		Donya::OutputDebugStr("Error : The boss does not draw !\n");	break;
+			}
+
+			EffectManager::GetInstance()->z_Render(shader);
+		}
+
+		//bloom screen
+		{
+			stage.bloom_Draw(shader, V, P);
+
+			player.bloom_Draw(shader, V, P);
+
+			switch (stageNo)
+			{
+			case KnightNo:	knight.bloom_Draw(shader, V, P);	break;
+			case GolemNo:	golem.bloom_Draw(shader, V, P);		break;
+			case RivalNo:	rival.bloom_Draw(shader, V, P);		break;
+			default:		Donya::OutputDebugStr("Error : The boss does not draw !\n");	break;
+			}
+
+			EffectManager::GetInstance()->bloom_Render(shader);
+		}
+
+		//TODO blur値入れる
+		postEffect_Bloom(0);
+
+		//TODO GameOver時は画面をモノトーンにするので第一引数の値を小さくする
+		filterScreen(1.0f);
 	}
+
 public:
 	bool LoadSounds() const
 	{
@@ -797,7 +841,7 @@ public:
 						ImGui::ColorEdit4( "Color", &lights.direction.color.x );
 						ImGui::SliderFloat3( "Direction", &lights.direction.direction.x, -8.0f, 8.0f );
 
-						getLineLight().setLineLight( lights.direction.direction, lights.direction.color );
+						getLineLight().setLineLight(lights.direction.position, lights.direction.direction, lights.direction.color );
 
 						ImGui::TreePop();
 					}

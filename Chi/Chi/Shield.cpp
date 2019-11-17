@@ -349,6 +349,86 @@ void Shield::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Dony
 #endif // DEBUG_MODE
 }
 
+void Shield::z_Draw(fbx_shader& HLSL, const Donya::Vector4x4& matView, const Donya::Vector4x4& matProjection, const Donya::Vector4x4& matParent)
+{
+	if (status == State::NotExist) { return; }
+	// else
+
+	const auto& PARAM = ShieldParam::Open();
+
+	const Donya::Vector3 drawOffset = PARAM.drawOffset;
+	const Donya::Vector4x4 DRAW_OFFSET = Donya::Vector4x4::MakeTranslation(drawOffset);
+
+	auto CalcCurrentScale = [](int currentUnfoldTimer)
+	{
+		float	percent = ShieldParam::Get().CalcUnfoldPercent(currentUnfoldTimer);
+		float	max = ShieldParam::Open().drawScaleMax;
+		float	min = ShieldParam::Open().drawScaleMin;
+		float	diff = max - min;
+
+		return	min + (diff * percent);
+	};
+
+	Donya::Vector4x4 S = Donya::Vector4x4::MakeScaling(CalcCurrentScale(unfoldTimer));
+	Donya::Vector4x4 M = S * DRAW_OFFSET;
+	Donya::Vector4x4 W = M * matParent;
+	Donya::Vector4x4 WVP = W * matView * matProjection;
+
+	switch (status)
+	{
+	case State::Open:
+		z_render(models.pOpen.get(), HLSL, WVP, W);
+		break;
+	case State::Idle:
+		z_render(models.pIdle.get(), HLSL, WVP, W);
+		break;
+	case State::React:
+		z_render(models.pReact.get(), HLSL, WVP, W);
+		break;
+	default: break;
+	}
+}
+
+void Shield::bloom_Draw(fbx_shader& HLSL, const Donya::Vector4x4& matView, const Donya::Vector4x4& matProjection, const Donya::Vector4x4& matParent)
+{
+	if (status == State::NotExist) { return; }
+	// else
+
+	const auto& PARAM = ShieldParam::Open();
+
+	const Donya::Vector3 drawOffset = PARAM.drawOffset;
+	const Donya::Vector4x4 DRAW_OFFSET = Donya::Vector4x4::MakeTranslation(drawOffset);
+
+	auto CalcCurrentScale = [](int currentUnfoldTimer)
+	{
+		float	percent = ShieldParam::Get().CalcUnfoldPercent(currentUnfoldTimer);
+		float	max = ShieldParam::Open().drawScaleMax;
+		float	min = ShieldParam::Open().drawScaleMin;
+		float	diff = max - min;
+
+		return	min + (diff * percent);
+	};
+
+	Donya::Vector4x4 S = Donya::Vector4x4::MakeScaling(CalcCurrentScale(unfoldTimer));
+	Donya::Vector4x4 M = S * DRAW_OFFSET;
+	Donya::Vector4x4 W = M * matParent;
+	Donya::Vector4x4 WVP = W * matView * matProjection;
+
+	switch (status)
+	{
+	case State::Open:
+		bloom_SRVrender(models.pOpen.get(), HLSL, WVP, W);
+		break;
+	case State::Idle:
+		bloom_SRVrender(models.pIdle.get(), HLSL, WVP, W);
+		break;
+	case State::React:
+		bloom_SRVrender(models.pReact.get(), HLSL, WVP, W);
+		break;
+	default: break;
+	}
+}
+
 bool Shield::CanUnfold() const
 {
 	return ( 0 < unfoldTimer ) ? true : false;

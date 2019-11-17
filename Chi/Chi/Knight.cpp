@@ -598,6 +598,171 @@ void Knight::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Dony
 #endif // DEBUG_MODE
 }
 
+void Knight::z_Draw(fbx_shader& HLSL, const Donya::Vector4x4& matView, const Donya::Vector4x4& matProjection, float animationAcceleration)
+
+{
+	const auto& PARAM = KnightParam::Open();
+
+	const Donya::Vector3 drawOffset = PARAM.drawOffset;
+	const Donya::Vector4x4 DRAW_OFFSET = Donya::Vector4x4::MakeTranslation(drawOffset);
+
+	// S, R, T will be used here and later.
+	Donya::Vector4x4 S = Donya::Vector4x4::MakeScaling(PARAM.scale);
+	Donya::Vector4x4 R = orientation.RequireRotationMatrix();
+	Donya::Vector4x4 T = Donya::Vector4x4::MakeTranslation(GetPos());
+	Donya::Vector4x4 W = CalcWorldMatrix() * DRAW_OFFSET;
+	Donya::Vector4x4 WVP = W * matView * matProjection;
+
+	switch (status)
+	{
+	case KnightAI::ActionState::WAIT:
+		z_render(models.pIdle.get(), HLSL, WVP, W);
+		break;
+	case KnightAI::ActionState::MOVE_GET_NEAR:
+		z_render(models.pRunFront.get(), HLSL, WVP, W);
+		break;
+	case KnightAI::ActionState::MOVE_GET_FAR:
+		z_render(models.pRunBack.get(), HLSL, WVP, W);
+		break;
+	case KnightAI::ActionState::MOVE_SIDE:
+		(Donya::SignBit(moveSign) == 1)
+			? z_render(models.pRunRight.get(), HLSL, WVP, W)
+			: z_render(models.pRunLeft.get(), HLSL, WVP, W);
+		break;
+	case KnightAI::ActionState::MOVE_AIM_SIDE:
+		(Donya::SignBit(moveSign) == 1)
+			? z_render(models.pRunRight.get(), HLSL, WVP, W)
+			: z_render(models.pRunLeft.get(), HLSL, WVP, W);
+		break;
+	case KnightAI::ActionState::ATTACK_EXPLOSION:
+	{
+		z_render(models.pAtkExpl.get(), HLSL, WVP, W);
+
+		float drawScale = KnightParam::Get().HitBoxExplosion().collision.radius * PARAM.explScaleDraw;
+		Donya::Vector4x4 FX_S = Donya::Vector4x4::MakeScaling(drawScale);
+		Donya::Vector4x4 FX_R = Donya::Quaternion::Make
+		(
+			Donya::Vector3::Up(),
+			PARAM.explRotationSpeed * timer
+		).RequireRotationMatrix();
+
+		Donya::Vector4x4 FX_W = (FX_S * FX_R) * (S * R * T)/* Except draw offset from parent world matrix.*/;
+		Donya::Vector4x4 FX_WVP = FX_W * matView * matProjection;
+
+		const int VIVID_TIME = KnightParam::Get().HitBoxExplosion().enableFrameLast;
+		float drawAlpha = (VIVID_TIME <= timer)
+			? 1.0f - (KnightParam::Open().explHideSpeed * (timer - VIVID_TIME))
+			: 1.0f;
+		z_render(models.pFxExpl.get(), HLSL, FX_WVP, FX_W);
+	}
+	break;
+	case KnightAI::ActionState::ATTACK_SWING:
+		z_render(models.pAtkSwing.get(), HLSL, WVP, W);
+		break;
+	case KnightAI::ActionState::ATTACK_RAID:
+		z_render(models.pAtkRaid.get(), HLSL, WVP, W);
+		break;
+	case KnightAI::ActionState::END:
+	{
+		const int MOTION_LENGTH = KnightParam::Open().defeatMotionLength;
+		int timeDiff = timer - MOTION_LENGTH;
+
+		float drawAlpha = 1.0f;
+		if (0 < timeDiff)
+		{
+			drawAlpha -= KnightParam::Open().defeatHideSpeed * timeDiff;
+			drawAlpha = std::max(0.0f, drawAlpha);
+		}
+		z_render(models.pDefeat.get(), HLSL, WVP, W);
+	}
+	break;
+	default: break;
+	}
+
+}
+
+void Knight::bloom_Draw(fbx_shader& HLSL, const Donya::Vector4x4& matView, const Donya::Vector4x4& matProjection, float animationAcceleration)
+
+{
+	const auto& PARAM = KnightParam::Open();
+
+	const Donya::Vector3 drawOffset = PARAM.drawOffset;
+	const Donya::Vector4x4 DRAW_OFFSET = Donya::Vector4x4::MakeTranslation(drawOffset);
+
+	// S, R, T will be used here and later.
+	Donya::Vector4x4 S = Donya::Vector4x4::MakeScaling(PARAM.scale);
+	Donya::Vector4x4 R = orientation.RequireRotationMatrix();
+	Donya::Vector4x4 T = Donya::Vector4x4::MakeTranslation(GetPos());
+	Donya::Vector4x4 W = CalcWorldMatrix() * DRAW_OFFSET;
+	Donya::Vector4x4 WVP = W * matView * matProjection;
+
+	switch (status)
+	{
+	case KnightAI::ActionState::WAIT:
+		bloom_SRVrender(models.pIdle.get(), HLSL, WVP, W);
+		break;
+	case KnightAI::ActionState::MOVE_GET_NEAR:
+		bloom_SRVrender(models.pRunFront.get(), HLSL, WVP, W);
+		break;
+	case KnightAI::ActionState::MOVE_GET_FAR:
+		bloom_SRVrender(models.pRunBack.get(), HLSL, WVP, W);
+		break;
+	case KnightAI::ActionState::MOVE_SIDE:
+		(Donya::SignBit(moveSign) == 1)
+			? bloom_SRVrender(models.pRunRight.get(), HLSL, WVP, W)
+			: bloom_SRVrender(models.pRunLeft.get(), HLSL, WVP, W);
+		break;
+	case KnightAI::ActionState::MOVE_AIM_SIDE:
+		(Donya::SignBit(moveSign) == 1)
+			? bloom_SRVrender(models.pRunRight.get(), HLSL, WVP, W)
+			: bloom_SRVrender(models.pRunLeft.get(), HLSL, WVP, W);
+		break;
+	case KnightAI::ActionState::ATTACK_EXPLOSION:
+	{
+		bloom_SRVrender(models.pAtkExpl.get(), HLSL, WVP, W);
+
+		float drawScale = KnightParam::Get().HitBoxExplosion().collision.radius * PARAM.explScaleDraw;
+		Donya::Vector4x4 FX_S = Donya::Vector4x4::MakeScaling(drawScale);
+		Donya::Vector4x4 FX_R = Donya::Quaternion::Make
+		(
+			Donya::Vector3::Up(),
+			PARAM.explRotationSpeed * timer
+		).RequireRotationMatrix();
+
+		Donya::Vector4x4 FX_W = (FX_S * FX_R) * (S * R * T)/* Except draw offset from parent world matrix.*/;
+		Donya::Vector4x4 FX_WVP = FX_W * matView * matProjection;
+
+		const int VIVID_TIME = KnightParam::Get().HitBoxExplosion().enableFrameLast;
+		float drawAlpha = (VIVID_TIME <= timer)
+			? 1.0f - (KnightParam::Open().explHideSpeed * (timer - VIVID_TIME))
+			: 1.0f;
+		bloom_SRVrender(models.pFxExpl.get(), HLSL, FX_WVP, FX_W);
+	}
+	break;
+	case KnightAI::ActionState::ATTACK_SWING:
+		bloom_SRVrender(models.pAtkSwing.get(), HLSL, WVP, W);
+		break;
+	case KnightAI::ActionState::ATTACK_RAID:
+		bloom_SRVrender(models.pAtkRaid.get(), HLSL, WVP, W);
+		break;
+	case KnightAI::ActionState::END:
+	{
+		const int MOTION_LENGTH = KnightParam::Open().defeatMotionLength;
+		int timeDiff = timer - MOTION_LENGTH;
+
+		float drawAlpha = 1.0f;
+		if (0 < timeDiff)
+		{
+			drawAlpha -= KnightParam::Open().defeatHideSpeed * timeDiff;
+			drawAlpha = std::max(0.0f, drawAlpha);
+		}
+		bloom_SRVrender(models.pDefeat.get(), HLSL, WVP, W);
+	}
+	break;
+	default: break;
+	}
+
+}
 bool Knight::IsCollideAttackHitBoxes( const Donya::AABB   other, bool disableCollidingHitBoxes )
 {
 	if ( !KnightAI::IsAction( status ) || !other.enable || !other.exist ) { return false; }

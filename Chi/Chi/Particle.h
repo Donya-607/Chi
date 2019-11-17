@@ -309,6 +309,7 @@ public:
 	void ReSet() { emitting = false; }
 	void Emit();
 	void Draw();
+	void bloom_Draw();
 	void ImGuiDataInit();
 	void ImGui();
 
@@ -361,6 +362,7 @@ public:
 	void ReSet();
 	void Emit();
 	void Draw();
+	void bloom_Draw();
 	void ImGuiDataInit();
 	void ImGui();
 
@@ -440,6 +442,7 @@ public:
 	void Set(DirectX::XMFLOAT3 _pos, int stageNum = 0);
 	void Emit();
 	void Draw();
+	void bloom_Draw();
 	void ImGuiDataInit();
 	void ImGui();
 
@@ -526,6 +529,7 @@ public:
 	void Set(DirectX::XMFLOAT3 _pos);
 	void Emit();
 	void Draw();
+	void bloom_Draw();
 	void ImGuiDataInit();
 	void ImGui();
 	bool GetEmitting() { return emitting; }
@@ -611,6 +615,7 @@ public:
 	void Set(DirectX::XMFLOAT3 _pos, DirectX::XMFLOAT3 _dir);
 	void Emit();
 	void Draw();
+	void bloom_Draw();
 	void ImGuiDataInit();
 	void ImGui();
 
@@ -694,6 +699,7 @@ public:
 	void ReSet();
 	void Emit(DirectX::XMFLOAT3 _pos, DirectX::XMFLOAT3 _dir);
 	void Draw();
+	void bloom_Draw();
 	void ImGuiDataInit();
 	void ImGui();
 
@@ -775,6 +781,7 @@ public:
 	void Set(DirectX::XMFLOAT3 _pos);
 	void Emit();
 	void Draw();
+	void bloom_Draw();
 	void ImGuiDataInit();
 	void ImGui();
 	bool GetEmitting() { return emitting; }
@@ -857,6 +864,7 @@ public:
 	void Set(DirectX::XMFLOAT3 _pos);
 	void Emit();
 	void Draw();
+	void bloom_Draw();
 	void ImGuiDataInit();
 	void ImGui();
 	bool GetEmitting() { return emitting; }

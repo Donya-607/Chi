@@ -269,6 +269,12 @@ void static_mesh::loadStaticMeshMTL(ID3D11Device* _device, const wchar_t* _objFi
 
 void static_mesh::init(ID3D11Device* device, std::string vsName, D3D11_INPUT_ELEMENT_DESC* inputElementDescs, int numElement, std::string psName)
 {
+	ResourceManager::LoadPixelShader(device, "./Data/shader/geometric_primitive_z_ps.cso", &z_PS);
+	ResourceManager::LoadPixelShader(device, "./Data/shader/obj_z_ps.cso", &noTex_z_PS);
+	ResourceManager::LoadPixelShader(device, "./Data/shader/geometric_primitive_bloom_ps.cso", &bloom_PS);
+	ResourceManager::LoadPixelShader(device, "./Data/shader/obj_bloom_ps.cso", &noTex_bloom_PS);
+
+
 	HRESULT hr = S_OK;
 	//vertexShader
 	ResourceManager::LoadVertexShader(device, vsName, inputElementDescs, numElement, &vertexShader, &layout);
@@ -841,6 +847,246 @@ void static_mesh::render(
 	}
 }
 
+void static_mesh::z_render(ID3D11DeviceContext* context, const DirectX::XMFLOAT4X4& SynthesisMatrix, const DirectX::XMFLOAT4X4& worldMatrix, const DirectX::XMFLOAT4& camPos)
+{
+
+	if (!materials.empty())
+		for (auto& it : materials)
+		{
+			//	定数バッファの作成
+			cbuffer cb;
+			cb.world_view_projection = SynthesisMatrix;
+			cb.world = worldMatrix;
+			cb.camPos = camPos;
+			cb.b_material.ambient = { it.Ka.x,it.Ka.y,it.Ka.z,1.0f };
+			cb.b_material.diffuse = { it.Kd.x,it.Kd.y,it.Kd.z,1.0f };
+			cb.b_material.specular = { it.Ks.x,it.Ks.y,it.Ks.z,0.5f };
+			context->UpdateSubresource(constant_buffer, 0, nullptr, &cb, 0, 0);
+			context->VSSetConstantBuffers(0, 1, &constant_buffer);
+
+			// 頂点バッファのバインド
+			UINT stride = sizeof(vertex);
+			UINT offset = 0;
+			context->IASetVertexBuffers(0, 1, &vertex_buffer, &stride, &offset);
+
+			//	インデックスバッファのバインド
+			context->IASetIndexBuffer(index_buffer, DXGI_FORMAT_R32_UINT, 0);
+
+			//	プリミティブモードの設定
+			context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+
+			//	ラスタライザーの設定
+			context->RSSetState(rasterizeFillOut);
+
+			if (it.Resource)
+			{
+				//	入力レイアウトのバインド
+				context->IASetInputLayout(layout);
+				//	シェーダー(2種)の設定
+				context->VSSetShader(vertexShader, nullptr, 0);
+			}
+			else
+			{
+				//	入力レイアウトのバインド
+				context->IASetInputLayout(noTexLayout);
+				//	シェーダー(2種)の設定
+				context->VSSetShader(noTexVS, nullptr, 0);
+			}
+			context->PSSetShader(z_PS, nullptr, 0);
+			//	深度テストの設定
+			context->OMSetDepthStencilState(depthStencilState, 0);
+
+			context->PSSetShaderResources(0, 1, &it.Resource);
+			context->PSSetSamplers(0, 1, &sampleState);
+
+			for (auto& itr : subsets)
+			{
+				//	プリミティブの描画
+				if (it.newmtl != itr.usemtl)
+					continue;
+				context->DrawIndexed(itr.index_count, itr.index_start, 0);
+			}
+		}
+	else
+	{
+		//	定数バッファの作成
+		cbuffer cb;
+		cb.world_view_projection = SynthesisMatrix;
+		cb.world = worldMatrix;
+		cb.camPos = camPos;
+		cb.b_material.diffuse = { 1,1,1,1 };
+		cb.b_material.specular = { 1,1,1,1 };
+		context->UpdateSubresource(constant_buffer, 0, nullptr, &cb, 0, 0);
+		context->VSSetConstantBuffers(0, 1, &constant_buffer);
+		context->PSSetConstantBuffers(0, 1, &constant_buffer);
+
+		// 頂点バッファのバインド
+		UINT stride = sizeof(vertex);
+		UINT offset = 0;
+		context->IASetVertexBuffers(0, 1, &vertex_buffer, &stride, &offset);
+
+		//	インデックスバッファのバインド
+		context->IASetIndexBuffer(index_buffer, DXGI_FORMAT_R32_UINT, 0);
+
+		//	プリミティブモードの設定
+		context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+		//	入力レイアウトのバインド
+		context->IASetInputLayout(layout);
+
+		//	ラスタライザーの設定
+		context->RSSetState(rasterizeFillOut);
+
+		//	シェーダー(2種)の設定
+		context->VSSetShader(vertexShader, nullptr, 0);
+
+		context->PSSetShader(z_PS, nullptr, 0);
+
+
+		//	深度テストの設定
+		context->OMSetDepthStencilState(depthStencilState, 0);
+
+		//	プリミティブの描画
+		context->DrawIndexed(numIndices, 0, 0);
+
+	}
+
+}
+
+void static_mesh::bloom_SRV_render(ID3D11DeviceContext* context, const DirectX::XMFLOAT4X4& SynthesisMatrix, const DirectX::XMFLOAT4X4& worldMatrix, const DirectX::XMFLOAT4& camPos, line_light& _line_light, std::vector<point_light>& _point_light, const DirectX::XMFLOAT4& materialColor, const DirectX::XMFLOAT3& judge_color, ID3D11ShaderResourceView* z_SRV)
+{
+	int size = _point_light.size();
+
+	if (!materials.empty())
+		for (auto& it : materials)
+		{
+			//	定数バッファの作成
+			cbuffer cb;
+			cb.world_view_projection = SynthesisMatrix;
+			cb.world = worldMatrix;
+			cb.camPos = camPos;
+			cb.lineLight = _line_light.getInfo();
+			for (int i = 0; i < 5; i++)
+			{
+				if (size <= i)
+				{
+					cb.pntLight[i].pos.w = 0;
+					continue;
+				}
+				cb.pntLight[i] = _point_light[i].getInfo();
+			}
+			cb.b_material.ambient = { it.Ka.x,it.Ka.y,it.Ka.z,1.0f };
+			cb.b_material.diffuse = { it.Kd.x,it.Kd.y,it.Kd.z,1.0f };
+			cb.b_material.specular = { it.Ks.x,it.Ks.y,it.Ks.z,0.5f };
+			cb.judge_color = { judge_color.x,judge_color.y,judge_color.z,1.0 };
+			context->UpdateSubresource(constant_buffer, 0, nullptr, &cb, 0, 0);
+			context->VSSetConstantBuffers(0, 1, &constant_buffer);
+
+			// 頂点バッファのバインド
+			UINT stride = sizeof(vertex);
+			UINT offset = 0;
+			context->IASetVertexBuffers(0, 1, &vertex_buffer, &stride, &offset);
+
+			//	インデックスバッファのバインド
+			context->IASetIndexBuffer(index_buffer, DXGI_FORMAT_R32_UINT, 0);
+
+			//	プリミティブモードの設定
+			context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+
+			//	ラスタライザーの設定
+			context->RSSetState(rasterizeFillOut);
+
+			if (it.Resource)
+			{
+				//	入力レイアウトのバインド
+				context->IASetInputLayout(layout);
+				//	シェーダー(2種)の設定
+				context->VSSetShader(vertexShader, nullptr, 0);
+				context->PSSetShader(bloom_PS, nullptr, 0);
+			}
+			else
+			{
+				//	入力レイアウトのバインド
+				context->IASetInputLayout(noTexLayout);
+				//	シェーダー(2種)の設定
+				context->VSSetShader(noTexVS, nullptr, 0);
+				context->PSSetShader(noTex_bloom_PS, nullptr, 0);
+			}
+			//	深度テストの設定
+			context->OMSetDepthStencilState(depthStencilState, 0);
+
+			context->PSSetShaderResources(0, 1, &it.Resource);
+			context->PSSetShaderResources(1, 1, &z_SRV);
+			context->PSSetSamplers(0, 1, &sampleState);
+
+			for (auto& itr : subsets)
+			{
+				//	プリミティブの描画
+				if (it.newmtl != itr.usemtl)
+					continue;
+				context->DrawIndexed(itr.index_count, itr.index_start, 0);
+			}
+		}
+	else
+	{
+		//	定数バッファの作成
+		cbuffer cb;
+		cb.world_view_projection = SynthesisMatrix;
+		cb.world = worldMatrix;
+		cb.camPos = camPos;
+		cb.lineLight = _line_light.getInfo();
+		for (int i = 0; i < 5; i++)
+		{
+			if (size <= i)
+			{
+				cb.pntLight[i].pos.w = 0;
+				continue;
+			}
+			cb.pntLight[i] = _point_light[i].getInfo();
+		}
+		cb.b_material.ambient = materialColor;
+		cb.b_material.diffuse = { 1,1,1,1 };
+		cb.b_material.specular = { 1,1,1,1 };
+		cb.judge_color = { judge_color.x,judge_color.y,judge_color.z,1.0 };
+		context->UpdateSubresource(constant_buffer, 0, nullptr, &cb, 0, 0);
+		context->VSSetConstantBuffers(0, 1, &constant_buffer);
+		context->PSSetConstantBuffers(0, 1, &constant_buffer);
+
+		// 頂点バッファのバインド
+		UINT stride = sizeof(vertex);
+		UINT offset = 0;
+		context->IASetVertexBuffers(0, 1, &vertex_buffer, &stride, &offset);
+
+		//	インデックスバッファのバインド
+		context->IASetIndexBuffer(index_buffer, DXGI_FORMAT_R32_UINT, 0);
+
+		//	プリミティブモードの設定
+		context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+		//	入力レイアウトのバインド
+		context->IASetInputLayout(layout);
+
+		//	ラスタライザーの設定
+		context->RSSetState(rasterizeFillOut);
+
+		//	シェーダー(2種)の設定
+		context->VSSetShader(vertexShader, nullptr, 0);
+
+		context->PSSetShader(noTex_bloom_PS, nullptr, 0);
+
+		context->PSSetShaderResources(1, 1, &z_SRV);
+
+		//	深度テストの設定
+		context->OMSetDepthStencilState(depthStencilState, 0);
+
+		//	プリミティブの描画
+		context->DrawIndexed(numIndices, 0, 0);
+
+	}
+}
+
 void static_mesh::billboardRender(
 	ID3D11DeviceContext* context,
 	const DirectX::XMFLOAT4X4& SynthesisMatrix,
@@ -849,7 +1095,7 @@ void static_mesh::billboardRender(
 	const float angle,
 	const DirectX::XMFLOAT4& camPos,
 	const DirectX::XMFLOAT2& texpos, const DirectX::XMFLOAT2& texsize,
-	const float alpha,const DirectX::XMFLOAT3& color)
+	const float alpha, const DirectX::XMFLOAT3& color)
 {
 
 	HRESULT hr = S_OK;
@@ -919,7 +1165,11 @@ void static_mesh::billboardRender(
 		cb.pntLight[i].attenuate = { 0,0,0,0 };
 
 	}
-	cb.b_material.ambient = { color.x,color.y,color.z,alpha/2.0f+0.5f };
+	cb.b_material.ambient = { color.x,color.y,color.z,alpha / 2.0f + 0.5f };
+	if (alpha <= 0)
+		cb.b_material.ambient.w = 0;
+	else if (alpha >= 1)
+		cb.b_material.ambient.w = 1;
 	cb.b_material.diffuse = { 0,0,0,1.0f };
 	cb.b_material.specular = { 0,0,0,0.5f };
 	context->UpdateSubresource(constant_buffer, 0, nullptr, &cb, 0, 0);
@@ -950,6 +1200,231 @@ void static_mesh::billboardRender(
 
 	context->PSSetShaderResources(0, 1, &materials.back().Resource);
 	context->PSSetSamplers(0, 1, &sampleState);
+
+	context->DrawIndexed(subsets.back().index_count, subsets.back().index_start, 0);
+
+}
+
+void static_mesh::billboard_z_render(ID3D11DeviceContext* context, const DirectX::XMFLOAT4X4& SynthesisMatrix, const DirectX::XMFLOAT4& pos, const DirectX::XMFLOAT2 scale, const float angle, const DirectX::XMFLOAT4& camPos, const DirectX::XMFLOAT2& texpos, const DirectX::XMFLOAT2& texsize, const float alpha, const DirectX::XMFLOAT3& color)
+{
+	HRESULT hr = S_OK;
+	D3D11_MAP map = D3D11_MAP_WRITE_DISCARD;
+	D3D11_MAPPED_SUBRESOURCE mapped_buffer;
+	hr = context->Map(vertex_buffer, 0, map, 0, &mapped_buffer);
+	_ASSERT_EXPR(SUCCEEDED(hr), hr_trace(hr));
+
+	vertex* vertices = static_cast<vertex*>(mapped_buffer.pData);
+
+	DirectX::XMINT2 tex = { (int)materials.back().tex2dDesc.Width,(int)materials.back().tex2dDesc.Height };
+	vertices[0].texcoord = { texpos.x / tex.x * 1.0f,texpos.y / tex.y * 1.0f };
+	vertices[1].texcoord = { (texpos.x + texsize.x) / tex.x * 1.0f,texpos.y / tex.y * 1.0f };
+	vertices[2].texcoord = { texpos.x / tex.x * 1.0f,(texpos.y + texsize.y) / tex.y * 1.0f };
+	vertices[3].texcoord = { (texpos.x + texsize.x) / tex.x * 1.0f,(texpos.y + texsize.y) / tex.y * 1.0f };
+
+	vertices[0].position = DirectX::XMFLOAT3(-0.5f, +0.5f, 0);
+	vertices[1].position = DirectX::XMFLOAT3(+0.5f, +0.5f, 0);
+	vertices[2].position = DirectX::XMFLOAT3(-0.5f, -0.5f, 0);
+	vertices[3].position = DirectX::XMFLOAT3(+0.5f, -0.5f, 0);
+
+
+	vertices[0].normal = vertices[1].normal =
+		vertices[2].normal = vertices[3].normal = DirectX::XMFLOAT3(+0.0f, +0.0f, -1.0f);
+
+	context->Unmap(vertex_buffer, 0);
+
+	//transformVertex
+
+	DirectX::XMFLOAT3 direction = { camPos.x - pos.x,camPos.y - pos.y,camPos.z - pos.z };
+	float size = sqrtf(direction.x * direction.x + direction.y * direction.y + direction.z * direction.z);
+	direction = { -direction.x / size,-direction.y / size,-direction.z / size };
+
+	orientation = Quaternion::LookAt(orientation, direction).Normalized();
+	Quaternion front = Donya::Quaternion::Make(orientation.LocalFront(), angle * 3.14f / 180.0f);
+	Quaternion rotate = orientation;
+	rotate.RotateBy(front);
+	rotate.Normalized();
+
+	DirectX::XMMATRIX S, R, T, world;
+	T = DirectX::XMMatrixTranslation(pos.x, pos.y, pos.z);
+
+	//	拡大・縮小
+	S = DirectX::XMMatrixScaling(scale.x, scale.y, 1);
+
+	//	回転
+	R = DirectX::XMLoadFloat4x4(&rotate.RequireRotationMatrix());
+
+	world = S * R * T;
+
+	DirectX::XMMATRIX viewProjection = DirectX::XMLoadFloat4x4(&SynthesisMatrix);
+	DirectX::XMFLOAT4X4 WVP, W;
+	//	Matrix -> Float4x4 変換
+	DirectX::XMStoreFloat4x4(&WVP, world * viewProjection);
+	DirectX::XMStoreFloat4x4(&W, world);
+
+	cbuffer cb;
+	cb.world_view_projection = WVP;
+	cb.world = W;
+	cb.camPos = camPos;
+	cb.lineLight.color = { 0,0,0,0 };
+	cb.lineLight.direction = { 0,0,0,0 };
+
+	for (int i = 0; i < 5; i++)
+	{
+		cb.pntLight[i].pos = { 0,0,0,0 };
+		cb.pntLight[i].attenuate = { 0,0,0,0 };
+
+	}
+	cb.b_material.ambient = { color.x,color.y,color.z,alpha / 2.0f + 0.5f };
+	if (alpha <= 0)
+		cb.b_material.ambient.w = 0;
+	else if (alpha >= 1)
+		cb.b_material.ambient.w = 1;
+	cb.b_material.diffuse = { 0,0,0,1.0f };
+	cb.b_material.specular = { 0,0,0,0.5f };
+	cb.screenSize = { (float)pSystem->SCREEN_WIDTH,(float)pSystem->SCREEN_HEIGHT,0,0 };
+	context->UpdateSubresource(constant_buffer, 0, nullptr, &cb, 0, 0);
+	context->VSSetConstantBuffers(0, 1, &constant_buffer);
+	context->PSSetConstantBuffers(0, 1, &constant_buffer);
+
+	// 頂点バッファのバインド
+	UINT stride = sizeof(vertex);
+	UINT offset = 0;
+	context->IASetVertexBuffers(0, 1, &vertex_buffer, &stride, &offset);
+
+	//	インデックスバッファのバインド
+	context->IASetIndexBuffer(index_buffer, DXGI_FORMAT_R32_UINT, 0);
+
+	//	プリミティブモードの設定
+	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+
+	//	ラスタライザーの設定
+	context->RSSetState(rasterizeFillOut);
+
+	//	入力レイアウトのバインド
+	context->IASetInputLayout(layout);
+	//	シェーダー(2種)の設定
+	context->VSSetShader(vertexShader, nullptr, 0);
+	context->PSSetShader(noTex_z_PS, nullptr, 0);
+	//	深度テストの設定
+	context->OMSetDepthStencilState(depthStencilState, 0);
+
+	context->PSSetShaderResources(0, 1, &materials.back().Resource);
+	context->PSSetSamplers(0, 1, &sampleState);
+
+	context->DrawIndexed(subsets.back().index_count, subsets.back().index_start, 0);
+
+}
+
+void static_mesh::billboard_bloom_SRV_render(ID3D11DeviceContext* context, const DirectX::XMFLOAT4X4& SynthesisMatrix, const DirectX::XMFLOAT4& pos, const DirectX::XMFLOAT2 scale, const float angle, const DirectX::XMFLOAT4& camPos, const DirectX::XMFLOAT2& texpos, const DirectX::XMFLOAT2& texsize, const float alpha, const DirectX::XMFLOAT3& color, const DirectX::XMFLOAT4& judge_color, ID3D11ShaderResourceView* z_SRV)
+{
+	HRESULT hr = S_OK;
+	D3D11_MAP map = D3D11_MAP_WRITE_DISCARD;
+	D3D11_MAPPED_SUBRESOURCE mapped_buffer;
+	hr = context->Map(vertex_buffer, 0, map, 0, &mapped_buffer);
+	_ASSERT_EXPR(SUCCEEDED(hr), hr_trace(hr));
+
+	vertex* vertices = static_cast<vertex*>(mapped_buffer.pData);
+
+	DirectX::XMINT2 tex = { (int)materials.back().tex2dDesc.Width,(int)materials.back().tex2dDesc.Height };
+	vertices[0].texcoord = { texpos.x / tex.x * 1.0f,texpos.y / tex.y * 1.0f };
+	vertices[1].texcoord = { (texpos.x + texsize.x) / tex.x * 1.0f,texpos.y / tex.y * 1.0f };
+	vertices[2].texcoord = { texpos.x / tex.x * 1.0f,(texpos.y + texsize.y) / tex.y * 1.0f };
+	vertices[3].texcoord = { (texpos.x + texsize.x) / tex.x * 1.0f,(texpos.y + texsize.y) / tex.y * 1.0f };
+
+	vertices[0].position = DirectX::XMFLOAT3(-0.5f, +0.5f, 0);
+	vertices[1].position = DirectX::XMFLOAT3(+0.5f, +0.5f, 0);
+	vertices[2].position = DirectX::XMFLOAT3(-0.5f, -0.5f, 0);
+	vertices[3].position = DirectX::XMFLOAT3(+0.5f, -0.5f, 0);
+
+
+	vertices[0].normal = vertices[1].normal =
+		vertices[2].normal = vertices[3].normal = DirectX::XMFLOAT3(+0.0f, +0.0f, -1.0f);
+
+	context->Unmap(vertex_buffer, 0);
+
+	//transformVertex
+
+	DirectX::XMFLOAT3 direction = { camPos.x - pos.x,camPos.y - pos.y,camPos.z - pos.z };
+	float size = sqrtf(direction.x * direction.x + direction.y * direction.y + direction.z * direction.z);
+	direction = { -direction.x / size,-direction.y / size,-direction.z / size };
+
+	orientation = Quaternion::LookAt(orientation, direction).Normalized();
+	Quaternion front = Donya::Quaternion::Make(orientation.LocalFront(), angle * 3.14f / 180.0f);
+	Quaternion rotate = orientation;
+	rotate.RotateBy(front);
+	rotate.Normalized();
+
+	DirectX::XMMATRIX S, R, T, world;
+	T = DirectX::XMMatrixTranslation(pos.x, pos.y, pos.z);
+
+	//	拡大・縮小
+	S = DirectX::XMMatrixScaling(scale.x, scale.y, 1);
+
+	//	回転
+	R = DirectX::XMLoadFloat4x4(&rotate.RequireRotationMatrix());
+
+	world = S * R * T;
+
+	DirectX::XMMATRIX viewProjection = DirectX::XMLoadFloat4x4(&SynthesisMatrix);
+	DirectX::XMFLOAT4X4 WVP, W;
+	//	Matrix -> Float4x4 変換
+	DirectX::XMStoreFloat4x4(&WVP, world * viewProjection);
+	DirectX::XMStoreFloat4x4(&W, world);
+
+	cbuffer cb;
+	cb.world_view_projection = WVP;
+	cb.world = W;
+	cb.camPos = camPos;
+	cb.lineLight.color = { 0,0,0,0 };
+	cb.lineLight.direction = { 0,0,0,0 };
+	cb.judge_color = judge_color;
+	cb.screenSize = { (float)pSystem->SCREEN_WIDTH,(float)pSystem->SCREEN_HEIGHT,0,0 };
+
+	for (int i = 0; i < 5; i++)
+	{
+		cb.pntLight[i].pos = { 0,0,0,0 };
+		cb.pntLight[i].attenuate = { 0,0,0,0 };
+
+	}
+	cb.b_material.ambient = { color.x,color.y,color.z,alpha / 2.0f + 0.5f };
+	if (alpha <= 0)
+		cb.b_material.ambient.w = 0;
+	else if (alpha >= 1)
+		cb.b_material.ambient.w = 1;
+	cb.b_material.diffuse = { 0,0,0,1.0f };
+	cb.b_material.specular = { 0,0,0,0.5f };
+	context->UpdateSubresource(constant_buffer, 0, nullptr, &cb, 0, 0);
+	context->VSSetConstantBuffers(0, 1, &constant_buffer);
+	context->PSSetConstantBuffers(0, 1, &constant_buffer);
+
+	// 頂点バッファのバインド
+	UINT stride = sizeof(vertex);
+	UINT offset = 0;
+	context->IASetVertexBuffers(0, 1, &vertex_buffer, &stride, &offset);
+
+	//	インデックスバッファのバインド
+	context->IASetIndexBuffer(index_buffer, DXGI_FORMAT_R32_UINT, 0);
+
+	//	プリミティブモードの設定
+	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+
+	//	ラスタライザーの設定
+	context->RSSetState(rasterizeFillOut);
+
+	//	入力レイアウトのバインド
+	context->IASetInputLayout(layout);
+	//	シェーダー(2種)の設定
+	context->VSSetShader(vertexShader, nullptr, 0);
+	context->PSSetShader(noTex_bloom_PS, nullptr, 0);
+	//	深度テストの設定
+	context->OMSetDepthStencilState(depthStencilState, 0);
+
+	context->PSSetShaderResources(0, 1, &materials.back().Resource);
+	context->PSSetShaderResources(1, 1, &z_SRV);
+	context->PSSetSamplers(0, 1, &sampleState);
+	context->PSSetSamplers(1, 1, &sampleState);
 
 	context->DrawIndexed(subsets.back().index_count, subsets.back().index_start, 0);
 

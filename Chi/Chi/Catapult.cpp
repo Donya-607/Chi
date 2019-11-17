@@ -77,6 +77,33 @@ void Catapult::Draw(fbx_shader& HLSL, const Donya::Vector4x4& matView, const Don
 	}
 }
 
+void Catapult::z_Draw(fbx_shader& HLSL, const Donya::Vector4x4& matView, const Donya::Vector4x4& matProjection)
+{
+	if (hitOBB.exist)
+	{
+		Donya::Vector4x4 W = CalcWorldMatrix();
+		Donya::Vector4x4 WVP = W * matView * matProjection;
+
+		z_render(pModel.get(), HLSL, WVP, W);
+
+		stone.z_Draw(HLSL, matView, matProjection);
+	}
+}
+
+void Catapult::bloom_Draw(fbx_shader& HLSL, const Donya::Vector4x4& matView, const Donya::Vector4x4& matProjection)
+{
+	if (hitOBB.exist)
+	{
+		Donya::Vector4x4 W = CalcWorldMatrix();
+		Donya::Vector4x4 WVP = W * matView * matProjection;
+
+		bloom_SRVrender(pModel.get(), HLSL, WVP, W);
+
+		stone.bloom_Draw(HLSL, matView, matProjection);
+	}
+
+}
+
 void Catapult::UnInit()
 {
 	pos   = Donya::Vector3::Zero();
@@ -162,6 +189,28 @@ void Stone::Draw(fbx_shader& HLSL, const Donya::Vector4x4& matView, const Donya:
 
 			OBJRender(pSphere.get(), CWVP, CW, Donya::Vector4(0.0f, 0.3f, 0.3f, 0.6f));
 		}
+	}
+}
+
+void Stone::z_Draw(fbx_shader& HLSL, const Donya::Vector4x4& matView, const Donya::Vector4x4& matProjection)
+{
+	if (exist)
+	{
+		Donya::Vector4x4 W = CalcWorldMatrix();
+		Donya::Vector4x4 WVP = W * matView * matProjection;
+
+		z_render(pModel.get(), HLSL, WVP, W);
+	}
+}
+
+void Stone::bloom_Draw(fbx_shader& HLSL, const Donya::Vector4x4& matView, const Donya::Vector4x4& matProjection)
+{
+	if (exist)
+	{
+		Donya::Vector4x4 W = CalcWorldMatrix();
+		Donya::Vector4x4 WVP = W * matView * matProjection;
+
+		bloom_SRVrender(pModel.get(), HLSL, WVP, W);
 	}
 }
 

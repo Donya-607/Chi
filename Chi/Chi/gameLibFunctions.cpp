@@ -51,9 +51,9 @@ void clearRendertarget(ID3D11RenderTargetView* _renderTarget, const DirectX::XMF
 
 
 //ShaderResourceView
-bool createSRV(ID3D11ShaderResourceView** _SRV,ID3D11RenderTargetView** RT)
+bool createSRV(ID3D11ShaderResourceView** _SRV, ID3D11RenderTargetView** RT)
 {
-	return GameLib::createSRV(_SRV,RT);
+	return GameLib::createSRV(_SRV, RT);
 }
 
 void postEffect_Bloom_SRV(ID3D11ShaderResourceView** _shaderResource, DirectX::XMFLOAT4 _judge_color)
@@ -61,9 +61,18 @@ void postEffect_Bloom_SRV(ID3D11ShaderResourceView** _shaderResource, DirectX::X
 	GameLib::postEffect_Bloom_SRV(_shaderResource, _judge_color);
 }
 
-void postEffect_Bloom(ID3D11ShaderResourceView** _shaderResource, float _blur_value, DirectX::XMFLOAT4 _judge_color)
+void postEffect_Bloom(float _blur_value, bool flg)
 {
-	GameLib::postEffect_Bloom(_shaderResource, _blur_value, _judge_color);
+	GameLib::postEffect_Bloom(_blur_value, flg);
+}
+void setBloomRT()
+{
+	GameLib::setBloomRT();
+}
+
+void filterScreen(float saturate, float bright, float contrast)
+{
+	GameLib::filter_screen(bright, contrast, saturate);
 }
 
 //BLENDMODE//
@@ -199,7 +208,7 @@ void spriteRenderExtend(Sprite* _sprite, const float pos_x, const float pos_y, c
 {
 	GameLib::texture::SpriteRender(
 		_sprite,
-		pos_x, pos_y, pos_x + (_sprite->getSize().x*Magnification), pos_y + (_sprite->getSize().y*Magnification),
+		pos_x, pos_y, pos_x + (_sprite->getSize().x * Magnification), pos_y + (_sprite->getSize().y * Magnification),
 		0, 0, _sprite->getSize().x, _sprite->getSize().y,
 		0, 1, 1, 1, 0, 0, _tempX, _tempY);
 }
@@ -207,7 +216,7 @@ void spriteRenderExtend(Sprite* _sprite, const DirectX::XMFLOAT2& pos, const flo
 {
 	GameLib::texture::SpriteRender(
 		_sprite,
-		pos.x, pos.y, pos.x + (_sprite->getSize().x*Magnification), pos.y + (_sprite->getSize().y*Magnification),
+		pos.x, pos.y, pos.x + (_sprite->getSize().x * Magnification), pos.y + (_sprite->getSize().y * Magnification),
 		0, 0, _sprite->getSize().x, _sprite->getSize().y,
 		0, 1, 1, 1, 0, 0, _tempX, _tempY);
 }
@@ -216,7 +225,7 @@ void spriteRenderExtend2(Sprite* _sprite, const float pos_x, const float pos_y, 
 {
 	GameLib::texture::SpriteRender(
 		_sprite,
-		pos_x, pos_y, pos_x + (_sprite->getSize().x*Magnification_x), pos_y + (_sprite->getSize().y*Magnification_y),
+		pos_x, pos_y, pos_x + (_sprite->getSize().x * Magnification_x), pos_y + (_sprite->getSize().y * Magnification_y),
 		0, 0, _sprite->getSize().x, _sprite->getSize().y,
 		0, 1, 1, 1, 0, 0, _tempX, _tempY);
 }
@@ -224,7 +233,7 @@ void spriteRenderExtend2(Sprite* _sprite, const DirectX::XMFLOAT2& pos, const Di
 {
 	GameLib::texture::SpriteRender(
 		_sprite,
-		pos.x, pos.y, pos.x + (_sprite->getSize().x*Magnification.x), pos.y + (_sprite->getSize().y*Magnification.y),
+		pos.x, pos.y, pos.x + (_sprite->getSize().x * Magnification.x), pos.y + (_sprite->getSize().y * Magnification.y),
 		0, 0, _sprite->getSize().x, _sprite->getSize().y,
 		0, 1, 1, 1, 0, 0, _tempX, _tempY);
 }
@@ -238,7 +247,7 @@ void spriteRenderExtend3(Sprite* _sprite, const float pos_x, const float pos_y, 
 		0, 0, _sprite->getSize().x, _sprite->getSize().y,
 		0, 1, 1, 1, centerPos_x, centerPos_y, _tempX, _tempY);
 }
-void spriteRenderExtend3(Sprite* _sprite, const DirectX::XMFLOAT2& pos, const DirectX::XMFLOAT2&centerPos, const DirectX::XMFLOAT2& Magnification, bool _tempX, bool _tempY)
+void spriteRenderExtend3(Sprite* _sprite, const DirectX::XMFLOAT2& pos, const DirectX::XMFLOAT2& centerPos, const DirectX::XMFLOAT2& Magnification, bool _tempX, bool _tempY)
 {
 	GameLib::texture::SpriteRender(
 		_sprite,
@@ -253,16 +262,16 @@ void spriteRenderRectExtend(Sprite* _sprite, const float pos_x, const float pos_
 	GameLib::texture::SpriteRender(
 		_sprite,
 		pos_x, pos_y,
-		pos_x + (texSize_x*Magnification), pos_y + (texSize_y*Magnification),
+		pos_x + (texSize_x * Magnification), pos_y + (texSize_y * Magnification),
 		texPos_x, texPos_y, texPos_x + texSize_x, texPos_y + texSize_y,
 		0, 1, 1, 1, 0, 0, _tempX, _tempY);
 }
-void spriteRenderRectExtend(Sprite* _sprite, const DirectX::XMFLOAT2& pos, const DirectX::XMFLOAT2&texPos, const DirectX::XMFLOAT2&texSize, const float Magnification, bool _tempX, bool _tempY)
+void spriteRenderRectExtend(Sprite* _sprite, const DirectX::XMFLOAT2& pos, const DirectX::XMFLOAT2& texPos, const DirectX::XMFLOAT2& texSize, const float Magnification, bool _tempX, bool _tempY)
 {
 	GameLib::texture::SpriteRender(
 		_sprite,
 		pos.x, pos.y,
-		pos.x + (texSize.x*Magnification), pos.y + (texSize.y*Magnification),
+		pos.x + (texSize.x * Magnification), pos.y + (texSize.y * Magnification),
 		texPos.x, texPos.y, texPos.x + texSize.x, texPos.y + texSize.y,
 		0, 1, 1, 1, 0, 0, _tempX, _tempY);
 }
@@ -272,16 +281,16 @@ void spriteRenderRectExtend2(Sprite* _sprite, const float pos_x, const float pos
 	GameLib::texture::SpriteRender(
 		_sprite,
 		pos_x, pos_y,
-		pos_x + (texSize_x*Magnification_x), pos_y + (texSize_y*Magnification_y),
+		pos_x + (texSize_x * Magnification_x), pos_y + (texSize_y * Magnification_y),
 		texPos_x, texPos_y, texPos_x + texSize_x, texPos_y + texSize_y,
 		0, 1, 1, 1, 0, 0, _tempX, _tempY);
 }
-void spriteRenderRectExtend2(Sprite* _sprite, const DirectX::XMFLOAT2& pos, const DirectX::XMFLOAT2&texPos, const DirectX::XMFLOAT2&texSize, const DirectX::XMFLOAT2& Magnification, bool _tempX, bool _tempY)
+void spriteRenderRectExtend2(Sprite* _sprite, const DirectX::XMFLOAT2& pos, const DirectX::XMFLOAT2& texPos, const DirectX::XMFLOAT2& texSize, const DirectX::XMFLOAT2& Magnification, bool _tempX, bool _tempY)
 {
 	GameLib::texture::SpriteRender(
 		_sprite,
 		pos.x, pos.y,
-		pos.x + (texSize.x*Magnification.x), pos.y + (texSize.y*Magnification.y),
+		pos.x + (texSize.x * Magnification.x), pos.y + (texSize.y * Magnification.y),
 		texPos.x, texPos.y, texPos.x + texSize.x, texPos.y + texSize.y,
 		0, 1, 1, 1, 0, 0, _tempX, _tempY);
 }
@@ -291,16 +300,16 @@ void spriteRenderRectExtend3(Sprite* _sprite, const float pos_x, const float pos
 	GameLib::texture::SpriteRender(
 		_sprite,
 		pos_x, pos_y,
-		pos_x + texSize_x*Magnification_x, pos_y + texSize_y*Magnification_y,
+		pos_x + texSize_x * Magnification_x, pos_y + texSize_y * Magnification_y,
 		texPos_x, texPos_y, texPos_x + texSize_x, texPos_y + texSize_y,
 		0, 1, 1, 1, centerPos_x, centerPos_y, _tempX, _tempY);
 }
-void spriteRenderRectExtend3(Sprite* _sprite, const DirectX::XMFLOAT2& pos, const DirectX::XMFLOAT2&texPos, const DirectX::XMFLOAT2&texSize, const DirectX::XMFLOAT2& centerPos, const DirectX::XMFLOAT2& Magnification, bool _tempX, bool _tempY)
+void spriteRenderRectExtend3(Sprite* _sprite, const DirectX::XMFLOAT2& pos, const DirectX::XMFLOAT2& texPos, const DirectX::XMFLOAT2& texSize, const DirectX::XMFLOAT2& centerPos, const DirectX::XMFLOAT2& Magnification, bool _tempX, bool _tempY)
 {
 	GameLib::texture::SpriteRender(
 		_sprite,
 		pos.x, pos.y,
-		pos.x + texSize.x*Magnification.x, pos.y + texSize.y*Magnification.y,
+		pos.x + texSize.x * Magnification.x, pos.y + texSize.y * Magnification.y,
 		texPos.x, texPos.y, texPos.x + texSize.x, texPos.y + texSize.y,
 		0, 1, 1, 1, centerPos.x, centerPos.y, _tempX, _tempY);
 }
@@ -309,7 +318,7 @@ void spriteRenderRota(Sprite* _sprite, const float pos_x, const float pos_y, con
 {
 	GameLib::texture::SpriteRender(
 		_sprite,
-		pos_x, pos_y, pos_x + _sprite->getSize().x*Magnification, pos_y + _sprite->getSize().y*Magnification,
+		pos_x, pos_y, pos_x + _sprite->getSize().x * Magnification, pos_y + _sprite->getSize().y * Magnification,
 		0, 0, _sprite->getSize().x, _sprite->getSize().y,
 		angle, 1, 1, 1, 0, 0, _tempX, _tempY);
 }
@@ -317,7 +326,7 @@ void spriteRenderRota(Sprite* _sprite, const DirectX::XMFLOAT2 pos, const float 
 {
 	GameLib::texture::SpriteRender(
 		_sprite,
-		pos.x, pos.y, pos.x + _sprite->getSize().x*Magnification, pos.y + _sprite->getSize().y*Magnification,
+		pos.x, pos.y, pos.x + _sprite->getSize().x * Magnification, pos.y + _sprite->getSize().y * Magnification,
 		0, 0, _sprite->getSize().x, _sprite->getSize().y,
 		angle, 1, 1, 1, 0, 0, _tempX, _tempY);
 }
@@ -327,7 +336,7 @@ void spriteRenderRota2(Sprite* _sprite, const float pos_x, const float pos_y, co
 	GameLib::texture::SpriteRender(
 		_sprite,
 		pos_x, pos_y,
-		pos_x + _sprite->getSize().x*Magnification_x, pos_y + _sprite->getSize().y*Magnification_y,
+		pos_x + _sprite->getSize().x * Magnification_x, pos_y + _sprite->getSize().y * Magnification_y,
 		0, 0, _sprite->getSize().x, _sprite->getSize().y,
 		angle, 1, 1, 1, 0, 0, _tempX, _tempY);
 }
@@ -336,7 +345,7 @@ void spriteRenderRota2(Sprite* _sprite, const DirectX::XMFLOAT2 pos, const Direc
 	GameLib::texture::SpriteRender(
 		_sprite,
 		pos.x, pos.y,
-		pos.x + _sprite->getSize().x*Magnification.x, pos.y + _sprite->getSize().y*Magnification.y,
+		pos.x + _sprite->getSize().x * Magnification.x, pos.y + _sprite->getSize().y * Magnification.y,
 		0, 0, _sprite->getSize().x, _sprite->getSize().y,
 		angle, 1, 1, 1, 0, 0, _tempX, _tempY);
 }
@@ -346,7 +355,7 @@ void spriteRenderRota3(Sprite* _sprite, const float pos_x, const float pos_y, co
 	GameLib::texture::SpriteRender(
 		_sprite,
 		pos_x, pos_y,
-		pos_x + _sprite->getSize().x*Magnification_x, pos_y + _sprite->getSize().y*Magnification_y,
+		pos_x + _sprite->getSize().x * Magnification_x, pos_y + _sprite->getSize().y * Magnification_y,
 		0, 0, _sprite->getSize().x, _sprite->getSize().y,
 		angle, 1, 1, 1, centerPos_x, centerPos_y, _tempX, _tempY);
 }
@@ -355,7 +364,7 @@ void spriteRenderRota3(Sprite* _sprite, const DirectX::XMFLOAT2 pos, const Direc
 	GameLib::texture::SpriteRender(
 		_sprite,
 		pos.x, pos.y,
-		pos.x + _sprite->getSize().x*Magnification.x, pos.y + _sprite->getSize().y*Magnification.y,
+		pos.x + _sprite->getSize().x * Magnification.x, pos.y + _sprite->getSize().y * Magnification.y,
 		0, 0, _sprite->getSize().x, _sprite->getSize().y,
 		angle, 1, 1, 1, centerPos.x, centerPos.y, _tempX, _tempY);
 }
@@ -382,7 +391,7 @@ void spriteRenderRectRota2(Sprite* _sprite, const float pos_x, const float pos_y
 	GameLib::texture::SpriteRender(
 		_sprite,
 		pos_x, pos_y,
-		pos_x + texSize_x*Magnification_x, pos_y + texSize_y*Magnification_y,
+		pos_x + texSize_x * Magnification_x, pos_y + texSize_y * Magnification_y,
 		texPos_x, texPos_y, texPos_x + texSize_x, texPos_y + texSize_y,
 		angle, 1, 1, 1, 0, 0, _tempX, _tempY);
 }
@@ -391,7 +400,7 @@ void spriteRenderRectRota2(Sprite* _sprite, const DirectX::XMFLOAT2& pos, const 
 	GameLib::texture::SpriteRender(
 		_sprite,
 		pos.x, pos.y,
-		pos.x + texSize.x*Magnification.x, pos.y + texSize.y*Magnification.y,
+		pos.x + texSize.x * Magnification.x, pos.y + texSize.y * Magnification.y,
 		texPos.x, texPos.y, texPos.x + texSize.x, texPos.y + texSize.y,
 		angle, 1, 1, 1, 0, 0, _tempX, _tempY);
 }
@@ -401,7 +410,7 @@ void spriteRenderRectRota3(Sprite* _sprite, const float pos_x, const float pos_y
 	GameLib::texture::SpriteRender(
 		_sprite,
 		pos_x, pos_y,
-		pos_x + texSize_x*Magnification_x, pos_y + texSize_y*Magnification_y,
+		pos_x + texSize_x * Magnification_x, pos_y + texSize_y * Magnification_y,
 		texPos_x, texPos_y, texPos_x + texSize_x, texPos_y + texSize_y,
 		angle, 1, 1, 1, centerPos_x, centerPos_y, _tempX, _tempY);
 }
@@ -410,7 +419,7 @@ void spriteRenderRectRota3(Sprite* _sprite, const DirectX::XMFLOAT2& pos, const 
 	GameLib::texture::SpriteRender(
 		_sprite,
 		pos.x, pos.y,
-		pos.x + texSize.x*Magnification.x, pos.y + texSize.y*Magnification.y,
+		pos.x + texSize.x * Magnification.x, pos.y + texSize.y * Magnification.y,
 		texPos.x, texPos.y, texPos.x + texSize.x, texPos.y + texSize.y,
 		angle, 1, 1, 1, centerPos.x, centerPos.y, _tempX, _tempY);
 }
@@ -444,7 +453,7 @@ void setTarget(const DirectX::XMFLOAT3& _target)
 
 void setTarget(const float x, const float y, const float z)
 {
-	GameLib::camera::setTarget({x,y,z});
+	GameLib::camera::setTarget({ x,y,z });
 }
 
 DirectX::XMFLOAT4 getCamPos()
@@ -459,13 +468,13 @@ DirectX::XMFLOAT4 getCamTarget()
 
 //light//
 
-void setLightAmbient(const DirectX::XMFLOAT4& _lightAmbient,const DirectX::XMFLOAT4& _lightColor)
+void setLineLight(const DirectX::XMFLOAT4& _position, const DirectX::XMFLOAT4& _lightAmbient, const DirectX::XMFLOAT4& _lightColor)
 {
-	GameLib::light::setLineLight(_lightAmbient,_lightColor);
+	GameLib::light::setLineLight(_position, _lightAmbient, _lightColor);
 }
-void setLightAmbient(const float x, const float y, const float z, const float w,const float r,const float g, const float b, const float a)
+void setLineLight(const float px, const float py, const float pz, const float pw, const float x, const float y, const float z, const float w, const float r, const float g, const float b, const float a)
 {
-	GameLib::light::setLineLight({ x, y, z, w }, {r,g,b,a});
+	GameLib::light::setLineLight({ px,py,pz,pw }, { x, y, z, w }, { r,g,b,a });
 }
 
 line_light& getLineLight()
@@ -510,7 +519,7 @@ void createSphere(static_mesh* sphere, u_int slice, u_int stack)
 	GameLib::staticMesh::createSphere(sphere, slice, stack);
 }
 
-void createPlane(static_mesh * _plane, u_int _vertical, u_int _side)
+void createPlane(static_mesh* _plane, u_int _vertical, u_int _side)
 {
 	GameLib::staticMesh::createPlane(_plane, _vertical, _side);
 }
@@ -530,26 +539,36 @@ void loadOBJ_MTL(static_mesh* staticMesh, wchar_t* objName, wchar_t* mtlName)
 	GameLib::staticMesh::loadMeshMTL(staticMesh, objName, mtlName);
 }
 
-static_mesh::primitive_material & getPrimitiveMaterial(static_mesh* _mesh)
+static_mesh::primitive_material& getPrimitiveMaterial(static_mesh* _mesh)
 {
 	return GameLib::staticMesh::getPrimitiveMaterial(_mesh);
 }
 
-void OBJRender(static_mesh* staticMesh, const DirectX::XMFLOAT4X4&SynthesisMatrix, const DirectX::XMFLOAT4X4&worldMatrix,const DirectX::XMFLOAT4&materialColor, bool wireFlg)
+void OBJRender(static_mesh* staticMesh, const DirectX::XMFLOAT4X4& SynthesisMatrix, const DirectX::XMFLOAT4X4& worldMatrix, const DirectX::XMFLOAT4& materialColor, bool wireFlg)
 {
-	GameLib::staticMesh::staticMeshRender(staticMesh, SynthesisMatrix,worldMatrix, getCamPos(), getLineLight(),getPointLight(), materialColor, wireFlg);
+	GameLib::staticMesh::staticMeshRender(staticMesh, SynthesisMatrix, worldMatrix, getCamPos(), getLineLight(), getPointLight(), materialColor, wireFlg);
 }
 
-void billboardRender(static_mesh* _mesh, const DirectX::XMFLOAT4X4& view_projection, const DirectX::XMFLOAT4& _pos, const DirectX::XMFLOAT2 _scale, const float _angle, const DirectX::XMFLOAT4& _cam_pos, const DirectX::XMFLOAT2& texpos, const DirectX::XMFLOAT2& texsize,const float alpha,const DirectX::XMFLOAT3& color)
+void billboardRender(static_mesh* _mesh, const DirectX::XMFLOAT4X4& view_projection, const DirectX::XMFLOAT4& _pos, const DirectX::XMFLOAT2 _scale, const float _angle, const DirectX::XMFLOAT4& _cam_pos, const DirectX::XMFLOAT2& texpos, const DirectX::XMFLOAT2& texsize, const float alpha, const DirectX::XMFLOAT3& color)
 {
-	GameLib::staticMesh::builboradRender(_mesh, view_projection, _pos, _scale, _angle, _cam_pos, texpos, texsize,alpha,color);
+	GameLib::staticMesh::builboradRender(_mesh, view_projection, _pos, _scale, _angle, _cam_pos, texpos, texsize, alpha, color);
+}
+
+void billboard_z_Render(static_mesh* _mesh, const DirectX::XMFLOAT4X4& view_projection, const DirectX::XMFLOAT4& _pos, const DirectX::XMFLOAT2 _scale, const float angle, const DirectX::XMFLOAT4& _cam_pos, const DirectX::XMFLOAT2& texpos, const DirectX::XMFLOAT2& texsize, const float alpha, const DirectX::XMFLOAT3& color)
+{
+	GameLib::staticMesh::builborad_z_Render(_mesh, view_projection, _pos, _scale, angle, _cam_pos, texpos, texsize, alpha, color);
+}
+
+void billboard_bloom_Render(static_mesh* _mesh, const DirectX::XMFLOAT4X4& view_projection, const DirectX::XMFLOAT4& _pos, const DirectX::XMFLOAT2 _scale, const float angle, const DirectX::XMFLOAT4& _cam_pos, const DirectX::XMFLOAT2& texpos, const DirectX::XMFLOAT2& texsize, const DirectX::XMFLOAT4& judge_color, const float alpha, const DirectX::XMFLOAT3& color)
+{
+	GameLib::staticMesh::builborad_bloom_Render(_mesh, view_projection, _pos, _scale, angle, _cam_pos, texpos, texsize, alpha, color, judge_color);
 }
 
 
 //skinned_mesh//
-void loadFBX(skinned_mesh* skinnedMesh, const std::string& FBXName, bool load_cerealize,bool isTpose)
+void loadFBX(skinned_mesh* skinnedMesh, const std::string& FBXName, bool load_cerealize, bool isTpose)
 {
-	GameLib::skinnedMesh::loadFBX(skinnedMesh, FBXName, load_cerealize,isTpose);
+	GameLib::skinnedMesh::loadFBX(skinnedMesh, FBXName, load_cerealize, isTpose);
 }
 
 void loadShader(fbx_shader& shader, std::string vertex, std::string pixel, std::string noBoneVertex, std::string notexPS)
@@ -559,7 +578,7 @@ void loadShader(fbx_shader& shader, std::string vertex, std::string pixel, std::
 
 void setLoopFlg(skinned_mesh* _mesh, const bool _loop_flg)
 {
-	GameLib::skinnedMesh::setLoopanimation(_mesh,_loop_flg);
+	GameLib::skinnedMesh::setLoopanimation(_mesh, _loop_flg);
 }
 
 void setStopAnimation(skinned_mesh* _mesh, const bool _is_stop)
@@ -577,7 +596,7 @@ void setAnimFlame(skinned_mesh* _mesh, const int _anim_flame)
 	GameLib::skinnedMesh::setAnimFlame(_mesh, _anim_flame);
 }
 
-const int getAnimFlame(skinned_mesh*_mesh)
+const int getAnimFlame(skinned_mesh* _mesh)
 {
 	return GameLib::skinnedMesh::getAnimFlame(_mesh);
 }
@@ -587,19 +606,29 @@ bool calcTransformedPosBySpecifyMesh(skinned_mesh* _mesh, DirectX::XMFLOAT3& _po
 	return GameLib::skinnedMesh::calcTransformedPosBySpecifyMesh(_mesh, _pos, _mesh_name);
 }
 
-bool calcTransformedPosBySpecifyMesh(skinned_mesh* _mesh, DirectX::XMFLOAT3& _pos, std::string _mesh_name,bone_animation* anim)
+bool calcTransformedPosBySpecifyMesh(skinned_mesh* _mesh, DirectX::XMFLOAT3& _pos, std::string _mesh_name, bone_animation* anim)
 {
-	return GameLib::skinnedMesh::calcTransformedPosBySpecifyMesh(_mesh, _pos, _mesh_name,anim);
+	return GameLib::skinnedMesh::calcTransformedPosBySpecifyMesh(_mesh, _pos, _mesh_name, anim);
 }
 
-void FBXRender(skinned_mesh* _mesh, fbx_shader& hlsl, const DirectX::XMFLOAT4X4& SynthesisMatrix, const DirectX::XMFLOAT4X4& worldMatrix,float magnification, bool animation_flg, const DirectX::XMFLOAT4& materialColor, bool wireFlg)
+void FBXRender(skinned_mesh* _mesh, fbx_shader& hlsl, const DirectX::XMFLOAT4X4& SynthesisMatrix, const DirectX::XMFLOAT4X4& worldMatrix, float magnification, bool animation_flg, const DirectX::XMFLOAT4& materialColor, bool wireFlg)
 {
-	GameLib::skinnedMesh::skinnedMeshRender(_mesh, hlsl, magnification, SynthesisMatrix, worldMatrix, getCamPos(), getLineLight(), getPointLight(), materialColor, wireFlg,animation_flg);
+	GameLib::skinnedMesh::skinnedMeshRender(_mesh, hlsl, magnification, SynthesisMatrix, worldMatrix, getCamPos(), getLineLight(), getPointLight(), materialColor, wireFlg, animation_flg);
 }
 
-void FBXRender(skinned_mesh* skinnedMesh, fbx_shader& hlsl,bone_animation* anim,const DirectX::XMFLOAT4X4&SynthesisMatrix, const DirectX::XMFLOAT4X4&worldMatrix, const DirectX::XMFLOAT4&materialColor, bool wireFlg)
+void z_render(skinned_mesh* _mesh, fbx_shader& hlsl, const DirectX::XMFLOAT4X4& SynthesisMatrix, const DirectX::XMFLOAT4X4& worldMatrix)
 {
-	GameLib::skinnedMesh::skinnedMeshRender(skinnedMesh,hlsl,anim, SynthesisMatrix, worldMatrix,getCamPos(),getLineLight(),getPointLight(), materialColor, wireFlg);
+	GameLib::skinnedMesh::z_render(_mesh, hlsl, SynthesisMatrix, worldMatrix);
+}
+
+void bloom_SRVrender(skinned_mesh* _mesh, fbx_shader& hlsl, const DirectX::XMFLOAT4X4& SynthesisMatrix, const DirectX::XMFLOAT4X4& worldMatrix, const DirectX::XMFLOAT4& judge_color, const DirectX::XMFLOAT4& materialColor)
+{
+	GameLib::skinnedMesh::bloom_SRVrender(_mesh, hlsl, SynthesisMatrix, worldMatrix, materialColor, judge_color);
+}
+
+void FBXRender(skinned_mesh* skinnedMesh, fbx_shader& hlsl, bone_animation* anim, const DirectX::XMFLOAT4X4& SynthesisMatrix, const DirectX::XMFLOAT4X4& worldMatrix, const DirectX::XMFLOAT4& materialColor, bool wireFlg)
+{
+	GameLib::skinnedMesh::skinnedMeshRender(skinnedMesh, hlsl, anim, SynthesisMatrix, worldMatrix, getCamPos(), getLineLight(), getPointLight(), materialColor, wireFlg);
 }
 
 
@@ -608,7 +637,7 @@ void loadAnimation(bone_animation* _anim, std::string _anim_name)
 	GameLib::skinnedMesh::loadAnimation(_anim, _anim_name);
 }
 
-void playAnimation(bone_animation* _anim,float magnification, bool _is_loop)
+void playAnimation(bone_animation* _anim, float magnification, bool _is_loop)
 {
 	GameLib::skinnedMesh::playAnimation(_anim, magnification, _is_loop);
 }

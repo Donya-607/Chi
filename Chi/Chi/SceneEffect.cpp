@@ -29,7 +29,7 @@ void SceneEffect::init()
 	);
 
 	lights.direction.color = Donya::Vector4(1.0f, 1.0f, 1.0f, 1.0f);
-	getLineLight().setLineLight(lights.direction.direction, lights.direction.color);
+	getLineLight().setLineLight(lights.direction.position,lights.direction.direction, lights.direction.color);
 	for (const auto i : lights.points)
 	{
 		setPointLight(i);
@@ -294,7 +294,7 @@ void SceneEffect::imGui()
 		ImGui::ColorEdit4("Color", &lights.direction.color.x);
 		ImGui::SliderFloat3("Direction", &lights.direction.direction.x, -8.0f, 8.0f);
 
-		getLineLight().setLineLight(lights.direction.direction, lights.direction.color);
+		getLineLight().setLineLight(lights.direction.position, lights.direction.direction, lights.direction.color);
 
 		ImGui::TreePop();
 	}

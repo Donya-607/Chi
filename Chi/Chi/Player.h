@@ -253,7 +253,9 @@ public:
 	/// </summary>
 	void PhysicUpdate( const std::vector<Donya::Circle> &xzCylinderWalls );
 
-	void Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matProjection );
+	void Draw(fbx_shader& HLSL, const Donya::Vector4x4& matView, const Donya::Vector4x4& matProjection);
+	void z_Draw(fbx_shader& HLSL, const Donya::Vector4x4& matView, const Donya::Vector4x4& matProjection);
+	void bloom_Draw(fbx_shader& HLSL, const Donya::Vector4x4& matView, const Donya::Vector4x4& matProjection);
 public:
 	/// <summary>
 	/// Returns world-space position.

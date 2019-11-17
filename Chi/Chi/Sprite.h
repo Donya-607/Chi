@@ -14,19 +14,19 @@
 class Sprite
 {
 private:
-	ID3D11VertexShader*		m_vertex;
-	ID3D11PixelShader*		m_pixel;
-	ID3D11InputLayout*		m_input;
-	ID3D11Buffer*			m_buffer;
-	ID3D11RasterizerState*  m_rasterize;
-	ID3D11ShaderResourceView *m_shader;
+	ID3D11VertexShader* m_vertex;
+	ID3D11PixelShader* m_pixel;
+	ID3D11InputLayout* m_input;
+	ID3D11Buffer* m_buffer;
+	ID3D11RasterizerState* m_rasterize;
+	ID3D11ShaderResourceView* m_shader;
 	D3D11_TEXTURE2D_DESC m_tex2dDesc;
-	ID3D11SamplerState *m_sampleState;
-	ID3D11DepthStencilState *m_depth;
+	ID3D11SamplerState* m_sampleState;
+	ID3D11DepthStencilState* m_depth;
 	vector2 size;
 	struct vertex
 	{
-		DirectX::XMFLOAT3 position;
+		DirectX::XMFLOAT4 position;
 		DirectX::XMFLOAT4 color;
 		DirectX::XMFLOAT2 texcoord;
 	};
@@ -40,13 +40,16 @@ public:
 		float _dx, float _dy, float _dw, float _dh,
 		float _sx, float _sy, float _sw, float _sh,
 		float _angle, float _r, float _g, float _b, float _a,
-		float _cx = 0,float _cy  =0,
-		bool _flipX = false,bool _flipY = false) const;
+		float _cx = 0, float _cy = 0,
+		bool _flipX = false, bool _flipY = false) const;
 	void textout(ID3D11DeviceContext* _dContext,
 		std::string _string,
 		float _x, float _y, float _w, float _h,
 		float _r = 1, float _g = 1, float _b = 1, float _a = 1) const;
-
+	ID3D11ShaderResourceView* getSRV()
+	{
+		return m_shader;
+	}
 };
 
 class sprite_batch
@@ -81,9 +84,9 @@ public:
 		DirectX::XMFLOAT2 texcoord;
 	};
 
-	sprite_batch(ID3D11Device *device, const wchar_t *file_name, size_t max_instance = 10240);
+	sprite_batch(ID3D11Device* device, const wchar_t* file_name, size_t max_instance = 10240);
 
-	void begin(ID3D11DeviceContext *immediate_context);
+	void begin(ID3D11DeviceContext* immediate_context);
 	void render
 	(
 		float dx, float dy, float dw, float dh,
@@ -93,13 +96,13 @@ public:
 		float x, float y, float sx, float sy,
 		float r, float g, float b, float a);
 
-	void end(ID3D11DeviceContext *immediate_context);
+	void end(ID3D11DeviceContext* immediate_context);
 
 private:
 	D3D11_VIEWPORT viewport;
 
 	UINT count_instance = 0;
-	instance *instances = nullptr;
+	instance* instances = nullptr;
 };
 
 
@@ -110,16 +113,16 @@ private:
 class SpriteBatch
 {
 private:
-	ID3D11VertexShader*         vertexShader;
-	ID3D11PixelShader*          pixelShader;
-	ID3D11InputLayout*          inputLayout;
-	ID3D11Buffer*               buffer;
-	ID3D11RasterizerState*      rasterizerState;
+	ID3D11VertexShader* vertexShader;
+	ID3D11PixelShader* pixelShader;
+	ID3D11InputLayout* inputLayout;
+	ID3D11Buffer* buffer;
+	ID3D11RasterizerState* rasterizerState;
 
-	ID3D11ShaderResourceView*   shaderResourceView;
+	ID3D11ShaderResourceView* shaderResourceView;
 	D3D11_TEXTURE2D_DESC        tex2dDesc;
-	ID3D11SamplerState*         samplerState;
-	ID3D11DepthStencilState*    depthStencilState;
+	ID3D11SamplerState* samplerState;
+	ID3D11DepthStencilState* depthStencilState;
 
 	size_t MAX_INSTANCES;
 

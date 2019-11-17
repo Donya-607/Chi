@@ -14,28 +14,31 @@
 //   struct lineLight
 //   {
 //       
-//       float4 direction;              // Offset:  144
-//       float4 color;                  // Offset:  160
+//       float4 pos;                    // Offset:  144
+//       float4 direction;              // Offset:  160
+//       float4 color;                  // Offset:  176
 //
-//   } line_light;                      // Offset:  144 Size:    32 [unused]
+//   } line_light;                      // Offset:  144 Size:    48 [unused]
 //   
 //   struct Light
 //   {
 //       
-//       float4 pos;                    // Offset:  176
-//       float4 color;                  // Offset:  192
-//       float4 attenuate;              // Offset:  208
+//       float4 pos;                    // Offset:  192
+//       float4 color;                  // Offset:  208
+//       float4 attenuate;              // Offset:  224
 //
-//   } pntLight[5];                     // Offset:  176 Size:   240 [unused]
+//   } pntLight[5];                     // Offset:  192 Size:   240 [unused]
 //   
 //   struct Material
 //   {
 //       
-//       float4 ambient;                // Offset:  416
-//       float4 diffuse;                // Offset:  432
-//       float4 specular;               // Offset:  448
+//       float4 ambient;                // Offset:  432
+//       float4 diffuse;                // Offset:  448
+//       float4 specular;               // Offset:  464
 //
-//   } material;                        // Offset:  416 Size:    48 [unused]
+//   } material;                        // Offset:  432 Size:    48 [unused]
+//   float4 judge_color;                // Offset:  480 Size:    16 [unused]
+//   float4 screen_size;                // Offset:  496 Size:    16 [unused]
 //
 // }
 //
@@ -83,7 +86,7 @@ dcl_temps 5
 //   o1.x <- <main return value>.posw.x; o1.y <- <main return value>.posw.y; o1.z <- <main return value>.posw.z; o1.w <- <main return value>.posw.w; 
 //   o0.x <- <main return value>.position.x; o0.y <- <main return value>.position.y; o0.z <- <main return value>.position.z; o0.w <- <main return value>.position.w
 //
-#line 6 "D:\Develop\Chi\Chi\Chi\Chi\geometric_primitive_vs.hlsl"
+#line 6 "D:\Git\fps_shooting\Chi\Chi\Chi\geometric_primitive_vs.hlsl"
 mul r0.xyzw, v0.xxxx, cb0[0].xyzw
 mul r1.xyzw, v0.yyyy, cb0[1].xyzw
 add r0.xyzw, r0.xyzw, r1.xyzw

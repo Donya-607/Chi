@@ -35,6 +35,8 @@ public:
 	void Init(Donya::Vector3 _pos, Donya::Vector3 _speed, Donya::Vector3 _accel, Donya::Vector3 _scale, Donya::Vector3 _angle);
 	void Update();
 	void Draw(fbx_shader& HLSL, const Donya::Vector4x4& matView, const Donya::Vector4x4& matProjection);
+	void z_Draw(fbx_shader& HLSL, const Donya::Vector4x4& matView, const Donya::Vector4x4& matProjection);
+	void bloom_Draw(fbx_shader& HLSL, const Donya::Vector4x4& matView, const Donya::Vector4x4& matProjection);
 	void UnInit();
 	void ImGui();
 
@@ -79,6 +81,8 @@ public:
 	void Init(Donya::Vector3 _pos, Donya::Vector3 _scale, Donya::Vector3 _angle);
 	void Update(Donya::Vector3 _playerPos);
 	void Draw(fbx_shader& HLSL, const Donya::Vector4x4& matView, const Donya::Vector4x4& matProjection);
+	void z_Draw(fbx_shader& HLSL, const Donya::Vector4x4& matView, const Donya::Vector4x4& matProjection);
+	void bloom_Draw(fbx_shader& HLSL, const Donya::Vector4x4& matView, const Donya::Vector4x4& matProjection);
 	void UnInit();
 	void ImGui();
 	void StartAnim()

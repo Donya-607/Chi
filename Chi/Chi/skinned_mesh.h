@@ -14,14 +14,10 @@
 #include "./liblary/DirectXTex-master/DirectXTex/DirectXTex.h"
 #include "resourceManager.h"
 #include "light.h"
+#include "system.h"
 #include "Donya/Serializer.h"
 #include "Donya/Template.h"
-//#include <cereal\cereal.hpp>
-//#include <cereal\archives\binary.hpp>
-//#include <cereal\archives\json.hpp>
-//#include <cereal\archives\xml.hpp>
 #include <cereal\types\vector.hpp>
-//#include <cereal\types\unordered_map.hpp>
 #include <cereal\types\string.hpp>
 
 struct fbx_shader
@@ -67,7 +63,7 @@ struct bone
 				CEREAL_NVP(transform._42),
 				CEREAL_NVP(transform._43),
 				CEREAL_NVP(transform._44)
-				);
+			);
 		}
 	}
 
@@ -168,7 +164,7 @@ public:
 					CEREAL_NVP(texcoord.y),
 					CEREAL_NVP(bone_weights),
 					CEREAL_NVP(bone_indices)
-					);
+				);
 			}
 		}
 		DirectX::XMFLOAT3 position;
@@ -196,6 +192,8 @@ public:
 		DirectX::XMFLOAT4 diffuse;
 		DirectX::XMFLOAT4 specular;
 		DirectX::XMFLOAT4X4 bone_transforms[MAX_BONES] = { { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 } };
+		DirectX::XMFLOAT4 judge_color;
+		DirectX::XMFLOAT4 screenSize;
 	};
 
 	struct property
@@ -216,7 +214,7 @@ public:
 					CEREAL_NVP(texture_filename),
 					CEREAL_NVP(scale_u),
 					CEREAL_NVP(scale_v)
-					);
+				);
 			}
 		}
 		float factor = 1;
@@ -246,7 +244,7 @@ public:
 					CEREAL_NVP(transparent),
 					CEREAL_NVP(index_start),
 					CEREAL_NVP(index_count)
-					);
+				);
 			}
 		}
 		property ambient;
@@ -384,7 +382,7 @@ public:
 		int a = 0;
 	}
 	~skinned_mesh() {}
-	void setInfo(ID3D11Device* _device, const std::string& _objFileName,bool load_cerealize, bool is_Tpose);
+	void setInfo(ID3D11Device* _device, const std::string& _objFileName, bool load_cerealize, bool is_Tpose);
 	void setInfo_T_pose(ID3D11Device* _device, const std::string& _objFileName);
 
 	void init(ID3D11Device* device);
@@ -409,6 +407,30 @@ public:
 		float magnification,
 		bool animation_flg
 	);
+
+	void z_render(
+		ID3D11DeviceContext* context,
+		fbx_shader& hlsl,
+		const DirectX::XMFLOAT4X4& SynthesisMatrix,
+		const DirectX::XMFLOAT4X4& worldMatrix,
+		const DirectX::XMFLOAT4& camPos,
+		ID3D11PixelShader* z_PS
+	);
+
+	void bloom_SRVrender(
+		ID3D11DeviceContext* context,
+		fbx_shader& hlsl,
+		const DirectX::XMFLOAT4X4& SynthesisMatrix,
+		const DirectX::XMFLOAT4X4& worldMatrix,
+		const DirectX::XMFLOAT4& camPos,
+		line_light& _lineLight,
+		std::vector<point_light>& _point_light,
+		const DirectX::XMFLOAT4& materialColor,
+		ID3D11PixelShader* bloom_SRV,
+		const DirectX::XMFLOAT4& judge_color,
+		ID3D11ShaderResourceView* z_SRV
+	);
+
 
 	void render(
 		ID3D11DeviceContext* context,

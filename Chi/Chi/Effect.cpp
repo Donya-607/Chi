@@ -28,20 +28,43 @@ void EffectManager::BossAttackMomentEffectUpdate(Donya::Vector3 bossPos, Donya::
 	bossAttackMomentEffect.Update(bossPos, playerPos);
 }
 
-void EffectManager::Render( fbx_shader &HLSL )
+void EffectManager::Render(fbx_shader& HLSL)
 {
-	eruptionEffectManager.Render( HLSL );
-	longAttackEffectManager.Render( HLSL );
-	dustEffect.Render( HLSL );
-	sparkEffect.Render( HLSL );
+	eruptionEffectManager.Render(HLSL);
+	longAttackEffectManager.Render(HLSL);
+	dustEffect.Render(HLSL);
+	sparkEffect.Render(HLSL);
 	playerAbsorptionParticle.Draw();
 	bossAbsorptionParticle.Draw();
 	locusParticle.Draw();
-	jumpEffect.Render( HLSL );
+	jumpEffect.Render(HLSL);
 	accelParticle.Draw();
 	bossAttackMomentEffect.Draw();
 	stoneBreakParticle.Draw();
 	catapultBreakParticle.Draw();
+}
+
+void EffectManager::z_Render(fbx_shader& HLSL)
+{
+	eruptionEffectManager.z_Render(HLSL);
+	longAttackEffectManager.z_Render(HLSL);
+}
+
+void EffectManager::bloom_Render(fbx_shader& HLSL)
+{
+	eruptionEffectManager.bloom_Render(HLSL);
+	longAttackEffectManager.bloom_Render(HLSL);
+	dustEffect.bloom_Render(HLSL);
+	sparkEffect.bloom_Render(HLSL);
+	playerAbsorptionParticle.bloom_Draw();
+	bossAbsorptionParticle.bloom_Draw();
+	locusParticle.bloom_Draw();
+	jumpEffect.bloom_Render(HLSL);
+	accelParticle.bloom_Draw();
+	bossAttackMomentEffect.bloom_Draw();
+	stoneBreakParticle.bloom_Draw();
+	catapultBreakParticle.bloom_Draw();
+
 }
 
 std::string GetEffectModelPath(EffectModel effectModel)
@@ -87,11 +110,27 @@ void EruptionEffectManager::Update()
 	}
 }
 
-void EruptionEffectManager::Render( fbx_shader &HLSL )
+void EruptionEffectManager::Render(fbx_shader& HLSL)
 {
 	for (int i = 0; i < MAX_SIZE; i++)
 	{
-		eruptionEffect[i].Render( HLSL );
+		eruptionEffect[i].Render(HLSL);
+	}
+}
+
+void EruptionEffectManager::z_Render(fbx_shader& HLSL)
+{
+	for (int i = 0; i < MAX_SIZE; i++)
+	{
+		eruptionEffect[i].z_Render(HLSL);
+	}
+}
+
+void EruptionEffectManager::bloom_Render(fbx_shader& HLSL)
+{
+	for (int i = 0; i < MAX_SIZE; i++)
+	{
+		eruptionEffect[i].bloom_Render(HLSL);
 	}
 }
 
@@ -286,14 +325,14 @@ void EruptionEffect::Update()
 	}
 }
 
-void EruptionEffect::Render( fbx_shader &HLSL )
+void EruptionEffect::Render(fbx_shader& HLSL)
 {
 	if (activated)
 	{
 		Donya::Vector4x4 V = Donya::Vector4x4::FromMatrix(GameLib::camera::GetViewMatrix());
 		Donya::Vector4x4 P = Donya::Vector4x4::FromMatrix(GameLib::camera::GetProjectionMatrix());
 
-	#if DEBUG_MODE
+#if DEBUG_MODE
 
 		auto GenerateSphere = []()->std::shared_ptr<static_mesh>
 		{
@@ -303,7 +342,7 @@ void EruptionEffect::Render( fbx_shader &HLSL )
 		};
 		static std::shared_ptr<static_mesh> pSphere = GenerateSphere();
 
-	#endif // DEBUG_MODE
+#endif // DEBUG_MODE
 
 		for (int i = 0; i < MAX_SIZE; i++)
 		{
@@ -317,9 +356,9 @@ void EruptionEffect::Render( fbx_shader &HLSL )
 				FBXRender(pModel[i].get(), HLSL, WVP, W);
 			}
 
-		#if DEBUG_MODE
+#if DEBUG_MODE
 
-			if ( Donya::IsShowCollision() && hitSphere[i].exist)
+			if (Donya::IsShowCollision() && hitSphere[i].exist)
 			{
 				Donya::Vector4x4 CS = Donya::Vector4x4::MakeScaling(hitSphere[i].radius); // Half size->Whole size.
 				Donya::Vector4x4 CR = Donya::Vector4x4::MakeRotationEuler(Donya::Vector3(0.0f, 0.0f, 0.0f));
@@ -330,9 +369,53 @@ void EruptionEffect::Render( fbx_shader &HLSL )
 				OBJRender(pSphere.get(), CWVP, CW, Donya::Vector4(0.0f, 0.3f, 0.3f, 0.6f));
 			}
 
-		#endif // DEBUG_MODE
+#endif // DEBUG_MODE
 			eruqtionParticle[i].Draw();
 		}
+	}
+}
+
+void EruptionEffect::z_Render(fbx_shader& HLSL)
+{
+	if (activated)
+	{
+		Donya::Vector4x4 V = Donya::Vector4x4::FromMatrix(GameLib::camera::GetViewMatrix());
+		Donya::Vector4x4 P = Donya::Vector4x4::FromMatrix(GameLib::camera::GetProjectionMatrix());
+		for (int i = 0; i < MAX_SIZE; i++)
+		{
+			if (data[i].GetExist())
+			{
+				Donya::Vector4x4 S = Donya::Vector4x4::MakeScaling(1.0f);
+				Donya::Vector4x4 T = Donya::Vector4x4::MakeTranslation(data[i].GetPos());
+				Donya::Vector4x4 R = Donya::Vector4x4::MakeRotationEuler(data[i].GetAngle());
+				Donya::Vector4x4 W = S * R * T;
+				Donya::Vector4x4 WVP = W * V * P;
+				z_render(pModel[i].get(), HLSL, WVP, W);
+			}
+		}
+	}
+}
+
+void EruptionEffect::bloom_Render(fbx_shader& HLSL)
+{
+	if (activated)
+	{
+		Donya::Vector4x4 V = Donya::Vector4x4::FromMatrix(GameLib::camera::GetViewMatrix());
+		Donya::Vector4x4 P = Donya::Vector4x4::FromMatrix(GameLib::camera::GetProjectionMatrix());
+		for (int i = 0; i < MAX_SIZE; i++)
+		{
+			if (data[i].GetExist())
+			{
+				Donya::Vector4x4 S = Donya::Vector4x4::MakeScaling(1.0f);
+				Donya::Vector4x4 T = Donya::Vector4x4::MakeTranslation(data[i].GetPos());
+				Donya::Vector4x4 R = Donya::Vector4x4::MakeRotationEuler(data[i].GetAngle());
+				Donya::Vector4x4 W = S * R * T;
+				Donya::Vector4x4 WVP = W * V * P;
+				bloom_SRVrender(pModel[i].get(), HLSL, WVP, W);
+			}
+			eruqtionParticle[i].bloom_Draw();
+		}
+
 	}
 }
 
@@ -361,6 +444,22 @@ void LongAttackEffectManager::Render(fbx_shader& HLSL)
 	for (int i = 0; i < MAX_SIZE; i++)
 	{
 		longAttackEffect[i].Render(HLSL);
+	}
+}
+
+void LongAttackEffectManager::z_Render(fbx_shader& HLSL)
+{
+	for (int i = 0; i < MAX_SIZE; i++)
+	{
+		longAttackEffect[i].z_Render(HLSL);
+	}
+}
+
+void LongAttackEffectManager::bloom_Render(fbx_shader& HLSL)
+{
+	for (int i = 0; i < MAX_SIZE; i++)
+	{
+		longAttackEffect[i].bloom_Render(HLSL);
 	}
 }
 
@@ -533,7 +632,7 @@ void LongAttackEffect::Render(fbx_shader& HLSL)
 		Donya::Vector4x4 V = Donya::Vector4x4::FromMatrix(GameLib::camera::GetViewMatrix());
 		Donya::Vector4x4 P = Donya::Vector4x4::FromMatrix(GameLib::camera::GetProjectionMatrix());
 
-	#if DEBUG_MODE
+#if DEBUG_MODE
 
 		auto GenerateSphere = []()->std::shared_ptr<static_mesh>
 		{
@@ -543,7 +642,7 @@ void LongAttackEffect::Render(fbx_shader& HLSL)
 		};
 		static std::shared_ptr<static_mesh> pSphere = GenerateSphere();
 
-	#endif // DEBUG_MODE
+#endif // DEBUG_MODE
 
 		for (int i = 0; i < aliveMaxNum - aliveMaxReductionNum; i++)
 		{
@@ -557,9 +656,9 @@ void LongAttackEffect::Render(fbx_shader& HLSL)
 				FBXRender(pModel[i].get(), HLSL, WVP, W);
 			}
 
-		#if DEBUG_MODE
+#if DEBUG_MODE
 
-			if ( Donya::IsShowCollision() && hitSphere[i].exist)
+			if (Donya::IsShowCollision() && hitSphere[i].exist)
 			{
 				Donya::Vector4x4 CS = Donya::Vector4x4::MakeScaling(hitSphere[i].radius); // Half size->Whole size.
 				Donya::Vector4x4 CR = Donya::Vector4x4::MakeRotationEuler(Donya::Vector3(0.0f, 0.0f, 0.0f));
@@ -570,11 +669,59 @@ void LongAttackEffect::Render(fbx_shader& HLSL)
 				OBJRender(pSphere.get(), CWVP, CW, Donya::Vector4(0.0f, 0.3f, 0.3f, 0.6f));
 			}
 
-		#endif // DEBUG_MODE
+#endif // DEBUG_MODE
 		}
 	}
 }
 
+void LongAttackEffect::z_Render(fbx_shader& HLSL)
+
+{
+	if (activated)
+	{
+		Donya::Vector4x4 V = Donya::Vector4x4::FromMatrix(GameLib::camera::GetViewMatrix());
+		Donya::Vector4x4 P = Donya::Vector4x4::FromMatrix(GameLib::camera::GetProjectionMatrix());
+
+
+		for (int i = 0; i < aliveMaxNum - aliveMaxReductionNum; i++)
+		{
+			if (data[i].GetExist())
+			{
+				Donya::Vector4x4 S = Donya::Vector4x4::MakeScaling(1.0f);
+				Donya::Vector4x4 T = Donya::Vector4x4::MakeTranslation(data[i].GetPos());
+				Donya::Vector4x4 R = Donya::Vector4x4::MakeRotationEuler(data[i].GetAngle());
+				Donya::Vector4x4 W = S * R * T;
+				Donya::Vector4x4 WVP = W * V * P;
+				z_render(pModel[i].get(), HLSL, WVP, W);
+			}
+
+		}
+	}
+}
+void LongAttackEffect::bloom_Render(fbx_shader& HLSL)
+
+{
+	if (activated)
+	{
+		Donya::Vector4x4 V = Donya::Vector4x4::FromMatrix(GameLib::camera::GetViewMatrix());
+		Donya::Vector4x4 P = Donya::Vector4x4::FromMatrix(GameLib::camera::GetProjectionMatrix());
+
+
+		for (int i = 0; i < aliveMaxNum - aliveMaxReductionNum; i++)
+		{
+			if (data[i].GetExist())
+			{
+				Donya::Vector4x4 S = Donya::Vector4x4::MakeScaling(1.0f);
+				Donya::Vector4x4 T = Donya::Vector4x4::MakeTranslation(data[i].GetPos());
+				Donya::Vector4x4 R = Donya::Vector4x4::MakeRotationEuler(data[i].GetAngle());
+				Donya::Vector4x4 W = S * R * T;
+				Donya::Vector4x4 WVP = W * V * P;
+				bloom_SRVrender(pModel[i].get(), HLSL, WVP, W);
+			}
+
+		}
+	}
+}
 void DustEffect::SetData(Donya::Vector3 _pos, int _stageNo)
 {
 	for (int i = 0; i < MAX_SIZE; i++)
@@ -601,6 +748,15 @@ void DustEffect::Render(fbx_shader& HLSL)
 	{
 		dustParticle[i].Draw();
 	}
+}
+
+void DustEffect::bloom_Render(fbx_shader& HLSL)
+{
+	for (int i = 0; i < MAX_SIZE; i++)
+	{
+		dustParticle[i].bloom_Draw();
+	}
+
 }
 
 void SparkEffect::SetData(Donya::Vector3 _pos)
@@ -631,6 +787,15 @@ void SparkEffect::Render(fbx_shader& HLSL)
 	}
 }
 
+void SparkEffect::bloom_Render(fbx_shader& HLSL)
+{
+	for (int i = 0; i < MAX_SIZE; i++)
+	{
+		sparkParticle[i].bloom_Draw();
+	}
+
+}
+
 void JumpEffect::SetData(Donya::Vector3 _pos, int _stageNo)
 {
 	if (!dustParticle.GetEmitting())
@@ -650,4 +815,10 @@ void JumpEffect::Render(fbx_shader& HLSL)
 {
 	eruqtionParticle.Draw();
 	dustParticle.Draw();
+}
+
+void JumpEffect::bloom_Render(fbx_shader& HLSL)
+{
+	eruqtionParticle.bloom_Draw();
+	dustParticle.bloom_Draw();
 }

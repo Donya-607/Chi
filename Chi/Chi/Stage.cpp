@@ -33,6 +33,23 @@ void Stage::Draw(fbx_shader& hlsl,const Donya::Vector4x4 &matView, const Donya::
 	FBXRender( pModel.get(),hlsl, WVP, W );
 }
 
+void Stage::z_Draw(fbx_shader& hlsl, const Donya::Vector4x4& matView, const Donya::Vector4x4& matProjection)
+{
+	Donya::Vector4x4 W = Donya::Vector4x4::Identity();
+	Donya::Vector4x4 WVP = W * matView * matProjection;
+
+	z_render(pModel.get(), hlsl, WVP, W);
+
+}
+
+void Stage::bloom_Draw(fbx_shader& hlsl, const Donya::Vector4x4& matView, const Donya::Vector4x4& matProjection)
+{
+	Donya::Vector4x4 W = Donya::Vector4x4::Identity();
+	Donya::Vector4x4 WVP = W * matView * matProjection;
+
+	bloom_SRVrender(pModel.get(), hlsl, WVP, W);
+}
+
 void Stage::LoadModel()
 {
 	loadFBX( pModel.get(), GetModelPath( ModelAttribute::Stage01 ) );
