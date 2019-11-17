@@ -33,6 +33,21 @@ void sceneTitle::init()
 	loadFBX(pStageModel.get(), GetModelPath(ModelAttribute::TutorialStage));
 	loadFBX(pTitleModel.get(), "./Data/model/TestMove.fbx");
 
+	createBillboard(&attackUIdata.pMesh, L"./Data/Images/UI/Telop.png");
+	createBillboard(&guardUIdata.pMesh, L"./Data/Images/UI/Telop.png");
+
+	attackUIdata.pos = Donya::Vector4(0.0f, 2445.0f, 5645.0f, 1.0f);
+	attackUIdata.scale = Donya::Vector2(300.0f, 100.0f);
+	attackUIdata.texPos = Donya::Vector2(0.0f, 0.0f);
+	attackUIdata.texSize = Donya::Vector2(1690.0f, 557.0f);
+	attackUIdata.angle = 180.0f;
+
+	guardUIdata.pos = Donya::Vector4(-296.0f, 2426.0f, 11482.0f, 1.0f);
+	guardUIdata.scale = Donya::Vector2(300.0f, 100.0f);
+	guardUIdata.texPos = Donya::Vector2(0.0f, 553.0f);
+	guardUIdata.texSize = Donya::Vector2(1690.0f, 557.0f);
+	guardUIdata.angle = 293.0f;
+
 	std::vector<Donya::Box> wallHitBox_vector;
 	Donya::Box wallHitBox;
 
@@ -61,6 +76,20 @@ void sceneTitle::init()
 	wallHitBox.cx = -650.0f;
 	wallHitBox.cy = 14000.0f;
 	wallHitBox.w = 160.0f;
+	wallHitBox.h = 300.0f;
+	wallHitBox_vector.push_back(wallHitBox);
+
+	// left block Guard
+	wallHitBox.cx = 650.0f;
+	wallHitBox.cy = 11431.0f;
+	wallHitBox.w = 320.0f;
+	wallHitBox.h = 300.0f;
+	wallHitBox_vector.push_back(wallHitBox);
+
+	// right block Guard
+	wallHitBox.cx = -650.0f;
+	wallHitBox.cy = 11431.0f;
+	wallHitBox.w = 320.0f;
 	wallHitBox.h = 300.0f;
 	wallHitBox_vector.push_back(wallHitBox);
 
@@ -93,10 +122,33 @@ void sceneTitle::init()
 
 	moveCnt = 0;
 	titleExist = true;
+
+	nextGameCnt = 0;
+	returnTitleCnt = 0;
 }
 
 void sceneTitle::update()
 {
+#if DEBUG_MODE
+
+	if (Donya::Keyboard::Press(VK_MENU))
+	{
+		if (Donya::Keyboard::Trigger('C'))
+		{
+			char breakPoint = 0;
+		}
+		if (Donya::Keyboard::Trigger('H'))
+		{
+			Donya::ToggleShowCollision();
+		}
+		if (Donya::Keyboard::Trigger('T') || Donya::Keyboard::Trigger('I'))
+		{
+			Donya::ToggleShowStateOfImGui();
+		}
+	}
+
+#endif // DEBUG_MODE
+
 	switch (sceneState)
 	{
 	case SceneState::TITLE:
@@ -109,6 +161,8 @@ void sceneTitle::update()
 		TutorialUpdate();
 		break;
 	}
+
+	EffectManager::GetInstance()->Update();
 }
 
 void sceneTitle::TitleUpdate()
@@ -135,40 +189,29 @@ void sceneTitle::CameraMove()
 	}
 	else
 	{
-		using namespace Donya::Easing;
+		float tmp = Donya::Easing::Ease(Donya::Easing::Kind::Exponential, Donya::Easing::Type::Out, static_cast<float>(moveCnt) / static_cast<float>(MAX_MOVE_CNT));
+		Donya::Vector3 pos_vec = camPos - camTitlePos;
+		Donya::Vector3 pos = camTitlePos + pos_vec * tmp;
 
-		float currentTime = static_cast<float>( moveCnt ) / static_cast<float>( MAX_MOVE_CNT );
-		float ease = Ease( Kind::Exponential, Type::Out, currentTime );
+		Donya::Vector3 target_vec = camTarget - camTitleTarget;
+		Donya::Vector3 target = camTitleTarget + target_vec * tmp;
 
-		Donya::Vector3 posDiff		= camPos - camTitlePos;
-		Donya::Vector3 targetDiff	= camTarget - camTitleTarget;
-
-		Donya::Vector3 resultPos	= camTitlePos + ( posDiff * ease );
-		Donya::Vector3 resultTarget	= camTitleTarget + ( targetDiff * ease );
-
-		setCamPos( resultPos );
-		setTarget( resultTarget );
-
-		constexpr float START	= 3354.0f;
-		constexpr float LAST	= 4000.0f;
-		constexpr float DIFF	= LAST - START;
-		titlePos.y = START + ( DIFF * ease );
-
-		/*
-		// OLD process.
-		float posX = easing::OutExp(moveCnt, MAX_MOVE_CNT, camPos.x, camTitlePos.x);
+		/*float posX = easing::OutExp(moveCnt, MAX_MOVE_CNT, camPos.x, camTitlePos.x);
 		float posY = easing::OutExp(moveCnt, MAX_MOVE_CNT, camPos.y, camTitlePos.y);
 		float posZ = easing::OutExp(moveCnt, MAX_MOVE_CNT, camPos.z, camTitlePos.z);
 
 		float targetX = easing::OutExp(moveCnt, MAX_MOVE_CNT, camTarget.x, camTitleTarget.x);
 		float targetY = easing::OutExp(moveCnt, MAX_MOVE_CNT, camTarget.y, camTitleTarget.y);
-		float targetZ = easing::OutExp(moveCnt, MAX_MOVE_CNT, camTarget.z, camTitleTarget.z);
+		float targetZ = easing::OutExp(moveCnt, MAX_MOVE_CNT, camTarget.z, camTitleTarget.z);*/
 
-		setCamPos(Donya::Vector3(posX, posY, posZ));
-		setTarget(Donya::Vector3(targetX, targetY, targetZ));
+		setCamPos(pos);
+		setTarget(target);
 
-		titlePos.y = easing::OutExp(moveCnt, MAX_MOVE_CNT, 4000.0f, 3354.0f);
-		*/
+		tmp = Donya::Easing::Ease(Donya::Easing::Kind::Exponential, Donya::Easing::Type::Out, static_cast<float>(moveCnt) / static_cast<float>(MAX_MOVE_CNT));
+		float posY_len = 4000.0f - 3354.0f;
+		
+		titlePos.y += posY_len * tmp;
+		//titlePos.y = easing::OutExp(moveCnt, MAX_MOVE_CNT, 4000.0f, 3354.0f);
 	}
 }
 
@@ -188,6 +231,9 @@ void sceneTitle::TutorialUpdate()
 	case sceneTitle::END:
 		TutorialEndUpdate();
 		break;
+	case sceneTitle::RETURN_TITLE:
+		TutorialReturnTitle();
+		break;
 	}
 }
 
@@ -206,11 +252,14 @@ void sceneTitle::TutorialStartUpdate()
 	{
 		return
 		(
+			player.GetPosition().z <= 11431.0f
+			/*
 			11431.0f - 100.0f / 2.0f <= player.GetPosition().z
 			&& player.GetPosition().z <= 11431.0f + 100.0f / 2.0f
 
 			&& -100.0f / 2.0f <= player.GetPosition().x
 			&& player.GetPosition().x <= 100.0f / 2.0f
+			*/
 		)
 		? true
 		: false;
@@ -261,7 +310,21 @@ void sceneTitle::TutorialAttackUpdate()
 
 void sceneTitle::TutorialEndUpdate()
 {
-	pSceneManager->setNextScene(new SceneGame, false);
+	if (MAX_NEXT_GAME_CNT <= nextGameCnt++)
+	{
+		nextGameCnt = 0;
+		pSceneManager->setNextScene(new SceneGame, false);
+	}
+}
+
+void sceneTitle::TutorialReturnTitle()
+{
+	if (MAX_RETRUN_TITLE_CNT <= returnTitleCnt++)
+	{
+		returnTitleCnt = 0;
+		// TODO : Ž€–S‰‰o’Ç‰Á‚É‚æ‚è•ÏX‚ ‚è
+		pSceneManager->setNextScene(new sceneTitle(), false);
+	}
 }
 
 void sceneTitle::CameraUpdate(const Donya::Vector3& targetPosition)
@@ -367,6 +430,11 @@ void sceneTitle::render()
 	player.Draw(shader, V, P);
 	catapult.Draw(shader, V, P);
 
+	billboardRender(&attackUIdata.pMesh, V * P, attackUIdata.pos, attackUIdata.scale, attackUIdata.angle, getCamPos(), attackUIdata.texPos, attackUIdata.texSize);
+	billboardRender(&guardUIdata.pMesh, V * P, guardUIdata.pos, guardUIdata.scale, guardUIdata.angle, getCamPos(), guardUIdata.texPos, guardUIdata.texSize);
+
+	EffectManager::GetInstance()->Render(shader);
+
 	if ( Donya::IsShowCollision() )
 	{
 		auto GenerateCube = []()->std::shared_ptr<static_mesh>
@@ -422,6 +490,27 @@ void sceneTitle::imGui()
 		pSceneManager->setNextScene(new SceneGameOver, false);
 	}
 
+	ImGui::End();
+
+	ImGui::Begin("billboard");
+	if (ImGui::TreeNode("attackUIdata BillBoard Test Draw Parametor"))
+	{
+		ImGui::DragFloat3("pos", &attackUIdata.pos.x);
+		ImGui::DragFloat2("scale", &attackUIdata.scale.x);
+		ImGui::DragFloat2("texPos", &attackUIdata.texPos.x);
+		ImGui::DragFloat2("texSize", &attackUIdata.texSize.x);
+		ImGui::DragFloat("angle", &attackUIdata.angle);
+		ImGui::TreePop();
+	}
+	if (ImGui::TreeNode("guardUIdata BillBoard Test Draw Parametor"))
+	{
+		ImGui::DragFloat3("pos", &guardUIdata.pos.x);
+		ImGui::DragFloat2("scale", &guardUIdata.scale.x);
+		ImGui::DragFloat2("texPos", &guardUIdata.texPos.x);
+		ImGui::DragFloat2("texSize", &guardUIdata.texSize.x);
+		ImGui::DragFloat("angle", &guardUIdata.angle);
+		ImGui::TreePop();
+	}
 	ImGui::End();
 
 	ImGui::Begin("Camera");
@@ -640,6 +729,7 @@ void sceneTitle::ProcessCollision()
 
 	if (Donya::OBB::IsHitSphere(playerShieldBox, catapult.stone.hitSphere))
 	{
+		EffectManager::GetInstance()->StoneBreakEffectSet(catapult.stone.pos);
 		setStopAnimation(catapult.pModel.get(), true);
 		catapult.stone.exist = false;
 		catapult.stone.hitSphere.exist = false;
@@ -650,14 +740,22 @@ void sceneTitle::ProcessCollision()
 	}
 	if (!wasHitToShield && Donya::OBB::IsHitSphere(playerBodyBox, catapult.stone.hitSphere))
 	{
+		EffectManager::GetInstance()->StoneBreakEffectSet(catapult.stone.pos);
+		setStopAnimation(catapult.pModel.get(), true);
+		catapult.stone.exist = false;
+		catapult.stone.hitSphere.exist = false;
+		catapult.stone.hitSphere.enable = false;
 		player.ReceiveImpact();
-		pSceneManager->setNextScene(new sceneTitle(), false);
+		tutorialState = sceneTitle::RETURN_TITLE;
 	}
 
 	// PlayerAttack VS CatapultBudy
 	{
 		if (tutorialState == TutorialState::ATTACK && Donya::OBB::IsHitOBB(playerAttackBox, catapult.hitOBB))
 		{
+			Donya::Vector3 wsCatapultPos = catapult.GetPos();
+			wsCatapultPos.y += 200.0f;
+			EffectManager::GetInstance()->CatapultBreakEffectSet(wsCatapultPos);
 			catapult.hitOBB.exist = false;
 			tutorialState++;
 		}

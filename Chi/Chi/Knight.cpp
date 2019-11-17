@@ -11,6 +11,8 @@
 #include "gameLibFunctions.h"	// Use FBXRender().
 #include "skinned_mesh.h"
 
+#include "Effect.h"
+
 #undef max
 #undef min
 
@@ -921,6 +923,8 @@ void Knight::AttackExplosionInit( TargetStatus target )
 
 	setStopAnimation( models.pAtkExpl.get(), /* is_stop = */ true );
 	setAnimFlame( models.pAtkExpl.get(), 0 );
+
+	EffectManager::GetInstance()->BossAbsorptionEffectSet( GetPos() );
 }
 void Knight::AttackExplosionUpdate( TargetStatus target )
 {
@@ -936,6 +940,7 @@ void Knight::AttackExplosionUpdate( TargetStatus target )
 		explHitBox.collision.radius = KnightParam::Open().explScaleStart;
 		setStopAnimation( models.pAtkExpl.get(), /* is_stop = */ false );
 
+		EffectManager::GetInstance()->BossAbsorptionEffectReSet();
 	}
 	else
 	if ( CHARGE_LENGTH < timer )

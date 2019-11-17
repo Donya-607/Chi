@@ -87,6 +87,9 @@ public:
 		setAnimFlame(pModel.get(), 0);
 	}
 
+public:
+	Donya::Vector3 GetPos() const { return pos; }
+
 private:
 	Donya::Vector4x4 CalcWorldMatrix() const
 	{

@@ -14,44 +14,6 @@ void SceneEffect::init()
 	keyCnt = 0;
 	keyCnt2 = 0;
 
-//	flashParticle.Set();
-//	flashParticle.ImGuiDataInit();
-
-//	bubbleParticle.Set();
-//	bubbleParticle.ImGuiDataInit();
-
-//	bossAI.Init();
-
-	//auto GenerateCube = []()->std::shared_ptr<static_mesh>
-	//{
-	//	std::shared_ptr<static_mesh> tmpCube = std::make_shared<static_mesh>();
-	//	createCube(tmpCube.get());
-	//	return tmpCube;
-	//};
-
-	//pCube1 = GenerateCube();
-	//pCube2 = GenerateCube();
-
-	//obb1.pos = Donya::Vector3(5.0f, 0.0f, 0.0f);
-	//obb2.pos = Donya::Vector3(-5.0f, 0.0f, 0.0f);
-	//obb1.scale = Donya::Vector3(25.0f, 20.0f, 15.0f);
-	//obb2.scale = Donya::Vector3(25.0f, 20.0f, 15.0f);
-	//obb1.orientation.Identity();
-	//obb2.orientation.Identity();
-
-	//color1 = DirectX::XMFLOAT4(0.7f, 0.7f, 0.7f, 1.0f);
-	//color2 = DirectX::XMFLOAT4(0.7f, 0.7f, 0.7f, 1.0f);
-
-	//angle1[0] = 0.0f;
-	//angle1[1] = 0.0f;
-	//angle1[2] = 0.0f;
-	//angle2[0] = 0.0f;
-	//angle2[1] = 0.0f;
-	//angle2[2] = 0.0f;
-
-	/*exist1 = false;
-	exist2 = false;*/
-
 	stage.Init(0);
 
 	cameraPos = Donya::Vector3{ 0.0f, 256.0f, -1000.0f };
@@ -74,11 +36,19 @@ void SceneEffect::init()
 	}
 
 //	EffectManager::GetInstance()->Init();
-//	originPos = Donya::Vector3(0.0f, 0.0f, 0.0f);
-
-	createBillboard(&data.pMesh, L"./Data/Images/particle.png");
-
+	originPos = Donya::Vector3::Zero();
+	direction = Donya::Vector3(1.0f, 1.0f, 1.0f);
+#if 0
+	createBillboard(&data.pMesh, L"./Data/Images/UI/particle.png");
+#else
+	createBillboard(&data.pMesh, L"./Data/Images/UI/Telop.png");
+#endif
 	UIManager::GetInstance()->Init();
+
+	shieldExist = false;
+
+	playerPos = DirectX::XMFLOAT3(0.0f, 0.0f, -750.0);
+	bossPos = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0);
 }
 void SceneEffect::update()
 {
@@ -112,46 +82,18 @@ void SceneEffect::update()
 		keyCnt2 = 0;
 	}
 
-//	flashParticle.Emit();
-//	bubbleParticle.Emit();
-//	bossAI.Update();
-//	eruptionEffect.Update(Donya::Vector3(0.0f, 0.0f, 0.0f), Donya::Vector3(0.0f, 0.0f, -1.0f));
 	EffectManager::GetInstance()->Update();
-//	EffectManager::GetInstance()->Update(Donya::Vector3(0.0f, 0.0f, 0.0f));
-
-	//if (obb1.JudgeOBB(&obb2))
-	//{
-	//	color1.x = 1.0f;
-	//	color2.y = 1.0f;
-	//}
-	//else
-	//{
-	//	color1.x = 0.7f;
-	//	color2.y = 0.7f;
-	//}
+	EffectManager::GetInstance()->AccelEffectUpdate(originPos, direction);
+	EffectManager::GetInstance()->BossAttackMomentEffectUpdate(playerPos, bossPos);
 
 	stage.Update();
-
-	//for (auto eruption : EffectManager::GetInstance()->GetEruptionEffectVector())
-	//{
-	//	for (auto eruptionHitSphere : eruption.GetHitSphereVector())
-	//	{
-	//		if (eruptionHitSphere.exist)
-	//		{
-	//			Donya::Vector3 _pos = eruptionHitSphere.pos;
-	//		}
-	//		else
-	//		{
-	//			float _radius = eruptionHitSphere.radius;
-	//		}
-	//	}
-	//}
 
 	eruqtionParticle.Emit();
 	absorptionParticle.Emit();
 	dustParticle.Emit();
 	sparkParticle.Emit();
 	locusParticle.Emit();
+	accelParticle.Emit(originPos, direction);
 
 	UIManager::GetInstance()->Update(Donya::Vector3(0.0f, 0.0f, 0.0f));
 }
@@ -163,24 +105,6 @@ void SceneEffect::render()
 	Donya::Vector4x4 V = Donya::Vector4x4::FromMatrix(GameLib::camera::GetViewMatrix());
 	Donya::Vector4x4 P = Donya::Vector4x4::FromMatrix(GameLib::camera::GetProjectionMatrix());
 
-	//Donya::Vector4x4 S = Donya::Vector4x4::MakeScaling(obb1.scale);
-	//Donya::Vector4x4 T = Donya::Vector4x4::MakeTranslation(obb1.pos);
-	//Donya::Vector4x4 R = obb1.orientation.RequireRotationMatrix();
-	//Donya::Vector4x4 W = S * R * T;
-	//Donya::Vector4x4 WVP = W * V * P;
-
-//	if (exist1) OBJRender(pCube1.get(), WVP, W, color1);
-
-	//S = Donya::Vector4x4::MakeScaling(obb2.scale);
-	//T = Donya::Vector4x4::MakeTranslation(obb2.pos);
-	//R = obb2.orientation.RequireRotationMatrix();
-	//W = S * R * T;
-	//WVP = W * V * P;
-
-//	if (exist2) OBJRender(pCube2.get(), WVP, W, color2);
-
-
-//	eruptionEffect.Render();
 	EffectManager::GetInstance()->Render( shader );
 
 	stage.Draw( shader, V, P );
@@ -190,6 +114,7 @@ void SceneEffect::render()
 	dustParticle.Draw();
 	sparkParticle.Draw();
 	locusParticle.Draw();
+	accelParticle.Draw();
 
 	DirectX::XMFLOAT4X4 viewProjection;
 	DirectX::XMStoreFloat4x4(&viewProjection, getViewMatrix() * getProjectionMatrix());
@@ -205,18 +130,6 @@ void SceneEffect::imGui()
 {
 	UIManager::GetInstance()->Imgui();
 	ImGui::Begin("Effect");
-	if (ImGui::TreeNode("DirectionalLight"))
-	{
-		if (ImGui::Button("Shiled Development On"))
-		{
-			EffectManager::GetInstance()->Set(EffectManager::GetInstance()->SHIELD_DEVELOPMENT);
-		}
-		if (ImGui::Button("Shiled Development Off"))
-		{
-			EffectManager::GetInstance()->ReSet(EffectManager::GetInstance()->SHIELD_DEVELOPMENT);
-		}
-		ImGui::TreePop();
-	}
 	if (ImGui::TreeNode("BillBoard Test Draw Parametor"))
 	{
 		ImGui::DragFloat3("pos", &data.pos.x);
@@ -239,18 +152,20 @@ void SceneEffect::imGui()
 		ImGui::InputInt("stageNum", &stageNum);
 		if (ImGui::Button("Emit"))
 		{
-			dustParticle.Set(DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f), stageNum);
+			// dustParticle.Set(DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f), stageNum);
+			EffectManager::GetInstance()->DustEffectSet(DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f), stageNum);
 		}
 		ImGui::TreePop();
 	}
 	if (ImGui::TreeNode("Jump Particle Emit"))
 	{
-		static int stageNum = 1;
-		ImGui::InputInt("stageNum", &stageNum);
+		static DirectX::XMFLOAT3 _pos = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0);
+		ImGui::DragFloat3("emit pos", &_pos.x);
 		if (ImGui::Button("Emit"))
 		{
-			eruqtionParticle.Set(DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f));
-			dustParticle.Set(DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f), stageNum);
+			//eruqtionParticle.Set(DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f));
+			//dustParticle.Set(DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f), stageNum);
+			EffectManager::GetInstance()->JumpEffectSet(_pos);
 		}
 		ImGui::TreePop();
 	}
@@ -258,13 +173,25 @@ void SceneEffect::imGui()
 	{
 		static DirectX::XMFLOAT3 _pos = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0);
 		ImGui::DragFloat3("emit pos", &_pos.x);
-		if (ImGui::Button("Set"))
+		if (ImGui::Button("Player Set"))
 		{
-			absorptionParticle.Set(_pos);
+			//absorptionParticle.Set(_pos);
+			EffectManager::GetInstance()->PlayerAbsorptionEffectSet(_pos);
 		}
-		if (ImGui::Button("ReSet"))
+		if (ImGui::Button("Player ReSet"))
 		{
-			absorptionParticle.ReSet();
+			//absorptionParticle.ReSet();
+			EffectManager::GetInstance()->PlayerAbsorptionEffectReSet();
+		}
+		if (ImGui::Button("Boss Set"))
+		{
+			//absorptionParticle.Set(_pos);
+			EffectManager::GetInstance()->BossAbsorptionEffectSet(_pos);
+		}
+		if (ImGui::Button("Boss ReSet"))
+		{
+			//absorptionParticle.ReSet();
+			EffectManager::GetInstance()->BossAbsorptionEffectReSet();
 		}
 		ImGui::TreePop();
 	}
@@ -274,7 +201,8 @@ void SceneEffect::imGui()
 		ImGui::DragFloat3("emit pos ", &pos.x);
 		if (ImGui::Button("Emit"))
 		{
-			sparkParticle.Set(pos);
+			//sparkParticle.Set(pos);
+			EffectManager::GetInstance()->SparkEffectSet(pos);
 		}
 		ImGui::TreePop();
 	}
@@ -286,7 +214,8 @@ void SceneEffect::imGui()
 		ImGui::DragFloat3("emit direction", &dir.x);
 		if (ImGui::Button("Emit"))
 		{
-			locusParticle.Set(pos, dir);
+			//locusParticle.Set(pos, dir);
+			EffectManager::GetInstance()->LocusParticleSet(pos, dir);
 		}
 		ImGui::TreePop();
 	}
@@ -299,7 +228,61 @@ void SceneEffect::imGui()
 		ImGui::DragFloat3("boss pos", &bossPos.x);
 		if (ImGui::Button("On"))
 		{
-			EffectManager::GetInstance()->Set(EffectManager::GetInstance()->LONG_ATTACK, playerPos, bossPos);
+			EffectManager::GetInstance()->LongAttackEffectSet(playerPos, bossPos);
+		}
+		ImGui::TreePop();
+	}
+	if (ImGui::TreeNode("Accel Particle Emit"))
+	{
+		ImGui::DragFloat3("emit pos", &originPos.x);
+		ImGui::DragFloat3("emit direction", &direction.x);
+		if (ImGui::Button("Set"))
+		{
+			//accelParticle.Set();
+			EffectManager::GetInstance()->AccelEffectSet();
+		}
+		if (ImGui::Button("ReSet"))
+		{
+			//accelParticle.ReSet();
+			EffectManager::GetInstance()->AccelEffectReSet();
+		}
+		ImGui::TreePop();
+	}
+	if (ImGui::TreeNode("Boss Attack Effect Emit"))
+	{
+		ImGui::DragFloat3("player pos", &playerPos.x);
+		ImGui::DragFloat3("boss pos", &bossPos.x);
+		if (ImGui::Button("Set"))
+		{
+			EffectManager::GetInstance()->BossAttackMomentEffectSet(60, 0);
+		}
+		ImGui::TreePop();
+	}
+	if (ImGui::TreeNode("Stone Break Effect Emit"))
+	{
+		static DirectX::XMFLOAT3 pos = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0);
+		ImGui::DragFloat3("emit pos ", &pos.x);
+		if (ImGui::Button("Set"))
+		{
+			EffectManager::GetInstance()->StoneBreakEffectSet(pos);
+		}
+		ImGui::TreePop();
+	}
+	if (ImGui::TreeNode("Catapult Break Effect Emit"))
+	{
+		static DirectX::XMFLOAT3 pos = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0);
+		ImGui::DragFloat3("emit pos ", &pos.x);
+		if (ImGui::Button("Set"))
+		{
+			EffectManager::GetInstance()->CatapultBreakEffectSet(pos);
+		}
+		ImGui::TreePop();
+	}
+	if (ImGui::TreeNode("UI Effect"))
+	{
+		if (ImGui::Button("On"))
+		{
+			UIManager::GetInstance()->Init();
 		}
 		ImGui::TreePop();
 	}

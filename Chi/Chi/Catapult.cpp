@@ -1,6 +1,7 @@
 #include "Catapult.h"
 #include "Donya/FilePath.h"
-
+#include "Donya/Useful.h"	// Use IsShowCollision().
+#include "Donya/UseImGui.h"	// Use USE_IMGUI macro.
 
 void Catapult::Init( Donya::Vector3 _pos, Donya::Vector3 _scale, Donya::Vector3 _angle )
 {
@@ -53,23 +54,26 @@ void Catapult::Draw(fbx_shader& HLSL, const Donya::Vector4x4& matView, const Don
 
 		FBXRender(pModel.get(), HLSL, WVP, W);
 
-		auto GenerateCube = []()->std::shared_ptr<static_mesh>
+		if ( Donya::IsShowCollision() )
 		{
-			std::shared_ptr<static_mesh> tmpCube = std::make_shared<static_mesh>();
-			createCube(tmpCube.get());
-			return tmpCube;
-		};
-		static std::shared_ptr<static_mesh> pCube = GenerateCube();
+			auto GenerateCube = []()->std::shared_ptr<static_mesh>
+			{
+				std::shared_ptr<static_mesh> tmpCube = std::make_shared<static_mesh>();
+				createCube(tmpCube.get());
+				return tmpCube;
+			};
+			static std::shared_ptr<static_mesh> pCube = GenerateCube();
 
-		Donya::Vector4x4 CS = Donya::Vector4x4::MakeScaling(hitOBB.size); // Half size->Whole size.
-		Donya::Vector4x4 CR = Donya::Vector4x4::MakeRotationEuler(Donya::Vector3(0.0f, 0.0f, 0.0f));
-		Donya::Vector4x4 CT = Donya::Vector4x4::MakeTranslation(hitOBB.pos);
-		Donya::Vector4x4 CW = CS * CR * CT;
-		Donya::Vector4x4 CWVP = CW * matView * matProjection;
+			Donya::Vector4x4 CS = Donya::Vector4x4::MakeScaling(hitOBB.size); // Half size->Whole size.
+			Donya::Vector4x4 CR = Donya::Vector4x4::MakeRotationEuler(Donya::Vector3(0.0f, 0.0f, 0.0f));
+			Donya::Vector4x4 CT = Donya::Vector4x4::MakeTranslation(hitOBB.pos);
+			Donya::Vector4x4 CW = CS * CR * CT;
+			Donya::Vector4x4 CWVP = CW * matView * matProjection;
 
-		OBJRender(pCube.get(), CWVP, CW, Donya::Vector4(0.0f, 0.8f, 0.3f, 0.6f));
+			OBJRender(pCube.get(), CWVP, CW, Donya::Vector4(0.0f, 0.8f, 0.3f, 0.6f));
 
-		stone.Draw(HLSL, matView, matProjection);
+			stone.Draw(HLSL, matView, matProjection);
+		}
 	}
 }
 
@@ -83,12 +87,16 @@ void Catapult::UnInit()
 
 void Catapult::ImGui()
 {
+#if USE_IMGUI
+
 	ImGui::Begin("Catapult");
 	ImGui::DragFloat3("pos", &pos.x);
 	ImGui::DragFloat3("hitOBB.size", &hitOBB.size.x);
 	ImGui::End();
 
 	stone.ImGui();
+
+#endif // USE_IMGUI
 }
 
 
@@ -166,8 +174,12 @@ void Stone::UnInit()
 
 void Stone::ImGui() 
 {
+#if USE_IMGUI
+
 	ImGui::Begin("Stone");
 	ImGui::DragFloat3("pos", &pos.x);
 	ImGui::DragFloat("radius", &hitSphere.radius);
 	ImGui::End();
+
+#endif // USE_IMGUI
 }

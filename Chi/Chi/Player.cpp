@@ -253,8 +253,8 @@ Player::Input Player::Input::MakeByExternalInput( Donya::Vector4x4 viewMat )
 
 		constexpr int TRIGGER_FLAG	= 1;
 		constexpr int PRESS_FLAG	= 2;
-		if ( TRIGGER_FLAG	== xInput::pressedButtons( PAD_NO, XboxPad_Button::RIGHT_SHOULDER	) ) { input.doDefend = true; }
-		if ( PRESS_FLAG		== xInput::pressedButtons( PAD_NO, XboxPad_Button::X				) ) { input.doAttack = true; }
+		if ( PRESS_FLAG		== xInput::pressedButtons( PAD_NO, XboxPad_Button::RIGHT_SHOULDER	) ) { input.doDefend = true; }
+		if ( TRIGGER_FLAG	== xInput::pressedButtons( PAD_NO, XboxPad_Button::X				) ) { input.doAttack = true; }
 	}
 #if !DEBUG_MODE
 	// else

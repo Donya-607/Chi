@@ -3,142 +3,45 @@
 #include "Donya/Useful.h"		// Use IsShowCollision().
 #include "Player.h"
 
-//
-//std::string EffectManager::GetModelPath(int effectNum)
-//{
-//	switch (effectNum)
-//	{
-//	case EffectNum::FIRE:
-//		return "./Data/model/Effect/fire.fbx";					// break;
-//	case EffectNum::THUNDER:
-//		return "./Data/model/Effect/thunder.fbx";				// break;
-//	default:
-//		assert(!"Error : Specified unexpect model type."); break;
-//		break;
-//	}
-//
-//	return "ERROR_ATTRIBUTE";
-//}
-//
-//EffectManager::EffectManager()
-//{
-//	for (int i = 0; i < MAX_SIZE; i++)
-//	{
-//		pEffect[i] = std::make_shared<skinned_mesh>();
-//	}
-//}
-//
-//void EffectManager::Load()
-//{
-//	std::shared_ptr<skinned_mesh> tmpFbx = std::make_shared<skinned_mesh>();
-//	for (int i = 0; i < MAX_SIZE; i++)
-//	{
-//		loadFBX(tmpFbx.get(), GetModelPath(i));
-//		pEffect[i] = tmpFbx;
-//	}
-//}
-//
-//std::shared_ptr<skinned_mesh> EffectManager::GetEffect(EffectNum effectNum)
-//{
-//	return pEffect[effectNum];
-//}
-
-
-void EffectManager::Init()
-{
-//	effect.resize(MAX_SIZE);
-
-//	for (int i = 0; i < MAX_SIZE; i++)
-//	{
-//		switch (i)
-//		{
-//		case EffectManager::ERUPTION:
-//			effect[i] = std::make_unique<EruptionEffectManager>();
-//			break;
-//		case EffectManager::SHIELD_DEVELOPMENT:
-//			effect[i] = std::make_unique<ShieldDevelopment>();
-//			break;
-//		// TODO : add effect
-//		}
-//	}
-}
-
-void EffectManager::Set(EffectType effectType, Donya::Vector3 pos, int startTime)
-{
-	//effect[effectType]->SetData(pos, startTime);
-
-	switch (effectType)
-	{
-	case EffectManager::ERUPTION:
-		eruptionEffectManager.SetData(pos, startTime);
-		break;
-		// TODO : add effect
-	}
-}
-
-void EffectManager::Set(EffectType effectType, Donya::Vector3 playerPos, Donya::Vector3 bossPos)
-{
-	switch (effectType)
-	{
-	case EffectManager::LONG_ATTACK:
-		longAttackEffectManager.SetData(playerPos, bossPos);
-		break;
-		// TODO : add effect
-	}
-}
-
-void EffectManager::Set(EffectType effectType)
-{
-	//effect[effectType]->Set();
-
-	switch (effectType)
-	{
-	case EffectManager::SHIELD_DEVELOPMENT:
-		shieldDevelopment.Set();
-		break;
-		// TODO : add effect
-	}
-}
-
-void EffectManager::ReSet(EffectType effectType)
-{
-	//effect[effectType]->ReSet();
-
-	switch (effectType)
-	{
-	case EffectManager::SHIELD_DEVELOPMENT:
-		shieldDevelopment.ReSet();
-		break;
-		// TODO : add effect
-	}
-}
 
 void EffectManager::Update()
 {
-	/*for (int i = 0; i < MAX_SIZE; i++)
-	{
-		effect[i]->Update();
-	}*/
-
 	eruptionEffectManager.Update();
 	longAttackEffectManager.Update();
+	dustEffect.Update();
+	sparkEffect.Update();
+	playerAbsorptionParticle.Emit();
+	bossAbsorptionParticle.Emit();
+	locusParticle.Emit();
+	jumpEffect.Update();
+	stoneBreakParticle.Emit();
+	catapultBreakParticle.Emit();
 }
 
-void EffectManager::Update(Donya::Vector3 pos)
+void EffectManager::AccelEffectUpdate(Donya::Vector3 pos, Donya::Vector3 dir)
 {
-	shieldDevelopment.Update(pos);
+	accelParticle.Emit(pos, dir);
+}
+
+void EffectManager::BossAttackMomentEffectUpdate(Donya::Vector3 bossPos, Donya::Vector3 playerPos)
+{
+	bossAttackMomentEffect.Update(bossPos, playerPos);
 }
 
 void EffectManager::Render( fbx_shader &HLSL )
 {
-	/*for (int i = 0; i < MAX_SIZE; i++)
-	{
-		effect[i]->Render();
-	}*/
-
 	eruptionEffectManager.Render( HLSL );
-	shieldDevelopment.Render( HLSL );
 	longAttackEffectManager.Render( HLSL );
+	dustEffect.Render( HLSL );
+	sparkEffect.Render( HLSL );
+	playerAbsorptionParticle.Draw();
+	bossAbsorptionParticle.Draw();
+	locusParticle.Draw();
+	jumpEffect.Render( HLSL );
+	accelParticle.Draw();
+	bossAttackMomentEffect.Draw();
+	stoneBreakParticle.Draw();
+	catapultBreakParticle.Draw();
 }
 
 std::string GetEffectModelPath(EffectModel effectModel)
@@ -147,11 +50,15 @@ std::string GetEffectModelPath(EffectModel effectModel)
 	switch (effectModel)
 	{
 	case EffectModel::ERUPTION:
-		return "./Data/model/Effect/EFE_Boss03_Attack.fbx";		// break;
+		return "./Data/model/Effect/EFE_Boss03_Attack.fbx";			// break;
+	case EffectModel::SHIELD_OPEN:
+		return "./Data/model/Effect/EFE_Player_Shield_Open.fbx";	// break;
 	case EffectModel::SHIELD_DEVELOPMENT:
-		return "./Data/model/Effect/EFE_Player_Shield.fbx";		// break;
+		return "./Data/model/Effect/EFE_Player_Shield.fbx";			// break;
+	case EffectModel::SHIELD_IMPACT:
+		return "./Data/model/Effect/EFE_Player_Shield_Impact.fbx";	// break;
 	case EffectModel::LONG_ATTACK:
-		return "./Data/model/Effect/EFE_Boss04_LongAttack.fbx";	// break;
+		return "./Data/model/Effect/EFE_Boss04_LongAttack.fbx";		// break;
 	default:
 		assert(!"Error : Specified unexpect model type."); break;
 		break;
@@ -333,6 +240,7 @@ void EruptionEffect::Update()
 					if (getAnimFlame(pModel[i].get()) == 107)
 					{
 						hitSphere[i].exist = true;
+						eruqtionParticle[i].Set(hitSphere[i].pos);
 					}
 					if (getAnimFlame(pModel[i].get()) == 213)
 					{
@@ -370,6 +278,11 @@ void EruptionEffect::Update()
 			}
 		}
 		timer++;
+	}
+
+	for (int i = 0; i < MAX_SIZE; i++)
+	{
+		eruqtionParticle[i].Emit();
 	}
 }
 
@@ -418,59 +331,8 @@ void EruptionEffect::Render( fbx_shader &HLSL )
 			}
 
 		#endif // DEBUG_MODE
+			eruqtionParticle[i].Draw();
 		}
-	}
-}
-
-ShieldDevelopment::ShieldDevelopment()
-{
-	auto GenerateFBX = []()->std::shared_ptr<skinned_mesh>
-	{
-		std::shared_ptr<skinned_mesh> tmpFBX = std::make_shared<skinned_mesh>();
-		loadFBX(tmpFBX.get(), GetEffectModelPath(EffectModel::SHIELD_DEVELOPMENT));
-		return tmpFBX;
-	};
-	pModel = std::make_unique<skinned_mesh>();
-	pModel = GenerateFBX();
-	data.SetPos(DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f));
-}
-
-void ShieldDevelopment::Init()
-{
-
-}
-
-void ShieldDevelopment::Set()
-{
-	data.SetExist(true);
-}
-
-void ShieldDevelopment::ReSet()
-{
-	data.SetExist(false);
-}
-
-void ShieldDevelopment::Update(Donya::Vector3 pos)
-{
-	if (data.GetExist())
-	{
-		data.SetPos(pos);
-	}
-}
-
-void ShieldDevelopment::Render( fbx_shader &HLSL )
-{
-	if (data.GetExist())
-	{
-		Donya::Vector4x4 V = Donya::Vector4x4::FromMatrix(GameLib::camera::GetViewMatrix());
-		Donya::Vector4x4 P = Donya::Vector4x4::FromMatrix(GameLib::camera::GetProjectionMatrix());
-
-		Donya::Vector4x4 S = Donya::Vector4x4::MakeScaling(1.0f);
-		Donya::Vector4x4 T = Donya::Vector4x4::MakeTranslation(data.GetPos());
-		Donya::Vector4x4 R = Donya::Vector4x4::MakeRotationEuler(data.GetAngle());
-		Donya::Vector4x4 W = S * R * T;
-		Donya::Vector4x4 WVP = W * V * P;
-		FBXRender(pModel.get(), HLSL, WVP, W);
 	}
 }
 
@@ -534,8 +396,10 @@ void LongAttackEffect::SetData(Donya::Vector3 _playerPos, Donya::Vector3 _bossPo
 	float dis = sqrtf(powf(dir.x, 2.0f) + powf(dir.y, 2.0f) + powf(dir.z, 2.0f));
 	dir.Normalize();
 
-	aliveMaxNum = static_cast<int>(dis / SIZE);
+	aliveMaxNum = MAX_SIZE;
 	hitSphere.resize(aliveMaxNum);
+
+	aliveMaxReductionNum = 0;
 
 	for (int i = 0; i < aliveMaxNum; i++)
 	{
@@ -543,21 +407,27 @@ void LongAttackEffect::SetData(Donya::Vector3 _playerPos, Donya::Vector3 _bossPo
 		data[i].SetPos(_pos);
 		data[i].SetTime(20 * i);
 		data[i].SetExist(false);
+
 		hitSphere[i].pos.x = _pos.x;
 		hitSphere[i].pos.y = _pos.y + 25.0f;
 		hitSphere[i].pos.z = _pos.z;
 		hitSphere[i].radius = SIZE - 75.0f;
 		hitSphere[i].exist = false;
+
+		if (CollideToWall(data[i].GetPos()))
+		{
+			aliveMaxReductionNum++;
+		}
 	}
 
 	aliveNum = 0;
 	Init();
 }
 
-bool LongAttackEffect::CollideToWall(Donya::Vector3& pos)
+bool LongAttackEffect::CollideToWall(Donya::Vector3 pos)
 {
 	const float bodyRadius = PlayerParam::Get().HitBoxPhysic().radius;
-	const float trueFieldRadius = 1420.0f - 50.0f;
+	const float trueFieldRadius = 1420.0f - (SIZE - 100.0f);
 
 	constexpr Donya::Vector3 ORIGIN = Donya::Vector3::Zero();
 	const Donya::Vector3 currentDistance = pos - ORIGIN;
@@ -615,7 +485,7 @@ void LongAttackEffect::Update()
 				break;
 			}*/
 
-			for (int i = 0; i < aliveMaxNum; i++)
+			for (int i = 0; i < aliveMaxNum - aliveMaxReductionNum; i++)
 			{
 				if (getAnimFlame(pModel[i].get()) == 62)
 				{
@@ -630,7 +500,7 @@ void LongAttackEffect::Update()
 					data[i].SetExist(false);
 				}
 			}
-			if (aliveNum < aliveMaxNum && data[aliveNum].GetTime() <= timer - startTimer)
+			if (aliveNum < aliveMaxNum - aliveMaxReductionNum && data[aliveNum].GetTime() <= timer - startTimer)
 			{
 				data[aliveNum].SetExist(true);
 				setAnimFlame(pModel[aliveNum].get(), 1);
@@ -638,7 +508,7 @@ void LongAttackEffect::Update()
 			}
 
 			bool exists = false;
-			for (int i = 0; i < aliveMaxNum; i++)
+			for (int i = 0; i < aliveMaxNum - aliveMaxReductionNum; i++)
 			{
 				if (data[i].GetExist())
 				{
@@ -675,7 +545,7 @@ void LongAttackEffect::Render(fbx_shader& HLSL)
 
 	#endif // DEBUG_MODE
 
-		for (int i = 0; i < aliveMaxNum; i++)
+		for (int i = 0; i < aliveMaxNum - aliveMaxReductionNum; i++)
 		{
 			if (data[i].GetExist())
 			{
@@ -703,4 +573,81 @@ void LongAttackEffect::Render(fbx_shader& HLSL)
 		#endif // DEBUG_MODE
 		}
 	}
+}
+
+void DustEffect::SetData(Donya::Vector3 _pos, int _stageNo)
+{
+	for (int i = 0; i < MAX_SIZE; i++)
+	{
+		if (!dustParticle[i].GetEmitting())
+		{
+			dustParticle[i].Set(_pos, _stageNo);
+			break;
+		}
+	}
+}
+
+void DustEffect::Update()
+{
+	for (int i = 0; i < MAX_SIZE; i++)
+	{
+		dustParticle[i].Emit();
+	}
+}
+
+void DustEffect::Render(fbx_shader& HLSL)
+{
+	for (int i = 0; i < MAX_SIZE; i++)
+	{
+		dustParticle[i].Draw();
+	}
+}
+
+void SparkEffect::SetData(Donya::Vector3 _pos)
+{
+	for (int i = 0; i < MAX_SIZE; i++)
+	{
+		if (!sparkParticle[i].GetEmitting())
+		{
+			sparkParticle[i].Set(_pos);
+			break;
+		}
+	}
+}
+
+void SparkEffect::Update()
+{
+	for (int i = 0; i < MAX_SIZE; i++)
+	{
+		sparkParticle[i].Emit();
+	}
+}
+
+void SparkEffect::Render(fbx_shader& HLSL)
+{
+	for (int i = 0; i < MAX_SIZE; i++)
+	{
+		sparkParticle[i].Draw();
+	}
+}
+
+void JumpEffect::SetData(Donya::Vector3 _pos, int _stageNo)
+{
+	if (!dustParticle.GetEmitting())
+	{
+		eruqtionParticle.Set(_pos);
+		dustParticle.Set(_pos, _stageNo);
+	}
+}
+
+void JumpEffect::Update()
+{
+	eruqtionParticle.Emit();
+	dustParticle.Emit();
+}
+
+void JumpEffect::Render(fbx_shader& HLSL)
+{
+	eruqtionParticle.Draw();
+	dustParticle.Draw();
 }

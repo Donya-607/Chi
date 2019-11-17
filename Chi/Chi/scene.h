@@ -44,6 +44,20 @@ private:
 	std::unique_ptr<skinned_mesh> pStageModel;
 	std::unique_ptr<skinned_mesh> pTitleModel;
 
+	struct billboard
+	{
+		static_mesh pMesh;
+
+		DirectX::XMFLOAT4 pos;			// ç¿ïW
+		DirectX::XMFLOAT2 scale;		// íÜêSç¿ïWÇ©ÇÁÇÃîºåa
+		float angle;					// äpìx
+
+		DirectX::XMFLOAT2 texPos;
+		DirectX::XMFLOAT2 texSize;
+	};
+	billboard attackUIdata;
+	billboard guardUIdata;
+
 	enum SceneState
 	{
 		TITLE,
@@ -57,7 +71,8 @@ private:
 		START,
 		GUARD,
 		ATTACK,
-		END
+		END,
+		RETURN_TITLE
 	};
 	int tutorialState;
 
@@ -66,6 +81,12 @@ private:
 	int moveCnt;
 
 	bool titleExist;
+
+	static const int MAX_NEXT_GAME_CNT = 120;
+	int nextGameCnt;
+
+	static const int MAX_RETRUN_TITLE_CNT = 120;
+	int returnTitleCnt;
 
 
 #if 0
@@ -136,6 +157,7 @@ public:
 	void TutorialStartUpdate();
 	void TutorialGuardUpdate();
 	void TutorialAttackUpdate();
+	void TutorialReturnTitle();
 	void TutorialEndUpdate();
 	void ProcessCollision();
 	void CameraUpdate(const Donya::Vector3& targetPosition);
@@ -187,12 +209,12 @@ class SceneEffect : public baseScene
 private:
 	FlashParticle flashParticle;
 	BubbleParticle bubbleParticle;
-EruptionParticle eruqtionParticle;
+	EruptionParticle eruqtionParticle;
 	AbsorptionParticle absorptionParticle;
 	DustParticle dustParticle;
 	SparkParticle sparkParticle;
 	LocusParticle locusParticle;
-
+	AccelParticle accelParticle;
 
 	struct billboard
 	{
@@ -228,10 +250,15 @@ EruptionParticle eruqtionParticle;
 	Donya::Vector3 cameraPos;
 	Donya::Vector3 cameraFocusOffset;
 	Lights	lights;
+	fbx_shader shader;
 
 	Donya::Vector3 originPos;
+	Donya::Vector3 direction;
+	DirectX::XMFLOAT3 playerPos;
+	DirectX::XMFLOAT3 bossPos;
+	bool shieldExist;
 
-	fbx_shader shader;
+
 
 public:
 	SceneEffect() : stage(), cameraPos(), cameraFocusOffset(), lights(), shader(){}

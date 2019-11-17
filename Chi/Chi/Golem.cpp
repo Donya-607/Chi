@@ -1226,11 +1226,7 @@ void Golem::AttackSwingUpdate( TargetStatus target )
 				setStopAnimation( models.pAtkSwing.get(), /* is_stop = */ true );
 			}
 
-			EffectManager::GetInstance()->Set
-			(
-				EffectManager::EffectType::ERUPTION,
-				pos
-			);
+			EffectManager::GetInstance()->EruptionEffectSet( pos );
 		}
 	}
 	else // When stopping and spawn effects.
@@ -1367,6 +1363,8 @@ void Golem::DefeatInit()
 	velocity		= 0.0f;
 	slerpFactor		= 0.0f;
 	currentMotion	= Defeat;
+
+	EffectManager::GetInstance()->EruptionEffectReSetCollision();
 }
 void Golem::DefeatUpdate()
 {

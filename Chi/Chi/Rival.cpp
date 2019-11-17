@@ -1235,12 +1235,7 @@ void Rival::AttackLineUpdate( TargetStatus target )
 	timer++;
 	if ( timer == RivalParam::Open().line.generateFrame )
 	{
-		EffectManager::GetInstance()->Set
-		(
-			EffectManager::EffectType::LONG_ATTACK,
-			target.pos,
-			pos
-		);
+		EffectManager::GetInstance()->LongAttackEffectSet( target.pos, pos );
 	}
 }
 void Rival::AttackLineUninit()
