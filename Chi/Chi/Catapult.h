@@ -17,7 +17,8 @@ public:
 	Donya::Vector3 scale;
 	Donya::Vector3 angle;
 	bool exist;
-	Donya::Sphere hitSphere;
+//	Donya::Sphere hitSphere;
+	Donya::OBB hitOBB;
 
 public:
 	Stone() :
@@ -28,7 +29,8 @@ public:
 		scale(),
 		angle(),
 		exist(false),
-		hitSphere()
+		//hitSphere(),
+		hitOBB()
 	{}
 	~Stone() {}
 

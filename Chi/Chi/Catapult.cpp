@@ -37,7 +37,7 @@ void Catapult::Update( Donya::Vector3 _playerPos )
 
 		stone.Init(Donya::Vector3(0.0f, pos.y + 1350.0f, pos.z + 500.0f), // pos
 			Donya::Vector3(75.0f * catapultToPlayerVec.x, 0.0f, 75.0f * catapultToPlayerVec.z), // speed
-			Donya::Vector3(0.0f, 2.0f * catapultToPlayerVec.y, 0.0f), // accel
+			Donya::Vector3(0.0f, 3.0f * catapultToPlayerVec.y, 0.0f), // accel
 			Donya::Vector3(1.0f, 1.0f, 1.0f),  // scale
 			Donya::Vector3(0.0f, 0.0f, 0.0f)); // angle
 	}
@@ -111,12 +111,21 @@ void Stone::Init( Donya::Vector3 _pos, Donya::Vector3 _speed, Donya::Vector3 _ac
 
 	setAnimFlame(pModel.get(), 0);
 
-	hitSphere.pos.x = pos.x;
+	/*hitSphere.pos.x = pos.x;
 	hitSphere.pos.y = pos.y + 100.0f;
 	hitSphere.pos.z = pos.z;
 	hitSphere.radius = 230.0f * 2.0f;
 	hitSphere.exist = true;
-	hitSphere.enable = true;
+	hitSphere.enable = true;*/
+
+	hitOBB.pos.x = pos.x;
+	hitOBB.pos.y = pos.y + 100.0f;
+	hitOBB.pos.z = pos.z;
+	hitOBB.size.x = 250.0f;
+	hitOBB.size.y = 250.0f;
+	hitOBB.size.z = 250.0f;
+	hitOBB.exist = true;
+	hitOBB.enable = true;
 }
 
 void Stone::Update()
@@ -129,9 +138,13 @@ void Stone::Update()
 		speed.y += accel.y;
 		pos.y += speed.y;
 
-		hitSphere.pos.x = pos.x;
+		/*hitSphere.pos.x = pos.x;
 		hitSphere.pos.y = pos.y + 100.0f;
-		hitSphere.pos.z = pos.z;
+		hitSphere.pos.z = pos.z;*/
+
+		hitOBB.pos.x = pos.x;
+		hitOBB.pos.y = pos.y + 100.0f;
+		hitOBB.pos.z = pos.z;
 	}
 }
 
@@ -146,21 +159,37 @@ void Stone::Draw(fbx_shader& HLSL, const Donya::Vector4x4& matView, const Donya:
 
 		if ( Donya::IsShowCollision() )
 		{
-			auto GenerateSphere = []()->std::shared_ptr<static_mesh>
-			{
-				std::shared_ptr<static_mesh> tmpSphere = std::make_shared<static_mesh>();
-				createSphere(tmpSphere.get(), 6, 12);
-				return tmpSphere;
-			};
-			static std::shared_ptr<static_mesh> pSphere = GenerateSphere();
+			//auto GenerateSphere = []()->std::shared_ptr<static_mesh>
+			//{
+			//	std::shared_ptr<static_mesh> tmpSphere = std::make_shared<static_mesh>();
+			//	createSphere(tmpSphere.get(), 6, 12);
+			//	return tmpSphere;
+			//};
+			//static std::shared_ptr<static_mesh> pSphere = GenerateSphere();
 
-			Donya::Vector4x4 CS = Donya::Vector4x4::MakeScaling(hitSphere.radius); // Half size->Whole size.
+			//Donya::Vector4x4 CS = Donya::Vector4x4::MakeScaling(hitSphere.radius); // Half size->Whole size.
+			//Donya::Vector4x4 CR = Donya::Vector4x4::MakeRotationEuler(Donya::Vector3(0.0f, 0.0f, 0.0f));
+			//Donya::Vector4x4 CT = Donya::Vector4x4::MakeTranslation(hitSphere.pos);
+			//Donya::Vector4x4 CW = CS * CR * CT;
+			//Donya::Vector4x4 CWVP = CW * matView * matProjection;
+
+			//OBJRender(pSphere.get(), CWVP, CW, Donya::Vector4(0.0f, 0.3f, 0.3f, 0.6f));
+
+			auto GenerateCube = []()->std::shared_ptr<static_mesh>
+			{
+				std::shared_ptr<static_mesh> tmpCube = std::make_shared<static_mesh>();
+				createCube(tmpCube.get());
+				return tmpCube;
+			};
+			static std::shared_ptr<static_mesh> pCube = GenerateCube();
+
+			Donya::Vector4x4 CS = Donya::Vector4x4::MakeScaling(hitOBB.size); // Half size->Whole size.
 			Donya::Vector4x4 CR = Donya::Vector4x4::MakeRotationEuler(Donya::Vector3(0.0f, 0.0f, 0.0f));
-			Donya::Vector4x4 CT = Donya::Vector4x4::MakeTranslation(hitSphere.pos);
+			Donya::Vector4x4 CT = Donya::Vector4x4::MakeTranslation(hitOBB.pos);
 			Donya::Vector4x4 CW = CS * CR * CT;
 			Donya::Vector4x4 CWVP = CW * matView * matProjection;
 
-			OBJRender(pSphere.get(), CWVP, CW, Donya::Vector4(0.0f, 0.3f, 0.3f, 0.6f));
+			OBJRender(pCube.get(), CWVP, CW, Donya::Vector4(0.0f, 0.8f, 0.3f, 0.6f));
 		}
 	}
 }
@@ -181,7 +210,8 @@ void Stone::ImGui()
 
 	ImGui::Begin("Stone");
 	ImGui::DragFloat3("pos", &pos.x);
-	ImGui::DragFloat("radius", &hitSphere.radius);
+	//ImGui::DragFloat("radius", &hitSphere.radius);
+	ImGui::DragFloat3("radius", &hitOBB.size.x);
 	ImGui::End();
 
 #endif // USE_IMGUI

@@ -8,7 +8,7 @@
 #include "Donya/Keyboard.h"
 
 
-SceneResult::SceneResult(int clearTime) :
+SceneResult::SceneResult() :
 	rankingScore(), rankingRender(), yourScore(), yourScoreRender(),
 	lights(), sprite(), rankingPos(), yourScorePos(), rankingWidth()
 {
@@ -25,7 +25,7 @@ SceneResult::SceneResult(int clearTime) :
 		rankingScore[i] = 0;
 	}
 
-	yourScore = clearTime;
+	yourScore = GameTimer::GetInstance()->totalTimer.AllCurren();
 
 	spriteLoad(&sprite, L"./Data/Images/UI/UI.png");
 }
@@ -206,7 +206,10 @@ void SceneResult::imGui()
 		}
 		ImGui::Text(" ");
 
-		ImGui::Text("Your Score : %d", yourScore);
+		ImGui::Text("Your stage 1 Time : %d, %d : %d : %d", GameTimer::GetInstance()->timer[0].AllCurren(), GameTimer::GetInstance()->timer[0].Minute(), GameTimer::GetInstance()->timer[0].Second(), GameTimer::GetInstance()->timer[0].Current());
+		ImGui::Text("Your stage 2 Time : %d, %d : %d : %d", GameTimer::GetInstance()->timer[1].AllCurren(), GameTimer::GetInstance()->timer[1].Minute(), GameTimer::GetInstance()->timer[1].Second(), GameTimer::GetInstance()->timer[1].Current());
+		ImGui::Text("Your stage 3 Time : %d, %d : %d : %d", GameTimer::GetInstance()->timer[2].AllCurren(), GameTimer::GetInstance()->timer[2].Minute(), GameTimer::GetInstance()->timer[2].Second(), GameTimer::GetInstance()->timer[2].Current());
+		ImGui::Text("Your Total Time : %d, %d : %d : %d", yourScore, GameTimer::GetInstance()->totalTimer.Minute(), GameTimer::GetInstance()->totalTimer.Second(), GameTimer::GetInstance()->totalTimer.Current());
 
 		if (ImGui::TreeNode("BillBoard Test Draw Parametor"))
 		{

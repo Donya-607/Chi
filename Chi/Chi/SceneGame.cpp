@@ -353,6 +353,7 @@ public:
 
 		BossUpdate();
 
+		GameTimer::GetInstance()->Update(stageNo);
 		std::vector<Donya::Circle> bossBodies = FetchBossBodies();
 		player.PhysicUpdate( bossBodies );
 
@@ -370,6 +371,8 @@ public:
 		if ( player.IsDefeated() )
 		{
 			SetStageNo( 0 );
+
+			GameTimer::GetInstance()->Init();
 
 			pSceneManager->setNextScene( new SceneGameOver, false );
 		}
@@ -399,7 +402,7 @@ public:
 			{
 				SetStageNo( 0 );
 
-				pSceneManager->setNextScene( new SceneResult( NULL ), false );
+				pSceneManager->setNextScene( new SceneResult(), false );
 			}
 			else
 			{
