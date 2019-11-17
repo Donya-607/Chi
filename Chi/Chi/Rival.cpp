@@ -1399,6 +1399,8 @@ void Rival::AttackRushUpdate( TargetStatus target )
 				extraStatus	= ExtraState::RUSH_SLASH;
 				velocity	= 0.0f;
 
+				RivalParam::Get().RushHitBox().collision.enable = true;
+
 				setStopAnimation( models.pAtkRushSlash.get(), /* is_Stop = */ false );
 			}
 			else

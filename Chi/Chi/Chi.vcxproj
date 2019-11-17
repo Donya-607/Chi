@@ -157,6 +157,7 @@
     <ClInclude Include="Donya\Serializer.h" />
     <ClInclude Include="Donya\Sound.h" />
     <ClInclude Include="Donya\Template.h" />
+    <ClInclude Include="Donya\Timer.h" />
     <ClInclude Include="Donya\Useful.h" />
     <ClInclude Include="Donya\UseImGui.h" />
     <ClInclude Include="Donya\Vector.h" />
@@ -220,6 +221,7 @@
     <ClCompile Include="Donya\Quaternion.cpp" />
     <ClCompile Include="Donya\Random.cpp" />
     <ClCompile Include="Donya\Sound.cpp" />
+    <ClCompile Include="Donya\Timer.cpp" />
     <ClCompile Include="Donya\Useful.cpp" />
     <ClCompile Include="Donya\UseImGui.cpp" />
     <ClCompile Include="Donya\Vector.cpp" />
