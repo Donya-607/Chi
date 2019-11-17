@@ -306,8 +306,11 @@ if_nz r0.w
 endif 
 
 #line 122
+mul r0.xyz, r0.xyzx, cb0[286].wwww
+
+#line 123
 max r0.xyz, r0.xyzx, l(0.000000, 0.000000, 0.000000, 0.000000)
 min o0.xyz, r0.xyzx, l(1.000000, 1.000000, 1.000000, 0.000000)  // o0.x <- <main return value>.x; o0.y <- <main return value>.y; o0.z <- <main return value>.z
 mul o0.w, r2.w, v3.w  // o0.w <- <main return value>.w
 ret 
-// Approximately 124 instruction slots used
+// Approximately 125 instruction slots used

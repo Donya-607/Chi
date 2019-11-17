@@ -1195,7 +1195,7 @@ void skinned_mesh::z_render(ID3D11DeviceContext* context, fbx_shader& hlsl, cons
 	}
 }
 
-void skinned_mesh::bloom_SRVrender(ID3D11DeviceContext* context, fbx_shader& hlsl, const DirectX::XMFLOAT4X4& SynthesisMatrix, const DirectX::XMFLOAT4X4& worldMatrix, const DirectX::XMFLOAT4& camPos, line_light& _lineLight, std::vector<point_light>& _point_light, const DirectX::XMFLOAT4& materialColor, ID3D11PixelShader* bloom_PS, const DirectX::XMFLOAT3& _judge_color, ID3D11ShaderResourceView* z_SRV)
+void skinned_mesh::bloom_SRVrender(ID3D11DeviceContext* context, fbx_shader& hlsl, const DirectX::XMFLOAT4X4& SynthesisMatrix, const DirectX::XMFLOAT4X4& worldMatrix, const DirectX::XMFLOAT4& camPos, line_light& _lineLight, std::vector<point_light>& _point_light, const DirectX::XMFLOAT4& materialColor, ID3D11PixelShader* bloom_PS, const DirectX::XMFLOAT4& _judge_color, ID3D11ShaderResourceView* z_SRV)
 
 {
 
@@ -1253,7 +1253,7 @@ void skinned_mesh::bloom_SRVrender(ID3D11DeviceContext* context, fbx_shader& hls
 				cb.ambient.w = p.transparent.color.w;
 				cb.diffuse = p.diffuse.color;
 				cb.specular = p.specular.color;
-				cb.judge_color = { _judge_color.x,_judge_color.y,_judge_color.z,1.0f };
+				cb.judge_color = _judge_color;
 				cb.screenSize = { (float)pSystem->SCREEN_WIDTH,(float)pSystem->SCREEN_HEIGHT,.0f,.0f };
 				context->UpdateSubresource(constant_buffer, 0, nullptr, &cb, 0, 0);
 				context->VSSetConstantBuffers(0, 1, &constant_buffer);

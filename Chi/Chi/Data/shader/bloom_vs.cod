@@ -10,7 +10,7 @@
 //   float screenWidth;                 // Offset:    0 Size:     4
 //   float screenHeight;                // Offset:    4 Size:     4
 //   float blur;                        // Offset:    8 Size:     4
-//   float dummy;                       // Offset:   12 Size:     4 [unused]
+//   float power;                       // Offset:   12 Size:     4 [unused]
 //
 // }
 //

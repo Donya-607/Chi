@@ -127,7 +127,12 @@
     <ClInclude Include="Knight.h" />
     <ClInclude Include="KnightAI.h" />
     <ClInclude Include="Effect.h" />
-    <ClInclude Include="bloom.h" />
+    <ClInclude Include="bloom.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="filter.h">
+      <Filter>header</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp">
@@ -219,7 +224,12 @@
     <ClCompile Include="KnightAI.cpp" />
     <ClCompile Include="Knight.cpp" />
     <ClCompile Include="Effect.cpp" />
-    <ClCompile Include="bloom.cpp" />
+    <ClCompile Include="bloom.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="filter.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="geometric_phong_ps.hlsl">
@@ -289,6 +299,10 @@
     <FxCompile Include="geometric_primitive_bloom_ps.hlsl" />
     <FxCompile Include="obj_z_ps.hlsl" />
     <FxCompile Include="obj_bloom_ps.hlsl" />
+    <FxCompile Include="filter_ps.hlsl">
+      <Filter>source</Filter>
+    </FxCompile>
+    <FxCompile Include="filter_vs.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <None Include="geometric_primitive.hlsli">
@@ -309,6 +323,7 @@
     <None Include="bloom.hlsli">
       <Filter>shader</Filter>
     </None>
+    <None Include="filter.hlsli" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="source">

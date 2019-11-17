@@ -70,6 +70,11 @@ void setBloomRT()
 	GameLib::setBloomRT();
 }
 
+void filterScreen(float saturate,float bright,float contrast)
+{
+	GameLib::filter_screen(bright,contrast,saturate);
+}
+
 //BLENDMODE//
 
 void setBlendMode_NONE(const float alpha)
@@ -616,7 +621,7 @@ void z_render(skinned_mesh* _mesh, fbx_shader& hlsl, const DirectX::XMFLOAT4X4& 
 	GameLib::skinnedMesh::z_render(_mesh, hlsl, SynthesisMatrix, worldMatrix);
 }
 
-void bloom_SRVrender(skinned_mesh* _mesh, fbx_shader& hlsl, const DirectX::XMFLOAT4X4& SynthesisMatrix, const DirectX::XMFLOAT4X4& worldMatrix, const DirectX::XMFLOAT3& judge_color,const DirectX::XMFLOAT4& materialColor)
+void bloom_SRVrender(skinned_mesh* _mesh, fbx_shader& hlsl, const DirectX::XMFLOAT4X4& SynthesisMatrix, const DirectX::XMFLOAT4X4& worldMatrix, const DirectX::XMFLOAT4& judge_color,const DirectX::XMFLOAT4& materialColor)
 {
 	GameLib::skinnedMesh::bloom_SRVrender(_mesh, hlsl, SynthesisMatrix, worldMatrix, materialColor, judge_color);
 }

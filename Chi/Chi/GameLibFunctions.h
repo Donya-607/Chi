@@ -29,7 +29,7 @@ void postEffect_Bloom(float _blur_value, bool flg = true);
 
 void setBloomRT();
 
-
+void filterScreen(float saturate,float bright = 0, float contrast = 1);
 
 //BLENDMODE//
 
@@ -209,7 +209,7 @@ void bloom_SRVrender(
 	fbx_shader& hlsl,
 	const DirectX::XMFLOAT4X4& SynthesisMatrix,
 	const DirectX::XMFLOAT4X4& worldMatrix,
-	const DirectX::XMFLOAT3& judge_color,
+	const DirectX::XMFLOAT4& judge_color,
 	const DirectX::XMFLOAT4& materialColor = {1.0f,1.0f,1.0f,1.0f}
 );
 

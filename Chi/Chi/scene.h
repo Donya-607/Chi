@@ -32,7 +32,7 @@ private:
 		bool  is_enable;
 		float stop_timer;
 		std::vector<ImTextureID> tex_SRV;
-		DirectX::XMFLOAT3 judge_color;
+		DirectX::XMFLOAT4 judge_color;
 	};
 
 	float camPos[3] = { 0,6,-10 };
@@ -66,9 +66,13 @@ private:
 	ImTextureID screen_SRV;
 	ImTextureID bloom_SRV;
 	ImTextureID z_SRV;
+	ImTextureID filter_SRV;
 	float blur;
 	DirectX::XMFLOAT4 judged_color;
 	bool enable_bloom;
+
+	DirectX::XMFLOAT4 status;
+	Sprite test;
 public:
 	sceneTitle(){}
 	~sceneTitle()

@@ -7,10 +7,10 @@ void Sprite::RoadSprite(ID3D11Device * _device, const wchar_t* _fileName)
 
 	vertex vertices[] =
 	{
-		{ DirectX::XMFLOAT3(-0.5,+0.5,0),DirectX::XMFLOAT4(1,1,1,1) },
-		{ DirectX::XMFLOAT3(+0.5,+0.5,0),DirectX::XMFLOAT4(1,0,0,1) },
-		{ DirectX::XMFLOAT3(-0.5,-0.5,0),DirectX::XMFLOAT4(0,1,0,1) },
-		{ DirectX::XMFLOAT3(+0.5,-0.5,0),DirectX::XMFLOAT4(0,0,1,1) },
+		{ DirectX::XMFLOAT4(-0.5,+0.5,0,1.0),DirectX::XMFLOAT4(1,1,1,1) },
+		{ DirectX::XMFLOAT4(+0.5,+0.5,0,1.0),DirectX::XMFLOAT4(1,0,0,1) },
+		{ DirectX::XMFLOAT4(-0.5,-0.5,0,1.0),DirectX::XMFLOAT4(0,1,0,1) },
+		{ DirectX::XMFLOAT4(+0.5,-0.5,0,1.0),DirectX::XMFLOAT4(0,0,1,1) },
 	};
 
 	D3D11_BUFFER_DESC i_buffer = {};
@@ -207,6 +207,8 @@ void Sprite::Render(ID3D11DeviceContext * _dContext, float _dx, float _dy, float
 	vertices[3].position.x = x3;
 	vertices[3].position.y = y3;
 	vertices[0].position.z = vertices[1].position.z = vertices[2].position.z = vertices[3].position.z = 0.0f;
+	vertices[0].position.w = vertices[1].position.w = vertices[2].position.w = vertices[3].position.w = 1.0f;
+
 
 	if (_flipX)
 	{

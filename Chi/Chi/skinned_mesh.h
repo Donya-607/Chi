@@ -427,7 +427,7 @@ public:
 		std::vector<point_light>& _point_light,
 		const DirectX::XMFLOAT4& materialColor,
 		ID3D11PixelShader* bloom_SRV,
-		const DirectX::XMFLOAT3& judge_color,
+		const DirectX::XMFLOAT4& judge_color,
 		ID3D11ShaderResourceView* z_SRV
 	);
 

@@ -42,5 +42,5 @@ cbuffer CONSTANT_BUFFER : register(b0)
 	float screenWidth;
 	float screenHeight;
 	float blur;
-	float dummy;
+	float power;
 };

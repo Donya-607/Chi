@@ -228,7 +228,7 @@ INT WINAPI wWinMain(HINSTANCE instance, HINSTANCE prev_instance, LPWSTR cmd_line
 
 
 		GameLib::present(0, 0);
-#if 0
+#if 1
 		static OPENFILENAME ofn;
 
 		static wchar_t cfilename[MAX_PATH];

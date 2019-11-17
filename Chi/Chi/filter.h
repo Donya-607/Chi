@@ -10,13 +10,10 @@
 #include "misc.h"
 #include "resourceManager.h"
 
-class bloom
+class filter
 {
 	ID3D11VertexShader* m_vertex;
 	ID3D11PixelShader* m_pixel;
-	ID3D11PixelShader* m_first_pixel;
-	ID3D11VertexShader* m_vertex_SRV;
-	ID3D11PixelShader* m_pixel_SRV;
 	ID3D11InputLayout* m_input;
 	ID3D11Buffer* m_buffer;
 	ID3D11RasterizerState* m_rasterize;
@@ -29,31 +26,22 @@ class bloom
 	struct vertex
 	{
 		DirectX::XMFLOAT4 position;
-		DirectX::XMFLOAT4 color;
 		DirectX::XMFLOAT2 texcoord;
 	};
 
 	struct cbuffer
 	{
-		float screenWidth;
-		float screenHeight;
-		float blurValue;
-		float dummy;
+		DirectX::XMFLOAT4 judgeColor;
 	};
 
 public:
-	bloom() {}
-	~bloom() 
+	filter() {}
+	~filter()
 	{
 		ResourceManager::ReleasePixelShader(m_pixel);
-		ResourceManager::ReleasePixelShader(m_pixel_SRV);
-		ResourceManager::ReleasePixelShader(m_first_pixel);
 	}
-	void init(ID3D11Device* _device);
-	void firstRender(ID3D11DeviceContext* _dContext, ID3D11ShaderResourceView** _SRV)const;
+	void init(ID3D11Device* _device, ID3D11DeviceContext* context);
 	void Render(ID3D11DeviceContext* _dContext, ID3D11ShaderResourceView** _SRV,
-		float _blur_value) const;
-	void createSRV(ID3D11DeviceContext* _dContext, ID3D11ShaderResourceView** _SRV,
-		DirectX::XMFLOAT4 _judge_color);
+		float bright,float contrast,float saturate) const;
 
 };

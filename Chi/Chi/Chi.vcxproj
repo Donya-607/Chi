@@ -159,6 +159,7 @@
     <ClInclude Include="Donya\Vector.h" />
     <ClInclude Include="dragDrop.h" />
     <ClInclude Include="Effect.h" />
+    <ClInclude Include="filter.h" />
     <ClInclude Include="font.h" />
     <ClInclude Include="frame_rate.h" />
     <ClInclude Include="gameLib.h" />
@@ -214,6 +215,7 @@
     <ClCompile Include="Donya\Vector.cpp" />
     <ClCompile Include="DragDrop.cpp" />
     <ClCompile Include="Effect.cpp" />
+    <ClCompile Include="filter.cpp" />
     <ClCompile Include="font.cpp" />
     <ClCompile Include="frame_rate.cpp" />
     <ClCompile Include="gameLib.cpp" />
@@ -266,6 +268,18 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
     </FxCompile>
     <FxCompile Include="bloom_vs.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="filter_ps.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="filter_vs.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
@@ -395,6 +409,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="bloom.hlsli" />
+    <None Include="filter.hlsli" />
     <None Include="geometric_primitive.hlsli" />
     <None Include="obj.hlsli" />
     <None Include="shadow_first.hlsli" />

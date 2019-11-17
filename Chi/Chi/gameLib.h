@@ -25,6 +25,7 @@
 #include "system.h"
 #include "Camera.h"
 #include "bloom.h"
+#include "filter.h"
 #include "XinputPad.h"
 #include "keyInput.h"
 namespace GameLib
@@ -78,9 +79,12 @@ namespace GameLib
 	void setBloomRT();
 	void clearBloomRT();
 
+	void filter_screen(float bright,float contrasut, float saturate);
+
 	ID3D11ShaderResourceView* getOriginalScreen();
 	ID3D11ShaderResourceView* getZScreen();
 	ID3D11ShaderResourceView* getBloomScreen();
+	ID3D11ShaderResourceView* getFilterScreen();
 	//other
 	std::wstring getLoadedFileName();
 	int getLoadedFileCount();
@@ -342,7 +346,7 @@ namespace GameLib
 			const DirectX::XMFLOAT4X4& SynthesisMatrix,
 			const DirectX::XMFLOAT4X4& worldMatrix,
 			const DirectX::XMFLOAT4& materialColor,
-			const DirectX::XMFLOAT3& judge_color
+			const DirectX::XMFLOAT4& judge_color
 		);
 
 		void skinnedMeshRender(

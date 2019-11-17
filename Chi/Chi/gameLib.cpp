@@ -32,7 +32,10 @@ namespace GameLib
 		//ブルーム用の指定色書き出し画面
 		ID3D11RenderTargetView* bloom_RT = nullptr;
 		ID3D11ShaderResourceView* bloom_SRV = nullptr;
-
+		//フィルター用の書き出し画面
+		ID3D11RenderTargetView* filter_RT = nullptr;
+		ID3D11ShaderResourceView* filter_SRV = nullptr;
+		
 		//z値用のPS
 		ID3D11PixelShader* skinned_mesh_z_ps;
 		ID3D11PixelShader* static_mesh_z_ps;
@@ -55,6 +58,7 @@ namespace GameLib
 		keyInput				 keyboard;
 		dragDrop				drag_drop;
 		bloom					Bloom;
+		filter					Filter;
 		std::vector<wstring> loadFileName;
 		bool loadFin;
 		std::vector<DirectX::XMFLOAT4> judge_color;
@@ -266,6 +270,7 @@ namespace GameLib
 		clearRT(m.original_RT, { 0,0,0,0 });
 		clearRT(m.bloom_RT, { 0,0,0,0 });
 		clearRT(m.z_RT, { 0,0,0,0 });
+		clearRT(m.filter_RT, { 0,0,0,0 });
 
 		m.context->OMSetRenderTargets(1, &m.renderTargetView, m.depthStencilView);
 
@@ -547,9 +552,11 @@ namespace GameLib
 			m.context->OMSetBlendState(m.Blender->states[m.Blender->BS_NONE], nullptr, 0xFFFFFFFF);
 			m.Bloom.init(m.device);
 			m.cam = new Camera();
+			m.Filter.init(m.device,m.context);
 			createSRV(&m.original_SRV, &m.original_RT);
 			createSRV(&m.bloom_SRV, &m.bloom_RT);
 			createSRV(&m.z_SRV, &m.z_RT);
+			createSRV(&m.filter_SRV, &m.filter_RT);
 
 			ResourceManager::LoadPixelShader(m.device, "./Data/shader/skinned_mesh_z_ps.cso", &m.skinned_mesh_z_ps);
 			ResourceManager::LoadPixelShader(m.device, "./Data/shader/skinned_mesh_bloom_ps.cso", &m.skinned_mesh_bloom_ps);
@@ -598,7 +605,7 @@ namespace GameLib
 	}
 	void postEffect_Bloom(float _blur_value,  bool flg)
 	{
-		resetRendertarget();
+		setRenderTarget(&m.filter_RT);
 
 		m.Bloom.firstRender(m.context, &m.original_SRV);
 
@@ -622,6 +629,12 @@ namespace GameLib
 		m.context->ClearRenderTargetView(m.bloom_RT, (const float*)&color);
 	}
 
+	void filter_screen(float bright,float contrast ,float saturate)
+	{
+		resetRendertarget();
+		m.Filter.Render(m.context, &m.filter_SRV, bright,contrast,saturate);
+	}
+
 	ID3D11ShaderResourceView* getOriginalScreen()
 	{
 		return m.original_SRV;
@@ -635,6 +648,11 @@ namespace GameLib
 	ID3D11ShaderResourceView* getBloomScreen()
 	{
 		return m.bloom_SRV;
+	}
+
+	ID3D11ShaderResourceView* getFilterScreen()
+	{
+		return m.filter_SRV;
 	}
 
 	std::wstring getLoadedFileName()
@@ -993,7 +1011,7 @@ namespace GameLib
 			_mesh->z_render(m.context, hlsl, SynthesisMatrix, worldMatrix, m.cam->getCameraPos(), m.skinned_mesh_z_ps);
 		}
 
-		void bloom_SRVrender(skinned_mesh* _mesh, fbx_shader& hlsl, const DirectX::XMFLOAT4X4& SynthesisMatrix, const DirectX::XMFLOAT4X4& worldMatrix,  const DirectX::XMFLOAT4& materialColor,const DirectX::XMFLOAT3& judge_color)
+		void bloom_SRVrender(skinned_mesh* _mesh, fbx_shader& hlsl, const DirectX::XMFLOAT4X4& SynthesisMatrix, const DirectX::XMFLOAT4X4& worldMatrix,  const DirectX::XMFLOAT4& materialColor,const DirectX::XMFLOAT4& judge_color)
 		{
 			setRenderTarget(&m.bloom_RT);
 			_mesh->bloom_SRVrender(m.context, hlsl, SynthesisMatrix, worldMatrix, m.cam->getCameraPos(), m.LineLight, m.pointLights, materialColor, m.skinned_mesh_bloom_ps, judge_color, m.z_SRV);

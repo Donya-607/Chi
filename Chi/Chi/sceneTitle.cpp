@@ -33,7 +33,7 @@ void sceneTitle::init()
 	models.back().model_scale = { 0.1f,0.1f,0.1f };
 	models.back().is_enable = true;
 	models.back().stop_timer = 2.0f;
-	models.back().judge_color = { 1,1,1 };
+	models.back().judge_color = { 1,1,1 ,1.0f};
 	for (int i = 0; i < models.back().mesh.getMeshCount(); i++)
 	{
 		for (auto& p : models.back().mesh.getMesh(i).subsets)
@@ -56,10 +56,14 @@ void sceneTitle::init()
 	screen_SRV = (void*)SRV;
 	z_SRV = (void*)SRV;
 	bloom_SRV = (void*)SRV;
+	filter_SRV = (void*)SRV;
 	blur = 0;
 	judged_color = { 1.0f,1.0f,1.0f,1.0f };
 	enable_bloom = true;
 	billbord_judge = { 1.0f,1.0f,1.0f,1.0f };
+
+	status = { 0.0f,1.0f,1.0f,1.0f };
+	spriteLoad(&test, L"./Data/bag001.png");
 }
 
 void sceneTitle::update()
@@ -88,7 +92,7 @@ void sceneTitle::update()
 		models.back().model_scale = { 0.1f,0.1f,0.1f };
 		models.back().is_enable = true;
 		models.back().stop_timer = 2.0f;
-		models.back().judge_color = { 1,1,1 };
+		models.back().judge_color = { 1,1,1,1.0f };
 		for (int i = 0; i < models.back().mesh.getMeshCount(); i++)
 		{
 			for (auto& p : models.back().mesh.getMesh(i).subsets)
@@ -345,8 +349,13 @@ void sceneTitle::render()
 
 	screen_SRV = (void*)GameLib::getOriginalScreen();
 	bloom_SRV = (void*)GameLib::getBloomScreen();
-	z_SRV = (void*)GameLib::getZScreen();
-	postEffect_Bloom(blur, enable_bloom);
+	//z_SRV = (void*)GameLib::getZScreen();
+	z_SRV = (void*)test.getSRV();
+	postEffect_Bloom(blur,enable_bloom);
+
+	filter_SRV = (void*)GameLib::getFilterScreen();
+	filterScreen(status.z,status.x,status.y);
+	spriteRender(&test, { 100,100 });
 }
 
 void sceneTitle::uninit()
@@ -421,6 +430,8 @@ void sceneTitle::imGui()
 			ImGui::DragFloat("r##billbord", &billbord_judge.x, 0.01, 0, 1.5);
 			ImGui::DragFloat("g##billbord", &billbord_judge.y, 0.01, 0, 1.5);
 			ImGui::DragFloat("b##billbord", &billbord_judge.z, 0.01, 0, 1.5);
+			ImGui::NewLine();
+			ImGui::DragFloat("power##billbord", &billbord_judge.w, 0.01, 0, 100);
 			ImGui::TreePop();
 		}
 
@@ -486,6 +497,8 @@ void sceneTitle::imGui()
 					ImGui::DragFloat("r##judge_color_for_fbx", &models[index].judge_color.x, 0.01, 0, 1);
 					ImGui::DragFloat("g##judge_color_for_fbx", &models[index].judge_color.y, 0.01, 0, 1);
 					ImGui::DragFloat("b##judge_color_for_fbx", &models[index].judge_color.z, 0.01, 0, 1);
+					ImGui::NewLine();
+					ImGui::DragFloat("power##judge_color_for_fbx", &models[index].judge_color.w, 0.01, 0,100);
 					ImGui::TreePop();
 				}
 
@@ -552,6 +565,28 @@ void sceneTitle::imGui()
 		ImGui::End();
 	}
 
+	{
+		ImGui::SetNextWindowSize(ImVec2(500.0f, getWindowSize().y / 2.0f), ImGuiSetCond_Once);
+		ImGui::SetNextWindowPos(ImVec2(.0f, getWindowSize().y / 2.0f), ImGuiSetCond_Once);
+		ImGui::Begin("filter", NULL, ImGuiWindowFlags_MenuBar);
+
+
+		if (ImGui::TreeNode("parameter"))
+		{
+			ImGui::DragFloat("bright", &status.x, 0.10, 0, 1.0f);
+			ImGui::DragFloat("contrast", &status.y, 0.01, 0, 1.0f);
+			ImGui::DragFloat("saturate", &status.z, 0.01, 0, 10.0f);
+			ImGui::TreePop();
+		}
+
+		if (ImGui::TreeNode("screen"))
+		{
+			ImGui::Image(filter_SRV, { 480,270 });
+			ImGui::TreePop();
+		}
+
+		ImGui::End();
+	}
 
 	//camera_info ImGui
 	{

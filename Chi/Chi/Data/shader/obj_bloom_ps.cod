@@ -115,9 +115,10 @@ if_nz r1.x
 endif 
 
 #line 19
-mov o0.x, r0.x
-mov o0.y, r0.y
-mov o0.z, r0.z
+mul r0.xyz, r0.xyzx, cb0[30].wwww
+
+#line 20
+mov o0.xyz, r0.xyzx
 mov o0.w, r0.w
 ret 
-// Approximately 19 instruction slots used
+// Approximately 18 instruction slots used

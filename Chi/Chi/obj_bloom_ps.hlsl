@@ -16,6 +16,7 @@ float4 main(VS_OUT pin) : SV_TARGET
 		color.y = 0;
 	if (color.z <= judge_color.z)
 		color.z = 0;
+	color.xyz *= judge_color.w;
 	return color;
 
 }

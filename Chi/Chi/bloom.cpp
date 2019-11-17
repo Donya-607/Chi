@@ -303,6 +303,7 @@ void bloom::Render(ID3D11DeviceContext* _dContext,ID3D11ShaderResourceView** _SR
 	cb.blurValue = _blur_value;
 	cb.screenWidth = screen_width;
 	cb.screenHeight = screen_height;
+
 	_dContext->UpdateSubresource(constant_buffer, 0, nullptr, &cb, 0, 0);
 	_dContext->VSSetConstantBuffers(0, 1, &constant_buffer);
 	_dContext->PSSetConstantBuffers(0, 1, &constant_buffer);

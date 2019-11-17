@@ -26,7 +26,7 @@ private:
 	vector2 size;
 	struct vertex
 	{
-		DirectX::XMFLOAT3 position;
+		DirectX::XMFLOAT4 position;
 		DirectX::XMFLOAT4 color;
 		DirectX::XMFLOAT2 texcoord;
 	};
@@ -46,7 +46,10 @@ public:
 		std::string _string,
 		float _x, float _y, float _w, float _h,
 		float _r = 1, float _g = 1, float _b = 1, float _a = 1) const;
-
+	ID3D11ShaderResourceView* getSRV()
+	{
+		return m_shader;
+	}
 };
 
 class sprite_batch

@@ -119,5 +119,6 @@ if (color.y <= judge_color.y)
 	color.y = 0;
 if (color.z <= judge_color.z)
 	color.z = 0;
+color.xyz *= judge_color.w;
 return float4(saturate(color) ,pin.color.w * sampleColor.w);
 }
