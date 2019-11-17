@@ -54,6 +54,8 @@ void Catapult::Draw(fbx_shader& HLSL, const Donya::Vector4x4& matView, const Don
 
 		FBXRender(pModel.get(), HLSL, WVP, W);
 
+		stone.Draw(HLSL, matView, matProjection);
+
 		if ( Donya::IsShowCollision() )
 		{
 			auto GenerateCube = []()->std::shared_ptr<static_mesh>
@@ -71,8 +73,6 @@ void Catapult::Draw(fbx_shader& HLSL, const Donya::Vector4x4& matView, const Don
 			Donya::Vector4x4 CWVP = CW * matView * matProjection;
 
 			OBJRender(pCube.get(), CWVP, CW, Donya::Vector4(0.0f, 0.8f, 0.3f, 0.6f));
-
-			stone.Draw(HLSL, matView, matProjection);
 		}
 	}
 }
@@ -144,21 +144,24 @@ void Stone::Draw(fbx_shader& HLSL, const Donya::Vector4x4& matView, const Donya:
 
 		FBXRender(pModel.get(), HLSL, WVP, W);
 
-		auto GenerateSphere = []()->std::shared_ptr<static_mesh>
+		if ( Donya::IsShowCollision() )
 		{
-			std::shared_ptr<static_mesh> tmpSphere = std::make_shared<static_mesh>();
-			createSphere(tmpSphere.get(), 6, 12);
-			return tmpSphere;
-		};
-		static std::shared_ptr<static_mesh> pSphere = GenerateSphere();
+			auto GenerateSphere = []()->std::shared_ptr<static_mesh>
+			{
+				std::shared_ptr<static_mesh> tmpSphere = std::make_shared<static_mesh>();
+				createSphere(tmpSphere.get(), 6, 12);
+				return tmpSphere;
+			};
+			static std::shared_ptr<static_mesh> pSphere = GenerateSphere();
 
-		Donya::Vector4x4 CS = Donya::Vector4x4::MakeScaling(hitSphere.radius); // Half size->Whole size.
-		Donya::Vector4x4 CR = Donya::Vector4x4::MakeRotationEuler(Donya::Vector3(0.0f, 0.0f, 0.0f));
-		Donya::Vector4x4 CT = Donya::Vector4x4::MakeTranslation(hitSphere.pos);
-		Donya::Vector4x4 CW = CS * CR * CT;
-		Donya::Vector4x4 CWVP = CW * matView * matProjection;
+			Donya::Vector4x4 CS = Donya::Vector4x4::MakeScaling(hitSphere.radius); // Half size->Whole size.
+			Donya::Vector4x4 CR = Donya::Vector4x4::MakeRotationEuler(Donya::Vector3(0.0f, 0.0f, 0.0f));
+			Donya::Vector4x4 CT = Donya::Vector4x4::MakeTranslation(hitSphere.pos);
+			Donya::Vector4x4 CW = CS * CR * CT;
+			Donya::Vector4x4 CWVP = CW * matView * matProjection;
 
-		OBJRender(pSphere.get(), CWVP, CW, Donya::Vector4(0.0f, 0.3f, 0.3f, 0.6f));
+			OBJRender(pSphere.get(), CWVP, CW, Donya::Vector4(0.0f, 0.3f, 0.3f, 0.6f));
+		}
 	}
 }
 

@@ -170,7 +170,14 @@ void sceneTitle::TitleUpdate()
 	setCamPos(camTitlePos);
 	setTarget(camTitleTarget);
 
-	if (Donya::Keyboard::Trigger('T'))
+	auto IsInputed = []()->bool
+	{
+		Player::Input input = Player::Input::MakeByExternalInput( Donya::Vector4x4::Identity() );
+
+		bool   inputed = ( !input.moveVector.IsZero() || input.doDefend || input.doAttack ) ? true : false;
+		return inputed;
+	};
+	if ( IsInputed() )
 	{
 		sceneState++;
 	}
