@@ -158,7 +158,7 @@ public:
 
 		FetchNowStageNumber();
 	#if DEBUG_MODE
-		// stageNo = AppearStage::RivalNo;
+		stageNo = AppearStage::RivalNo;
 	#endif // DEBUG_MODE
 
 		Donya::OutputDebugStr( "Begin Objects initialize.\n" );

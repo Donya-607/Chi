@@ -1429,6 +1429,7 @@ void Rival::AttackRushUninit()
 	extraStatus	= ExtraState::NONE;
 
 	ResetCurrentSphereF( &RivalParam::Get().RushHitBox() );
+	RivalParam::Get().RushHitBox().collision.exist = false;
 
 	setAnimFlame( models.pAtkRushWait.get(), 0 );
 	setAnimFlame( models.pAtkRushSlash.get(), 0 );
