@@ -34,15 +34,12 @@ private:
 public:
 	HP_UI()
 	{
-		for (int i = 0; i < MAX_SIZE; i++)
-		{
-			createBillboard(&billboard, L"./Data/Images/UI/hpUI.png", DirectX::XMFLOAT2(0.0f, 0.0f), DirectX::XMFLOAT2(1024.0f, 222.0f));
-		}
+		createBillboard(&billboard, L"./Data/Images/UI/hpUI.png", DirectX::XMFLOAT2(0.0f, 0.0f), DirectX::XMFLOAT2(1024.0f, 222.0f));
 	}
 	~HP_UI() {}
 
 	void Init();
-	void UnInit();
+	//void UnInit();
 	void Update(Donya::Vector3 _bossPos);
 	void Draw();
 	void Imgui();
@@ -63,7 +60,7 @@ public:
 		return &instance;
 	}
 
-	void Init()
+	/*void Init()
 	{
 		hpUI.Init();
 	}
@@ -82,5 +79,5 @@ public:
 	void Imgui()
 	{
 		hpUI.Imgui();
-	}
+	}*/
 };

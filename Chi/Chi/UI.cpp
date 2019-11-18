@@ -21,10 +21,10 @@ void HP_UI::Init()
 	aliveDataNum = 0;
 	state = 0;
 }
-void HP_UI::UnInit()
-{
-
-}
+//void HP_UI::UnInit()
+//{
+//
+//}
 void HP_UI::Update(Donya::Vector3 _bossPos)
 {
 	if (exist)
