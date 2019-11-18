@@ -548,6 +548,16 @@ public:
 	}
 	bool IsBossDefeated() const
 	{
+	#if DEBUG_MODE
+
+		if ( Donya::Keyboard::Trigger( 'Q' ) )
+		{
+			return true;
+		}
+		// else
+
+	#endif // DEBUG_MODE
+
 		switch ( stageNo )
 		{
 		case KnightNo:	return knight.IsDefeated();
