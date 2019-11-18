@@ -1511,7 +1511,7 @@ void Rival::AttackRushInit( TargetStatus target, float elapsedTime )
 {
 	status			= RivalAI::ActionState::ATTACK_RUSH;
 	extraStatus		= ExtraState::RUSH_WAIT;
-	timer			= RivalParam::Open().rush.waitLength * elapsedTime;
+	timer			= RivalParam::Open().rush.waitLength;
 	slerpFactor		= RivalParam::Get().SlerpFactor( status );
 	velocity		= 0.0f;
 	currentMotion	= AtkRushWait;
@@ -1632,7 +1632,7 @@ void Rival::BreakInit( float elapsedTime )
 	const auto temporaryActionState = RivalAI::ActionState::ATTACK_RUSH; // If this action is attack, after break status is wait. if this action is wait, after break status is attack.
 	status			= temporaryActionState;
 	extraStatus		= ExtraState::BREAK;
-	timer			= RivalParam::Open().breakdown.breakFrame * elapsedTime;
+	timer			= RivalParam::Open().breakdown.breakFrame;
 	slerpFactor		= 0.0f;
 	velocity		= 0.0f;
 	extraOffset		= 0.0f;
@@ -1813,7 +1813,7 @@ void Rival::UseImGui( float normalizedTargetDistance )
 			};
 			std::string statusCaption = "Status : " + GetStatusName( status );
 			ImGui::Text( statusCaption.c_str() );
-			ImGui::Text( "Timer : %d", timer );
+			ImGui::Text( "Timer : %f", timer );
 			ImGui::Text( "SlerpFactor : %5.3f", slerpFactor );
 			ImGui::Text( "Distance.Target : %5.3f", normalizedTargetDistance );
 			ImGui::Text( "" );

@@ -89,17 +89,17 @@
                     "cereal_class_version": 0,
                     "start": 0.33000001311302187,
                     "last": 0.6700000166893005,
-                    "speed": 15.0
+                    "speed": 400.0
                 },
                 {
                     "start": 0.8299999833106995,
                     "last": 1.1699999570846558,
-                    "speed": 15.0
+                    "speed": 400.0
                 },
                 {
                     "start": 1.5,
                     "last": 1.8300000429153443,
-                    "speed": 15.0
+                    "speed": 400.0
                 }
             ]
         },
@@ -115,8 +115,8 @@
             "slerpFactor": 1.0,
             "easingKind": 7,
             "easingType": 1,
-            "jumpStartFrame": 0.16699999570846559,
-            "jumpLastFrame": 1.3300000429153443,
+            "jumpStartFrame": 0.699999988079071,
+            "jumpLastFrame": 1.7999999523162842,
             "jumpDistance": 600.0,
             "hitBox": {
                 "cereal_class_version": 0,
