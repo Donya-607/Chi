@@ -27,6 +27,8 @@ void SceneGameOver::update()
 {
 	Fade::GetInstance()->Update();
 
+	if (Fade::GetInstance()->GetExist()) return;
+
 	using namespace GameLib::input;
 	constexpr int   PAD_NO = 0;
 	constexpr float STICK_RANGE_MAX = 32768.0f;
