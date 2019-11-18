@@ -245,7 +245,11 @@ void GolemAI::ImGui( float normalizedTargetDistance )
 
 		if ( ImGui::TreeNode( "CurrentParameter" ) )
 		{
-			ImGui::Text( "Status : %d", GetActionName( scast<int>( status ) ).c_str() );
+			ImGui::Text( "Status : %s", GetActionName( scast<int>( status ) ).c_str() );
+			ImGui::Text( "Next.WaitNo : %d", storage.waitNo );
+			ImGui::Text( "Next.AttackNo : %d", storage.nextAttackNo );
+			ImGui::Text( "Next.AttackKind : %s", GetAttackName( storage.nextAttackNo ) );
+			ImGui::Text( "AttackTimes : %d", attackTimes );
 			ImGui::Text( "Timer : %d", timer );
 			ImGui::Text( "CoolTime : %d", coolTime );
 			ImGui::Text( "Distance.Target : %f", normalizedTargetDistance );

@@ -1307,6 +1307,11 @@ void Player::UseImGui()
 			ImGui::TreePop();
 		}
 
+		if ( ImGui::Button( "GenerateDust" ) )
+		{
+			EffectManager::GetInstance()->DustEffectSet( GetPosition(), 0 );
+		}
+
 		ImGui::End();
 	}
 }
