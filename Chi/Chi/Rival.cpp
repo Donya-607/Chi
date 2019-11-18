@@ -104,7 +104,7 @@ RivalParam::Member RivalParam::Open()
 	return Get().Content();
 }
 
-void RivalParam::UpdateBarrage( int elapsedTime )
+void RivalParam::UpdateBarrage( float elapsedTime )
 {
 	m.barrage.Update( elapsedTime );
 }
@@ -216,7 +216,7 @@ void RivalParam::UseImGui()
 
 			if ( ImGui::TreeNode( "Defeat" ) )
 			{
-				ImGui::DragInt( "Motion.Length(Frame)", &m.defeat.motionLength );
+				ImGui::DragFloat( "Motion.Length(Frame)", &m.defeat.motionLength );
 				ImGui::SliderFloat( "AfterMotion.HideSpeed", &m.defeat.hideSpeed, 0.00001f, 1.0f );
 
 				ImGui::TreePop();
@@ -251,8 +251,8 @@ void RivalParam::UseImGui()
 				
 				auto ShowSphereF  = [&ShowSphere]( const std::string &prefix, Donya::SphereFrame *pSphereF )
 				{
-					ImGui::DragInt( ( prefix + ".EnableFrame.Start" ).c_str(), &pSphereF->enableFrameStart );
-					ImGui::DragInt( ( prefix + ".EnableFrame.Last" ).c_str(), &pSphereF->enableFrameLast );
+					ImGui::DragFloat( ( prefix + ".EnableFrame.Start" ).c_str(), &pSphereF->enableFrameStart );
+					ImGui::DragFloat( ( prefix + ".EnableFrame.Last" ).c_str(), &pSphereF->enableFrameLast );
 
 					bool oldExistFlag = pSphereF->collision.exist;
 					ShowSphere( prefix, &pSphereF->collision );
@@ -325,8 +325,8 @@ void RivalParam::UseImGui()
 						const size_t COUNT = timings.size();
 						for ( size_t i = 0; i < COUNT; ++i )
 						{
-							ImGui::DragInt  ( ( "[" + std::to_string( i ) + "].StartFrame" ).c_str(), &timings[i].start );
-							ImGui::DragInt  ( ( "[" + std::to_string( i ) + "].LastFrame" ).c_str(),  &timings[i].last  );
+							ImGui::DragFloat( ( "[" + std::to_string( i ) + "].StartFrame" ).c_str(), &timings[i].start );
+							ImGui::DragFloat( ( "[" + std::to_string( i ) + "].LastFrame" ).c_str(),  &timings[i].last  );
 							ImGui::DragFloat( ( "[" + std::to_string( i ) + "].WalkSpeed" ).c_str(),  &timings[i].speed );
 							ImGui::Text( "" );
 						}
@@ -337,7 +337,7 @@ void RivalParam::UseImGui()
 
 				if ( ImGui::TreeNode( "Attack.Line" ) )
 				{
-					ImGui::DragInt( "Line.GenerateTiming(Frame)", &m.line.generateFrame );
+					ImGui::DragFloat( "Line.GenerateTiming(Frame)", &m.line.generateFrame );
 
 					ImGui::TreePop();
 				}
@@ -356,8 +356,8 @@ void RivalParam::UseImGui()
 						ImGui::Text( ( "Easing : " + strKind + "." + strType ).c_str() );
 					}
 
-					ImGui::DragInt( "Jump.StartFrame", &m.raid.jumpStartFrame );
-					ImGui::DragInt( "Jump.LastFrame",  &m.raid.jumpLastFrame  );
+					ImGui::DragFloat( "Jump.StartFrame", &m.raid.jumpStartFrame );
+					ImGui::DragFloat( "Jump.LastFrame",  &m.raid.jumpLastFrame  );
 					ImGui::DragFloat( "Jump.Length(Distance)", &m.raid.jumpDistance );
 
 					static std::array<char, 512U> meshNameBuffer{};
@@ -368,9 +368,9 @@ void RivalParam::UseImGui()
 
 				if ( ImGui::TreeNode( "Attack.Rush" ) )
 				{
-					ImGui::DragInt( "Rush.WaitLength(Frame)", &m.rush.waitLength );
+					ImGui::DragFloat( "Rush.WaitLength(Frame)", &m.rush.waitLength );
 					ImGui::DragFloat( "Rush.Speed", &m.rush.rushSpeed );
-					ImGui::DragInt( "Slash.StopAnimeFrame", &m.rush.slashStopAnimeFrame );
+					ImGui::DragFloat( "Slash.StopAnimeFrame", &m.rush.slashStopAnimeFrame );
 
 					ShowSphere( "Slash.TriggerRange", &m.rush.slashOccurRange );
 
@@ -381,8 +381,8 @@ void RivalParam::UseImGui()
 
 				if ( ImGui::TreeNode( "Attack.Break" ) )
 				{
-					ImGui::DragInt( "Break.WholeLength(Frame)", &m.breakdown.breakFrame );
-					ImGui::DragInt( "Leave.WholeLength(Frame)", &m.breakdown.leaveWholeFrame );
+					ImGui::DragFloat( "Break.WholeLength(Frame)", &m.breakdown.breakFrame );
+					ImGui::DragFloat( "Leave.WholeLength(Frame)", &m.breakdown.leaveWholeFrame );
 
 					// Easing parameter.
 					{
@@ -396,7 +396,7 @@ void RivalParam::UseImGui()
 						ImGui::Text( ( "Easing : " + strKind + "." + strType ).c_str() );
 					}
 
-					ImGui::DragInt( "Leave.MovingFrame", &m.breakdown.leaveMoveFrame );
+					ImGui::DragFloat( "Leave.MovingFrame", &m.breakdown.leaveMoveFrame );
 					ImGui::DragFloat( "Leave.Length(Distance)", &m.breakdown.leaveDistance );
 
 					ImGui::TreePop();
@@ -527,7 +527,7 @@ void Rival::Uninit()
 	}
 }
 
-void Rival::Update( TargetStatus target )
+void Rival::Update( TargetStatus target, float elapsedTime )
 {
 #if USE_IMGUI
 
@@ -536,15 +536,15 @@ void Rival::Update( TargetStatus target )
 
 #endif // USE_IMGUI
 
-	AI.Update( CalcNormalizedDistance( target.pos ) );
+	AI.Update( elapsedTime, CalcNormalizedDistance( target.pos ) );
 
-	ChangeStatus( target );
-	UpdateCurrentStatus( target );
+	ChangeStatus( target, elapsedTime );
+	UpdateCurrentStatus( target, elapsedTime );
 
 	ApplyVelocity( target );
 	CollideToWall();
 
-	FxUpdate( target );
+	FxUpdate( target, elapsedTime );
 }
 
 void Rival::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matProjection, float animeAccel )
@@ -579,8 +579,8 @@ void Rival::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya
 			break;
 		case ExtraState::DEFEAT:
 			{
-				const int MOTION_LENGTH = RivalParam::Open().defeat.motionLength;
-				int timeDiff = timer - MOTION_LENGTH;
+				const float MOTION_LENGTH = RivalParam::Open().defeat.motionLength;
+				float timeDiff = timer - MOTION_LENGTH;
 				
 				float drawAlpha = 1.0f;
 				if ( 0 < timeDiff )
@@ -801,8 +801,8 @@ void Rival::z_Draw(fbx_shader& HLSL, const Donya::Vector4x4& matView, const Dony
 			break;
 		case ExtraState::DEFEAT:
 		{
-			const int MOTION_LENGTH = RivalParam::Open().defeat.motionLength;
-			int timeDiff = timer - MOTION_LENGTH;
+			const float MOTION_LENGTH = RivalParam::Open().defeat.motionLength;
+			float timeDiff = timer - MOTION_LENGTH;
 
 			float drawAlpha = 1.0f;
 			if (0 < timeDiff)
@@ -885,8 +885,8 @@ void Rival::bloom_Draw(fbx_shader& HLSL, const Donya::Vector4x4& matView, const 
 			break;
 		case ExtraState::DEFEAT:
 		{
-			const int MOTION_LENGTH = RivalParam::Open().defeat.motionLength;
-			int timeDiff = timer - MOTION_LENGTH;
+			const float MOTION_LENGTH = RivalParam::Open().defeat.motionLength;
+			float timeDiff = timer - MOTION_LENGTH;
 
 			float drawAlpha = 1.0f;
 			if (0 < timeDiff)
@@ -1079,17 +1079,17 @@ Donya::Sphere Rival::RushWorldHitBox() const
 	return wsHitBox;
 }
 
-void Rival::WasDefended()
+void Rival::WasDefended( float elapsedTime )
 {
 	if ( status == RivalAI::ActionState::ATTACK_RUSH )
 	{
 		// Prevent place the position of myself and target.
-		pos += -orientation.LocalFront() * RivalParam::Open().rush.rushSpeed;
+		pos += -orientation.LocalFront() * RivalParam::Open().rush.rushSpeed * elapsedTime;
 
 		// Should call before BreakInit().
 		AttackRushUninit();
 
-		BreakInit();
+		BreakInit( elapsedTime );
 	}
 }
 void Rival::ReceiveImpact()
@@ -1105,7 +1105,7 @@ void Rival::SetFieldRadius( float newFieldRadius )
 
 bool Rival::IsDefeated() const
 {
-	const int MOTION_LENGTH = RivalParam::Open().defeat.motionLength;
+	const float MOTION_LENGTH = RivalParam::Open().defeat.motionLength;
 	return ( extraStatus == ExtraState::DEFEAT && MOTION_LENGTH <= timer ) ? true : false;
 }
 
@@ -1173,7 +1173,7 @@ Donya::Vector4x4 Rival::CalcWorldMatrix() const
 	return S * R * T;
 }
 
-void Rival::ChangeStatus( TargetStatus target )
+void Rival::ChangeStatus( TargetStatus target, float elapsedTime )
 {
 	RivalAI::ActionState lotteryStatus = AI.GetState();
 	if ( status == lotteryStatus ) { return; }
@@ -1209,15 +1209,15 @@ void Rival::ChangeStatus( TargetStatus target )
 
 	switch ( lotteryStatus )
 	{
-	case RivalAI::ActionState::WAIT:				WaitInit( target );					break;
-	case RivalAI::ActionState::MOVE_GET_NEAR:		MoveInit( target, lotteryStatus );	break;
-	case RivalAI::ActionState::MOVE_GET_FAR:		MoveInit( target, lotteryStatus );	break;
-	case RivalAI::ActionState::MOVE_SIDE:			MoveInit( target, lotteryStatus );	break;
-	case RivalAI::ActionState::MOVE_AIM_SIDE:		MoveInit( target, lotteryStatus );	break;
-	case RivalAI::ActionState::ATTACK_BARRAGE:		AttackBarrageInit( target );		break;
-	case RivalAI::ActionState::ATTACK_LINE:			AttackLineInit( target );			break;
-	case RivalAI::ActionState::ATTACK_RAID:			AttackRaidInit( target );			break;
-	case RivalAI::ActionState::ATTACK_RUSH:			AttackRushInit( target );			break;
+	case RivalAI::ActionState::WAIT:				WaitInit( target, elapsedTime );					break;
+	case RivalAI::ActionState::MOVE_GET_NEAR:		MoveInit( target, lotteryStatus, elapsedTime );	break;
+	case RivalAI::ActionState::MOVE_GET_FAR:		MoveInit( target, lotteryStatus, elapsedTime );	break;
+	case RivalAI::ActionState::MOVE_SIDE:			MoveInit( target, lotteryStatus, elapsedTime );	break;
+	case RivalAI::ActionState::MOVE_AIM_SIDE:		MoveInit( target, lotteryStatus, elapsedTime );	break;
+	case RivalAI::ActionState::ATTACK_BARRAGE:		AttackBarrageInit( target, elapsedTime );		break;
+	case RivalAI::ActionState::ATTACK_LINE:			AttackLineInit( target, elapsedTime );			break;
+	case RivalAI::ActionState::ATTACK_RAID:			AttackRaidInit( target, elapsedTime );			break;
+	case RivalAI::ActionState::ATTACK_RUSH:			AttackRushInit( target, elapsedTime );			break;
 	default: break;
 	}
 
@@ -1230,7 +1230,7 @@ void Rival::ChangeStatus( TargetStatus target )
 		EffectManager::GetInstance()->BossAttackMomentEffectSet( VIVID_FRAME, BOSS_NO );
 	}
 }
-void Rival::UpdateCurrentStatus( TargetStatus target )
+void Rival::UpdateCurrentStatus( TargetStatus target, float elapsedTime )
 {
 	if ( extraStatus != ExtraState::NONE )
 	{
@@ -1239,24 +1239,24 @@ void Rival::UpdateCurrentStatus( TargetStatus target )
 		//	case Rival::ExtraState::RUSH_WAIT:		break;
 		//	case Rival::ExtraState::RUSH_RUN:		break;
 		//	case Rival::ExtraState::RUSH_SLASH:		break;
-		case Rival::ExtraState::BREAK:	BreakUpdate( target );	return; // break;
-		case Rival::ExtraState::LEAVE:	BreakUpdate( target );	return; // break;
-		case Rival::ExtraState::DEFEAT:	DefeatUpdate();			return; // break;
+		case Rival::ExtraState::BREAK:	BreakUpdate( target, elapsedTime );	return; // break;
+		case Rival::ExtraState::LEAVE:	BreakUpdate( target, elapsedTime );	return; // break;
+		case Rival::ExtraState::DEFEAT:	DefeatUpdate( elapsedTime );		return; // break;
 		default: break;
 		}
 	}
 
 	switch ( status )
 	{
-	case RivalAI::ActionState::WAIT:				WaitUpdate( target );			break;
-	case RivalAI::ActionState::MOVE_GET_NEAR:		MoveUpdate( target );			break;
-	case RivalAI::ActionState::MOVE_GET_FAR:		MoveUpdate( target );			break;
-	case RivalAI::ActionState::MOVE_SIDE:			MoveUpdate( target );			break;
-	case RivalAI::ActionState::MOVE_AIM_SIDE:		MoveUpdate( target );			break;
-	case RivalAI::ActionState::ATTACK_BARRAGE:		AttackBarrageUpdate( target );	break;
-	case RivalAI::ActionState::ATTACK_LINE:			AttackLineUpdate( target );		break;
-	case RivalAI::ActionState::ATTACK_RAID:			AttackRaidUpdate( target );		break;
-	case RivalAI::ActionState::ATTACK_RUSH:			AttackRushUpdate( target );		break;
+	case RivalAI::ActionState::WAIT:				WaitUpdate( target, elapsedTime  );			break;
+	case RivalAI::ActionState::MOVE_GET_NEAR:		MoveUpdate( target, elapsedTime  );			break;
+	case RivalAI::ActionState::MOVE_GET_FAR:		MoveUpdate( target, elapsedTime  );			break;
+	case RivalAI::ActionState::MOVE_SIDE:			MoveUpdate( target, elapsedTime  );			break;
+	case RivalAI::ActionState::MOVE_AIM_SIDE:		MoveUpdate( target, elapsedTime  );			break;
+	case RivalAI::ActionState::ATTACK_BARRAGE:		AttackBarrageUpdate( target, elapsedTime );	break;
+	case RivalAI::ActionState::ATTACK_LINE:			AttackLineUpdate( target,elapsedTime  );	break;
+	case RivalAI::ActionState::ATTACK_RAID:			AttackRaidUpdate( target,elapsedTime  );	break;
+	case RivalAI::ActionState::ATTACK_RUSH:			AttackRushUpdate( target,elapsedTime  );	break;
 	default: break;
 	}
 }
@@ -1267,7 +1267,7 @@ XXXUpdate : call by UpdateCurrentStatus.
 XXXUninit : call by ChangeStatus when changing status. before YYYInit.
 */
 
-void Rival::WaitInit( TargetStatus target )
+void Rival::WaitInit( TargetStatus target, float elapsedTime )
 {
 	status			= RivalAI::ActionState::WAIT;
 	slerpFactor		= RivalParam::Get().SlerpFactor( status );
@@ -1276,7 +1276,7 @@ void Rival::WaitInit( TargetStatus target )
 
 	setAnimFlame( models.pIdle.get(), 0 );
 }
-void Rival::WaitUpdate( TargetStatus target )
+void Rival::WaitUpdate( TargetStatus target, float elapsedTime )
 {
 
 #if GET_CLOSE
@@ -1295,7 +1295,7 @@ void Rival::WaitUninit()
 	setAnimFlame( models.pIdle.get(), 0 );
 }
 
-void Rival::MoveInit( TargetStatus target, RivalAI::ActionState statusDetail )
+void Rival::MoveInit( TargetStatus target, RivalAI::ActionState statusDetail, float elapsedTime )
 {
 	status		= statusDetail;
 	slerpFactor	= RivalParam::Get().SlerpFactor( status );
@@ -1317,9 +1317,9 @@ void Rival::MoveInit( TargetStatus target, RivalAI::ActionState statusDetail )
 	setAnimFlame( models.pLeave.get(),    0 );
 	setLoopFlg( models.pLeave.get(), /* is_loop = */ true );
 }
-void Rival::MoveUpdate( TargetStatus target )
+void Rival::MoveUpdate( TargetStatus target, float elapsedTime )
 {
-	const float speed = RivalParam::Get().MoveSpeed( status );
+	const float speed = RivalParam::Get().MoveSpeed( status ) * elapsedTime;
 	
 	switch ( status )
 	{
@@ -1355,7 +1355,7 @@ void Rival::MoveUninit()
 	setAnimFlame( models.pLeave.get(),    0 );
 }
 
-void Rival::AttackBarrageInit( TargetStatus target )
+void Rival::AttackBarrageInit( TargetStatus target, float elapsedTime )
 {
 	status			= RivalAI::ActionState::ATTACK_BARRAGE;
 	slerpFactor		= RivalParam::Get().SlerpFactor( status );
@@ -1365,9 +1365,9 @@ void Rival::AttackBarrageInit( TargetStatus target )
 	RivalParam::Get().ResetBarrage();
 	setAnimFlame( models.pAtkBarrage.get(), 0 );
 }
-void Rival::AttackBarrageUpdate( TargetStatus target )
+void Rival::AttackBarrageUpdate( TargetStatus target, float elapsedTime )
 {
-	RivalParam::Get().UpdateBarrage();
+	RivalParam::Get().UpdateBarrage( elapsedTime );
 	
 	const auto nowBarrage = RivalParam::Open().barrage;
 
@@ -1376,7 +1376,7 @@ void Rival::AttackBarrageUpdate( TargetStatus target )
 	{
 		if ( it.withinFrame )
 		{
-			walkSpeed = it.speed;
+			walkSpeed = it.speed * elapsedTime;
 			break;
 		}
 	}
@@ -1396,7 +1396,7 @@ void Rival::AttackBarrageUninit()
 	setAnimFlame( models.pAtkBarrage.get(), 0 );
 }
 
-void Rival::AttackLineInit( TargetStatus target )
+void Rival::AttackLineInit( TargetStatus target, float elapsedTime )
 {
 	status			= RivalAI::ActionState::ATTACK_LINE;
 	timer			= 0;
@@ -1419,10 +1419,10 @@ void Rival::AttackLineInit( TargetStatus target )
 
 	setAnimFlame( models.pAtkLine.get(), 0 );
 }
-void Rival::AttackLineUpdate( TargetStatus target )
+void Rival::AttackLineUpdate( TargetStatus target, float elapsedTime )
 {
-	timer++;
-	if ( timer == RivalParam::Open().line.generateFrame )
+	timer += 1.0f * elapsedTime;
+	if ( ZeroEqual( timer - RivalParam::Open().line.generateFrame ) )
 	{
 		EffectManager::GetInstance()->LongAttackEffectSet( target.pos, pos );
 	}
@@ -1434,7 +1434,7 @@ void Rival::AttackLineUninit()
 	setAnimFlame( models.pAtkLine.get(), 0 );
 }
 
-void Rival::AttackRaidInit( TargetStatus target )
+void Rival::AttackRaidInit( TargetStatus target, float elapsedTime )
 {
 	status			= RivalAI::ActionState::ATTACK_RAID;
 	timer			= 0;
@@ -1446,10 +1446,10 @@ void Rival::AttackRaidInit( TargetStatus target )
 	ResetCurrentSphereFN( &RivalParam::Get().RaidHitBox() );
 	setAnimFlame( models.pAtkRaid.get(), 0 );
 }
-void Rival::AttackRaidUpdate( TargetStatus target )
+void Rival::AttackRaidUpdate( TargetStatus target, float elapsedTime )
 {
-	const int START_TIME	= RivalParam::Open().raid.jumpStartFrame;
-	const int LANDING_TIME	= RivalParam::Open().raid.jumpLastFrame;
+	const float START_TIME		= RivalParam::Open().raid.jumpStartFrame;
+	const float LANDING_TIME	= RivalParam::Open().raid.jumpLastFrame;
 	
 	auto ApplyExtraOffset	= [&]()->void
 	{
@@ -1458,15 +1458,15 @@ void Rival::AttackRaidUpdate( TargetStatus target )
 		extraOffset = 0.0f;
 	};
 
-	timer++;
+	timer += 1.0f * elapsedTime;
 
 	if ( timer <= START_TIME )
 	{
 		// Before jump. move to front slowly.
 
-		extraOffset += orientation.LocalFront() * RivalParam::Get().MoveSpeed( status );
+		extraOffset += orientation.LocalFront() * RivalParam::Get().MoveSpeed( status ) * elapsedTime;
 
-		if ( timer == START_TIME )
+		if ( ZeroEqual( timer - START_TIME ) )
 		{
 			ApplyExtraOffset();
 			slerpFactor = 0.0f;
@@ -1477,7 +1477,7 @@ void Rival::AttackRaidUpdate( TargetStatus target )
 	{
 		// Before landing. move to front with easing.
 		
-		float percent	= scast<float>( timer - START_TIME ) / scast<float>( LANDING_TIME );
+		float percent	= timer - START_TIME / LANDING_TIME;
 		float ease		= Donya::Easing::Ease
 		(
 			scast<Donya::Easing::Kind>( RivalParam::Open().raid.easingKind ),
@@ -1485,9 +1485,9 @@ void Rival::AttackRaidUpdate( TargetStatus target )
 			percent
 		);
 
-		extraOffset = orientation.LocalFront() * ( RivalParam::Open().raid.jumpDistance * ease );
+		extraOffset = orientation.LocalFront() * ( RivalParam::Open().raid.jumpDistance * elapsedTime * ease );
 
-		if ( timer == START_TIME + LANDING_TIME )
+		if ( ZeroEqual( timer - ( START_TIME + LANDING_TIME ) ) )
 		{
 			ApplyExtraOffset();
 		}
@@ -1498,7 +1498,7 @@ void Rival::AttackRaidUpdate( TargetStatus target )
 	}
 
 	auto &hitBox = RivalParam::Get().RaidHitBox();
-	hitBox.sphereF.Update();
+	hitBox.sphereF.Update( elapsedTime );
 }
 void Rival::AttackRaidUninit()
 {
@@ -1510,11 +1510,11 @@ void Rival::AttackRaidUninit()
 	setAnimFlame( models.pAtkRaid.get(), 0 );
 }
 
-void Rival::AttackRushInit( TargetStatus target )
+void Rival::AttackRushInit( TargetStatus target, float elapsedTime )
 {
 	status			= RivalAI::ActionState::ATTACK_RUSH;
 	extraStatus		= ExtraState::RUSH_WAIT;
-	timer			= RivalParam::Open().rush.waitLength;
+	timer			= RivalParam::Open().rush.waitLength * elapsedTime;
 	slerpFactor		= RivalParam::Get().SlerpFactor( status );
 	velocity		= 0.0f;
 	currentMotion	= AtkRushWait;
@@ -1529,13 +1529,13 @@ void Rival::AttackRushInit( TargetStatus target )
 
 	EffectManager::GetInstance()->AccelEffectSet();
 }
-void Rival::AttackRushUpdate( TargetStatus target )
+void Rival::AttackRushUpdate( TargetStatus target, float elapsedTime )
 {
 	switch ( extraStatus )
 	{
 	case Rival::ExtraState::RUSH_WAIT:
 		{
-			timer--;
+			timer -= 1.0f * elapsedTime;
 			if ( timer <= 0 )
 			{
 				timer			= RivalParam::Open().rush.slashStopAnimeFrame;
@@ -1551,7 +1551,7 @@ void Rival::AttackRushUpdate( TargetStatus target )
 		{
 			// Animation.
 			{
-				timer--;
+				timer -= 1.0f * elapsedTime;
 
 				if ( timer <= 0 )
 				{
@@ -1560,7 +1560,7 @@ void Rival::AttackRushUpdate( TargetStatus target )
 				}
 				else
 				{
-					RivalParam::Get().RushHitBox().Update();
+					RivalParam::Get().RushHitBox().Update( elapsedTime );
 				}
 			}
 
@@ -1598,7 +1598,7 @@ void Rival::AttackRushUpdate( TargetStatus target )
 			}
 			else
 			{
-				velocity = orientation.LocalFront() * RivalParam::Open().rush.rushSpeed;
+				velocity = orientation.LocalFront() * RivalParam::Open().rush.rushSpeed * elapsedTime;
 
 				EffectManager::GetInstance()->AccelEffectUpdate( GetPos(), orientation.LocalFront() );
 			}
@@ -1606,7 +1606,7 @@ void Rival::AttackRushUpdate( TargetStatus target )
 		break;
 	case Rival::ExtraState::RUSH_SLASH:
 		{
-			RivalParam::Get().RushHitBox().Update();
+			RivalParam::Get().RushHitBox().Update( elapsedTime );
 
 			if ( models.pAtkRushSlash->getAnimFinFlg() )
 			{
@@ -1630,12 +1630,12 @@ void Rival::AttackRushUninit()
 	setAnimFlame( models.pAtkRushSlash.get(), 0 );
 }
 
-void Rival::BreakInit()
+void Rival::BreakInit( float elapsedTime )
 {
 	const auto temporaryActionState = RivalAI::ActionState::ATTACK_RUSH; // If this action is attack, after break status is wait. if this action is wait, after break status is attack.
 	status			= temporaryActionState;
 	extraStatus		= ExtraState::BREAK;
-	timer			= RivalParam::Open().breakdown.breakFrame;
+	timer			= RivalParam::Open().breakdown.breakFrame * elapsedTime;
 	slerpFactor		= 0.0f;
 	velocity		= 0.0f;
 	extraOffset		= 0.0f;
@@ -1650,7 +1650,7 @@ void Rival::BreakInit()
 	setLoopFlg( models.pBreak.get(), /* is_loop = */ false );
 	setLoopFlg( models.pLeave.get(), /* is_loop = */ false );
 }
-void Rival::BreakUpdate( TargetStatus target )
+void Rival::BreakUpdate( TargetStatus target, float elapsedTime )
 {
 	auto ApplyExtraOffset = [&]()->void
 	{
@@ -1663,7 +1663,7 @@ void Rival::BreakUpdate( TargetStatus target )
 	{
 	case Rival::ExtraState::BREAK:
 		{
-			timer--;
+			timer -= 1.0f * elapsedTime;
 			if ( timer <= 0 )
 			{
 				timer			= 0;
@@ -1674,12 +1674,12 @@ void Rival::BreakUpdate( TargetStatus target )
 		break;
 	case Rival::ExtraState::LEAVE:
 		{
-			timer++;
+			timer += 1.0f * elapsedTime;
 
-			const int MOTION_WHOLE_FRAME	= RivalParam::Open().breakdown.leaveWholeFrame;
-			const int MOVING_FRAME			= RivalParam::Open().breakdown.leaveMoveFrame;
+			const float MOTION_WHOLE_FRAME	= RivalParam::Open().breakdown.leaveWholeFrame;
+			const float MOVING_FRAME		= RivalParam::Open().breakdown.leaveMoveFrame;
 
-			float percent = scast<float>( timer ) / scast<float>( MOVING_FRAME );
+			float percent = timer / MOVING_FRAME;
 			float ease = Donya::Easing::Ease
 			(
 				scast<Donya::Easing::Kind>( RivalParam::Open().breakdown.leaveEasingKind ),
@@ -1687,9 +1687,9 @@ void Rival::BreakUpdate( TargetStatus target )
 				percent
 			);
 
-			extraOffset = -orientation.LocalFront() * ( RivalParam::Open().breakdown.leaveDistance * ease );
+			extraOffset = -orientation.LocalFront() * ( RivalParam::Open().breakdown.leaveDistance * elapsedTime * ease );
 
-			if ( timer == MOVING_FRAME )
+			if ( ZeroEqual( timer - MOVING_FRAME ) )
 			{
 				ApplyExtraOffset();
 
@@ -1728,12 +1728,12 @@ void Rival::DefeatInit()
 
 	EffectManager::GetInstance()->LongAttackEffectReSetCollision();
 }
-void Rival::DefeatUpdate()
+void Rival::DefeatUpdate( float elapsedTime )
 {
-	timer++;
+	timer += 1.0f * elapsedTime;
 
-	const int MOTION_LENGTH = RivalParam::Open().defeat.motionLength;
-	if ( timer == MOTION_LENGTH )
+	const float MOTION_LENGTH = RivalParam::Open().defeat.motionLength;
+	if ( ZeroEqual( timer - MOTION_LENGTH ) )
 	{
 		EffectManager::GetInstance()->DisappearanceEffectSet( GetPos() );
 	}
@@ -1776,7 +1776,7 @@ void Rival::CollideToWall()
 	}
 }
 
-void Rival::FxUpdate( TargetStatus target )
+void Rival::FxUpdate( TargetStatus target, float elapsedTime )
 {
 	EffectManager::GetInstance()->BossAttackMomentEffectUpdate( GetPos(), target.pos );
 }

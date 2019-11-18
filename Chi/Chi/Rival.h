@@ -48,9 +48,9 @@ public:
 	};
 	struct IntervalSpeed
 	{
-		int		current{};
-		int		start{};	// Will be serialize.
-		int		last{};		// Will be serialize.
+		float	current{};
+		float	start{};	// Will be serialize.
+		float	last{};		// Will be serialize.
 		float	speed{};	// Will be serialize.
 		bool	withinFrame{ false };
 	private:
@@ -71,7 +71,7 @@ public:
 			}
 		}
 	public:
-		void Update( int elapsedTime = 1 )
+		void Update( float elapsedTime )
 		{
 			current += elapsedTime;
 
@@ -139,15 +139,15 @@ public:
 				}
 			}
 		public:
-			void Update( int elapsedTime = 1 )
+			void Update( float elapsedTime )
 			{
 				for ( auto &it : collisions )
 				{
-					it.Update();
+					it.Update( elapsedTime );
 				}
 				for ( auto &it : walkTimings )
 				{
-					it.Update();
+					it.Update( elapsedTime );
 				}
 			}
 		};
@@ -155,7 +155,7 @@ public:
 		{
 			float	moveSpeed{};
 			float	slerpFactor{};	// 0.0f ~ 1.0f.
-			int		generateFrame{};
+			float	generateFrame{};
 		private:
 			friend class cereal::access;
 			template<class Archive>
@@ -183,8 +183,8 @@ public:
 			float				slerpFactor{}; // 0.0f ~ 1.0f.
 			int					easingKind{};
 			int					easingType{};
-			int					jumpStartFrame{};
-			int					jumpLastFrame{};
+			float				jumpStartFrame{};
+			float				jumpLastFrame{};
 			float				jumpDistance{};
 			SphereFrameWithName	hitBox{};
 		private:
@@ -220,9 +220,9 @@ public:
 		{
 			float				moveSpeed{};
 			float				slerpFactor{}; // 0.0f ~ 1.0f.
-			int					waitLength{};
+			float				waitLength{};
 			float				rushSpeed{};
-			int					slashStopAnimeFrame{};
+			float				slashStopAnimeFrame{};
 			Donya::Sphere		slashOccurRange{};
 			Donya::SphereFrame	hitBox{};
 		private:
@@ -257,11 +257,11 @@ public:
 		{
 			float	moveSpeed{};
 			float	slerpFactor{};	// 0.0f ~ 1.0f.
-			int		breakFrame{};
+			float	breakFrame{};
 			int		leaveEasingKind{};
 			int		leaveEasingType{};
-			int		leaveWholeFrame{};
-			int		leaveMoveFrame{};
+			float	leaveWholeFrame{};
+			float	leaveMoveFrame{};
 			float	leaveDistance{};
 		private:
 			friend class cereal::access;
@@ -288,7 +288,7 @@ public:
 		};
 		struct Defeat
 		{
-			int		motionLength{};	// Per frame.
+			float	motionLength{};	// Per frame.
 			float	hideSpeed{};	// Use after motionLength.
 		private:
 			friend class cereal::access;
@@ -383,7 +383,7 @@ public:
 	/// <summary>
 	/// Update "walkTimings" and "collisions".
 	/// </summary>
-	void UpdateBarrage( int elapsedTime = 1 );
+	void UpdateBarrage( float elapsedTime );
 	/// <summary>
 	/// Reset  "walkTimings" and "collisions".
 	/// </summary>
@@ -475,7 +475,7 @@ private:
 	RivalAI::ActionState	status;
 	ExtraState				extraStatus;	// Internal status.
 	RivalAI					AI;
-	int						timer;			// Recycle between each state.
+	float					timer;			// Recycle between each state.
 	float					moveSign;		// Use when aim-move state. store destination sign(-1:left, +1:right).
 	float					fieldRadius;	// For collision to wall. the field is perfect-circle, so I can detect collide to wall by distance.
 	float					slerpFactor;	// 0.0f ~ 1.0f. Use orientation's rotation.
@@ -492,11 +492,11 @@ public:
 	void Init( int stageNo );
 	void Uninit();
 
-	void Update( TargetStatus target );
+	void Update( TargetStatus target, float elapsedTime );
 
-	void Draw(fbx_shader& HLSL, const Donya::Vector4x4& matView, const Donya::Vector4x4& matProjection, float animationAcceleration = 1.0f);
-	void z_Draw(fbx_shader& HLSL, const Donya::Vector4x4& matView, const Donya::Vector4x4& matProjection, float animationAcceleration = 1.0f);
-	void bloom_Draw(fbx_shader& HLSL, const Donya::Vector4x4& matView, const Donya::Vector4x4& matProjection, float animationAcceleration = 1.0f);
+	void Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matProjection, float animationAcceleration = 1.0f );
+	void z_Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matProjection, float animationAcceleration = 1.0f );
+	void bloom_Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matProjection, float animationAcceleration = 1.0f );
 public:
 	bool IsCollideAttackHitBoxes( const Donya::AABB   judgeOther, bool disableCollidingHitBoxes );
 	bool IsCollideAttackHitBoxes( const Donya::OBB    judgeOther, bool disableCollidingHitBoxes );
@@ -514,7 +514,7 @@ public:
 	/// <summary>
 	/// Please call when defended Rival's attack.
 	/// </summary>
-	void WasDefended();
+	void WasDefended( float elapsedTime );
 	void ReceiveImpact();
 
 	void SetFieldRadius( float fieldRadius );
@@ -533,39 +533,39 @@ private:
 
 	Donya::Vector4x4 CalcWorldMatrix() const;
 private:
-	void ChangeStatus( TargetStatus target );
-	void UpdateCurrentStatus( TargetStatus target );
+	void ChangeStatus( TargetStatus target, float elapsedTime );
+	void UpdateCurrentStatus( TargetStatus target, float elapsedTime );
 
-	void WaitInit( TargetStatus target );
-	void WaitUpdate( TargetStatus target );
+	void WaitInit( TargetStatus target, float elapsedTime );
+	void WaitUpdate( TargetStatus target, float elapsedTime );
 	void WaitUninit();
 
-	void MoveInit( TargetStatus target, RivalAI::ActionState statusDetail );
-	void MoveUpdate( TargetStatus target );
+	void MoveInit( TargetStatus target, RivalAI::ActionState statusDetail, float elapsedTime );
+	void MoveUpdate( TargetStatus target, float elapsedTime );
 	void MoveUninit();
 	
-	void AttackBarrageInit( TargetStatus target );
-	void AttackBarrageUpdate( TargetStatus target );
+	void AttackBarrageInit( TargetStatus target, float elapsedTime );
+	void AttackBarrageUpdate( TargetStatus target, float elapsedTime );
 	void AttackBarrageUninit();
 
-	void AttackLineInit( TargetStatus target );
-	void AttackLineUpdate( TargetStatus target );
+	void AttackLineInit( TargetStatus target, float elapsedTime );
+	void AttackLineUpdate( TargetStatus target, float elapsedTime );
 	void AttackLineUninit();
 
-	void AttackRaidInit( TargetStatus target );
-	void AttackRaidUpdate( TargetStatus target );
+	void AttackRaidInit( TargetStatus target, float elapsedTime );
+	void AttackRaidUpdate( TargetStatus target, float elapsedTime );
 	void AttackRaidUninit();
 
-	void AttackRushInit( TargetStatus target );
-	void AttackRushUpdate( TargetStatus target );
+	void AttackRushInit( TargetStatus target, float elapsedTime );
+	void AttackRushUpdate( TargetStatus target, float elapsedTime );
 	void AttackRushUninit();
 
-	void BreakInit();
-	void BreakUpdate( TargetStatus target );
+	void BreakInit( float elapsedTime );
+	void BreakUpdate( TargetStatus target, float elapsedTime );
 	void BreakUninit();
 
 	void DefeatInit();
-	void DefeatUpdate();
+	void DefeatUpdate( float elapsedTime );
 	void DefeatUninit();
 private:
 	/// <summary>
@@ -577,7 +577,7 @@ private:
 	/// </summary>
 	void CollideToWall();
 
-	void FxUpdate( TargetStatus target );
+	void FxUpdate( TargetStatus target, float elapsedTime );
 private:
 #if USE_IMGUI
 

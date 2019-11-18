@@ -57,7 +57,7 @@ public:
 		float				idleSlerpFactor{};		// 0.0 ~ 1.0. Use when status is idle.
 		float				moveMoveSpeed{};		// Use when status is move.
 		float				moveSlerpFactor{};		// 0.0 ~ 1.0. Use when status is move.
-		int					defeatMotionLength{};	// Per frame. Use when status is defeat(END).
+		float				defeatMotionLength{};	// Per frame. Use when status is defeat(END).
 		float				defeatHideSpeed{};		// Use after motionLength.
 		float				explMoveSpeed{};		// Use when status is explosion.
 		float				explSlerpFactor{};		// 0.0 ~ 1.0. Use when status is explosion.
@@ -65,8 +65,8 @@ public:
 		float				swingSlerpFactor{};		// 0.0 ~ 1.0. Use when status is swing.
 		float				raidMoveSpeed{};		// Use when status is raid. speed of before jump.
 		float				raidSlerpFactor{};		// 0.0 ~ 1.0. Use when status is raid.
-		int					raidJumpStartFrame{};	// Use when status is raid.
-		int					raidJumpLastFrame{};	// Use when status is raid.
+		float				raidJumpStartFrame{};	// Use when status is raid.
+		float				raidJumpLastFrame{};	// Use when status is raid.
 		float				raidJumpDistance{};		// Use when status is raid. whole distance of long-jump's.
 		int					raidEaseKind{};			// Use when status is raid.
 		int					raidEaseType{};			// Use when status is raid.
@@ -74,9 +74,9 @@ public:
 		float				explScaleStart{};		// Use when status is explosion.
 		float				explScaleLast{};		// Use when status is explosion.
 		float				explScaleDraw{};		// Use when status is explosion.
-		int					explScalingFrame{};		// Take time(frame) of scaling.
-		int					explChargeFrame{};		// Take time(frame) of charge. use before the explosion and the animation will stop.
-		int					explReviveColFrame{};	// Take time(frame) of revive the collision of explosion, since hit to anything.
+		float				explScalingFrame{};		// Take time(frame) of scaling.
+		float				explChargeFrame{};		// Take time(frame) of charge. use before the explosion and the animation will stop.
+		float				explReviveColFrame{};	// Take time(frame) of revive the collision of explosion, since hit to anything.
 		float				explHideSpeed{};		// Use when status is explosion.
 		Donya::Vector3		initPos{};				// The index(stage number) is 1-based. 0 is tutorial.
 		Donya::Vector3		drawOffset{};			// The index(stage number) is 1-based. 0 is tutorial.
@@ -246,8 +246,8 @@ private:
 private:
 	KnightAI::ActionState	status;
 	KnightAI				AI;
-	int						timer;				// Recycle between each state.
-	int						reviveCollisionTime;// Use when disable collision.
+	float					timer;				// Recycle between each state.
+	float					reviveCollisionTime;// Use when disable collision.
 	float					moveSign;			// Use when aim-move state. store destination sign(-1:left, +1:right).
 	float					fieldRadius;		// For collision to wall. the field is perfect-circle, so I can detect collide to wall by distance.
 	float					slerpFactor;		// 0.0f ~ 1.0f. Use orientation's rotation.
@@ -264,7 +264,7 @@ public:
 	void Init( int stageNo );
 	void Uninit();
 
-	void Update( TargetStatus target );
+	void Update( TargetStatus target, float elapsedTime );
 
 	void Draw(fbx_shader& HLSL, const Donya::Vector4x4& matView, const Donya::Vector4x4& matProjection, float animationAcceleration = 1.0f);
 	void z_Draw(fbx_shader& HLSL, const Donya::Vector4x4& matView, const Donya::Vector4x4& matProjection, float animationAcceleration = 1.0f);
@@ -308,31 +308,31 @@ private:
 
 	Donya::Vector4x4 CalcWorldMatrix() const;
 private:
-	void ChangeStatus( TargetStatus target );
-	void UpdateCurrentStatus( TargetStatus target );
+	void ChangeStatus( TargetStatus target, float elapsedTime );
+	void UpdateCurrentStatus( TargetStatus target, float elapsedTime );
 
-	void WaitInit( TargetStatus target );
-	void WaitUpdate( TargetStatus target );
+	void WaitInit( TargetStatus target, float elapsedTime );
+	void WaitUpdate( TargetStatus target, float elapsedTime );
 	void WaitUninit();
 
-	void MoveInit( TargetStatus target, KnightAI::ActionState statusDetail );
-	void MoveUpdate( TargetStatus target );
+	void MoveInit( TargetStatus target, KnightAI::ActionState statusDetail, float elapsedTime );
+	void MoveUpdate( TargetStatus target, float elapsedTime );
 	void MoveUninit();
 
-	void AttackExplosionInit( TargetStatus target );
-	void AttackExplosionUpdate( TargetStatus target );
+	void AttackExplosionInit( TargetStatus target, float elapsedTime );
+	void AttackExplosionUpdate( TargetStatus target, float elapsedTime );
 	void AttackExplosionUninit();
 
-	void AttackSwingInit( TargetStatus target );
-	void AttackSwingUpdate( TargetStatus target );
+	void AttackSwingInit( TargetStatus target, float elapsedTime );
+	void AttackSwingUpdate( TargetStatus target, float elapsedTime );
 	void AttackSwingUninit();
 
-	void AttackRaidInit( TargetStatus target );
-	void AttackRaidUpdate( TargetStatus target );
+	void AttackRaidInit( TargetStatus target, float elapsedTime );
+	void AttackRaidUpdate( TargetStatus target, float elapsedTime );
 	void AttackRaidUninit();
 
 	void DefeatInit();
-	void DefeatUpdate();
+	void DefeatUpdate( float elapsedTime );
 	void DefeatUninit();
 private:
 	/// <summary>
@@ -344,7 +344,7 @@ private:
 	/// </summary>
 	void CollideToWall();
 
-	void FxUpdate( TargetStatus target );
+	void FxUpdate( TargetStatus target, float elapsedTime );
 private:
 #if USE_IMGUI
 

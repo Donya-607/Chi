@@ -2,7 +2,7 @@
     "Player": {
         "cereal_class_version": 9,
         "scale": 1.0,
-        "runSpeed": 16.0,
+        "runSpeed": 512.0,
         "rotSlerpFactor": 0.20000000298023225,
         "hitBoxBody": {
             "cereal_class_version": 0,
@@ -17,7 +17,7 @@
                 "y": 128.0,
                 "z": 16.0
             },
-            "exist": true
+            "exist": false
         },
         "hitBoxPhysic": {
             "cereal_class_version": 0,
@@ -29,9 +29,9 @@
             "radius": 16.0,
             "exist": true
         },
-        "frameUnfoldableDefence": 120,
-        "frameCancelableAttack": 20,
-        "frameWholeAttacking": 120,
+        "frameUnfoldableDefence": 0.0,
+        "frameCancelableAttack": 0.5,
+        "frameWholeAttacking": 2.4000000953674318,
         "hitBoxShield": {
             "pos": {
                 "x": 0.0,
@@ -47,8 +47,8 @@
         },
         "hitBoxLance": {
             "cereal_class_version": 0,
-            "enableFrameStart": 30,
-            "enableFrameLast": 80,
+            "enableFrameStart": 30.0,
+            "enableFrameLast": 80.0,
             "OBB": {
                 "cereal_class_version": 0,
                 "pos": {
@@ -72,17 +72,17 @@
             }
         },
         "lanceMeshName": "MDL_Spear",
-        "shieldsRecastFrame": 30,
-        "frameStopAnime": 1,
-        "frameStopTiming": 1,
-        "advanceStartFrame": 1,
-        "advanceFinFrame": 90,
-        "returnFinFrame": 120,
-        "advanceEaseKind": 0,
-        "advanceEaseType": 0,
+        "shieldsRecastFrame": 30.0,
+        "frameStopAnime": 1.0,
+        "frameStopTiming": 1.0,
+        "advanceStartFrame": 1.0,
+        "advanceFinFrame": 0.800000011920929,
+        "returnFinFrame": 1.2000000476837159,
+        "advanceEaseKind": 7,
+        "advanceEaseType": 1,
         "returnEaseKind": 8,
         "returnEaseType": 1,
-        "advanceDistance": 26.277000427246095,
+        "advanceDistance": 320.0,
         "motionSpeeds": [
             1.0,
             1.0,

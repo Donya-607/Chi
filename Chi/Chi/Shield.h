@@ -20,11 +20,11 @@ class ShieldParam final : public Donya::Singleton<ShieldParam>
 public:
 	struct Member
 	{
-		int					maxUnfoldableFrame{};
-		int					consumptionAmount{};	// Subtract amount when unfold.
-		int					decreaseSpeed{};		// Subtract to the frame of unfoldable while unfolding.
-		int					increaseSpeed{};		// Add to the frame of unfoldable while does not unfolding.
-		int					recoveryAmount{};
+		float				maxUnfoldableFrame{};
+		float				consumptionAmount{};	// Subtract amount when unfold.
+		float				decreaseSpeed{};		// Subtract to the frame of unfoldable while unfolding.
+		float				increaseSpeed{};		// Add to the frame of unfoldable while does not unfolding.
+		float				recoveryAmount{};
 		float				drawScaleMax{};			// Maximum scale.
 		float				drawScaleMin{};			// Minimum scale.
 		Donya::Vector3		drawOffset{};
@@ -71,7 +71,7 @@ public:
 	Member Content() const { return m; }
 	static Member Open();
 
-	float CalcUnfoldPercent( int currentTime );
+	float CalcUnfoldPercent( float currentTime );
 public:
 	void LoadParameter( bool isBinary = true );
 
@@ -112,8 +112,8 @@ private:
 	};
 private:
 	State		status;
-	int			unfoldTimer;
-	int			fluctuation;	// Will add to "unfoldTimer" at last in Update().
+	float		unfoldTimer;
+	float		fluctuation;	// Will add to "unfoldTimer" at last in Update().
 	MotionKind	currentMotion;
 	Models		models;
 	bool		nowUnfolding;	// Store old status. Used for "moment of unfold" judgement.
@@ -124,7 +124,7 @@ public:
 	void Init();
 	void Uninit();
 
-	void Update( bool isUnfolding, const Donya::Vector3 &wsParentPosition );
+	void Update( float elapsedTime, bool isUnfolding, const Donya::Vector3 &wsParentPosition );
 
 	void Draw(fbx_shader& HLSL, const Donya::Vector4x4& matView, const Donya::Vector4x4& matProjection, const Donya::Vector4x4& matParent);
 	void z_Draw(fbx_shader& HLSL, const Donya::Vector4x4& matView, const Donya::Vector4x4& matProjection, const Donya::Vector4x4& matParent);
@@ -135,7 +135,7 @@ public:
 	/// <summary>
 	/// Returns remaining unfoldable frame.
 	/// </summary>
-	int GetRemainingFrame() const { return unfoldTimer; }
+	float GetRemainingFrame() const { return unfoldTimer; }
 
 	/// <summary>
 	/// Returns local space AABB.
@@ -153,11 +153,11 @@ public:
 private:
 	void LoadModels();
 
-	void AddTimer( int addition );
+	void AddTimer( float addition );
 
 	void ApplyState( bool isUnfolding );
 
-	void Fluctuate();
+	void Fluctuate( float elapsedTime );
 
 	void Elapse();
 

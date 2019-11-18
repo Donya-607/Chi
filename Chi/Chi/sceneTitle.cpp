@@ -269,8 +269,10 @@ void sceneTitle::TutorialStartUpdate()
 	setCamPos(camPos);
 	setTarget(camTarget);
 
+	float deltaTime = GameLib::getDeltaTime();
+
 	Donya::Vector4x4 matView = Donya::Vector4x4::FromMatrix(GameLib::camera::GetViewMatrix());
-	player.Update(Player::Input::MakeByExternalInput(matView));
+	player.Update(Player::Input::MakeByExternalInput(matView), deltaTime);
 
 	std::vector<Donya::Circle> nullBodies{};
 	player.PhysicUpdate(nullBodies);
@@ -305,11 +307,13 @@ void sceneTitle::TutorialGuardUpdate()
 	setCamPos(camPos);
 	setTarget(camTarget);
 
+	float deltaTime = GameLib::getDeltaTime();
+
 	Donya::Vector4x4 matView = Donya::Vector4x4::FromMatrix(GameLib::camera::GetViewMatrix());
 	Player::Input input = Player::Input::MakeByExternalInput(matView);
 	// input.doAttack = false;
 	input.onlyRotation = true;
-	player.Update(input);
+	player.Update(input, deltaTime);
 
 	std::vector<Donya::Circle> nullBodies{};
 	player.PhysicUpdate(nullBodies);
@@ -324,8 +328,10 @@ void sceneTitle::TutorialAttackUpdate()
 	setCamPos(camPos);
 	setTarget(camTarget);
 
+	float deltaTime = GameLib::getDeltaTime();
+
 	Donya::Vector4x4 matView = Donya::Vector4x4::FromMatrix(GameLib::camera::GetViewMatrix());
-	player.Update(Player::Input::MakeByExternalInput(matView));
+	player.Update(Player::Input::MakeByExternalInput(matView), deltaTime);
 
 	std::vector<Donya::Circle> nullBodies{};
 	player.PhysicUpdate(nullBodies);

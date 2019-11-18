@@ -49,12 +49,12 @@ public:
 		Donya::OBB CalcTransformedOBB( skinned_mesh *pMesh, const Donya::Vector4x4 &parentSpaceMatrix ) const;
 	};
 private:
-	int								swingStopFrame;			// Use when status is attack of swing.
+	float							swingStopFrame;			// Use when status is attack of swing.
 	float							swingStopLength;		// Per second. Use when status is attack of swing.
 	int								rotLeaveEaseKind;		// Use when status is attack of rotate.
 	int								rotLeaveEaseType;		// Use when status is attack of rotate.
-	int								rotLeaveStartFrame;		// Use when status is attack of rotate.
-	int								rotLeaveWholeFrame;		// Use when status is attack of rotate.
+	float							rotLeaveStartFrame;		// Use when status is attack of rotate.
+	float							rotLeaveWholeFrame;		// Use when status is attack of rotate.
 	float							rotLeaveDistance;		// Use when status is attack of rotate.
 	float							scale;					// Usually 1.0f.
 	float							stageBodyRadius;		// Using for collision to stage's wall.
@@ -63,7 +63,7 @@ private:
 	float							idleSlerpFactor;		// 0.0 ~ 1.0. Use when status is idle.
 	float							moveMoveSpeed;			// Use when status is move.
 	float							moveSlerpFactor;		// 0.0 ~ 1.0. Use when status is move.
-	int								defeatMotionLength{};	// Per frame. Use when status is defeat(END).
+	float							defeatMotionLength{};	// Per frame. Use when status is defeat(END).
 	float							defeatHideSpeed{};		// Use after motionLength.
 	float							attackFastMoveSpeed;	// Use when status is attack of fast.
 	float							attackFastSlerpFactor;	// 0.0 ~ 1.0. Use when status is attack of fast.
@@ -213,12 +213,12 @@ public:
 public:
 	// These getter method for maintaining private member.
 
-	int										SwingStopFrame()		const	{ return swingStopFrame; }
+	float									SwingStopFrame()		const	{ return swingStopFrame; }
 	float									SwingStopSecond()		const	{ return swingStopLength; }
 	int										RotLeaveEaseKind()		const	{ return rotLeaveEaseKind; }
 	int										RotLeaveEaseType()		const	{ return rotLeaveEaseType; }
-	int										RotLeaveStartFrame()	const	{ return rotLeaveStartFrame; }
-	int										RotLeaveWholeFrame()	const	{ return rotLeaveWholeFrame; }
+	float									RotLeaveStartFrame()	const	{ return rotLeaveStartFrame; }
+	float									RotLeaveWholeFrame()	const	{ return rotLeaveWholeFrame; }
 	float									RotLeaveDistance()		const	{ return rotLeaveDistance; }
 	float									Scale()					const	{ return scale; }
 	float									StageBodyRadius()		const	{ return stageBodyRadius; }
@@ -226,7 +226,7 @@ public:
 	float									TargetDistFar()			const	{ return targetDistFar; }
 	float									MoveSpeed  ( GolemAI::ActionState status ) const;
 	float									SlerpFactor( GolemAI::ActionState status ) const;
-	int										DefeatMotionLength()	const	{ return defeatMotionLength; }
+	float									DefeatMotionLength()	const	{ return defeatMotionLength; }
 	float									DefeatHideSpeed()		const	{ return defeatHideSpeed; }
 	Donya::Vector3							GetInitPosition()		const	{ return initPos; }
 	Donya::Vector3							GetDrawOffset  ()		const	{ return drawOffset; }
@@ -287,8 +287,8 @@ private:
 	GolemAI::ActionState	status;
 	GolemAI					AI;
 	int						stageNo;		// 1-based.
-	int						timer;			// Recycle between each state.
-	int						swingTimer;		// Use when status is attack of swing.
+	float					timer;			// Recycle between each state.
+	float					swingTimer;		// Use when status is attack of swing.
 	float					moveSign;		// Use when aim-move state. store destination sign(-1:left, +1:right).
 	float					fieldRadius;	// For collision to wall. the field is perfect-circle, so I can detect collide to wall by distance.
 	float					slerpFactor;	// 0.0f ~ 1.0f. Use orientation's rotation.
@@ -306,7 +306,7 @@ public:
 	void Init( int stageNo );
 	void Uninit();
 
-	void Update( TargetStatus target );
+	void Update( TargetStatus target, float elapsedTime );
 
 	void Draw(fbx_shader& HLSL, const Donya::Vector4x4& matView, const Donya::Vector4x4& matProjection, float animationAcceleration = 1.0f);
 	void z_Draw(fbx_shader& HLSL, const Donya::Vector4x4& matView, const Donya::Vector4x4& matProjection, float animationAcceleration = 1.0f);
@@ -337,31 +337,31 @@ private:
 
 	Donya::Vector4x4 CalcWorldMatrix() const;
 private:
-	void ChangeStatus( TargetStatus target );
-	void UpdateCurrentStatus( TargetStatus target );
+	void ChangeStatus( TargetStatus target, float elapsedTime );
+	void UpdateCurrentStatus( TargetStatus target, float elapsedTime );
 
-	void WaitInit( TargetStatus target );
-	void WaitUpdate( TargetStatus target );
+	void WaitInit( TargetStatus target, float elapsedTime );
+	void WaitUpdate( TargetStatus target, float elapsedTime );
 	void WaitUninit();
 
-	void MoveInit( TargetStatus target, GolemAI::ActionState statusDetail );
-	void MoveUpdate( TargetStatus target );
+	void MoveInit( TargetStatus target, GolemAI::ActionState statusDetail, float elapsedTime );
+	void MoveUpdate( TargetStatus target, float elapsedTime );
 	void MoveUninit();
 
-	void AttackSwingInit( TargetStatus target );
-	void AttackSwingUpdate( TargetStatus target );
+	void AttackSwingInit( TargetStatus target, float elapsedTime );
+	void AttackSwingUpdate( TargetStatus target, float elapsedTime );
 	void AttackSwingUninit();
 	
-	void AttackFastInit( TargetStatus target );
-	void AttackFastUpdate( TargetStatus target );
+	void AttackFastInit( TargetStatus target, float elapsedTime );
+	void AttackFastUpdate( TargetStatus target, float elapsedTime );
 	void AttackFastUninit();
 
-	void AttackRotateInit( TargetStatus target );
-	void AttackRotateUpdate( TargetStatus target );
+	void AttackRotateInit( TargetStatus target, float elapsedTime );
+	void AttackRotateUpdate( TargetStatus target, float elapsedTime );
 	void AttackRotateUninit();
 
 	void DefeatInit();
-	void DefeatUpdate();
+	void DefeatUpdate( float elapsedTime );
 	void DefeatUninit();
 private:
 	/// <summary>
@@ -373,7 +373,7 @@ private:
 	/// </summary>
 	void CollideToWall();
 
-	void FxUpdate( TargetStatus target );
+	void FxUpdate( TargetStatus target, float elapsedTime );
 private:
 #if USE_IMGUI
 

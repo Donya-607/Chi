@@ -2,14 +2,14 @@
     "KnightAI": {
         "cereal_class_version": 2,
         "wholeFrame": {
-            "value0": 90,
-            "value1": 130,
-            "value2": 240
+            "value0": 90.0,
+            "value1": 130.0,
+            "value2": 240.0
         },
         "coolTimeFrame": {
-            "value0": 30,
-            "value1": 30,
-            "value2": 30
+            "value0": 30.0,
+            "value1": 30.0,
+            "value2": 30.0
         },
         "pAttackChoosers": {
             "value0": {
@@ -114,7 +114,7 @@
             "waitNo": 2,
             "nextAttackNo": -1
         },
-        "initCoolTime": 90,
+        "initCoolTime": 90.0,
         "gapIntervals": [
             3,
             3
