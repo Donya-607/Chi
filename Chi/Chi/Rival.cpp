@@ -1105,7 +1105,7 @@ void Rival::SetFieldRadius( float newFieldRadius )
 
 bool Rival::IsDefeated() const
 {
-	const int MOTION_LENGTH = RivalParam::Open().defeat.motionLength;
+	const float MOTION_LENGTH = RivalParam::Open().defeat.motionLength;
 	return ( extraStatus == ExtraState::DEFEAT && MOTION_LENGTH <= timer ) ? true : false;
 }
 

@@ -185,7 +185,7 @@ void KnightParam::UseImGui()
 
 			if ( ImGui::TreeNode( "Defeat" ) )
 			{
-				ImGui::DragInt( "Motion.Length(Frame)", &m.defeatMotionLength );
+				ImGui::DragFloat( "Motion.Length(Frame)", &m.defeatMotionLength );
 				ImGui::SliderFloat( "AfterMotion.HideSpeed", &m.defeatHideSpeed, 0.00001f, 1.0f );
 
 				ImGui::TreePop();
@@ -220,8 +220,8 @@ void KnightParam::UseImGui()
 				
 				auto ShowSphereF  = [&ShowSphere]( const std::string &prefix, Donya::SphereFrame *pSphereF )
 				{
-					ImGui::DragInt( ( prefix + ".EnableFrame.Start" ).c_str(), &pSphereF->enableFrameStart );
-					ImGui::DragInt( ( prefix + ".EnableFrame.Last" ).c_str(), &pSphereF->enableFrameLast );
+					ImGui::DragFloat( ( prefix + ".EnableFrame.Start" ).c_str(), &pSphereF->enableFrameStart );
+					ImGui::DragFloat( ( prefix + ".EnableFrame.Last" ).c_str(), &pSphereF->enableFrameLast );
 
 					bool oldExistFlag = pSphereF->collision.exist;
 					ShowSphere( prefix, &pSphereF->collision );
@@ -252,10 +252,10 @@ void KnightParam::UseImGui()
 					ImGui::DragFloat( "Scale.Start",	&m.explScaleStart,		0.2f );
 					ImGui::DragFloat( "Scale.Last",		&m.explScaleLast,		0.2f );
 					ImGui::DragFloat( "Scale.Draw",		&m.explScaleDraw,		0.2f );
-					ImGui::SliderInt( "Scaling.Length(Frame)",	&m.explScalingFrame,	1, 300  );
-					ImGui::SliderInt( "Charge.Length(Frame)",	&m.explChargeFrame,		1, 300  );
-					ImGui::SliderInt( "ReviveCollisionFrame",	&m.explReviveColFrame,	1, 300  );
-					ImGui::SliderFloat( "After.HideSpeed",		&m.explHideSpeed,		0.00001f, 1.0f  );
+					ImGui::DragFloat( "Scaling.Length(Frame)",	&m.explScalingFrame );
+					ImGui::DragFloat( "Charge.Length(Frame)",	&m.explChargeFrame );
+					ImGui::DragFloat( "ReviveCollisionFrame",	&m.explReviveColFrame );
+					ImGui::DragFloat( "After.HideSpeed",		&m.explHideSpeed );
 					ShowSphereF( "Collision", &m.hitBoxExpl );
 
 					ImGui::TreePop();
@@ -271,8 +271,8 @@ void KnightParam::UseImGui()
 
 				if ( ImGui::TreeNode( "Attack.Raid" ) )
 				{
-					ImGui::DragInt( "Jump.StartFrame",			&m.raidJumpStartFrame	);	m.raidJumpStartFrame	= std::max( 0,    m.raidJumpStartFrame );
-					ImGui::DragInt( "Jump.LandingFrame",		&m.raidJumpLastFrame	);	m.raidJumpLastFrame		= std::max( 0,    m.raidJumpLastFrame  );
+					ImGui::DragFloat( "Jump.StartFrame",		&m.raidJumpStartFrame	);	m.raidJumpStartFrame	= std::max( 0.0f, m.raidJumpStartFrame );
+					ImGui::DragFloat( "Jump.LandingFrame",		&m.raidJumpLastFrame	);	m.raidJumpLastFrame		= std::max( 0.0f, m.raidJumpLastFrame  );
 					ImGui::DragFloat( "Jump.Length(distance)",	&m.raidJumpDistance		);	m.raidJumpDistance		= std::max( 0.0f, m.raidJumpDistance   );
 
 					// Easing parameter.
@@ -396,7 +396,7 @@ void Knight::Uninit()
 	KnightParam::Get().Uninit();
 }
 
-void Knight::Update( TargetStatus target )
+void Knight::Update( TargetStatus target, float elapsedTime )
 {
 #if USE_IMGUI
 
@@ -405,10 +405,10 @@ void Knight::Update( TargetStatus target )
 
 #endif // USE_IMGUI
 
-	AI.Update( CalcNormalizedDistance( target.pos ) );
+	AI.Update( elapsedTime, CalcNormalizedDistance( target.pos ) );
 
-	ChangeStatus( target );
-	UpdateCurrentStatus( target );
+	ChangeStatus( target, elapsedTime );
+	UpdateCurrentStatus( target, elapsedTime );
 
 	ApplyVelocity( target );
 	CollideToWall();
@@ -885,7 +885,7 @@ void Knight::SetFieldRadius( float newFieldRadius )
 
 bool Knight::IsDefeated() const
 {
-	const int MOTION_LENGTH = KnightParam::Open().defeatMotionLength;
+	const float MOTION_LENGTH = KnightParam::Open().defeatMotionLength;
 	return ( status == KnightAI::ActionState::END && MOTION_LENGTH <= timer ) ? true : false;
 }
 
@@ -944,7 +944,7 @@ Donya::Vector4x4 Knight::CalcWorldMatrix() const
 	return S * R * T;
 }
 
-void Knight::ChangeStatus( TargetStatus target )
+void Knight::ChangeStatus( TargetStatus target, float elapsedTime )
 {
 	KnightAI::ActionState lotteryStatus = AI.GetState();
 	if ( status == lotteryStatus ) { return; }
@@ -965,14 +965,14 @@ void Knight::ChangeStatus( TargetStatus target )
 	}
 	switch ( lotteryStatus )
 	{
-	case KnightAI::ActionState::WAIT:				WaitInit( target );					break;
-	case KnightAI::ActionState::MOVE_GET_NEAR:		MoveInit( target, lotteryStatus );	break;
-	case KnightAI::ActionState::MOVE_GET_FAR:		MoveInit( target, lotteryStatus );	break;
-	case KnightAI::ActionState::MOVE_SIDE:			MoveInit( target, lotteryStatus );	break;
-	case KnightAI::ActionState::MOVE_AIM_SIDE:		MoveInit( target, lotteryStatus );	break;
-	case KnightAI::ActionState::ATTACK_EXPLOSION:	AttackExplosionInit( target );		break;
-	case KnightAI::ActionState::ATTACK_SWING:		AttackSwingInit( target );			break;
-	case KnightAI::ActionState::ATTACK_RAID:		AttackRaidInit( target );			break;
+	case KnightAI::ActionState::WAIT:				WaitInit( target, elapsedTime );				break;
+	case KnightAI::ActionState::MOVE_GET_NEAR:		MoveInit( target, lotteryStatus, elapsedTime );	break;
+	case KnightAI::ActionState::MOVE_GET_FAR:		MoveInit( target, lotteryStatus, elapsedTime );	break;
+	case KnightAI::ActionState::MOVE_SIDE:			MoveInit( target, lotteryStatus, elapsedTime );	break;
+	case KnightAI::ActionState::MOVE_AIM_SIDE:		MoveInit( target, lotteryStatus, elapsedTime );	break;
+	case KnightAI::ActionState::ATTACK_EXPLOSION:	AttackExplosionInit( target, elapsedTime );		break;
+	case KnightAI::ActionState::ATTACK_SWING:		AttackSwingInit( target, elapsedTime );			break;
+	case KnightAI::ActionState::ATTACK_RAID:		AttackRaidInit( target, elapsedTime );			break;
 	// case KnightAI::ActionState::END:				DefeatInit();		break; // Unnecessary.
 	default: break;
 	}
@@ -986,19 +986,19 @@ void Knight::ChangeStatus( TargetStatus target )
 		EffectManager::GetInstance()->BossAttackMomentEffectSet( VIVID_FRAME, BOSS_NO );
 	}
 }
-void Knight::UpdateCurrentStatus( TargetStatus target )
+void Knight::UpdateCurrentStatus( TargetStatus target, float elapsedTime )
 {
 	switch ( status )
 	{
-	case KnightAI::ActionState::WAIT:				WaitUpdate( target );				break;
-	case KnightAI::ActionState::MOVE_GET_NEAR:		MoveUpdate( target );				break;
-	case KnightAI::ActionState::MOVE_GET_FAR:		MoveUpdate( target );				break;
-	case KnightAI::ActionState::MOVE_SIDE:			MoveUpdate( target );				break;
-	case KnightAI::ActionState::MOVE_AIM_SIDE:		MoveUpdate( target );				break;
-	case KnightAI::ActionState::ATTACK_EXPLOSION:	AttackExplosionUpdate( target );	break;
-	case KnightAI::ActionState::ATTACK_SWING:		AttackSwingUpdate( target );		break;
-	case KnightAI::ActionState::ATTACK_RAID:		AttackRaidUpdate( target );			break;
-	case KnightAI::ActionState::END:				DefeatUpdate();						break;
+	case KnightAI::ActionState::WAIT:				WaitUpdate( target, elapsedTime );				break;
+	case KnightAI::ActionState::MOVE_GET_NEAR:		MoveUpdate( target, elapsedTime );				break;
+	case KnightAI::ActionState::MOVE_GET_FAR:		MoveUpdate( target, elapsedTime );				break;
+	case KnightAI::ActionState::MOVE_SIDE:			MoveUpdate( target, elapsedTime );				break;
+	case KnightAI::ActionState::MOVE_AIM_SIDE:		MoveUpdate( target, elapsedTime );				break;
+	case KnightAI::ActionState::ATTACK_EXPLOSION:	AttackExplosionUpdate( target, elapsedTime );	break;
+	case KnightAI::ActionState::ATTACK_SWING:		AttackSwingUpdate( target, elapsedTime );		break;
+	case KnightAI::ActionState::ATTACK_RAID:		AttackRaidUpdate( target, elapsedTime );		break;
+	case KnightAI::ActionState::END:				DefeatUpdate( elapsedTime );					break;
 	default: break;
 	}
 }
@@ -1009,7 +1009,7 @@ XXXUpdate : call by UpdateCurrentStatus.
 XXXUninit : call by ChangeStatus when changing status. before YYYInit.
 */
 
-void Knight::WaitInit( TargetStatus target )
+void Knight::WaitInit( TargetStatus target, float elapsedTime )
 {
 	status			= KnightAI::ActionState::WAIT;
 	slerpFactor		= KnightParam::Get().SlerpFactor( status );
@@ -1018,7 +1018,7 @@ void Knight::WaitInit( TargetStatus target )
 
 	setAnimFlame( models.pIdle.get(), 0 );
 }
-void Knight::WaitUpdate( TargetStatus target )
+void Knight::WaitUpdate( TargetStatus target, float elapsedTime )
 {
 
 }
@@ -1027,7 +1027,7 @@ void Knight::WaitUninit()
 	setAnimFlame( models.pIdle.get(), 0 );
 }
 
-void Knight::MoveInit( TargetStatus target, KnightAI::ActionState statusDetail )
+void Knight::MoveInit( TargetStatus target, KnightAI::ActionState statusDetail, float elapsedTime )
 {
 	status		= statusDetail;
 	slerpFactor	= KnightParam::Get().SlerpFactor( status );
@@ -1047,9 +1047,9 @@ void Knight::MoveInit( TargetStatus target, KnightAI::ActionState statusDetail )
 	setAnimFlame( models.pRunRight.get(), 0 );
 	setAnimFlame( models.pRunBack.get(),  0 );
 }
-void Knight::MoveUpdate( TargetStatus target )
+void Knight::MoveUpdate( TargetStatus target, float elapsedTime )
 {
-	const float speed = KnightParam::Get().MoveSpeed( status );
+	const float speed = KnightParam::Get().MoveSpeed( status ) * elapsedTime;
 	
 	switch ( status )
 	{
@@ -1085,7 +1085,7 @@ void Knight::MoveUninit()
 	setAnimFlame( models.pRunBack.get(),  0 );
 }
 
-void Knight::AttackExplosionInit( TargetStatus target )
+void Knight::AttackExplosionInit( TargetStatus target, float elapsedTime )
 {
 	status			= KnightAI::ActionState::ATTACK_EXPLOSION;
 	timer			= 0;
@@ -1103,15 +1103,15 @@ void Knight::AttackExplosionInit( TargetStatus target )
 
 	EffectManager::GetInstance()->BossAbsorptionEffectSet( GetPos() );
 }
-void Knight::AttackExplosionUpdate( TargetStatus target )
+void Knight::AttackExplosionUpdate( TargetStatus target, float elapsedTime )
 {
-	const int CHARGE_LENGTH  = KnightParam::Open().explChargeFrame;
-	const int SCALING_LENGTH = KnightParam::Open().explScalingFrame;
+	const float CHARGE_LENGTH  = KnightParam::Open().explChargeFrame;
+	const float SCALING_LENGTH = KnightParam::Open().explScalingFrame;
 
 	auto &explHitBox = KnightParam::Get().HitBoxExplosion();
 
-	timer++;
-	if ( timer == CHARGE_LENGTH )
+	timer += 1.0f * elapsedTime;
+	if ( ZeroEqual( timer - CHARGE_LENGTH ) )
 	{
 		// When finish stop the animation, and start explosion.
 		explHitBox.collision.radius = KnightParam::Open().explScaleStart;
@@ -1131,7 +1131,7 @@ void Knight::AttackExplosionUpdate( TargetStatus target )
 		}
 		else
 		{
-			const float scalingPercent = scast<float>( timer ) / scast<float>( CHARGE_LENGTH + SCALING_LENGTH );
+			const float scalingPercent =  timer / ( CHARGE_LENGTH + SCALING_LENGTH );
 			const float difference = RADIUS_MAX - RADIUS_MIN;
 
 			explHitBox.collision.radius = RADIUS_MIN + ( RADIUS_MAX * scalingPercent );
@@ -1140,7 +1140,7 @@ void Knight::AttackExplosionUpdate( TargetStatus target )
 
 	if ( 0 < reviveCollisionTime )
 	{
-		reviveCollisionTime--;
+		reviveCollisionTime -= 1.0f * elapsedTime;
 		if ( reviveCollisionTime <= 0 )
 		{
 			reviveCollisionTime = 0;
@@ -1148,7 +1148,7 @@ void Knight::AttackExplosionUpdate( TargetStatus target )
 		}
 	}
 
-	explHitBox.Update();
+	explHitBox.Update( elapsedTime );
 }
 void Knight::AttackExplosionUninit()
 {
@@ -1162,7 +1162,7 @@ void Knight::AttackExplosionUninit()
 	setAnimFlame( models.pAtkExpl.get(), 0 );
 }
 
-void Knight::AttackSwingInit( TargetStatus target )
+void Knight::AttackSwingInit( TargetStatus target, float elapsedTime )
 {
 	status			= KnightAI::ActionState::ATTACK_SWING;;
 	slerpFactor		= KnightParam::Get().SlerpFactor( status );
@@ -1172,10 +1172,10 @@ void Knight::AttackSwingInit( TargetStatus target )
 	ResetCurrentSphereFN( &KnightParam::Get().HitBoxSwing() );
 	setAnimFlame( models.pAtkSwing.get(), 0 );
 }
-void Knight::AttackSwingUpdate( TargetStatus target )
+void Knight::AttackSwingUpdate( TargetStatus target, float elapsedTime )
 {
 	auto &hitBox = KnightParam::Get().HitBoxSwing();
-	hitBox.sphereF.Update();
+	hitBox.sphereF.Update( elapsedTime );
 }
 void Knight::AttackSwingUninit()
 {
@@ -1185,7 +1185,7 @@ void Knight::AttackSwingUninit()
 	setAnimFlame( models.pAtkSwing.get(), 0 );
 }
 
-void Knight::AttackRaidInit( TargetStatus target )
+void Knight::AttackRaidInit( TargetStatus target, float elapsedTime )
 {
 	status			= KnightAI::ActionState::ATTACK_RAID;
 	timer			= 0;
@@ -1197,27 +1197,27 @@ void Knight::AttackRaidInit( TargetStatus target )
 	ResetCurrentSphereFN( &KnightParam::Get().HitBoxRaid() );
 	setAnimFlame( models.pAtkRaid.get(), 0 );
 }
-void Knight::AttackRaidUpdate( TargetStatus target )
+void Knight::AttackRaidUpdate( TargetStatus target, float elapsedTime )
 {
-	const int START_TIME	= KnightParam::Open().raidJumpStartFrame;
-	const int LANDING_TIME	= KnightParam::Open().raidJumpLastFrame;
+	const float START_TIME		= KnightParam::Open().raidJumpStartFrame;
+	const float LANDING_TIME	= KnightParam::Open().raidJumpLastFrame;
 	
-	auto ApplyExtraOffset	= [&]()->void
+	auto ApplyExtraOffset		= [&]()->void
 	{
 		// Apply movement and reset extraOffset.
 		pos += extraOffset;
 		extraOffset = 0.0f;
 	};
 
-	timer++;
+	timer += 1.0f * elapsedTime;
 
 	if ( timer <= START_TIME )
 	{
 		// Before jump. move to front slowly.
 
-		extraOffset += orientation.LocalFront() * KnightParam::Get().MoveSpeed( status );
+		extraOffset += orientation.LocalFront() * KnightParam::Get().MoveSpeed( status ) * elapsedTime;
 
-		if ( timer == START_TIME )
+		if ( ZeroEqual( timer - START_TIME ) )
 		{
 			ApplyExtraOffset();
 			EffectManager::GetInstance()->JumpEffectSet( GetPos() );
@@ -1228,7 +1228,7 @@ void Knight::AttackRaidUpdate( TargetStatus target )
 	{
 		// Before landing. move to front with easing.
 		
-		float percent	= scast<float>( timer - START_TIME ) / scast<float>( LANDING_TIME );
+		float percent	= ( timer - START_TIME ) / LANDING_TIME;
 		float ease		= Donya::Easing::Ease
 		(
 			scast<Donya::Easing::Kind>( KnightParam::Open().raidEaseKind ),
@@ -1236,9 +1236,9 @@ void Knight::AttackRaidUpdate( TargetStatus target )
 			percent
 		);
 
-		extraOffset = orientation.LocalFront() * ( KnightParam::Open().raidJumpDistance * ease );
+		extraOffset = orientation.LocalFront() * ( KnightParam::Open().raidJumpDistance * elapsedTime * ease );
 
-		if ( timer == START_TIME + LANDING_TIME )
+		if ( ZeroEqual( timer - ( START_TIME + LANDING_TIME ) ) )
 		{
 			ApplyExtraOffset();
 		}
@@ -1249,7 +1249,7 @@ void Knight::AttackRaidUpdate( TargetStatus target )
 	}
 
 	auto &hitBox = KnightParam::Get().HitBoxRaid();
-	hitBox.sphereF.Update();
+	hitBox.sphereF.Update( elapsedTime );
 }
 void Knight::AttackRaidUninit()
 {
@@ -1274,12 +1274,12 @@ void Knight::DefeatInit()
 	slerpFactor			= 0.0f;
 	currentMotion		= Defeat;
 }
-void Knight::DefeatUpdate()
+void Knight::DefeatUpdate( float elapsedTime )
 {
-	timer++;
+	timer += 1.0f * elapsedTime;
 
-	const int MOTION_LENGTH = KnightParam::Open().defeatMotionLength;
-	if ( timer == MOTION_LENGTH )
+	const float MOTION_LENGTH = KnightParam::Open().defeatMotionLength;
+	if ( ZeroEqual( timer - MOTION_LENGTH ) )
 	{
 		EffectManager::GetInstance()->DisappearanceEffectSet( GetPos() );
 	}
