@@ -1323,7 +1323,7 @@ void Knight::CollideToWall()
 	}
 }
 
-void Knight::FxUpdate( TargetStatus target )
+void Knight::FxUpdate( TargetStatus target, float elapsedTime )
 {
 	EffectManager::GetInstance()->BossAttackMomentEffectUpdate( GetPos(), target.pos );
 }

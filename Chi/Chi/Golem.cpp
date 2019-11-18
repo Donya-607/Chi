@@ -151,7 +151,7 @@ void GolemParam::UseImGui()
 
 			if ( ImGui::TreeNode( "Defeat" ) )
 			{
-				ImGui::DragInt( "Motion.Length(Frame)", &defeatMotionLength );
+				ImGui::DragFloat( "Motion.Length(Frame)", &defeatMotionLength );
 				ImGui::SliderFloat( "AfterMotion.HideSpeed", &defeatHideSpeed, 0.00001f, 1.0f );
 
 				ImGui::TreePop();
@@ -159,9 +159,9 @@ void GolemParam::UseImGui()
 			ImGui::Text( "" );
 			if ( ImGui::TreeNode( "SwingAttack" ) )
 			{
-				ImGui::DragInt  ( "StopFrame",			&swingStopFrame  );
+				ImGui::DragFloat( "StopFrame",			&swingStopFrame  );
 				ImGui::DragFloat( "StopLength(Second)",	&swingStopLength, 0.01f );
-				swingStopFrame  = std::max( 0,		swingStopFrame  );
+				swingStopFrame  = std::max( 0.0f,	swingStopFrame  );
 				swingStopLength = std::max( 0.0f,	swingStopLength );
 
 				ImGui::TreePop();
@@ -181,12 +181,12 @@ void GolemParam::UseImGui()
 					ImGui::Text( ( "Easing : " + strKind + "." + strType ).c_str() );
 				}
 
-				ImGui::DragInt( "Leave.StartFrame", &rotLeaveStartFrame );
-				ImGui::DragInt( "Leave.WholeFrame", &rotLeaveWholeFrame );
-				ImGui::DragFloat( "Leave.Distance", &rotLeaveDistance   );
-				rotLeaveStartFrame	= std::max( 0, rotLeaveStartFrame );
-				rotLeaveWholeFrame	= std::max( 0, rotLeaveWholeFrame );
-				rotLeaveDistance	= std::max( 0.0f, rotLeaveDistance );
+				ImGui::DragFloat( "Leave.StartFrame", &rotLeaveStartFrame );
+				ImGui::DragFloat( "Leave.WholeFrame", &rotLeaveWholeFrame );
+				ImGui::DragFloat( "Leave.Distance",   &rotLeaveDistance   );
+				rotLeaveStartFrame	= std::max( 0.0f, rotLeaveStartFrame  );
+				rotLeaveWholeFrame	= std::max( 0.0f, rotLeaveWholeFrame  );
+				rotLeaveDistance	= std::max( 0.0f, rotLeaveDistance    );
 
 				ImGui::TreePop();
 			}
@@ -219,8 +219,8 @@ void GolemParam::UseImGui()
 				};
 				auto ShowOBBF		= [&ShowOBB]( const std::string &prefix, Donya::OBBFrame	*pOBBF	)
 				{
-					ImGui::DragInt( ( prefix + ".EnableFrame.Start" ).c_str(), &pOBBF->enableFrameStart );
-					ImGui::DragInt( ( prefix + ".EnableFrame.Last"  ).c_str(), &pOBBF->enableFrameLast  );
+					ImGui::DragFloat( ( prefix + ".EnableFrame.Start" ).c_str(), &pOBBF->enableFrameStart );
+					ImGui::DragFloat( ( prefix + ".EnableFrame.Last"  ).c_str(), &pOBBF->enableFrameLast  );
 
 					bool oldExistFlag = pOBBF->OBB.exist;
 					ShowOBB( prefix, &pOBBF->OBB );
@@ -228,8 +228,8 @@ void GolemParam::UseImGui()
 				};
 				auto ShowSphereF	= [&ShowSphere]( const std::string &prefix, Donya::SphereFrame	*pSphereF	)
 				{
-					ImGui::DragInt( ( prefix + ".EnableFrame.Start" ).c_str(), &pSphereF->enableFrameStart );
-					ImGui::DragInt( ( prefix + ".EnableFrame.Last"  ).c_str(), &pSphereF->enableFrameLast  );
+					ImGui::DragFloat( ( prefix + ".EnableFrame.Start" ).c_str(), &pSphereF->enableFrameStart );
+					ImGui::DragFloat( ( prefix + ".EnableFrame.Last"  ).c_str(), &pSphereF->enableFrameLast  );
 
 					bool oldExistFlag = pSphereF->collision.exist;
 					ShowSphere( prefix, &pSphereF->collision );
@@ -544,7 +544,7 @@ void Golem::Uninit()
 	EffectManager::GetInstance()->EruptionEffectReSetCollision();
 }
 
-void Golem::Update( TargetStatus target )
+void Golem::Update( TargetStatus target, float elapsedTime )
 {
 #if USE_IMGUI
 
@@ -553,15 +553,15 @@ void Golem::Update( TargetStatus target )
 
 #endif // USE_IMGUI
 
-	AI.Update( CalcNormalizedDistance( target.pos ) );
+	AI.Update( CalcNormalizedDistance( target.pos ), elapsedTime );
 
-	ChangeStatus( target );
-	UpdateCurrentStatus( target );
+	ChangeStatus( target, elapsedTime );
+	UpdateCurrentStatus( target, elapsedTime );
 
 	ApplyVelocity( target );
 	CollideToWall();
 
-	FxUpdate( target );
+	FxUpdate( target, elapsedTime );
 }
 
 void Golem::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matProjection, float animeAccel )
@@ -1193,7 +1193,7 @@ Donya::Vector4x4 Golem::CalcWorldMatrix() const
 	return S * R * T;
 }
 
-void Golem::ChangeStatus( TargetStatus target )
+void Golem::ChangeStatus( TargetStatus target, float elapsedTime )
 {
 	GolemAI::ActionState lotteryStatus = AI.GetState();
 	if ( status == lotteryStatus ) { return; }
@@ -1214,14 +1214,14 @@ void Golem::ChangeStatus( TargetStatus target )
 	}
 	switch ( lotteryStatus )
 	{
-	case GolemAI::ActionState::WAIT:				WaitInit( target );					break;
-	case GolemAI::ActionState::MOVE_GET_NEAR:		MoveInit( target, lotteryStatus );	break;
-	case GolemAI::ActionState::MOVE_GET_FAR:		MoveInit( target, lotteryStatus );	break;
-	case GolemAI::ActionState::MOVE_SIDE:			MoveInit( target, lotteryStatus );	break;
-	case GolemAI::ActionState::MOVE_AIM_SIDE:		MoveInit( target, lotteryStatus );	break;
-	case GolemAI::ActionState::ATTACK_SWING:		AttackSwingInit( target );			break;
-	case GolemAI::ActionState::ATTACK_FAST:			AttackFastInit( target );			break;
-	case GolemAI::ActionState::ATTACK_ROTATE:		AttackRotateInit( target );			break;
+	case GolemAI::ActionState::WAIT:				WaitInit( target, elapsedTime );				break;
+	case GolemAI::ActionState::MOVE_GET_NEAR:		MoveInit( target, lotteryStatus, elapsedTime );	break;
+	case GolemAI::ActionState::MOVE_GET_FAR:		MoveInit( target, lotteryStatus, elapsedTime );	break;
+	case GolemAI::ActionState::MOVE_SIDE:			MoveInit( target, lotteryStatus, elapsedTime );	break;
+	case GolemAI::ActionState::MOVE_AIM_SIDE:		MoveInit( target, lotteryStatus, elapsedTime );	break;
+	case GolemAI::ActionState::ATTACK_SWING:		AttackSwingInit( target, elapsedTime );			break;
+	case GolemAI::ActionState::ATTACK_FAST:			AttackFastInit( target, elapsedTime );			break;
+	case GolemAI::ActionState::ATTACK_ROTATE:		AttackRotateInit( target, elapsedTime );		break;
 	// case GolemAI::ActionState::END:					DefeatInit();				break; // Unnecessary
 	default: break;
 	}
@@ -1235,19 +1235,19 @@ void Golem::ChangeStatus( TargetStatus target )
 		EffectManager::GetInstance()->BossAttackMomentEffectSet( VIVID_FRAME, BOSS_NO );
 	}
 }
-void Golem::UpdateCurrentStatus( TargetStatus target )
+void Golem::UpdateCurrentStatus( TargetStatus target, float elapsedTime )
 {
 	switch ( status )
 	{
-	case GolemAI::ActionState::WAIT:				WaitUpdate( target );			break;
-	case GolemAI::ActionState::MOVE_GET_NEAR:		MoveUpdate( target );			break;
-	case GolemAI::ActionState::MOVE_GET_FAR:		MoveUpdate( target );			break;
-	case GolemAI::ActionState::MOVE_SIDE:			MoveUpdate( target );			break;
-	case GolemAI::ActionState::MOVE_AIM_SIDE:		MoveUpdate( target );			break;
-	case GolemAI::ActionState::ATTACK_SWING:		AttackSwingUpdate( target );	break;
-	case GolemAI::ActionState::ATTACK_FAST:			AttackFastUpdate( target );		break;
-	case GolemAI::ActionState::ATTACK_ROTATE:		AttackRotateUpdate( target );	break;
-	case GolemAI::ActionState::END:					DefeatUpdate();					break;
+	case GolemAI::ActionState::WAIT:				WaitUpdate( target, elapsedTime );			break;
+	case GolemAI::ActionState::MOVE_GET_NEAR:		MoveUpdate( target, elapsedTime );			break;
+	case GolemAI::ActionState::MOVE_GET_FAR:		MoveUpdate( target, elapsedTime );			break;
+	case GolemAI::ActionState::MOVE_SIDE:			MoveUpdate( target, elapsedTime );			break;
+	case GolemAI::ActionState::MOVE_AIM_SIDE:		MoveUpdate( target, elapsedTime );			break;
+	case GolemAI::ActionState::ATTACK_SWING:		AttackSwingUpdate( target, elapsedTime );	break;
+	case GolemAI::ActionState::ATTACK_FAST:			AttackFastUpdate( target, elapsedTime );	break;
+	case GolemAI::ActionState::ATTACK_ROTATE:		AttackRotateUpdate( target, elapsedTime );	break;
+	case GolemAI::ActionState::END:					DefeatUpdate( elapsedTime );				break;
 	default: break;
 	}
 }
@@ -1258,7 +1258,7 @@ XXXUpdate : call by UpdateCurrentStatus.
 XXXUninit : call by ChangeStatus when changing status. before YYYInit.
 */
 
-void Golem::WaitInit( TargetStatus target )
+void Golem::WaitInit( TargetStatus target, float elapsedTime )
 {
 	status			= GolemAI::ActionState::WAIT;
 	slerpFactor		= GolemParam::Get().SlerpFactor( status );
@@ -1267,7 +1267,7 @@ void Golem::WaitInit( TargetStatus target )
 
 	setAnimFlame( models.pIdle.get(), 0 );
 }
-void Golem::WaitUpdate( TargetStatus target )
+void Golem::WaitUpdate( TargetStatus target, float elapsedTime )
 {
 
 }
@@ -1276,7 +1276,7 @@ void Golem::WaitUninit()
 	setAnimFlame( models.pIdle.get(), 0 );
 }
 
-void Golem::MoveInit( TargetStatus target, GolemAI::ActionState statusDetail )
+void Golem::MoveInit( TargetStatus target, GolemAI::ActionState statusDetail, float elapsedTime )
 {
 	status			= statusDetail;
 	slerpFactor		= GolemParam::Get().SlerpFactor( status );
@@ -1285,9 +1285,9 @@ void Golem::MoveInit( TargetStatus target, GolemAI::ActionState statusDetail )
 
 	setAnimFlame( models.pIdle.get(), 0 );
 }
-void Golem::MoveUpdate( TargetStatus target )
+void Golem::MoveUpdate( TargetStatus target, float elapsedTime )
 {
-	const float speed = GolemParam::Get().MoveSpeed( status );
+	const float speed = GolemParam::Get().MoveSpeed( status ) * elapsedTime;
 
 	switch ( status )
 	{
@@ -1320,7 +1320,7 @@ void Golem::MoveUninit()
 	setAnimFlame( models.pIdle.get(), 0 );
 }
 
-void Golem::AttackSwingInit( TargetStatus target )
+void Golem::AttackSwingInit( TargetStatus target, float elapsedTime )
 {
 	status			= GolemAI::ActionState::ATTACK_SWING;
 	timer			= GolemParam::Get().SwingStopFrame();
@@ -1333,18 +1333,18 @@ void Golem::AttackSwingInit( TargetStatus target )
 	setAnimFlame( models.pAtkSwing.get(), 0 );
 	setStopAnimation( models.pAtkSwing.get(), /* is_stop = */ false );
 }
-void Golem::AttackSwingUpdate( TargetStatus target )
+void Golem::AttackSwingUpdate( TargetStatus target, float elapsedTime )
 {
 	// When beginning status.
 	if ( 0 < timer )
 	{
-		timer--;
+		timer -= 1.0f * elapsedTime;
 		if ( timer <= 0 )
 		{
 			// Start stop and spawn effects.
 
 			constexpr float SEC_TO_FRAME = 1.0f / 60.0f;
-			swingTimer = scast<int>( GolemParam::Get().SwingStopSecond() / SEC_TO_FRAME );
+			swingTimer = GolemParam::Get().SwingStopSecond() / SEC_TO_FRAME;
 			if ( 0 < swingTimer )
 			{
 				setStopAnimation( models.pAtkSwing.get(), /* is_stop = */ true );
@@ -1356,7 +1356,7 @@ void Golem::AttackSwingUpdate( TargetStatus target )
 	else // When stopping and spawn effects.
 	if ( 0 < swingTimer )
 	{
-		swingTimer--;
+		swingTimer -= 1.0f * elapsedTime;
 		if ( swingTimer <= 0 )
 		{
 			// Finish stop and spawn effects.
@@ -1379,7 +1379,7 @@ void Golem::AttackSwingUpdate( TargetStatus target )
 		for ( size_t i = 0; i < COUNT; ++i )
 		{
 			auto &OBB = pOBBs->at( i );
-			OBB.Update();
+			OBB.Update( elapsedTime );
 		}
 	}
 }
@@ -1393,7 +1393,7 @@ void Golem::AttackSwingUninit()
 	setStopAnimation( models.pAtkSwing.get(), /* is_stop = */ false );
 }
 
-void Golem::AttackFastInit( TargetStatus target )
+void Golem::AttackFastInit( TargetStatus target, float elapsedTime )
 {
 	status			= GolemAI::ActionState::ATTACK_FAST;
 	slerpFactor		= GolemParam::Get().SlerpFactor( status );
@@ -1402,16 +1402,16 @@ void Golem::AttackFastInit( TargetStatus target )
 	ResetCurrentOBBFNames( GolemParam::Get().OBBFAtksFast() );
 	setAnimFlame( models.pAtkFast.get(), 0 );
 }
-void Golem::AttackFastUpdate( TargetStatus target )
+void Golem::AttackFastUpdate( TargetStatus target, float elapsedTime )
 {
-	velocity = orientation.LocalFront() * GolemParam::Get().MoveSpeed( status );
+	velocity = orientation.LocalFront() * GolemParam::Get().MoveSpeed( status ) * elapsedTime;
 
 	auto *pOBBFNs = GolemParam::Get().OBBFAtksFast();
 	const size_t COUNT = pOBBFNs->size();
 	for ( size_t i = 0; i < COUNT; ++i )
 	{
 		auto &OBBFN = pOBBFNs->at( i );
-		OBBFN.OBBF.Update();
+		OBBFN.OBBF.Update( elapsedTime );
 	}
 }
 void Golem::AttackFastUninit()
@@ -1420,7 +1420,7 @@ void Golem::AttackFastUninit()
 	setAnimFlame( models.pAtkFast.get(), 0 );
 }
 
-void Golem::AttackRotateInit( TargetStatus target )
+void Golem::AttackRotateInit( TargetStatus target, float elapsedTime )
 {
 	status			= GolemAI::ActionState::ATTACK_ROTATE;
 	slerpFactor		= GolemParam::Get().SlerpFactor( status );
@@ -1431,16 +1431,16 @@ void Golem::AttackRotateInit( TargetStatus target )
 	ResetCurrentSphereFrames( GolemParam::Get().RotateAtkCollisions() );
 	setAnimFlame( models.pAtkRotate.get(), 0 );
 }
-void Golem::AttackRotateUpdate( TargetStatus target )
+void Golem::AttackRotateUpdate( TargetStatus target, float elapsedTime )
 {
-	velocity = orientation.LocalFront() * GolemParam::Get().MoveSpeed( status );
+	velocity = orientation.LocalFront() * GolemParam::Get().MoveSpeed( status ) * elapsedTime;
 
-	const int startLeaveFrame	= GolemParam::Get().RotLeaveStartFrame();
-	const int currentFrame		= models.pAtkRotate->getAnimFlame();
+	const float startLeaveFrame	= GolemParam::Get().RotLeaveStartFrame();
+	const float currentFrame	= scast<float>( models.pAtkRotate->getAnimFlame() );
 	if ( startLeaveFrame <= currentFrame )
 	{
 		const auto &PARAM = GolemParam::Get();
-		const float increaseSpeed = 1.0f / scast<float>( PARAM.RotLeaveWholeFrame() );
+		const float increaseSpeed = 1.0f / PARAM.RotLeaveWholeFrame();
 
 		easeFactor += increaseSpeed;
 		if ( 1.0f <= easeFactor )
@@ -1454,7 +1454,7 @@ void Golem::AttackRotateUpdate( TargetStatus target )
 			scast<Donya::Easing::Type>( PARAM.RotLeaveEaseType() ),
 			easeFactor
 		);
-		extraOffset = -orientation.LocalFront() * ( PARAM.RotLeaveDistance() * easePercent );
+		extraOffset = -orientation.LocalFront() * ( PARAM.RotLeaveDistance() * elapsedTime * easePercent );
 	}
 
 	auto *pSphereFs = GolemParam::Get().RotateAtkCollisions();
@@ -1462,7 +1462,7 @@ void Golem::AttackRotateUpdate( TargetStatus target )
 	for ( size_t i = 0; i < COUNT; ++i )
 	{
 		auto &sphereF = pSphereFs->at( i );
-		sphereF.Update();
+		sphereF.Update( elapsedTime );
 	}
 }
 void Golem::AttackRotateUninit()
@@ -1490,12 +1490,12 @@ void Golem::DefeatInit()
 
 	EffectManager::GetInstance()->EruptionEffectReSetCollision();
 }
-void Golem::DefeatUpdate()
+void Golem::DefeatUpdate( float elapsedTime )
 {
-	timer++;
+	timer += 1.0f * elapsedTime;
 
-	const int MOTION_LENGTH = GolemParam::Get().DefeatMotionLength();
-	if ( timer == MOTION_LENGTH )
+	const float MOTION_LENGTH = GolemParam::Get().DefeatMotionLength();
+	if ( ZeroEqual( timer - MOTION_LENGTH ) )
 	{
 		EffectManager::GetInstance()->DisappearanceEffectSet( GetPos() );
 	}
@@ -1539,7 +1539,7 @@ void Golem::CollideToWall()
 	}
 }
 
-void Golem::FxUpdate( TargetStatus target )
+void Golem::FxUpdate( TargetStatus target, float elapsedTime )
 {
 	EffectManager::GetInstance()->BossAttackMomentEffectUpdate( GetPos(), target.pos );
 }

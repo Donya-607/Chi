@@ -344,7 +344,7 @@ private:
 	/// </summary>
 	void CollideToWall();
 
-	void FxUpdate( TargetStatus target );
+	void FxUpdate( TargetStatus target, float elapsedTime );
 private:
 #if USE_IMGUI
 
