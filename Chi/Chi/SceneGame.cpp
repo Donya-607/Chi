@@ -426,7 +426,9 @@ public:
 			ResetEffects();
 			GameTimer::GetInstance()->Init();
 
-			pSceneManager->setNextScene( new SceneGameOver, false );
+			//pSceneManager->setNextScene( new SceneGameOver, false );
+
+			Fade::GetInstance()->Init(2);
 		}
 	}
 
@@ -456,7 +458,9 @@ public:
 
 				ResetEffects();
 
-				pSceneManager->setNextScene( new SceneResult(), false );
+				//pSceneManager->setNextScene( new SceneResult(), false );
+
+				Fade::GetInstance()->Init(3);
 			}
 			else
 			{
@@ -464,7 +468,9 @@ public:
 
 				ResetEffects();
 
-				pSceneManager->setNextScene( new SceneGame(), false );
+				//pSceneManager->setNextScene( new SceneGame(), false );
+
+				if (!Fade::GetInstance()->GetExist()) Fade::GetInstance()->Init(1);
 			}
 		}
 	}
@@ -1027,8 +1033,15 @@ SceneGame::~SceneGame()
 void SceneGame::init()
 {
 	isStack = false; // Is this necessary ?
+	endLoad = false;
+	loadFinish = false;
 
-	pImpl->Init();
+	loading_thread = std::make_unique<std::thread>([&]() //&は無名関数, 次が関数の引数, {}の中が関数の中身
+	{
+		std::lock_guard<std::mutex> lock(loading_mutex);
+		pImpl->Init();
+		endLoad = true;
+	});
 }
 void SceneGame::uninit()
 {
@@ -1037,15 +1050,47 @@ void SceneGame::uninit()
 
 void SceneGame::update()
 {
+	Fade::GetInstance()->Update();
+
+	if (/*is_now_loading()*/ !endLoad)
+	{
+		return; //ロードが完了していなかったら即return
+	}
+	if (/*loading_thread && loading_thread->joinable()*/ endLoad && !loadFinish)
+	{
+		if (loading_thread && loading_mutex.try_lock())
+		{
+			loading_mutex.unlock();
+		}
+		loading_thread->join();
+		loadFinish = true;
+	}
+
 	pImpl->Update();
 }
 
 void SceneGame::render()
 {
+	clearWindow(0.5f, 0.5f, 0.5f, 1.0f);
+
+	if (/*is_now_loading()*/ !endLoad)
+	{
+		//ロード中
+		Fade::GetInstance()->Draw();
+		return;
+	}
+
 	pImpl->Draw();
+	Fade::GetInstance()->Draw();
 }
 
 void SceneGame::imGui()
 {
+	if (/*is_now_loading()*/ !endLoad)
+	{
+		//ロード中
+		return;
+	}
+
 	pImpl->UseImGui();
 }
