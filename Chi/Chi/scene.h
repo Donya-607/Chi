@@ -3,6 +3,9 @@
 
 #include <Windows.h>	// Insert by Donya, must include this before "Xinput.h".
 #include <Xinput.h>
+#include <mutex>
+#include <thread>
+#include <memory>
 
 #include "baseScene.h"
 
@@ -22,13 +25,14 @@
 #include "Donya/Timer.h"
 
 #include "Mouse.h"
+#include "Fade.h"
 
 using namespace DirectX;
 class sceneTitle : public baseScene
 {
 private:
-	Donya::Vector3 camPos = { 0.0f, 2450.0f, 15000.0f };
-	Donya::Vector3 camTarget = { 0.0f, 2000.0f, 0.0f };
+	Donya::Vector3 camPos = { 0.0f, 2420.0f, 15000.0f };
+	Donya::Vector3 camTarget = { 0.0f, 2590.0f, 0.0f };
 	float cameraDistance;
 
 	Donya::Vector3 camTitlePos = { 0.0f, 2226.0f, 14446.0f };
@@ -138,8 +142,22 @@ private:
 	DirectX::XMFLOAT4 judged_color;
 #endif
 
+private: // multi thread
+	std::unique_ptr<std::thread> loading_thread;
+	std::unique_ptr<Sprite> font;
+	std::mutex loading_mutex;
+	bool is_now_loading()
+	{
+		if (loading_thread && loading_mutex.try_lock())
+		{
+			loading_mutex.unlock();
+			return false;
+		}
+		return true;
+	}
+
 public:
-	sceneTitle() : 
+	sceneTitle(): 
 		shader(),
 		lights(),
 		player(),
@@ -178,6 +196,22 @@ public:
 	struct Impl;
 private:
 	std::unique_ptr<Impl> pImpl;
+
+private: // multi thread
+	std::unique_ptr<std::thread> loading_thread;
+	std::unique_ptr<Sprite> font;
+	std::mutex loading_mutex;
+	bool endLoad;
+	bool loadFinish;
+	bool is_now_loading()
+	{
+		if (loading_thread && loading_mutex.try_lock())
+		{
+			loading_mutex.unlock();
+			return false;
+		}
+		return true;
+	}
 
 public:
 	SceneGame();
@@ -322,7 +356,28 @@ private:
 	// light
 	Lights	lights;
 
-	Sprite sprite;
+	Sprite back;
+	Sprite text;
+	Sprite result;
+	Sprite ranking;
+
+	struct SpriteData
+	{
+		Donya::Vector2 pos;
+		Donya::Vector2 texPos;
+		Donya::Vector2 texSize;
+	};
+	SpriteData backData;
+	SpriteData textData;
+	SpriteData bossBackData[3];
+	SpriteData boss1TimeData[10];
+	SpriteData boss2TimeData[10];
+	SpriteData boss3TimeData[10];
+	SpriteData totalTimeData[10];
+	SpriteData nextTelopData;
+
+	SpriteData rankingData;
+
 
 	DirectX::XMFLOAT3 rankingPos;
 	DirectX::XMFLOAT3 yourScorePos;
@@ -384,14 +439,7 @@ private:
 	SpriteData continuity;
 	SpriteData toTitle;
 
-	/*continuity.pos = Donya::Vector2(1920.0f / 4.0f, 1080.0f / 0.5f);
-	continuity.texPos = Donya::Vector2(0.0f, 0.0f);
-	continuity.texSize = Donya::Vector2(434.0f, 114.0f);
-
-	toTitle.pos = Donya::Vector2(1920.0f / 0.5f, 1080.0f / 0.5f);
-	toTitle.texPos = Donya::Vector2(0.0f, 114.0f);
-	toTitle.texSize = Donya::Vector2(434.0f, 114.0f);*/
-
+	int state;
 
 private:
 	friend class cereal::access;

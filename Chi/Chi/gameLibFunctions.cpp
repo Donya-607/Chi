@@ -193,15 +193,15 @@ void spriteRenderRect(Sprite* _sprite, const float pos_x, const float pos_y, con
 	GameLib::texture::SpriteRender(
 		_sprite,
 		pos_x, pos_y, pos_x + texSize_x, pos_y + texSize_y,
-		texPos_x, texPos_y, texPos_x + texSize_x, texPos_y + texSize_y,
+		texPos_x, texPos_y, texSize_x, texSize_y,
 		0, 1, 1, 1, 0, 0, _tempX, _tempY);
 }
 void spriteRenderRect(Sprite* _sprite, const DirectX::XMFLOAT2& pos, const DirectX::XMFLOAT2& texPos, const DirectX::XMFLOAT2& texSize, bool _tempX, bool _tempY)
 {
 	GameLib::texture::SpriteRender(
 		_sprite,
-		pos.x, pos.y, pos.x + texSize.x, pos.y + texSize.y,
-		texPos.x, texPos.y, texPos.x + texSize.x, texPos.y + texSize.y,
+		pos.x, pos.y, texSize.x, texSize.y,
+		texPos.x, texPos.y, texSize.x, texSize.y,
 		0, 1, 1, 1, 0, 0, _tempX, _tempY);
 }
 
@@ -327,7 +327,7 @@ void spriteRenderRota(Sprite* _sprite, const DirectX::XMFLOAT2 pos, const float 
 {
 	GameLib::texture::SpriteRender(
 		_sprite,
-		pos.x, pos.y, pos.x + _sprite->getSize().x * Magnification, pos.y + _sprite->getSize().y * Magnification,
+		pos.x, pos.y, _sprite->getSize().x * Magnification, _sprite->getSize().y * Magnification,
 		0, 0, _sprite->getSize().x, _sprite->getSize().y,
 		angle, 1, 1, 1, 0, 0, _tempX, _tempY);
 }
@@ -383,7 +383,7 @@ void spriteRenderRectRota(Sprite* _sprite, const DirectX::XMFLOAT2& pos, const D
 	GameLib::texture::SpriteRender(
 		_sprite,
 		pos.x, pos.y, pos.x + texSize.x, pos.y + texSize.y,
-		texPos.x, texPos.y, texPos.x + texSize.x, texPos.y + texSize.y,
+		texPos.x, texPos.y, texSize.x, texSize.y,
 		angle, 1, 1, 1, 0, 0, _tempX, _tempY);
 }
 
@@ -392,7 +392,7 @@ void spriteRenderRectRota2(Sprite* _sprite, const float pos_x, const float pos_y
 	GameLib::texture::SpriteRender(
 		_sprite,
 		pos_x, pos_y,
-		pos_x + texSize_x * Magnification_x, pos_y + texSize_y * Magnification_y,
+		texSize_x * Magnification_x, texSize_y * Magnification_y,
 		texPos_x, texPos_y, texPos_x + texSize_x, texPos_y + texSize_y,
 		angle, 1, 1, 1, 0, 0, _tempX, _tempY);
 }
@@ -402,7 +402,7 @@ void spriteRenderRectRota2(Sprite* _sprite, const DirectX::XMFLOAT2& pos, const 
 		_sprite,
 		pos.x, pos.y,
 		pos.x + texSize.x * Magnification.x, pos.y + texSize.y * Magnification.y,
-		texPos.x, texPos.y, texPos.x + texSize.x, texPos.y + texSize.y,
+		texPos.x, texPos.y, texSize.x, texSize.y,
 		angle, 1, 1, 1, 0, 0, _tempX, _tempY);
 }
 
@@ -465,6 +465,11 @@ DirectX::XMFLOAT4 getCamPos()
 DirectX::XMFLOAT4 getCamTarget()
 {
 	return GameLib::camera::getTarget();
+}
+
+void startShake(float _shake_power, float _time)
+{
+	GameLib::camera::startShake(_shake_power, _time);
 }
 
 //light//
@@ -684,6 +689,16 @@ DirectX::XMINT2 getThumbL(int _padNum)
 DirectX::XMINT2 getThumbR(int _padNum)
 {
 	return GameLib::input::xInput::getThumbR(_padNum);
+}
+
+void startViblation(int index, float timer, float motor)
+{
+	GameLib::input::xInput::startViblation(index, timer, motor);
+}
+
+void stopViblation(int index)
+{
+	GameLib::input::xInput::stopViblation(index);
 }
 
 

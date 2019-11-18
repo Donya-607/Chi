@@ -2,7 +2,8 @@
 #define CAMERA_H_
 
 #include	<DirectXMath.h>
-
+#include <cstdlib>
+#include <ctime>
 class Camera
 {
 public:
@@ -22,9 +23,14 @@ public:
 	float aspect;
 	float near_panel;
 	float far_panel;
+	float shake_power;
+	DirectX::XMFLOAT2 shakepos;
+	DirectX::XMFLOAT2 shakeSpeed;
+	float timer;
 
 	Camera();
-	void update();
+	void update(float elapsed_time);
+	void startShake(float _shake_power, float _time);
 	void MonitoringCam();
 	void RelativePosCam();
 	void TrackCam();
@@ -39,7 +45,7 @@ public:
 	DirectX::XMFLOAT4 getCamTarget() { return { target.x,target.y,target.z,1.0f }; } DirectX::XMMATRIX SetOrthographicMatrix(float _w, float _h, float _zNear, float _zFar);
 	DirectX::XMMATRIX SetPerspectiveMatrix(float _fov, float _aspect, float _zNear, float _zFar);
 	DirectX::XMMATRIX GetViewMatrix();
-	DirectX::XMMATRIX GetProjectionMatrix() 
+	DirectX::XMMATRIX GetProjectionMatrix()
 	{
 		DirectX::XMMATRIX projection = DirectX::XMMatrixPerspectiveFovLH(fov, aspect, near_panel, far_panel);
 		return projection;
