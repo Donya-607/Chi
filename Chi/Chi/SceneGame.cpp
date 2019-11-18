@@ -399,6 +399,8 @@ public:
 
 	void BattleUpdate( float elapsedTime )
 	{
+		GameTimer::GetInstance()->Update( stageNo );
+
 		stage.Update();
 
 		Player::Input  playerInput = Player::Input::MakeByExternalInput( Donya::Vector4x4::FromMatrix( GameLib::camera::GetViewMatrix() ) );
@@ -406,14 +408,13 @@ public:
 		if ( playerInput.moveVector.IsZero() )
 		{
 			playerInput.moveVector = GetBossPosition() - player.GetPosition();
-			playerInput.moveVector.Normalized();
+			playerInput.moveVector.Normalize();
 			playerInput.onlyRotation = true;
 		}
 		player.Update( playerInput, elapsedTime );
 
 		BossUpdate( elapsedTime );
 
-		GameTimer::GetInstance()->Update( stageNo );
 		std::vector<Donya::Circle> bossBodies = FetchBossBodies();
 		player.PhysicUpdate( bossBodies );
 
@@ -435,8 +436,6 @@ public:
 			ResetEffects();
 			GameTimer::GetInstance()->Init();
 
-			//pSceneManager->setNextScene( new SceneGameOver, false );
-
 			Fade::GetInstance()->Init(2);
 		}
 	}
@@ -446,16 +445,12 @@ public:
 		stage.Update();
 
 		Player::Input  playerInput = Player::Input::MakeByExternalInput( Donya::Vector4x4::FromMatrix( GameLib::camera::GetViewMatrix() ) );
-		// If the movement is nothing, set the player's direction to boss.
-		if ( playerInput.moveVector.IsZero() )
-		{
-			playerInput.moveVector = GetBossPosition() - player.GetPosition();
-			playerInput.moveVector.Normalized();
-			playerInput.onlyRotation = true;
-		}
 		player.Update( playerInput, elapsedTime );
 
 		BossUpdate( elapsedTime );
+
+		std::vector<Donya::Circle> emptyCircles{};
+		player.PhysicUpdate( emptyCircles );
 
 		CameraUpdate( GetCameraTargetPos() );
 
