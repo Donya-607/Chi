@@ -22,29 +22,29 @@ class PlayerParam final : public Donya::Singleton<PlayerParam>
 {
 	friend Donya::Singleton<PlayerParam>;
 private:
-	int		frameUnfoldableDefence;	// 1 ~ N. Use when State::Defend.
-	int		shieldsRecastFrame;		// Frame of reuse shield.
-	int		frameStopAnime;			// 1 ~ N. Frame of stopping animation of attack.Use when State::Attack.
-	int		frameStopTiming;		// 0 ~ N. Timing of stopping animation of attack.Use when State::Attack.
-	int		frameCancelableAttack;	// 1 ~ "frameWholeAttacking". this frame is irrelevant by "frameStopAnime". Use when State::Attack.
-	int		frameWholeAttacking;	// 1 ~ N. this whole frame is irrelevant by "frameCancelableAttack". Use when State::Attack.
-	int		advanceStartFrame;		// 1 ~ N.
-	int		advanceFinFrame;		// 1 ~ N. this frame is same as start frame of return.
-	int		returnFinFrame;			// 1 ~ "frameWholeAttacking".
-	int		advanceEaseKind;
-	int		advanceEaseType;
-	int		returnEaseKind;
-	int		returnEaseType;
-	float	advanceDistance;		// Use when State::Attack.
-	float	scale;					// Usually 1.0f.
-	float	runSpeed;				// Scalar.
-	float	rotSlerpFactor;			// Use player's rotation.
-	Donya::AABB			hitBoxBody;		// HitBox that collide to boss attacks.
-	Donya::Sphere		hitBoxPhysic;	// HitBox that collide to stage.
-	Donya::AABB			hitBoxShield;	// HitBox of shield.
-	Donya::OBBFrame		hitBoxLance;	// HitBox of lance.
-	std::string			lanceMeshName;	// Use for find a mesh that transform the OBB of lance.
-	std::vector<float>	motionSpeeds;	// Magnification.
+	float				frameUnfoldableDefence;	// 1 ~ N. Use when State::Defend.
+	float				shieldsRecastFrame;		// Frame of reuse shield.
+	float				frameStopAnime;			// 1 ~ N. Frame of stopping animation of attack.Use when State::Attack.
+	float				frameStopTiming;		// 0 ~ N. Timing of stopping animation of attack.Use when State::Attack.
+	float				frameCancelableAttack;	// 1 ~ "frameWholeAttacking". this frame is irrelevant by "frameStopAnime". Use when State::Attack.
+	float				frameWholeAttacking;	// 1 ~ N. this whole frame is irrelevant by "frameCancelableAttack". Use when State::Attack.
+	float				advanceStartFrame;		// 1 ~ N.
+	float				advanceFinFrame;		// 1 ~ N. this frame is same as start frame of return.
+	float				returnFinFrame;			// 1 ~ "frameWholeAttacking".
+	int					advanceEaseKind;
+	int					advanceEaseType;
+	int					returnEaseKind;
+	int					returnEaseType;
+	float				advanceDistance;		// Use when State::Attack.
+	float				scale;					// Usually 1.0f.
+	float				runSpeed;				// Scalar.
+	float				rotSlerpFactor;			// Use player's rotation.
+	Donya::AABB			hitBoxBody;				// HitBox that collide to boss attacks.
+	Donya::Sphere		hitBoxPhysic;			// HitBox that collide to stage.
+	Donya::AABB			hitBoxShield;			// HitBox of shield.
+	Donya::OBBFrame		hitBoxLance;			// HitBox of lance.
+	std::string			lanceMeshName;			// Use for find a mesh that transform the OBB of lance.
+	std::vector<float>	motionSpeeds;			// Magnification.
 private:
 	PlayerParam();
 public:
@@ -130,29 +130,29 @@ public:
 	void Init( size_t motionCount  );
 	void Uninit();
 public:
-	int		FrameWholeDefence()		const { return frameUnfoldableDefence; }
-	int		FrameReuseShield()		const { return shieldsRecastFrame; }
-	int		FrameStopAnimeLength()	const { return frameStopAnime; }
-	int		FrameStopAnimeTiming()	const { return frameStopTiming; }
-	int		FrameCancelableAttack()	const { return frameCancelableAttack; }
-	int		FrameWholeAttacking()	const { return frameWholeAttacking; }
-	int		FrameAdvanceStart()		const { return advanceStartFrame; }
-	int		FrameAdvanceFin()		const { return advanceFinFrame; }
-	int		FrameReturnFin()		const { return returnFinFrame; }
-	int		AdvanceEaseKind()		const { return advanceEaseKind; }
-	int		AdvanceEaseType()		const { return advanceEaseType; }
-	int		ReturnEaseKind()		const { return returnEaseKind; }
-	int		ReturnEaseType()		const { return returnEaseType; }
-	float	AdvanceDistance()		const { return advanceDistance; }
-	float	Scale()					const { return scale; }
-	float	RunSpeed()				const { return runSpeed; }
-	float	SlerpFactor()			const { return rotSlerpFactor; }
-	Donya::AABB		HitBoxBody()	const { return hitBoxBody;   }
-	Donya::Sphere	HitBoxPhysic()	const { return hitBoxPhysic; }
-	Donya::AABB		HitBoxShield()	const { return hitBoxShield; }
+	float			FrameWholeDefence()		const { return frameUnfoldableDefence; }
+	float			FrameReuseShield()		const { return shieldsRecastFrame; }
+	float			FrameStopAnimeLength()	const { return frameStopAnime; }
+	float			FrameStopAnimeTiming()	const { return frameStopTiming; }
+	float			FrameCancelableAttack()	const { return frameCancelableAttack; }
+	float			FrameWholeAttacking()	const { return frameWholeAttacking; }
+	float			FrameAdvanceStart()		const { return advanceStartFrame; }
+	float			FrameAdvanceFin()		const { return advanceFinFrame; }
+	float			FrameReturnFin()		const { return returnFinFrame; }
+	int				AdvanceEaseKind()		const { return advanceEaseKind; }
+	int				AdvanceEaseType()		const { return advanceEaseType; }
+	int				ReturnEaseKind()		const { return returnEaseKind; }
+	int				ReturnEaseType()		const { return returnEaseType; }
+	float			AdvanceDistance()		const { return advanceDistance; }
+	float			Scale()					const { return scale; }
+	float			RunSpeed()				const { return runSpeed; }
+	float			SlerpFactor()			const { return rotSlerpFactor; }
+	Donya::AABB		HitBoxBody()			const { return hitBoxBody;   }
+	Donya::Sphere	HitBoxPhysic()			const { return hitBoxPhysic; }
+	Donya::AABB		HitBoxShield()			const { return hitBoxShield; }
 	Donya::OBBFrame				*HitBoxAttackF()			{ return &hitBoxLance;  }
 	const Donya::OBBFrame		*HitBoxAttackF()	const	{ return &hitBoxLance;  }
-	std::string LanceMeshName()		const { return lanceMeshName; }
+	std::string LanceMeshName()				const { return lanceMeshName; }
 	std::vector<float>			*MotionSpeeds()				{ return &motionSpeeds; }
 	const std::vector<float>	*MotionSpeeds()		const	{ return &motionSpeeds; }
 public:
@@ -228,8 +228,8 @@ private:
 	};
 private:
 	State					status;
-	int						timer;				// Recycle between each state.
-	int						shieldsRecastTime;	// I can defend when this time is zero.
+	float					timer;				// Recycle between each state.
+	float					shieldsRecastTime;	// I can defend when this time is zero.
 	float					fieldRadius;		// For collision to wall. the field is perfect-circle, so I can detect collide to wall by distance.
 	MotionKind				currentMotion;
 	Donya::Vector3			pos;				// In world space.
@@ -249,7 +249,7 @@ public:
 	void Init( const Donya::Vector3 &wsInitialPos, const Donya::Vector3 &initialAnglesRadian, const std::vector<Donya::Box> &wsXZWallCollisions );
 	void Uninit();
 
-	void Update( Input input );
+	void Update( Input input, float elapsedTime );
 	/// <summary>
 	/// Update the position, then doing collision to walls and repulsion.
 	/// </summary>
@@ -304,34 +304,34 @@ private:
 	/// </summary>
 	Donya::Vector4x4 CalcWorldMatrix() const;
 private:
-	void ChangeStatus( Input input );
-	void UpdateCurrentStatus( Input input );
+	void ChangeStatus( Input input, float elapsedTime );
+	void UpdateCurrentStatus( Input input, float elapsedTime );
 
 	void ChangeStatusFromIdle( Input input );
 	void IdleInit( Input input );
-	void IdleUpdate( Input input );
+	void IdleUpdate( Input input, float elapsedTime );
 	void IdleUninit();
 
 	void ChangeStatusFromRun( Input input );
 	void RunInit( Input input );
-	void RunUpdate( Input input );
+	void RunUpdate( Input input, float elapsedTime );
 	void RunUninit();
 
 	void ChangeStatusFromDefend( Input input );
 	void DefendInit( Input input );
-	void DefendUpdate( Input input );
+	void DefendUpdate( Input input, float elapsedTime );
 	void DefendUninit();
 
 	void ChangeStatusFromAttack( Input input );
 	void AttackInit( Input input );
-	void AttackUpdate( Input input );
+	void AttackUpdate( Input input, float elapsedTime );
 	void AttackUninit();
 
 	void DefeatInit();
-	void DefeatUpdate();
+	void DefeatUpdate( float elapsedTime );
 	void DefeatUninit();
 private:
-	void AssignInputVelocity( Input input );
+	void AssignInputVelocity( Input input, float elapsedTime );
 
 	/// <summary>
 	/// The position("pos") is only changed by this method(or CollideToStagesWall method).
@@ -342,7 +342,7 @@ private:
 	/// </summary>
 	void CollideToStagesWall();
 private:
-	void ShieldUpdate();
+	void ShieldUpdate( float elapsedTime );
 	bool CanUnfoldShield() const;
 private:
 #if USE_IMGUI

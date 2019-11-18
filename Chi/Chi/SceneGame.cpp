@@ -232,10 +232,12 @@ public:
 
 	#endif // DEBUG_MODE
 
+		float deltaTime = GameLib::getDeltaTime();
+
 		switch ( status )
 		{
-		case State::Battle:		BattleUpdate();		return;
-		case State::Win:		WinUpdate();		return;
+		case State::Battle:		BattleUpdate( deltaTime );	return;
+		case State::Win:		WinUpdate( deltaTime );		return;
 		default: return;
 		}
 	}
@@ -395,16 +397,16 @@ public:
 		stageNo = pStorage->stageNo;
 	}
 
-	void BattleUpdate()
+	void BattleUpdate( float elapsedTime )
 	{
 		stage.Update();
 
 		Player::Input  playerInput = Player::Input::MakeByExternalInput( Donya::Vector4x4::FromMatrix( GameLib::camera::GetViewMatrix() ) );
-		player.Update( playerInput );
+		player.Update( playerInput, elapsedTime );
 
 		BossUpdate();
 
-		GameTimer::GetInstance()->Update(stageNo);
+		GameTimer::GetInstance()->Update( stageNo );
 		std::vector<Donya::Circle> bossBodies = FetchBossBodies();
 		player.PhysicUpdate( bossBodies );
 
@@ -412,7 +414,7 @@ public:
 
 		EffectManager::GetInstance()->Update();
 
-		ProcessCollision();
+		ProcessCollision( elapsedTime );
 
 		if ( IsBossDefeated() )
 		{
@@ -430,12 +432,12 @@ public:
 		}
 	}
 
-	void WinUpdate()
+	void WinUpdate( float elapsedTime )
 	{
 		stage.Update();
 
 		Player::Input  playerInput = Player::Input::MakeByExternalInput( Donya::Vector4x4::FromMatrix( GameLib::camera::GetViewMatrix() ) );
-		player.Update( playerInput );
+		player.Update( playerInput, elapsedTime );
 
 		BossUpdate();
 
@@ -644,17 +646,17 @@ public:
 		GameLib::camera::setTarget( cameraTarget + cameraFocusOffset );
 	}
 
-	void ProcessCollision()
+	void ProcessCollision( float elapsedTime )
 	{
 		switch ( stageNo )
 		{
-		case KnightNo:	VS_Knight();	break;
-		case GolemNo:	VS_Golem();		break;
-		case RivalNo:	VS_Rival();		break;
+		case KnightNo:	VS_Knight( elapsedTime );	break;
+		case GolemNo:	VS_Golem( elapsedTime );	break;
+		case RivalNo:	VS_Rival( elapsedTime );	break;
 		default:		Donya::OutputDebugStr( "Error : The boss does not uninitialize !\n" );	break;
 		}
 	}
-	void VS_Knight()
+	void VS_Knight( float elapsedTime )
 	{
 		const Donya::OBB playerBodyBox		= player.GetHurtBox();
 		const Donya::OBB playerShieldBox	= player.GetShieldHitBox();
@@ -668,7 +670,7 @@ public:
 			if ( shieldCollided )
 			{
 				wasHitToShield = true;
-				player.SucceededDefence();
+				player.SucceededDefence( elapsedTime );
 			}
 
 			bool bodyCollided = ( shieldCollided ) ? false : knight.IsCollideAttackHitBoxes( playerBodyBox, /* disableCollidingHitBoxes = */ false );
@@ -689,7 +691,7 @@ public:
 			}
 		}
 	}
-	void VS_Golem()
+	void VS_Golem( float elapsedTime )
 	{
 		const Donya::OBB playerBodyBox   = player.GetHurtBox();
 		const Donya::OBB playerShieldBox = player.GetShieldHitBox();
@@ -709,7 +711,7 @@ public:
 					{
 						it.enable = false;
 						wasHitToShield = true;
-						player.SucceededDefence();
+						player.SucceededDefence( elapsedTime );
 					}
 					if ( !wasHitToShield && Donya::OBB::IsHitSphere( playerBodyBox, it ) )
 					{
@@ -724,7 +726,7 @@ public:
 			if ( shieldCollided )
 			{
 				wasHitToShield = true;
-				player.SucceededDefence();
+				player.SucceededDefence( elapsedTime );
 			}
 
 			bool bodyCollided = ( shieldCollided ) ? false : golem.IsCollideAttackHitBoxes( playerBodyBox, /* disableCollidingHitBoxes = */ false );
@@ -750,7 +752,7 @@ public:
 			}
 		}
 	}
-	void VS_Rival()
+	void VS_Rival( float elapsedTime )
 	{
 		const Donya::OBB playerBodyBox		= player.GetHurtBox();
 		const Donya::OBB playerShieldBox	= player.GetShieldHitBox();
@@ -764,7 +766,7 @@ public:
 			if ( shieldCollided )
 			{
 				wasHitToShield = true;
-				player.SucceededDefence();
+				player.SucceededDefence( elapsedTime );
 				rival.WasDefended();
 			}
 
@@ -786,8 +788,7 @@ public:
 					{
 						it.enable		= false;
 						wasHitToShield	= true;
-						player.SucceededDefence();
-						// rival.WasDefended(); // Unnecessary.
+						player.SucceededDefence( elapsedTime );
 					}
 					if ( !wasHitToShield && Donya::OBB::IsHitSphere( playerBodyBox, it ) )
 					{
