@@ -867,7 +867,7 @@ void skinned_mesh::render(ID3D11DeviceContext* context, fbx_shader& hlsl, const 
 							anim_fin = true;
 						}
 
-						if (static_cast<size_t>(animation_flame) < it.anim.size() - 1)
+						else
 							if (!stop_animation && stop_time <= 0)
 							{
 								anim_fin = false;
@@ -923,6 +923,12 @@ void skinned_mesh::render(ID3D11DeviceContext* context, fbx_shader& hlsl, const 
 				}
 				cb.ambient = p.ambient.color;
 				cb.ambient.w = p.transparent.color.w;
+				{
+					cb.ambient.x *= materialColor.x;
+					cb.ambient.y *= materialColor.y;
+					cb.ambient.z *= materialColor.z;
+					cb.ambient.w *= materialColor.w;
+				}
 				cb.diffuse = p.diffuse.color;
 				cb.specular = p.specular.color;
 
@@ -1005,7 +1011,7 @@ void skinned_mesh::render(ID3D11DeviceContext* context, fbx_shader& hlsl, const 
 				}
 				cb.pntLight[i] = _point_light[i].getInfo();
 			}
-			cb.ambient = { 1,1,1,1 };
+			cb.ambient = materialColor;
 			cb.diffuse = { 1,1,1,1 };
 			cb.specular = { 0.5f,0.5f,0.5f,0.5f };
 
@@ -1251,6 +1257,12 @@ void skinned_mesh::bloom_SRVrender(ID3D11DeviceContext* context, fbx_shader& hls
 				}
 				cb.ambient = p.ambient.color;
 				cb.ambient.w = p.transparent.color.w;
+				{
+					cb.ambient.x *= materialColor.x;
+					cb.ambient.y *= materialColor.y;
+					cb.ambient.z *= materialColor.z;
+					cb.ambient.w *= materialColor.w;
+				}
 				cb.diffuse = p.diffuse.color;
 				cb.specular = p.specular.color;
 				cb.judge_color = _judge_color;
@@ -1335,7 +1347,7 @@ void skinned_mesh::bloom_SRVrender(ID3D11DeviceContext* context, fbx_shader& hls
 				}
 				cb.pntLight[i] = _point_light[i].getInfo();
 			}
-			cb.ambient = { 1,1,1,1 };
+			cb.ambient = materialColor;
 			cb.diffuse = { 1,1,1,1 };
 			cb.specular = { 0.5f,0.5f,0.5f,0.5f };
 			cb.judge_color = { _judge_color.x,_judge_color.y,_judge_color.z,1.0f };
@@ -1447,6 +1459,10 @@ void skinned_mesh::render(
 					cb.pntLight[i] = _point_light[i].getInfo();
 				}
 				cb.ambient = p.ambient.color;
+				cb.ambient.x *= materialColor.x;
+				cb.ambient.y *= materialColor.y;
+				cb.ambient.z *= materialColor.z;
+				cb.ambient.w *= materialColor.w;
 				cb.diffuse = p.diffuse.color;
 				cb.specular = p.specular.color;
 
@@ -1529,7 +1545,7 @@ void skinned_mesh::render(
 				}
 				cb.pntLight[i] = _point_light[i].getInfo();
 			}
-			cb.ambient = { 1,1,1,1 };
+			cb.ambient = materialColor;
 			cb.diffuse = { 1,1,1,1 };
 			cb.specular = { 0.5f,0.5f,0.5f,0.5f };
 

@@ -189,6 +189,13 @@ public:
 class scenePose : public baseScene
 {
 private:
+	Sprite texture[2];
+	int timer;
+	DirectX::XMFLOAT2 pos[4];
+	DirectX::XMFLOAT2 verocity[4];
+	DirectX::XMFLOAT2 accelerator;
+	int cursol;
+	bool flg[4];
 
 public:
 	scenePose() {}

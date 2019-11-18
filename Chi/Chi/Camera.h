@@ -18,7 +18,10 @@ public:
 
 	DirectX::XMFLOAT3 position;		//à íu
 	DirectX::XMFLOAT3 target;		//íçéãì_
-	DirectX::XMMATRIX projection;	//ìäâeçsóÒ
+	float fov;
+	float aspect;
+	float near_panel;
+	float far_panel;
 
 	Camera();
 	void update();
@@ -36,7 +39,11 @@ public:
 	DirectX::XMFLOAT4 getCamTarget() { return { target.x,target.y,target.z,1.0f }; } DirectX::XMMATRIX SetOrthographicMatrix(float _w, float _h, float _zNear, float _zFar);
 	DirectX::XMMATRIX SetPerspectiveMatrix(float _fov, float _aspect, float _zNear, float _zFar);
 	DirectX::XMMATRIX GetViewMatrix();
-	DirectX::XMMATRIX GetProjectionMatrix() { return projection; }
+	DirectX::XMMATRIX GetProjectionMatrix() 
+	{
+		DirectX::XMMATRIX projection = DirectX::XMMatrixPerspectiveFovLH(fov, aspect, near_panel, far_panel);
+		return projection;
+	}
 
 	DirectX::XMMATRIX GetLightViewMatrix(DirectX::XMFLOAT3 _pos, DirectX::XMFLOAT3 _direct);
 	DirectX::XMMATRIX GetLightProjectionMatrix();
