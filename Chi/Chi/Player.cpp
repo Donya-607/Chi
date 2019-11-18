@@ -635,6 +635,9 @@ Donya::OBB Player::CalcAttackHitBox() const
 	}
 
 	// Should I also apply parent's scale ?
+
+	if ( status == State::Dead ) { resultOBB.enable = false; }
+
 	return resultOBB;
 }
 

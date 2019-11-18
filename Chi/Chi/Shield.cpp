@@ -6,6 +6,8 @@
 #include "GameLibFunctions.h"
 #include "skinned_mesh.h"
 
+#include "Effect.h"
+
 #undef max
 #undef min
 
@@ -591,9 +593,14 @@ void Shield::DetectEndAnimation()
 	if ( currentMotion == Idle || currentMotion == MOTION_COUNT ) { return; }
 	// else
 
-	if ( models.pOpen->getAnimFinFlg() || models.pReact->getAnimFinFlg() )
+	if ( bool wasOpen = models.pOpen->getAnimFinFlg() || models.pReact->getAnimFinFlg() )
 	{
 		ChangeMotion( State::Idle );
+
+		if ( wasOpen )
+		{
+			// EffectManager::GetInstance()->ShieldEffectSet();
+		}
 	}
 }
 

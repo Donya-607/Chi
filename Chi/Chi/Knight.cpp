@@ -975,6 +975,13 @@ void Knight::ChangeStatus( TargetStatus target )
 	}
 
 	status = scast<KnightAI::ActionState>( lotteryStatus );
+
+	if ( KnightAI::IsAction( status ) )
+	{
+		constexpr int VIVID_FRAME	= 8; // Should register to serialize list.
+		constexpr int BOSS_NO		= 0; // 0-based. Fixed number. but I should receive this.
+		EffectManager::GetInstance()->BossAttackMomentEffectSet( VIVID_FRAME, BOSS_NO );
+	}
 }
 void Knight::UpdateCurrentStatus( TargetStatus target )
 {
@@ -1210,6 +1217,7 @@ void Knight::AttackRaidUpdate( TargetStatus target )
 		if ( timer == START_TIME )
 		{
 			ApplyExtraOffset();
+			EffectManager::GetInstance()->JumpEffectSet( GetPos() );
 		}
 	}
 	else

@@ -1223,6 +1223,13 @@ void Golem::ChangeStatus( TargetStatus target )
 	}
 
 	status = scast<GolemAI::ActionState>( lotteryStatus );
+
+	if ( GolemAI::IsAction( status ) )
+	{
+		constexpr int VIVID_FRAME	= 8; // Should register to serialize list.
+		constexpr int BOSS_NO		= 1; // 0-based. Fixed number. but I should receive this.
+		EffectManager::GetInstance()->BossAttackMomentEffectSet( VIVID_FRAME, BOSS_NO );
+	}
 }
 void Golem::UpdateCurrentStatus( TargetStatus target )
 {

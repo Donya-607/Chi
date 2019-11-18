@@ -562,6 +562,7 @@ public:
 	void ResetEffects()
 	{
 		EffectManager::GetInstance()->EruptionEffectReSetExist();
+		// EffectManager::GetInstance()->Long();
 	}
 
 	Donya::Vector3 GetCameraTargetPos() const

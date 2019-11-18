@@ -1219,6 +1219,13 @@ void Rival::ChangeStatus( TargetStatus target )
 	}
 
 	status = scast<RivalAI::ActionState>( lotteryStatus );
+
+	if ( RivalAI::IsAction( status ) )
+	{
+		constexpr int VIVID_FRAME	= 8; // Should register to serialize list.
+		constexpr int BOSS_NO		= 2; // 0-based. Fixed number. but I should receive this.
+		EffectManager::GetInstance()->BossAttackMomentEffectSet( VIVID_FRAME, BOSS_NO );
+	}
 }
 void Rival::UpdateCurrentStatus( TargetStatus target )
 {
@@ -1516,6 +1523,8 @@ void Rival::AttackRushInit( TargetStatus target )
 	setAnimFlame( models.pAtkRushWait.get(), 0 );
 	setAnimFlame( models.pAtkRushSlash.get(), 0 );
 	setLoopFlg( models.pAtkRushSlash.get(), /* is_loop = */ false );
+
+	EffectManager::GetInstance()->AccelEffectSet();
 }
 void Rival::AttackRushUpdate( TargetStatus target )
 {
@@ -1581,6 +1590,8 @@ void Rival::AttackRushUpdate( TargetStatus target )
 				RivalParam::Get().RushHitBox().collision.enable = true;
 
 				setStopAnimation( models.pAtkRushSlash.get(), /* is_Stop = */ false );
+
+				EffectManager::GetInstance()->AccelEffectReSet();
 			}
 			else
 			{
