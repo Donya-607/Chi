@@ -1599,6 +1599,8 @@ void Rival::AttackRushUpdate( TargetStatus target )
 			else
 			{
 				velocity = orientation.LocalFront() * RivalParam::Open().rush.rushSpeed;
+
+				EffectManager::GetInstance()->AccelEffectUpdate( GetPos(), orientation.LocalFront() );
 			}
 		}
 		break;
@@ -1729,6 +1731,12 @@ void Rival::DefeatInit()
 void Rival::DefeatUpdate()
 {
 	timer++;
+
+	const int MOTION_LENGTH = RivalParam::Open().defeat.motionLength;
+	if ( timer == MOTION_LENGTH )
+	{
+
+	}
 }
 void Rival::DefeatUninit()
 {
