@@ -844,6 +844,7 @@ Donya::Sphere Knight::GetBodyHitBox() const
 {
 	Donya::Sphere wsBody = KnightParam::Open().hitBoxBody;
 	wsBody.pos += GetPos();
+	if ( status == KnightAI::ActionState::END ) { wsBody.enable = false; }
 	return wsBody;
 }
 Donya::Sphere Knight::CalcAttackHitBoxExplosion() const

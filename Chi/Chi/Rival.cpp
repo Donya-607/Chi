@@ -1041,6 +1041,7 @@ Donya::AABB Rival::GetBodyHitBox() const
 {
 	Donya::AABB wsBody = RivalParam::Open().hitBoxBody;
 	wsBody.pos += GetPos();
+	if ( extraStatus == ExtraState::DEFEAT ) { wsBody.enable = false; }
 	return wsBody;
 }
 

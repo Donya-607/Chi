@@ -1122,7 +1122,9 @@ std::vector<Donya::Sphere> Golem::GetBodyHitBoxes() const
 	const auto *pSpheres = PARAM.BodyHitBoxes();
 	for ( const auto &it : *pSpheres )
 	{
-		collisions.emplace_back( ToWorldSpace( it, GetPos(), orientation ) );
+		Donya::Sphere wsBodyPart = ToWorldSpace( it, GetPos(), orientation );
+		if ( status == GolemAI::ActionState::END ) { wsBodyPart.enable = false; }
+		collisions.emplace_back( wsBodyPart );
 	}
 
 	return collisions;
