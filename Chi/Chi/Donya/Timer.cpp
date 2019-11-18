@@ -14,6 +14,7 @@ void Timer::Update()
 	// else
 
 	current++;
+	allCurrent++;
 
 	if ( 60 <= current )
 	{

@@ -13,8 +13,9 @@ private:
 	int current;	// 0 ~ 59.
 	int second;		// 0 ~ 59.
 	int minute;		// 0 ~ 99.
+	int allCurrent;
 public:
-	Timer() : current( 59 ), second( 59 ), minute( 99 ) {}
+	Timer() : current( 59 ), second( 59 ), minute( 99 ), allCurrent( 0 ) {}
 	Timer( const Timer & ) = default;
 	Timer &operator = ( const Timer & ) = default;
 private:
@@ -39,11 +40,12 @@ public:
 	/// <summary>
 	/// If setting -1, that parameter is not change.
 	/// </summary>
-	void Set( int newMinute = -1, int newSecond = -1, int newCurrent = -1 )
+	void Set( int newMinute = -1, int newSecond = -1, int newCurrent = -1, int newAllCurrent = -1 )
 	{
 		if ( newMinute  != -1 ) { minute  = newMinute;  }
 		if ( newSecond  != -1 ) { second  = newSecond;  }
 		if ( newCurrent != -1 ) { current = newCurrent; }
+		if ( newAllCurrent != -1 ) { allCurrent = newAllCurrent; }
 	}
 
 	void Update();
@@ -59,7 +61,7 @@ public:
 	int Current() const { return current; }
 	int Second()  const { return second;  }
 	int Minute()  const { return minute;  }
-
+	int AllCurren() const { return allCurrent; }
 	/// <summary>
 	/// Returns string is "XX:XX:XX", min:sec:ms.
 	/// </summary>
@@ -86,3 +88,36 @@ static bool operator == ( const Timer &L, const Timer &R ) { return !( L < R ) &
 static bool operator != ( const Timer &L, const Timer &R ) { return !( L == R ); }
 
 CEREAL_CLASS_VERSION( Timer, 0 )
+
+class GameTimer
+{
+public:
+	Timer	timer[3];
+	Timer	totalTimer;
+
+public:
+	GameTimer() :
+		timer(),
+		totalTimer()
+	{}
+	~GameTimer() {}
+
+	static GameTimer* GetInstance()
+	{
+		static GameTimer instance;
+		return &instance;
+	}
+
+	void Init()
+	{
+		timer[0].Set(0, 0, 0, 0);
+		timer[1].Set(0, 0, 0, 0);
+		timer[2].Set(0, 0, 0, 0);
+		totalTimer.Set(0, 0, 0, 0);
+	}
+	void Update(int stageNo)
+	{
+		timer[stageNo].Update();
+		totalTimer.Update();
+	}
+};
