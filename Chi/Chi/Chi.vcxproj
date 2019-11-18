@@ -162,6 +162,7 @@
     <ClInclude Include="Donya\UseImGui.h" />
     <ClInclude Include="Donya\Vector.h" />
     <ClInclude Include="dragDrop.h" />
+    <ClInclude Include="easing.h" />
     <ClInclude Include="Effect.h" />
     <ClInclude Include="Fade.h" />
     <ClInclude Include="filter.h" />
@@ -228,6 +229,7 @@
     <ClCompile Include="Donya\UseImGui.cpp" />
     <ClCompile Include="Donya\Vector.cpp" />
     <ClCompile Include="DragDrop.cpp" />
+    <ClCompile Include="easing.cpp" />
     <ClCompile Include="Effect.cpp" />
     <ClCompile Include="Fade.cpp" />
     <ClCompile Include="filter.cpp" />
