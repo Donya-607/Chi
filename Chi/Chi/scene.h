@@ -19,6 +19,7 @@
 #include "light.h"
 #include "Donya/ChiUtility.h"
 #include "Donya/Serializer.h"
+#include "Donya/Timer.h"
 
 #include "Mouse.h"
 
@@ -353,7 +354,7 @@ public:
 #endif // USE_IMGUI
 
 public:
-	SceneResult(int clearTime);
+	SceneResult();
 	~SceneResult() {}
 
 	void init();
@@ -367,6 +368,25 @@ CEREAL_CLASS_VERSION(SceneResult, 0)
 class SceneGameOver : public baseScene
 {
 private:
+	Sprite sprite;
+
+	struct SpriteData
+	{
+		Donya::Vector2 pos;
+		Donya::Vector2 texPos;
+		Donya::Vector2 texSize;
+	};
+	SpriteData logo;
+	SpriteData continuity;
+	SpriteData toTitle;
+
+	/*continuity.pos = Donya::Vector2(1920.0f / 4.0f, 1080.0f / 0.5f);
+	continuity.texPos = Donya::Vector2(0.0f, 0.0f);
+	continuity.texSize = Donya::Vector2(434.0f, 114.0f);
+
+	toTitle.pos = Donya::Vector2(1920.0f / 0.5f, 1080.0f / 0.5f);
+	toTitle.texPos = Donya::Vector2(0.0f, 114.0f);
+	toTitle.texSize = Donya::Vector2(434.0f, 114.0f);*/
 
 
 private:

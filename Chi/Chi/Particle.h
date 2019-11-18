@@ -876,3 +876,168 @@ public:
 	int GetMaxSize() { return MAX_SIZE; }
 };
 CEREAL_CLASS_VERSION(CatapultBreakParticle, 0)
+
+class ShieldParticle
+{
+private:
+	struct ParticleImGuiData
+	{
+		int speed[3];
+		//int accel[3];
+		int accelStart[3];
+		int accelStage[3];
+		float radius;
+	};
+
+private:
+	static const int MAX_SIZE = 100;
+	static const int MAX_CNT = 30;
+
+	bool emitting;
+	int state;
+	Particle data[MAX_SIZE];
+	ParticleImGuiData imguiData;
+	DirectX::XMFLOAT4 originPos[MAX_SIZE];		// 放出源の座標
+	DirectX::XMFLOAT3 originSpeed[MAX_SIZE];
+	DirectX::XMFLOAT2 originScale[MAX_SIZE];
+	int cnt;
+	bool alive[MAX_SIZE];
+
+public:
+	ShieldParticle() : emitting(false)
+	{
+		for (int i = 0; i < MAX_SIZE; i++)
+		{
+			createBillboard(&data[i].pMesh, L"./Data/Images/UI/particle.png");
+		}
+	}
+	~ShieldParticle() {}
+
+private:
+	friend class cereal::access;
+	template<class Archive>
+	void serialize(Archive& archive, std::uint32_t version)
+	{
+		archive
+		(
+			CEREAL_NVP(imguiData.speed),
+			CEREAL_NVP(imguiData.accelStart),
+			CEREAL_NVP(imguiData.accelStage),
+			CEREAL_NVP(imguiData.radius)
+		);
+
+		if (1 <= version)
+		{
+			// archive( CEREAL_NVP( x ) );
+		}
+	}
+	static constexpr const char* SERIAL_ID = "Absorption";
+
+	void LoadParameter(bool isBinary = true);
+
+#if USE_IMGUI
+
+	void SaveParameter();
+
+public:
+	void UseImGui();
+
+#endif // USE_IMGUI
+
+public:
+	void Set(DirectX::XMFLOAT3 _pos);
+	void Emit();
+	void Draw();
+	void ImGuiDataInit();
+	void ImGui();
+	bool GetEmitting() { return emitting; }
+
+	// 放出位置の設定関数
+//	void SetOriginPos(DirectX::XMFLOAT3 _originPos) { originPos = _originPos; }
+
+	// パーティクルの最大サイズ
+	int GetMaxSize() { return MAX_SIZE; }
+};
+CEREAL_CLASS_VERSION(ShieldParticle, 0)
+
+class DisappearanceParticle
+{
+private:
+	struct ParticleImGuiData
+	{
+		int speed[3];
+		//int accel[3];
+		int accelStart[3];
+		int accelStage[3];
+		float radius;
+	};
+
+private:
+	static const int MAX_SIZE = 500;
+	static const int MAX_CNT = 30;
+
+	ParticleImGuiData imguiData;
+	bool emitting;
+	Particle data[MAX_SIZE];
+	bool alive[MAX_SIZE];
+	float radius[MAX_SIZE];
+	float angle[MAX_SIZE];
+	int cnt[MAX_CNT];
+	Donya::Vector3 originPos;
+
+public:
+	DisappearanceParticle() : emitting(false)
+	{
+		for (int i = 0; i < MAX_SIZE; i++)
+		{
+			createBillboard(&data[i].pMesh, L"./Data/Images/UI/particle.png");
+		}
+	}
+	~DisappearanceParticle() {}
+
+private:
+	friend class cereal::access;
+	template<class Archive>
+	void serialize(Archive& archive, std::uint32_t version)
+	{
+		archive
+		(
+			CEREAL_NVP(imguiData.speed),
+			CEREAL_NVP(imguiData.accelStart),
+			CEREAL_NVP(imguiData.accelStage),
+			CEREAL_NVP(imguiData.radius)
+		);
+
+		if (1 <= version)
+		{
+			// archive( CEREAL_NVP( x ) );
+		}
+	}
+	static constexpr const char* SERIAL_ID = "Absorption";
+
+	void LoadParameter(bool isBinary = true);
+
+#if USE_IMGUI
+
+	void SaveParameter();
+
+public:
+	void UseImGui();
+
+#endif // USE_IMGUI
+
+public:
+	void Set(DirectX::XMFLOAT3 _pos);
+	void Emit();
+	void Draw();
+	void ImGuiDataInit();
+	void ImGui();
+	bool GetEmitting() { return emitting; }
+
+	// 放出位置の設定関数
+//	void SetOriginPos(DirectX::XMFLOAT3 _originPos) { originPos = _originPos; }
+
+	// パーティクルの最大サイズ
+	int GetMaxSize() { return MAX_SIZE; }
+};
+CEREAL_CLASS_VERSION(DisappearanceParticle, 0)

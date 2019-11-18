@@ -42,11 +42,11 @@ void sceneTitle::init()
 	attackUIdata.texSize = Donya::Vector2(1690.0f, 557.0f);
 	attackUIdata.angle = 180.0f;
 
-	guardUIdata.pos = Donya::Vector4(-296.0f, 2426.0f, 11482.0f, 1.0f);
+	guardUIdata.pos = Donya::Vector4(-296.0f, 2577.0f, 9668.0f, 1.0f);
 	guardUIdata.scale = Donya::Vector2(300.0f, 100.0f);
 	guardUIdata.texPos = Donya::Vector2(0.0f, 553.0f);
 	guardUIdata.texSize = Donya::Vector2(1690.0f, 557.0f);
-	guardUIdata.angle = 293.0f;
+	guardUIdata.angle = 261.0f;
 
 	std::vector<Donya::Box> wallHitBox_vector;
 	Donya::Box wallHitBox;
@@ -81,15 +81,15 @@ void sceneTitle::init()
 
 	// left block Guard
 	wallHitBox.cx = 650.0f;
-	wallHitBox.cy = 11431.0f;
-	wallHitBox.w = 320.0f;
+	wallHitBox.cy = 9668.0f;
+	wallHitBox.w = 320.0f * 1.5f;
 	wallHitBox.h = 300.0f;
 	wallHitBox_vector.push_back(wallHitBox);
 
 	// right block Guard
 	wallHitBox.cx = -650.0f;
-	wallHitBox.cy = 11431.0f;
-	wallHitBox.w = 320.0f;
+	wallHitBox.cy = 9668.0f;
+	wallHitBox.w = 320.0f * 1.5f;
 	wallHitBox.h = 300.0f;
 	wallHitBox_vector.push_back(wallHitBox);
 
@@ -258,18 +258,18 @@ void sceneTitle::TutorialStartUpdate()
 	auto WithinStartupArea = [&]()->bool
 	{
 		return
-			(
-				player.GetPosition().z <= 11431.0f
-				/*
-				11431.0f - 100.0f / 2.0f <= player.GetPosition().z
-				&& player.GetPosition().z <= 11431.0f + 100.0f / 2.0f
+		(
+			player.GetPosition().z <= 11431.0f
+			/*
+			11431.0f - 100.0f / 2.0f <= player.GetPosition().z
+			&& player.GetPosition().z <= 11431.0f + 100.0f / 2.0f
 
-				&& -100.0f / 2.0f <= player.GetPosition().x
-				&& player.GetPosition().x <= 100.0f / 2.0f
-				*/
-				)
-			? true
-			: false;
+			&& -100.0f / 2.0f <= player.GetPosition().x
+			&& player.GetPosition().x <= 100.0f / 2.0f
+			*/
+			)
+		? true
+		: false;
 	};
 	if (WithinStartupArea())
 	{
@@ -320,6 +320,7 @@ void sceneTitle::TutorialEndUpdate()
 	if (MAX_NEXT_GAME_CNT <= nextGameCnt++)
 	{
 		nextGameCnt = 0;
+		GameTimer::GetInstance()->Init();
 		pSceneManager->setNextScene(new SceneGame, false);
 	}
 }
@@ -523,6 +524,25 @@ void sceneTitle::render()
 	postEffect_Bloom(0);
 	//ƒ‚ƒmƒg[ƒ“‚É‚·‚é‚Æ‚«‚Í‘æˆêˆø”‚ð‰º‚°‚é
 	filterScreen(1.0f);
+
+	//if ( Donya::IsShowCollision() )
+	//{
+	//	auto GenerateCube = []()->std::shared_ptr<static_mesh>
+	//	{
+	//		std::shared_ptr<static_mesh> tmpCube = std::make_shared<static_mesh>();
+	//		createCube( tmpCube.get() );
+	//		return tmpCube;
+	//	};
+	//	static std::shared_ptr<static_mesh> pCube = GenerateCube();
+
+	//	Donya::Vector4x4 CS = Donya::Vector4x4::MakeScaling( cubeScale ); // Half size->Whole size.
+	//	Donya::Vector4x4 CR = Donya::Vector4x4::MakeRotationEuler( Donya::Vector3( 0.0f, 0.0f, 0.0f ) );
+	//	Donya::Vector4x4 CT = Donya::Vector4x4::MakeTranslation( cubePos );
+	//	Donya::Vector4x4 CW = CS * CR * CT;
+	//	Donya::Vector4x4 CWVP = CW * V * P;
+
+	//	OBJRender( pCube.get(), CWVP, CW, Donya::Vector4( 0.0f, 0.8f, 0.3f, 0.6f ) );
+	//}
 }
 
 void sceneTitle::uninit()
@@ -547,18 +567,18 @@ void sceneTitle::imGui()
 		pSceneManager->setNextScene(new SceneGame(), false);
 	}
 	else
-		if (ImGui::Button("Effect"))
-		{
-			pSceneManager->setNextScene(new SceneEffect, false);
-		}
-		else if (ImGui::Button("Result"))
-		{
-			pSceneManager->setNextScene(new SceneResult(60), false);
-		}
-		else if (ImGui::Button("GameOver"))
-		{
-			pSceneManager->setNextScene(new SceneGameOver, false);
-		}
+	if (ImGui::Button("Effect"))
+	{
+		pSceneManager->setNextScene(new SceneEffect, false);
+	}
+	else if (ImGui::Button("Result"))
+	{
+		pSceneManager->setNextScene(new SceneResult(60), false);
+	}
+	else if (ImGui::Button("GameOver"))
+	{
+		pSceneManager->setNextScene(new SceneGameOver, false);
+	}
 
 	ImGui::End();
 
@@ -797,24 +817,24 @@ void sceneTitle::ProcessCollision()
 
 	bool wasHitToShield = false;
 
-	if (Donya::OBB::IsHitSphere(playerShieldBox, catapult.stone.hitSphere))
+	if (Donya::OBB::IsHitOBB(playerShieldBox, catapult.stone.hitOBB))
 	{
 		EffectManager::GetInstance()->StoneBreakEffectSet(catapult.stone.pos);
 		setStopAnimation(catapult.pModel.get(), true);
 		catapult.stone.exist = false;
-		catapult.stone.hitSphere.exist = false;
-		catapult.stone.hitSphere.enable = false;
+		catapult.stone.hitOBB.exist = false;
+		catapult.stone.hitOBB.enable = false;
 		wasHitToShield = true;
 		player.SucceededDefence();
 		tutorialState++;
 	}
-	if (!wasHitToShield && Donya::OBB::IsHitSphere(playerBodyBox, catapult.stone.hitSphere))
+	if (!wasHitToShield && Donya::OBB::IsHitOBB(playerBodyBox, catapult.stone.hitOBB))
 	{
 		EffectManager::GetInstance()->StoneBreakEffectSet(catapult.stone.pos);
 		setStopAnimation(catapult.pModel.get(), true);
 		catapult.stone.exist = false;
-		catapult.stone.hitSphere.exist = false;
-		catapult.stone.hitSphere.enable = false;
+		catapult.stone.hitOBB.exist = false;
+		catapult.stone.hitOBB.enable = false;
 		player.ReceiveImpact();
 		tutorialState = sceneTitle::RETURN_TITLE;
 	}
