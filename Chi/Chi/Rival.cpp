@@ -1684,7 +1684,7 @@ void Rival::BreakUpdate( TargetStatus target, float elapsedTime )
 				percent
 			);
 
-			extraOffset = -orientation.LocalFront() * ( RivalParam::Open().breakdown.leaveDistance * elapsedTime * ease );
+			extraOffset = -orientation.LocalFront() * ( RivalParam::Open().breakdown.leaveDistance * ease );
 
 			if ( MOVING_FRAME < timer )
 			{
