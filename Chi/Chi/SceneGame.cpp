@@ -456,7 +456,7 @@ public:
 
 				ResetEffects();
 
-				pSceneManager->setNextScene( new SceneResult( NULL ), false );
+				pSceneManager->setNextScene( new SceneResult(), false );
 			}
 			else
 			{
@@ -471,6 +471,16 @@ public:
 
 	void BossUpdate()
 	{
+	#if DEBUG_MODE
+
+		bool debugKill = false;
+		if ( Donya::Keyboard::Trigger( 'Q' ) )
+		{
+			debugKill = true;
+		}
+
+	#endif // DEBUG_MODE
+
 		switch ( stageNo )
 		{
 		case KnightNo:
@@ -478,6 +488,10 @@ public:
 				Knight::TargetStatus target{};
 				target.pos = player.GetPosition();
 				knight.Update( target );
+
+			#if DEBUG_MODE
+				if ( debugKill ) { knight.ReceiveImpact(); }
+			#endif // DEBUG_MODE
 			}
 			return;
 		case GolemNo:
@@ -485,6 +499,10 @@ public:
 				Golem::TargetStatus target{};
 				target.pos = player.GetPosition();
 				golem.Update( target );
+
+			#if DEBUG_MODE
+				if ( debugKill ) { golem.ReceiveImpact(); }
+			#endif // DEBUG_MODE
 			}
 			return;
 		case RivalNo:
@@ -492,6 +510,10 @@ public:
 				Rival::TargetStatus target{};
 				target.pos = player.GetPosition();
 				rival.Update( target );
+
+			#if DEBUG_MODE
+				if ( debugKill ) { rival.ReceiveImpact(); }
+			#endif // DEBUG_MODE
 			}
 			return;
 		default: Donya::OutputDebugStr( "Error : The boss does not update !\n" ); break;
@@ -548,16 +570,6 @@ public:
 	}
 	bool IsBossDefeated() const
 	{
-	#if DEBUG_MODE
-
-		if ( Donya::Keyboard::Trigger( 'Q' ) )
-		{
-			return true;
-		}
-		// else
-
-	#endif // DEBUG_MODE
-
 		switch ( stageNo )
 		{
 		case KnightNo:	return knight.IsDefeated();
@@ -579,7 +591,7 @@ public:
 	void ResetEffects()
 	{
 		EffectManager::GetInstance()->EruptionEffectReSetExist();
-		// EffectManager::GetInstance()->Long();
+		EffectManager::GetInstance()->LongAttackEffectReSetExist();
 	}
 
 	Donya::Vector3 GetCameraTargetPos() const

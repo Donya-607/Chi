@@ -124,7 +124,7 @@ public:
 	void Init();
 	void Uninit();
 
-	void Update( bool isUnfolding );
+	void Update( bool isUnfolding, const Donya::Vector3 &wsParentPosition );
 
 	void Draw(fbx_shader& HLSL, const Donya::Vector4x4& matView, const Donya::Vector4x4& matProjection, const Donya::Vector4x4& matParent);
 	void z_Draw(fbx_shader& HLSL, const Donya::Vector4x4& matView, const Donya::Vector4x4& matProjection, const Donya::Vector4x4& matParent);
@@ -163,7 +163,7 @@ private:
 
 	void ChangeMotion( State newStatus );
 
-	void DetectEndAnimation();
+	void DetectEndAnimation( const Donya::Vector3 &wsParentPosition );
 
 #if USE_IMGUI
 

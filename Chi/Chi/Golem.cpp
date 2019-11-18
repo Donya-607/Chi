@@ -560,6 +560,8 @@ void Golem::Update( TargetStatus target )
 
 	ApplyVelocity( target );
 	CollideToWall();
+
+	FxUpdate( target );
 }
 
 void Golem::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matProjection, float animeAccel )
@@ -1529,6 +1531,11 @@ void Golem::CollideToWall()
 		pos = ORIGIN + ( direction * ( currentLength - diff ) );
 		pos -= extraOffset; // Calculating position contains "extraOffset", so I should except "extraOffset".
 	}
+}
+
+void Golem::FxUpdate( TargetStatus target )
+{
+	EffectManager::GetInstance()->BossAttackMomentEffectUpdate( GetPos(), target.pos );
 }
 
 #if USE_IMGUI

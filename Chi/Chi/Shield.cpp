@@ -204,7 +204,7 @@ void Shield::Uninit()
 	ShieldParam::Get().Uninit();
 }
 
-void Shield::Update( bool isUnfolding )
+void Shield::Update( bool isUnfolding, const Donya::Vector3 &wsParentPosition )
 {
 #if USE_IMGUI
 
@@ -215,7 +215,7 @@ void Shield::Update( bool isUnfolding )
 
 	// I want detect the end after once call to FBXRender() from after change the motion.
 	// Because the end flag of animation is update in FBXRender(), so if not call, the flag is not updated(will detected a "true" immediately).
-	DetectEndAnimation();
+	DetectEndAnimation( wsParentPosition );
 
 	ApplyState( isUnfolding );
 
@@ -588,7 +588,7 @@ void Shield::ChangeMotion( State newStatus )
 	}
 }
 
-void Shield::DetectEndAnimation()
+void Shield::DetectEndAnimation( const Donya::Vector3 &wsParentPosition )
 {
 	if ( currentMotion == Idle || currentMotion == MOTION_COUNT ) { return; }
 	// else
@@ -599,7 +599,7 @@ void Shield::DetectEndAnimation()
 
 		if ( wasOpen )
 		{
-			// EffectManager::GetInstance()->ShieldEffectSet();
+			EffectManager::GetInstance()->ShieldEffectSet( wsParentPosition );
 		}
 	}
 }

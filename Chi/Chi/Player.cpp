@@ -1243,7 +1243,7 @@ void Player::CollideToStagesWall()
 void Player::ShieldUpdate()
 {
 	bool nowUnfolding = ( status == State::Defend ) ? true : false;
-	shield.Update( nowUnfolding );
+	shield.Update( nowUnfolding, GetPosition() );
 }
 bool Player::CanUnfoldShield() const
 {

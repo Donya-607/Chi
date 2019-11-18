@@ -338,11 +338,13 @@ private:
 	/// <summary>
 	/// The position("pos") is only changed by this method(or CollideToWall method).
 	/// </summary>
-	void ApplyVelocity( TargetStatus targert );
+	void ApplyVelocity( TargetStatus target );
 	/// <summary>
 	/// If the position("pos") without to field range, clamp to field range.
 	/// </summary>
 	void CollideToWall();
+
+	void FxUpdate( TargetStatus target );
 private:
 #if USE_IMGUI
 

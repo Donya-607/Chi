@@ -543,6 +543,8 @@ void Rival::Update( TargetStatus target )
 
 	ApplyVelocity( target );
 	CollideToWall();
+
+	FxUpdate( target );
 }
 
 void Rival::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matProjection, float animeAccel )
@@ -1722,16 +1724,7 @@ void Rival::DefeatInit()
 	slerpFactor		= 0.0f;
 	currentMotion	= Defeat;
 
-	// Disable the effect's collision.
-	auto &effects = EffectManager::GetInstance()->GetLongAttackEffectVector();
-	for ( auto &it : effects )
-	{
-		auto &collisions = it.GetHitSphereVector();
-		for ( auto &i : collisions )
-		{
-			i.enable = false;
-		}
-	}
+	EffectManager::GetInstance()->LongAttackEffectReSetCollision();
 }
 void Rival::DefeatUpdate()
 {
@@ -1773,6 +1766,11 @@ void Rival::CollideToWall()
 		pos = ORIGIN + ( direction * ( currentLength - diff ) );
 		pos -= extraOffset; // Calculating position contains "extraOffset", so I should except "extraOffset".
 	}
+}
+
+void Rival::FxUpdate( TargetStatus target )
+{
+	EffectManager::GetInstance()->BossAttackMomentEffectUpdate( GetPos(), target.pos );
 }
 
 #if USE_IMGUI

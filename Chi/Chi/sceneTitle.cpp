@@ -573,7 +573,7 @@ void sceneTitle::imGui()
 	}
 	else if (ImGui::Button("Result"))
 	{
-		pSceneManager->setNextScene(new SceneResult(60), false);
+		pSceneManager->setNextScene(new SceneResult(), false);
 	}
 	else if (ImGui::Button("GameOver"))
 	{
