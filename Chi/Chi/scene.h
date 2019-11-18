@@ -454,14 +454,14 @@ private:
 
 	void LoadParameter(bool isBinary = true);
 
-#if USE_IMGUI
+// #if USE_IMGUI
 
 	void SaveParameter();
 
 public:
-	void UseImGui();
+	// void UseImGui();
 
-#endif // USE_IMGUI
+// #endif // USE_IMGUI
 
 public:
 	SceneResult();

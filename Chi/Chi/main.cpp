@@ -29,14 +29,14 @@ INT WINAPI wWinMain(HINSTANCE instance, HINSTANCE prev_instance, LPWSTR cmd_line
 	(L"コンクエスト", instance, 1920, 1080, false, -1, 60.0f);
 
 	DragAcceptFiles(GameLib::getHandle(), true);
+
+	Donya::Sound::Init();
+
 #if DEBUG_MODE
 	pSceneManager->init(new sceneTitle);
 #else
 	pSceneManager->init(new sceneTitle);
 #endif // DEBUG_MODE
-
-
-	Donya::Sound::Init();
 
 	while (GameLib::gameLoop(true))
 	{
@@ -218,9 +218,10 @@ INT WINAPI wWinMain(HINSTANCE instance, HINSTANCE prev_instance, LPWSTR cmd_line
 
 	}
 
+	pSceneManager->end();
+
 	Donya::Sound::Uninit();
 
-	pSceneManager->end();
 	shutDownLibrary();
 	return 0;
 }

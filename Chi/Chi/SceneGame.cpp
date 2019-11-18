@@ -456,34 +456,26 @@ public:
 
 		EffectManager::GetInstance()->Update();
 
-		bool shouldChangeScene{};
-	#if DEBUG_MODE
-		shouldChangeScene = true;
-	#endif // DEBUG_MODE
-
-		if ( shouldChangeScene )
+		if ( IsLastStage( stageNo ) )
 		{
-			if ( IsLastStage( stageNo ) )
+			SetStageNo( 0 );
+
+			ResetEffects();
+
+			if ( !Fade::GetInstance()->GetExist() )
 			{
-				SetStageNo( 0 );
-
-				ResetEffects();
-
-				if ( !Fade::GetInstance()->GetExist() )
-				{
-					Fade::GetInstance()->Init( 3 );
-				}
+				Fade::GetInstance()->Init( 3 );
 			}
-			else
+		}
+		else
+		{
+			SetStageNo( stageNo + 1 );
+
+			ResetEffects();
+
+			if ( !Fade::GetInstance()->GetExist() )
 			{
-				SetStageNo( stageNo + 1 );
-
-				ResetEffects();
-
-				if ( !Fade::GetInstance()->GetExist() )
-				{
-					Fade::GetInstance()->Init( 1 );
-				}
+				Fade::GetInstance()->Init( 1 );
 			}
 		}
 	}

@@ -703,10 +703,10 @@ void SceneResult::LoadParameter(bool isBinary)
 }
 
 
-#if USE_IMGUI
-
 void SceneResult::imGui()
 {
+#if USE_IMGUI
+
 	if ( ImGui::BeginIfAllowed( "Result" ) )
 	{
 		ImGui::Text("ranking");
@@ -769,9 +769,9 @@ void SceneResult::imGui()
 
 		ImGui::End();
 	}
-}
 
 #endif // USE_IMGUI
+}
 
 void SceneResult::SaveParameter()
 {

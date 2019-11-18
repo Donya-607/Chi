@@ -115,7 +115,7 @@
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>$(ProjectDir)liblary\FMOD\LowLevel\lib;$(ProjectDir)liblary\FMOD\Studio\lib;$(ProjectDir)liblary\FBX SDK\2016.1.2\lib\vs2015\x86\release;$(ProjectDir)liblary\DirectXTK-master\Bin\Desktop_2015\Win32\Release;$(ProjectDir)liblary\DirectXTex-master\DirectXTex\Bin\Desktop_2019\Win32\Relese;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)liblary\FMOD\LowLevel\lib;$(ProjectDir)liblary\FMOD\Studio\lib;$(ProjectDir)liblary\FBX SDK\2016.1.2\lib\vs2015\x86\release;$(ProjectDir)liblary\DirectXTK-master\Bin\Desktop_2015\Win32\Release;$(ProjectDir)liblary\DirectXTex-master\DirectXTex\Bin\Desktop_2019\Win32\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>strmiids.lib;d3d11.lib;dxgi.lib;DirectXTK.lib;DirectXTex.lib;fmod_vc.lib;fmodstudio_vc.lib;libfbxsdk-md.lib;winmm.lib;xaudio2.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <FxCompile>
