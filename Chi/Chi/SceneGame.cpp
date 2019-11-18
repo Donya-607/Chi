@@ -460,9 +460,7 @@ public:
 
 				ResetEffects();
 
-				//pSceneManager->setNextScene( new SceneResult(), false );
-
-				Fade::GetInstance()->Init(3);
+				Fade::GetInstance()->Init( 3 );
 			}
 			else
 			{
@@ -470,9 +468,10 @@ public:
 
 				ResetEffects();
 
-				//pSceneManager->setNextScene( new SceneGame(), false );
-
-				if (!Fade::GetInstance()->GetExist()) Fade::GetInstance()->Init(1);
+				if ( !Fade::GetInstance()->GetExist() )
+				{
+					Fade::GetInstance()->Init( 1 );
+				}
 			}
 		}
 	}

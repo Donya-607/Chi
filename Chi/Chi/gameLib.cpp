@@ -1061,7 +1061,7 @@ namespace GameLib
 
 		void setAnimFlame(bone_animation* _anim, const int _anim_flame)
 		{
-			_anim->setAnimFlame(_anim_flame);
+			_anim->setAnimFlame(static_cast<float>(_anim_flame));
 		}
 
 
@@ -1192,12 +1192,17 @@ namespace GameLib
 
 			void startViblation(int index, float timer, float motor)
 			{
-				if (motor < 0)motor = 0;
-				else if (motor > 100)
-					motor = 100;
+				if ( motor < 0 )
+				{
+					motor = 0;
+				}
+				else if ( motor > 100.0f )
+				{
+					motor = 100.0f;
+				}
 
-				WORD right = motor * 655.35f*2;
-				WORD left = motor *655.35f*2;
+				WORD right = static_cast<WORD>( motor * 655.35f * 2.0f );
+				WORD left  = static_cast<WORD>( motor * 655.35f * 2.0f );
 				m.pad[index].startViblation(index, left, right);
 				m.pad[index].timer = timer;
 			}

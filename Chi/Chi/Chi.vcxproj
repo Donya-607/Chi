@@ -163,6 +163,7 @@
     <ClInclude Include="Donya\Vector.h" />
     <ClInclude Include="dragDrop.h" />
     <ClInclude Include="Effect.h" />
+    <ClInclude Include="Fade.h" />
     <ClInclude Include="filter.h" />
     <ClInclude Include="font.h" />
     <ClInclude Include="frame_rate.h" />
@@ -228,6 +229,7 @@
     <ClCompile Include="Donya\Vector.cpp" />
     <ClCompile Include="DragDrop.cpp" />
     <ClCompile Include="Effect.cpp" />
+    <ClCompile Include="Fade.cpp" />
     <ClCompile Include="filter.cpp" />
     <ClCompile Include="font.cpp" />
     <ClCompile Include="frame_rate.cpp" />
