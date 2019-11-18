@@ -2,14 +2,14 @@
     "GolemAI": {
         "cereal_class_version": 5,
         "wholeFrame": {
-            "value0": 235,
-            "value1": 160,
-            "value2": 420
+            "value0": 3.799999952316284,
+            "value1": 2.5,
+            "value2": 7.0
         },
         "coolTimeFrame": {
-            "value0": 30,
-            "value1": 30,
-            "value2": 30
+            "value0": 0.5,
+            "value1": 0.5,
+            "value2": 0.5
         },
         "pAttackChoosers": {
             "value0": {
@@ -95,9 +95,9 @@
         },
         "initStorage": {
             "waitNo": 0,
-            "nextAttackNo": 0
+            "nextAttackNo": -1
         },
-        "initCoolTime": 120,
+        "initCoolTime": 2.5,
         "gapIntervals": [
             3,
             4,

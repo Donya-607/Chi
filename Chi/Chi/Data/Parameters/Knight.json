@@ -95,7 +95,7 @@
         "m.raidJumpDistance": 666.0,
         "m.raidEaseKind": 7,
         "m.raidEaseType": 1,
-        "m.defeatMotionLength": 230.0,
+        "m.defeatMotionLength": 5.0,
         "m.defeatHideSpeed": 0.0010000000474974514,
         "m.motionSpeeds": [
             1.5,

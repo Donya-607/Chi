@@ -17,7 +17,7 @@
                 "y": 128.0,
                 "z": 16.0
             },
-            "exist": false
+            "exist": true
         },
         "hitBoxPhysic": {
             "cereal_class_version": 0,
@@ -47,8 +47,8 @@
         },
         "hitBoxLance": {
             "cereal_class_version": 0,
-            "enableFrameStart": 30.0,
-            "enableFrameLast": 80.0,
+            "enableFrameStart": 0.5,
+            "enableFrameLast": 1.100000023841858,
             "OBB": {
                 "cereal_class_version": 0,
                 "pos": {

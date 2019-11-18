@@ -212,7 +212,7 @@ void GolemAI::ImGui( float normalizedTargetDistance )
 
 			if ( ACTION_STATE_COUNT <= i ) { return "Error Name"; }
 			// else
-			return std::string{ NAMES[i] };
+			return  NAMES[i];
 		};
 		auto GetWaitName	= []( int i )->std::string
 		{
@@ -227,7 +227,7 @@ void GolemAI::ImGui( float normalizedTargetDistance )
 
 			if ( WAIT_STATE_COUNT <= i ) { return "Error Name"; }
 			// else
-			return std::string{ NAMES[i] };
+			return NAMES[i];
 		};
 		auto GetAttackName	= []( int i )->std::string
 		{
@@ -240,7 +240,7 @@ void GolemAI::ImGui( float normalizedTargetDistance )
 
 			if ( ALL_ATTACK_COUNT <= i ) { return "Error Name"; }
 			// else
-			return std::string{ NAMES[i] };
+			return NAMES[i];
 		};
 
 		if ( ImGui::TreeNode( "CurrentParameter" ) )
