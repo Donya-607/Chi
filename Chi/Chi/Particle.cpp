@@ -1569,8 +1569,8 @@ void AccelParticle::Emit(DirectX::XMFLOAT3 _pos, DirectX::XMFLOAT3 _dir)
 					bool minusX = false;
 					bool minusZ = false;
 
-					float _dirX = _dir.x;
-					float _dirZ = _dir.z;
+					float _dirX = -_dir.x;
+					float _dirZ = -_dir.z;
 
 					if (_dir.x < 0)
 					{
@@ -2191,7 +2191,7 @@ void ShieldParticle::Set(DirectX::XMFLOAT3 _pos)
 		DirectX::XMFLOAT4 _posFloat4 = DirectX::XMFLOAT4(_pos.x, _pos.y, _pos.z, 1.0f);
 		DirectX::XMFLOAT3 _speed = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f);
 		DirectX::XMFLOAT3 _accel = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f);
-		DirectX::XMFLOAT2 _scale = DirectX::XMFLOAT2(5.0f, 5.0f);
+		DirectX::XMFLOAT2 _scale = DirectX::XMFLOAT2(7.5f, 7.5f);
 		DirectX::XMFLOAT2 _texPos = DirectX::XMFLOAT2(0.0f, 630.0f);
 		DirectX::XMFLOAT2 _texSize = DirectX::XMFLOAT2(142.0f, 142.0f);
 
@@ -2377,7 +2377,7 @@ void DisappearanceParticle::Set(DirectX::XMFLOAT3 _pos)
 		DirectX::XMFLOAT4 _posFloat4 = DirectX::XMFLOAT4(_pos.x, _pos.y, _pos.z, 1.0f);
 		DirectX::XMFLOAT3 _speed = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f);
 		DirectX::XMFLOAT3 _accel = DirectX::XMFLOAT3(0.0f, 0.25f, 0.0f);
-		DirectX::XMFLOAT2 _scale = DirectX::XMFLOAT2(5.0f, 5.0f);
+		DirectX::XMFLOAT2 _scale = DirectX::XMFLOAT2(7.5f, 7.5f);
 		DirectX::XMFLOAT2 _texPos = DirectX::XMFLOAT2(0.0f, 1420.0f);
 		DirectX::XMFLOAT2 _texSize = DirectX::XMFLOAT2(142.0f, 142.0f);
 

@@ -551,6 +551,7 @@ private:
 	StoneBreakParticle		stoneBreakParticle;
 	CatapultBreakParticle	catapultBreakParticle;
 	ShieldEffect			shieldEffect;
+	DisappearanceParticle	disappearanceParticle;
 
 public:
 	EffectManager() {}
@@ -571,6 +572,7 @@ public:
 	}
 
 	void Update();
+	// pos : ボスの座標, dir : 方向ベクトル
 	void AccelEffectUpdate(Donya::Vector3 pos, Donya::Vector3 dir);
 	void BossAttackMomentEffectUpdate(Donya::Vector3 bossPos, Donya::Vector3 playerPos);
 	void Render( fbx_shader &HLSL );
@@ -684,6 +686,12 @@ public:
 	void ShieldEffectSet(Donya::Vector3 pos)
 	{
 		shieldEffect.Set(pos);
+	}
+
+	// ボス死亡パーティクル
+	void DisappearanceEffectSet(Donya::Vector3 pos)
+	{
+		disappearanceParticle.Set(pos);
 	}
 
 	std::vector<EruptionEffect> &GetEruptionEffectVector()
