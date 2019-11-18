@@ -3,12 +3,10 @@
 #include "GameLibFunctions.h"
 #include "XinputPad.h"
 #include "gameLib.h"
-#include "Donya/Sound.h"
+
 
 void SceneGameOver::init()  
 {
-	Donya::Sound::Play(GAMEOVER);
-
 	spriteLoad(&sprite, L"./Data/Images/UI/GameOver.png");
 
 	logo.pos = Donya::Vector2(631.0f, 175.0f);
@@ -28,6 +26,8 @@ void SceneGameOver::init()
 void SceneGameOver::update()
 {
 	Fade::GetInstance()->Update();
+
+	if (Fade::GetInstance()->GetExist()) return;
 
 	using namespace GameLib::input;
 	constexpr int   PAD_NO = 0;
@@ -68,7 +68,7 @@ void SceneGameOver::render()
 }
 void SceneGameOver::uninit()
 {
-	Donya::Sound::Stop(GAMEOVER);
+
 }
 void SceneGameOver::imGui()
 {

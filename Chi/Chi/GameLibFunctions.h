@@ -4,51 +4,6 @@
 #include "gameLib.h"
 #include "vector.h"
 
-//ˆêŽž”ð“ï
-enum MUSIC_ID
-{
-	TITLE = 0,
-	STAGE1,
-	STAGE2,
-	STAGE3,
-	GAMEOVER,
-	GAMECLEAR,
-};
-
-enum SE_ID
-{
-	CATAPAULT = 7,
-	ROCK,
-	PL_DEFEND,
-	PL_DEATH,
-	PL_HIT,
-	PL_RUN_1,
-	PL_RUN_2,
-	PL_RUN_3,
-	PL_SHILED_INPACT,
-	PL_SHILED_OPEN,
-	PL_THRUST,
-	PROTECTED,
-
-	BOSS_2_CHARGE,
-	BOSS_2_EXPLOSION,
-	BOSS_2_JUMP,
-	BOSS_2_RUN,
-	BOSS_2_SWING,
-
-	BOSS_3_ROCK,
-	BOSS_3_BACK,
-	BOSS_3_PUNTCH,
-
-	BOSS_4_JUMP,
-	BOSS_4_LINE,
-	BOSS_4_POINT,
-	BOSS_4_RUN,
-	BOSS_4_RUSH,
-	BOSS_4_SLASH,
-
-};
-
 
 //library//
 void startUpLibrary(LPCTSTR caption, HINSTANCE instance, int width = 640, int height = 480, bool isFullscreen = false, int iconNum = -1, double frameRate = 0.0);
@@ -258,7 +213,7 @@ void bloom_SRVrender(
 	fbx_shader& hlsl,
 	const DirectX::XMFLOAT4X4& SynthesisMatrix,
 	const DirectX::XMFLOAT4X4& worldMatrix,
-	const DirectX::XMFLOAT4& judge_color = {1.0f,1.0f,1.0f,1.0f},
+	const DirectX::XMFLOAT4& judge_color = { 1.0f,1.0f,1.0f,1.0f },
 	const DirectX::XMFLOAT4& materialColor = { 1.0f,1.0f,1.0f,1.0f }
 );
 

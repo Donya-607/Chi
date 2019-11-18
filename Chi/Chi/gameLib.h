@@ -302,7 +302,7 @@ namespace GameLib
 		static_mesh::primitive_material& getPrimitiveMaterial(static_mesh* _mesh);
 		void staticMeshRender(static_mesh* _mesh, const DirectX::XMFLOAT4X4&, const DirectX::XMFLOAT4X4&, const DirectX::XMFLOAT4&, line_light& _line_light, std::vector<point_light>& _point_light, const DirectX::XMFLOAT4&, bool);
 		void builboradRender(static_mesh* _mesh, const DirectX::XMFLOAT4X4&, const DirectX::XMFLOAT4&, const DirectX::XMFLOAT2, const float, const DirectX::XMFLOAT4&, const float alpha, const DirectX::XMFLOAT3& color);
-		void builborad_z_Render(static_mesh* _mesh, const DirectX::XMFLOAT4X4& view_projection, const DirectX::XMFLOAT4& _pos, const DirectX::XMFLOAT2 _scale, const float _angle, const DirectX::XMFLOAT4& camPos,  const float alpha, const DirectX::XMFLOAT3& color);
+		void builborad_z_Render(static_mesh* _mesh, const DirectX::XMFLOAT4X4& view_projection, const DirectX::XMFLOAT4& _pos, const DirectX::XMFLOAT2 _scale, const float _angle, const DirectX::XMFLOAT4& camPos, const float alpha, const DirectX::XMFLOAT3& color);
 		void builborad_bloom_Render(static_mesh* _mesh, const DirectX::XMFLOAT4X4& view_projection, const DirectX::XMFLOAT4& _pos, const DirectX::XMFLOAT2 _scale, const float _angle, const DirectX::XMFLOAT4& _cam_pos, const float alpha, const DirectX::XMFLOAT3& color, const DirectX::XMFLOAT4& judge_color);
 
 

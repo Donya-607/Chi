@@ -257,6 +257,7 @@ private:
 	Donya::Vector3			extraOffset;		// Actual position is "pos + extraOffset".
 	Donya::Quaternion		orientation;
 	Models					models;
+	bool					doOnce;				// Recycle between each state.
 public:
 	Knight();
 	~Knight();

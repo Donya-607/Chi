@@ -592,7 +592,7 @@ void createPlane(static_mesh* _plane, u_int _vertical, u_int _side)
 
 void createBillboard(static_mesh* _mesh, const wchar_t* _textureName, const DirectX::XMFLOAT2& texpos, const DirectX::XMFLOAT2& texsize)
 {
-	GameLib::staticMesh::createBillboard(_mesh, _textureName,texpos,texsize);
+	GameLib::staticMesh::createBillboard(_mesh, _textureName, texpos, texsize);
 }
 
 void loadOBJ(static_mesh* staticMesh, const wchar_t* objName)

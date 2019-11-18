@@ -72,6 +72,7 @@ void scenePose::update()
 	//‰‰oI—¹‚©‚çŒˆ’è‚Ü‚Å
 	if (flg[2])
 	{
+#if DEBUG_MODE
 		if (getKeyState(KEY_INPUT_UP) == 1)
 		{
 			cursol--;
@@ -90,7 +91,30 @@ void scenePose::update()
 			flg[2] = false;
 			flg[3] = true;
 		}
+#endif
+		if (getKeyState(KEY_INPUT_UP) == 1)
+		{
+			cursol--;
+			if (cursol < 0)
+				cursol = 2;
+		}
+		else if (getKeyState(KEY_INPUT_DOWN) == 1)
+		{
+			cursol++;
+			if (cursol > 2)
+				cursol = 0;
+		}
 
+		if (pressedButtons(0,A) == 1)
+		{
+			flg[2] = false;
+			flg[3] = true;
+		}
+		if (pressedButtons(0, START) == 1)
+		{
+			pSceneManager->deleteNowScene();
+			return;
+		}
 	}
 
 	//I‚í‚è˜gˆÚ“®
@@ -103,6 +127,7 @@ void scenePose::update()
 			break;
 
 		case 1:
+			GameTimer::GetInstance()->Init();
 			pSceneManager->setNextScene(new SceneGame, false);
 			break;
 

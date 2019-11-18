@@ -5,7 +5,7 @@
 #include "Donya/Collision.h"
 #include "imgui.h"
 #include "GameLibFunctions.h"
-#include "Donya/Sound.h"
+
 
 class Stone
 {
@@ -32,10 +32,7 @@ public:
 		//hitSphere(),
 		hitOBB()
 	{}
-	~Stone() 
-	{
-		Donya::Sound::Play(ROCK);
-	}
+	~Stone() {}
 
 	void Init(Donya::Vector3 _pos, Donya::Vector3 _speed, Donya::Vector3 _accel, Donya::Vector3 _scale, Donya::Vector3 _angle);
 	void Update();

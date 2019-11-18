@@ -87,7 +87,7 @@ dcl_temps 12
 //   v3.x <- pin.texcoord.x; v3.y <- pin.texcoord.y; 
 //   o0.x <- <main return value>.x; o0.y <- <main return value>.y; o0.z <- <main return value>.z; o0.w <- <main return value>.w
 //
-#line 67 "D:\Git\fps_shooting\Chi\Chi\Chi\geometric_primitive_bloom_ps.hlsl"
+#line 67 "D:\Develop\Chi\Chi\Chi\Chi\geometric_primitive_bloom_ps.hlsl"
 div r0.x, v0.x, cb0[31].x  // r0.x <- texpos.x
 div r0.y, v0.y, cb0[31].y  // r0.y <- texpos.y
 

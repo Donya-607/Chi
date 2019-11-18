@@ -29,8 +29,7 @@ void Catapult::Init( Donya::Vector3 _pos, Donya::Vector3 _scale, Donya::Vector3 
 }
 
 void Catapult::Update( Donya::Vector3 _playerPos )
-{ 
-
+{
 	if (getAnimFlame(pModel.get()) == 22)
 	{
 		Donya::Vector3 catapultToPlayerVec = _playerPos - Donya::Vector3(0.0f, pos.y + 1350.0f, pos.z + 500.0f);

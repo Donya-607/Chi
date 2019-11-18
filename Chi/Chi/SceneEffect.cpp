@@ -1,6 +1,7 @@
 #include "Particle.h"
 #include "scene.h"
 #include "sceneManager.h"
+#include "Donya/UseImGui.h"	// use USE_IMGUI macro.
 #include "Donya/Vector.h"
 #include "GameLibFunctions.h"
 #include "Effect.h"
@@ -134,6 +135,8 @@ void SceneEffect::uninit()
 }
 void SceneEffect::imGui()
 {
+#if USE_IMGUI
+
 	//UIManager::GetInstance()->Imgui();
 	ImGui::Begin("Effect");
 	if (ImGui::TreeNode("BillBoard Test Draw Parametor"))
@@ -408,4 +411,6 @@ void SceneEffect::imGui()
 	obb2.angle.x = angle2[0];
 	obb2.angle.y = angle2[1];
 	obb2.angle.z = angle2[2];*/
+
+#endif // USE_IMGUI
 }

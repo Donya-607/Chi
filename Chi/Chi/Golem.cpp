@@ -553,7 +553,7 @@ void Golem::Update( TargetStatus target, float elapsedTime )
 
 #endif // USE_IMGUI
 
-	AI.Update( CalcNormalizedDistance( target.pos ), elapsedTime );
+	AI.Update( elapsedTime, CalcNormalizedDistance( target.pos ) );
 
 	ChangeStatus( target, elapsedTime );
 	UpdateCurrentStatus( target, elapsedTime );

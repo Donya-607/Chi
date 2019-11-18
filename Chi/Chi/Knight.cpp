@@ -346,7 +346,8 @@ Knight::Knight() :
 	currentMotion( Idle ),
 	pos(), velocity(), extraOffset(),
 	orientation(),
-	models()
+	models(),
+	doOnce( false )
 {
 	auto InitializeModel = []( std::shared_ptr<skinned_mesh> *ppMesh )
 	{
@@ -1093,6 +1094,7 @@ void Knight::AttackExplosionInit( TargetStatus target, float elapsedTime )
 	slerpFactor		= KnightParam::Get().SlerpFactor( status );
 	velocity		= 0.0f;
 	currentMotion	= AtkExpl;
+	doOnce			= false;
 
 	Donya::SphereFrame &hitBox = KnightParam::Get().HitBoxExplosion();
 	ResetCurrentSphereF( &hitBox );
@@ -1111,15 +1113,17 @@ void Knight::AttackExplosionUpdate( TargetStatus target, float elapsedTime )
 	auto &explHitBox = KnightParam::Get().HitBoxExplosion();
 
 	timer += 1.0f * elapsedTime;
-	if ( ZeroEqual( timer - CHARGE_LENGTH ) )
+	if ( !doOnce && CHARGE_LENGTH < timer )
 	{
+		doOnce = true;
+
 		// When finish stop the animation, and start explosion.
 		explHitBox.collision.radius = KnightParam::Open().explScaleStart;
 		setStopAnimation( models.pAtkExpl.get(), /* is_stop = */ false );
 
 		EffectManager::GetInstance()->BossAbsorptionEffectReSet();
 	}
-	else
+	
 	if ( CHARGE_LENGTH < timer )
 	{
 		const float RADIUS_MIN = KnightParam::Open().explScaleStart;
@@ -1152,8 +1156,9 @@ void Knight::AttackExplosionUpdate( TargetStatus target, float elapsedTime )
 }
 void Knight::AttackExplosionUninit()
 {
-	timer = 0;
-	reviveCollisionTime = 0;
+	timer				= 0;
+	reviveCollisionTime	= 0;
+	doOnce				= false;
 
 	Donya::SphereFrame &hitBox = KnightParam::Get().HitBoxExplosion();
 	ResetCurrentSphereF( &hitBox );
@@ -1202,28 +1207,20 @@ void Knight::AttackRaidUpdate( TargetStatus target, float elapsedTime )
 	const float START_TIME		= KnightParam::Open().raidJumpStartFrame;
 	const float LANDING_TIME	= KnightParam::Open().raidJumpLastFrame;
 	
-	auto ApplyExtraOffset		= [&]()->void
-	{
-		// Apply movement and reset extraOffset.
-		pos += extraOffset;
-		extraOffset = 0.0f;
-	};
-
 	timer += 1.0f * elapsedTime;
 
 	if ( timer <= START_TIME )
 	{
 		// Before jump. move to front slowly.
 
-		extraOffset += orientation.LocalFront() * KnightParam::Get().MoveSpeed( status ) * elapsedTime;
-
-		if ( ZeroEqual( timer - START_TIME ) )
-		{
-			ApplyExtraOffset();
-			EffectManager::GetInstance()->JumpEffectSet( GetPos() );
-		}
+		velocity = orientation.LocalFront() * KnightParam::Get().MoveSpeed( status ) * elapsedTime;
 	}
-	else
+	else if ( !velocity.IsZero() )
+	{
+		velocity = 0.0f;
+		EffectManager::GetInstance()->JumpEffectSet( GetPos() );
+	}
+
 	if ( timer <= START_TIME + LANDING_TIME )
 	{
 		// Before landing. move to front with easing.
@@ -1237,15 +1234,12 @@ void Knight::AttackRaidUpdate( TargetStatus target, float elapsedTime )
 		);
 
 		extraOffset = orientation.LocalFront() * ( KnightParam::Open().raidJumpDistance * elapsedTime * ease );
-
-		if ( ZeroEqual( timer - ( START_TIME + LANDING_TIME ) ) )
-		{
-			ApplyExtraOffset();
-		}
 	}
-	else
+	else if ( !extraOffset.IsZero() )
 	{
-		// No op.
+		// Apply movement and reset extraOffset.
+		pos += extraOffset;
+		extraOffset = 0.0f;
 	}
 
 	auto &hitBox = KnightParam::Get().HitBoxRaid();

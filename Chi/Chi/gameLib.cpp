@@ -194,7 +194,7 @@ namespace GameLib
 
 	float getDeltaTime()
 	{
-		return m.hrTimer.time_interval()*m.anim_rate;
+		return m.hrTimer.time_interval() * m.anim_rate;
 	}
 
 	DirectX::XMINT2 getWindowSize()
@@ -948,7 +948,7 @@ namespace GameLib
 
 		void createBillboard(static_mesh* _mesh, const wchar_t* _textureName, const DirectX::XMFLOAT2& texpos, const DirectX::XMFLOAT2& texsize)
 		{
-			_mesh->createBillboard(m.device, _textureName,texpos,texsize);
+			_mesh->createBillboard(m.device, _textureName, texpos, texsize);
 		}
 
 		void loadMesh(static_mesh* _mesh, const wchar_t* objName)
@@ -1088,7 +1088,7 @@ namespace GameLib
 		void skinnedMeshRender(skinned_mesh* _mesh, fbx_shader& hlsl, float magnification, const DirectX::XMFLOAT4X4& SynthesisMatrix, const DirectX::XMFLOAT4X4& worldMatrix, const DirectX::XMFLOAT4& camPos, line_light& lineLight, std::vector<point_light>& _point_light, const DirectX::XMFLOAT4& materialColor, bool wireFlg, bool animation_flg)
 		{
 			setRenderTarget(&m.original_RT);
-			_mesh->render(m.context, hlsl, SynthesisMatrix, worldMatrix, camPos, lineLight, _point_light, materialColor, wireFlg, m.hrTimer.time_interval()*m.anim_rate, magnification, animation_flg);
+			_mesh->render(m.context, hlsl, SynthesisMatrix, worldMatrix, camPos, lineLight, _point_light, materialColor, wireFlg, m.hrTimer.time_interval() * m.anim_rate, magnification, animation_flg);
 
 		}
 
@@ -1274,17 +1274,17 @@ namespace GameLib
 
 			void startViblation(int index, float timer, float motor)
 			{
-				if ( motor < 0 )
+				if (motor < 0)
 				{
 					motor = 0;
 				}
-				else if ( motor > 100.0f )
+				else if (motor > 100.0f)
 				{
 					motor = 100.0f;
 				}
 
-				WORD right = static_cast<WORD>( motor * 655.35f * 2.0f );
-				WORD left  = static_cast<WORD>( motor * 655.35f * 2.0f );
+				WORD right = static_cast<WORD>(motor * 655.35f * 2.0f);
+				WORD left = static_cast<WORD>(motor * 655.35f * 2.0f);
 				m.pad[index].startViblation(index, left, right);
 				m.pad[index].timer = timer;
 			}

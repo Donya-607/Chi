@@ -2,16 +2,16 @@
     "RivalAI": {
         "cereal_class_version": 1,
         "wholeFrame": {
-            "value0": 2.3299999237060549,
-            "value1": 3.3299999237060549,
-            "value2": 2.5,
-            "value3": 1.6699999570846558
+            "value0": 3.0,
+            "value1": 3.0,
+            "value2": 3.0,
+            "value3": 3.0
         },
         "coolTimeFrame": {
             "value0": 1.0,
-            "value1": 0.0,
-            "value2": 0.8299999833106995,
-            "value3": 0.0
+            "value1": 1.0,
+            "value2": 1.0,
+            "value3": 1.0
         },
         "pAttackChoosers": {
             "value0": {
@@ -175,7 +175,7 @@
             "waitNo": 0,
             "nextAttackNo": 0
         },
-        "initCoolTime": 1.5,
+        "initCoolTime": 2.5,
         "gapIntervals": [
             4,
             2,
