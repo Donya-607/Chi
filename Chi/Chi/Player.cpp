@@ -828,6 +828,8 @@ void Player::RunUpdate( Input input, float elapsedTime )
 		lookDirection = input.moveVector.Normalized();
 		velocity = 0.0f;
 
+		// Prevent taking a running motion.
+
 		RunUninit();
 		IdleInit( input );
 

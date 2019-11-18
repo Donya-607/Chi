@@ -1202,28 +1202,20 @@ void Knight::AttackRaidUpdate( TargetStatus target, float elapsedTime )
 	const float START_TIME		= KnightParam::Open().raidJumpStartFrame;
 	const float LANDING_TIME	= KnightParam::Open().raidJumpLastFrame;
 	
-	auto ApplyExtraOffset		= [&]()->void
-	{
-		// Apply movement and reset extraOffset.
-		pos += extraOffset;
-		extraOffset = 0.0f;
-	};
-
 	timer += 1.0f * elapsedTime;
 
 	if ( timer <= START_TIME )
 	{
 		// Before jump. move to front slowly.
 
-		extraOffset += orientation.LocalFront() * KnightParam::Get().MoveSpeed( status ) * elapsedTime;
-
-		if ( ZeroEqual( timer - START_TIME ) )
-		{
-			ApplyExtraOffset();
-			EffectManager::GetInstance()->JumpEffectSet( GetPos() );
-		}
+		velocity = orientation.LocalFront() * KnightParam::Get().MoveSpeed( status ) * elapsedTime;
 	}
-	else
+	else if ( !velocity.IsZero() )
+	{
+		velocity = 0.0f;
+		EffectManager::GetInstance()->JumpEffectSet( GetPos() );
+	}
+
 	if ( timer <= START_TIME + LANDING_TIME )
 	{
 		// Before landing. move to front with easing.
@@ -1237,15 +1229,12 @@ void Knight::AttackRaidUpdate( TargetStatus target, float elapsedTime )
 		);
 
 		extraOffset = orientation.LocalFront() * ( KnightParam::Open().raidJumpDistance * elapsedTime * ease );
-
-		if ( ZeroEqual( timer - ( START_TIME + LANDING_TIME ) ) )
-		{
-			ApplyExtraOffset();
-		}
 	}
-	else
+	else if ( !extraOffset.IsZero() )
 	{
-		// No op.
+		// Apply movement and reset extraOffset.
+		pos += extraOffset;
+		extraOffset = 0.0f;
 	}
 
 	auto &hitBox = KnightParam::Get().HitBoxRaid();
