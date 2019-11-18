@@ -265,14 +265,27 @@ public:
 	void z_Render(fbx_shader& HLSL);
 	void bloom_Render(fbx_shader& HLSL);
 
-	bool GetActivated() const { return activated; }
-	std::vector<Donya::Sphere>& GetHitSphereVector() { return hitSphere; }
 	void SetEnable(int num, bool _enable = false)
 	{
 		if (MAX_SIZE <= num) return;
 
 		hitSphere[num].enable = _enable;
 	}
+	void SetExist(int num, bool _exist = false)
+	{
+		if (MAX_SIZE <= num) return;
+
+		hitSphere[num].exist = _exist;
+	}
+	void SetDataExist(int num, bool _exist)
+	{
+		if (MAX_SIZE <= num) return;
+
+		data[num].SetExist(_exist);
+	}
+
+	bool GetActivated() const { return activated; }
+	std::vector<Donya::Sphere>& GetHitSphereVector() { return hitSphere; }
 
 private:
 	bool CollideToWall(Donya::Vector3 pos);
@@ -326,6 +339,28 @@ public:
 			{
 				longAttackEffect[i].pModel[j] = std::make_shared<skinned_mesh>();
 				longAttackEffect[i].pModel[j] = _pModel;
+			}
+		}
+	}
+
+	void AllReSetExist()
+	{
+		for (int i = 0; i < MAX_SIZE; i++)
+		{
+			for (int j = 0; j < longAttackEffect[i].MAX_SIZE; j++)
+			{
+				longAttackEffect[i].SetDataExist(j, false);
+			}
+		}
+	}
+	void AllReSetCollision()
+	{
+		for (int i = 0; i < MAX_SIZE; i++)
+		{
+			for (int j = 0; j < longAttackEffect[i].MAX_SIZE; j++)
+			{
+				longAttackEffect[i].SetExist(j, false);
+				longAttackEffect[i].SetEnable(j, false);
 			}
 		}
 	}
@@ -414,11 +449,14 @@ private:
 	static constexpr float len = 50.0f;
 	int aliveFrameMAX;
 	int cnt;
+	static_mesh billboard[3];
 
 public:
 	BossAttackMomentEffect()
 	{
-		createBillboard(&data.pMesh, L"./Data/Images/UI/CheckPoint.png");
+		createBillboard(&billboard[0], L"./Data/Images/UI/CheckPoint.png", DirectX::XMFLOAT2(0.0f, 0.0f),       DirectX::XMFLOAT2(1480.0f, 1420.0f));
+		createBillboard(&billboard[1], L"./Data/Images/UI/CheckPoint.png", DirectX::XMFLOAT2(0.0f, 1150.0f),    DirectX::XMFLOAT2(1480.0f, 1420.0f));
+		createBillboard(&billboard[2], L"./Data/Images/UI/CheckPoint.png", DirectX::XMFLOAT2(0.0f, 2300.0f),    DirectX::XMFLOAT2(1480.0f, 1420.0f));
 	}
 	~BossAttackMomentEffect() {}
 
@@ -427,11 +465,9 @@ public:
 		DirectX::XMFLOAT4 _posFloat4 = DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
 		DirectX::XMFLOAT3 _speed = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f);
 		DirectX::XMFLOAT3 _accel = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f);
-		DirectX::XMFLOAT2 _scale = DirectX::XMFLOAT2(100.0f, 100.0f);
-		DirectX::XMFLOAT2 _texPos = DirectX::XMFLOAT2(0.0f, 1150.0f * bossNo);
-		DirectX::XMFLOAT2 _texSize = DirectX::XMFLOAT2(1480.0f, 1150.0f);
+		DirectX::XMFLOAT2 _scale = DirectX::XMFLOAT2(400.0f, 400.0f);
 
-		data.Init(_posFloat4, _speed, _accel, _scale, _texPos, _texSize);
+		data.Init(_posFloat4, _speed, _accel, _scale, bossNo);
 		data.SetColor(DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
 
 		aliveFrameMAX = aliveFrameMax;
@@ -449,7 +485,7 @@ public:
 			Donya::Vector3 vec = playerPos - bossPos;
 			vec.Normalize();
 
-			data.SetPos(Donya::Vector4(vec.x * len, 50.0f, vec.z * len, 1.0f));
+			data.SetPos(Donya::Vector4(bossPos.x + vec.x * len, bossPos.y + 50.0f, bossPos.z + vec.z * len, 1.0f));
 			data.SetAlpha(1.0f - (static_cast<float>(cnt) / static_cast<float>(aliveFrameMAX)));
 			cnt++;
 		}
@@ -457,17 +493,28 @@ public:
 
 	void Draw()
 	{
-		setBlendMode_ADD(1.0f);
+		//setBlendMode_ADD(1.0f);
 		DirectX::XMFLOAT4X4 viewProjection;
 		DirectX::XMStoreFloat4x4(&viewProjection, getViewMatrix() * getProjectionMatrix());
 		if (data.GetExist())
 		{
-			billboardRender(&data.pMesh, viewProjection, data.GetPos(), data.GetScale(), data.GetAngle(), getCamPos(), data.GetTexPos(), data.GetTexSize(), data.GetColor().w);
+			// billboardRender(&billboard[data.GetType()], viewProjection, data.GetPos(), data.GetScale(), data.GetAngle(), getCamPos(), data.GetColor().w);
+			billboardRender
+			(
+				&billboard[data.GetType()],
+				viewProjection,
+				data.GetPos(),
+				data.GetScale(),
+				data.GetAngle(),
+				getCamPos(),
+				data.GetColor().w
+			);
+
 			//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
 			//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
 			//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
 		}
-		setBlendMode_ALPHA(1.0f);
+		//setBlendMode_ALPHA(1.0f);
 	}
 	void bloom_Draw()
 	{
@@ -476,7 +523,19 @@ public:
 		DirectX::XMStoreFloat4x4(&viewProjection, getViewMatrix() * getProjectionMatrix());
 		if (data.GetExist())
 		{
-			billboard_bloom_Render(&data.pMesh, viewProjection, data.GetPos(), data.GetScale(), data.GetAngle(), getCamPos(), data.GetTexPos(), data.GetTexSize(), {1.0f,1.0f,1.0f,1.0f}, data.GetColor().w);
+			// billboard_bloom_Render(&billboard[data.GetType()], viewProjection, data.GetPos(), data.GetScale(), data.GetAngle(), getCamPos(), {1.0f,1.0f,1.0f,1.0f}, data.GetColor().w);
+			billboard_bloom_Render
+			(
+				&billboard[data.GetType()],
+				viewProjection,
+				data.GetPos(),
+				data.GetScale(),
+				data.GetAngle(),
+				getCamPos(),
+				{ 1.0f, 1.0f, 1.0f, 1.0f },
+				data.GetColor().w
+			);
+
 			//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
 			//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
 			//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
@@ -484,6 +543,44 @@ public:
 		setBlendMode_ALPHA(1.0f);
 	}
 
+};
+
+class ShieldEffect
+{
+private:
+	static const int MAX_SIZE = 5;
+	ShieldParticle shieldParticle[MAX_SIZE];
+
+public:
+	ShieldEffect() {}
+	~ShieldEffect() {}
+
+
+	void Set(Donya::Vector3 _pos)
+	{
+		for (int i = 0; i < MAX_SIZE; i++)
+		{
+			if (!shieldParticle[i].GetEmitting())
+			{
+				shieldParticle[i].Set(_pos);
+				break;
+			}
+		}
+	}
+	void Update()
+	{
+		for (int i = 0; i < MAX_SIZE; i++)
+		{
+			shieldParticle[i].Emit();
+		}
+	}
+	void Draw()
+	{
+		for (int i = 0; i < MAX_SIZE; i++)
+		{
+			shieldParticle[i].Draw();
+		}
+	}
 };
 
 class EffectManager
@@ -503,6 +600,8 @@ private:
 	BossAttackMomentEffect	bossAttackMomentEffect;
 	StoneBreakParticle		stoneBreakParticle;
 	CatapultBreakParticle	catapultBreakParticle;
+	ShieldEffect			shieldEffect;
+	DisappearanceParticle	disappearanceParticle;
 
 public:
 	EffectManager() {}
@@ -516,9 +615,14 @@ public:
 
 public:
 	void Init() {}
-	void UnInit() {}
+	void UnInit()
+	{
+		EruptionEffectReSetCollision();
+		LongAttackEffectReSetCollision();
+	}
 
 	void Update();
+	// pos : ボスの座標, dir : 方向ベクトル
 	void AccelEffectUpdate(Donya::Vector3 pos, Donya::Vector3 dir);
 	void BossAttackMomentEffectUpdate(Donya::Vector3 bossPos, Donya::Vector3 playerPos);
 	void Render(fbx_shader& HLSL);
@@ -587,6 +691,14 @@ public:
 	{
 		longAttackEffectManager.SetData(playerPos, bossPos);
 	}
+	void LongAttackEffectReSetExist() // 表示OFF
+	{
+		longAttackEffectManager.AllReSetExist();
+	}
+	void LongAttackEffectReSetCollision() // 当たり判定OFF
+	{
+		longAttackEffectManager.AllReSetCollision();
+	}
 
 	// BOSS1 ジャンプ攻撃
 	void JumpEffectSet(Donya::Vector3 pos)
@@ -620,6 +732,18 @@ public:
 	void CatapultBreakEffectSet(Donya::Vector3 pos)
 	{
 		catapultBreakParticle.Set(pos);
+	}
+
+	// プレイヤーシールド展開
+	void ShieldEffectSet(Donya::Vector3 pos)
+	{
+		shieldEffect.Set(pos);
+	}
+
+	// ボス死亡パーティクル
+	void DisappearanceEffectSet(Donya::Vector3 pos)
+	{
+		disappearanceParticle.Set(pos);
 	}
 
 	std::vector<EruptionEffect> &GetEruptionEffectVector()

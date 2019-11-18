@@ -76,12 +76,12 @@ private:
 	ActionStorage	storage{};	// Store next status's data.
 	ActionStorage	initStorage{};
 
-	int timer{};
-	int coolTime{};
-	int initCoolTime{};
+	float timer{};
+	float coolTime{};
+	float initCoolTime{};
 
-	std::array<int, ALL_ATTACK_COUNT>	wholeFrame{};		// An attack with gap is stored at back().
-	std::array<int, ALL_ATTACK_COUNT>	coolTimeFrame{};	// An attack with gap is stored at back().
+	std::array<float, ALL_ATTACK_COUNT>	wholeFrame{};		// An attack with gap is stored at back().
+	std::array<float, ALL_ATTACK_COUNT>	coolTimeFrame{};	// An attack with gap is stored at back().
 	std::array<std::unique_ptr<LotteryBase>, ALL_ATTACK_COUNT>
 		pAttackChoosers{};				// 0:by distance. 1:fixed.
 
@@ -168,7 +168,7 @@ private:
 	static constexpr const char *SERIAL_ID = "GolemAI";
 public:
 	void Init();
-	void Update( float normalizedTargetDistance );
+	void Update( float elapsedTime, float normalizedTargetDistance );
 
 	void StopUpdate()	{ stopUpdate = true;  }
 	void ResumeUpdate()	{ stopUpdate = false; }

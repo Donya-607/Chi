@@ -4,6 +4,52 @@
 #include "gameLib.h"
 #include "vector.h"
 
+//ˆêŽž”ð“ï
+enum MUSIC_ID
+{
+	TITLE = 0,
+	STAGE1,
+	STAGE2,
+	STAGE3,
+	GAMEOVER,
+	GAMECLEAR,
+};
+
+enum SE_ID
+{
+	CATAPAULT = 7,
+	ROCK,
+	PL_DEFEND,
+	PL_DEATH,
+	PL_HIT,
+	PL_RUN_1,
+	PL_RUN_2,
+	PL_RUN_3,
+	PL_SHILED_INPACT,
+	PL_SHILED_OPEN,
+	PL_THRUST,
+	PROTECTED,
+
+	BOSS_2_CHARGE,
+	BOSS_2_EXPLOSION,
+	BOSS_2_JUMP,
+	BOSS_2_RUN,
+	BOSS_2_SWING,
+
+	BOSS_3_ROCK,
+	BOSS_3_BACK,
+	BOSS_3_PUNTCH,
+
+	BOSS_4_JUMP,
+	BOSS_4_LINE,
+	BOSS_4_POINT,
+	BOSS_4_RUN,
+	BOSS_4_RUSH,
+	BOSS_4_SLASH,
+
+};
+
+
 //library//
 void startUpLibrary(LPCTSTR caption, HINSTANCE instance, int width = 640, int height = 480, bool isFullscreen = false, int iconNum = -1, double frameRate = 0.0);
 void startUpLibrary(LPCTSTR caption, HINSTANCE instance, DirectX::XMINT2 screenSize = { 640,480 }, bool isFullscreen = false, int iconNum = -1, double frameRate = 0.0);
@@ -63,7 +109,8 @@ void setString(DirectX::XMINT2 _pos, const std::wstring& fmt, Args ... args)
 	GameLib::debug::drawDebug(_pos, str);
 }
 
-
+//movie
+void play_movie(wchar_t* filename, bool* loop);
 
 
 //PRIMITIVE//
@@ -143,6 +190,8 @@ void setTarget(const float x, const float y, const float z);
 
 DirectX::XMFLOAT4 getCamPos();
 DirectX::XMFLOAT4 getCamTarget();
+void startShake(float _shake_power, float _time);
+
 
 //light//
 void setLineLight(const DirectX::XMFLOAT4& position, const DirectX::XMFLOAT4& _lightAmbient, const DirectX::XMFLOAT4& lightColor);
@@ -164,7 +213,7 @@ void createSphere(static_mesh* sphere, u_int slice, u_int stack);
 
 void createPlane(static_mesh* _plane, u_int _vertical = 1, u_int _side = 1);
 
-void createBillboard(static_mesh*, const wchar_t* _textureName);
+void createBillboard(static_mesh*, const wchar_t* _textureName, const DirectX::XMFLOAT2& texpos, const DirectX::XMFLOAT2& texsize);
 
 void loadOBJ(static_mesh* staticMesh, const wchar_t* objName);
 
@@ -174,9 +223,9 @@ static_mesh::primitive_material& getPrimitiveMaterial(static_mesh* _mesh);
 
 void OBJRender(static_mesh* staticMesh, const DirectX::XMFLOAT4X4& SynthesisMatrix, const DirectX::XMFLOAT4X4& worldMatrix, const DirectX::XMFLOAT4& materialColor = { 1.0f,1.0f,1.0f,1.0f }, bool wireFlg = false);
 
-void billboardRender(static_mesh* _mesh, const DirectX::XMFLOAT4X4&, const DirectX::XMFLOAT4&, const DirectX::XMFLOAT2, const float, const DirectX::XMFLOAT4&, const DirectX::XMFLOAT2& texpos, const DirectX::XMFLOAT2& texsize, const float alpha = 1.0f, const DirectX::XMFLOAT3& color = { 1.0f,1.0f,1.0f });
-void billboard_z_Render(static_mesh* _mesh, const DirectX::XMFLOAT4X4&, const DirectX::XMFLOAT4&, const DirectX::XMFLOAT2, const float, const DirectX::XMFLOAT4&, const DirectX::XMFLOAT2& texpos, const DirectX::XMFLOAT2& texsize, const float alpha = 1.0f, const DirectX::XMFLOAT3& color = { 1.0f,1.0f,1.0f });
-void billboard_bloom_Render(static_mesh* _mesh, const DirectX::XMFLOAT4X4&, const DirectX::XMFLOAT4&, const DirectX::XMFLOAT2, const float, const DirectX::XMFLOAT4&, const DirectX::XMFLOAT2& texpos, const DirectX::XMFLOAT2& texsize, const DirectX::XMFLOAT4& judge_color = { 1.0f,1.0f,1.0f,1.0f }, const float alpha = 1.0f, const DirectX::XMFLOAT3& color = { 1.0f,1.0f,1.0f });
+void billboardRender(static_mesh* _mesh, const DirectX::XMFLOAT4X4&, const DirectX::XMFLOAT4&, const DirectX::XMFLOAT2, const float, const DirectX::XMFLOAT4&, const float alpha = 1.0f, const DirectX::XMFLOAT3& color = { 1.0f,1.0f,1.0f });
+void billboard_z_Render(static_mesh* _mesh, const DirectX::XMFLOAT4X4&, const DirectX::XMFLOAT4&, const DirectX::XMFLOAT2, const float, const DirectX::XMFLOAT4&, const float alpha = 1.0f, const DirectX::XMFLOAT3& color = { 1.0f,1.0f,1.0f });
+void billboard_bloom_Render(static_mesh* _mesh, const DirectX::XMFLOAT4X4&, const DirectX::XMFLOAT4&, const DirectX::XMFLOAT2, const float, const DirectX::XMFLOAT4&, const DirectX::XMFLOAT4& judge_color = { 1.0f,1.0f,1.0f,1.0f }, const float alpha = 1.0f, const DirectX::XMFLOAT3& color = { 1.0f,1.0f,1.0f });
 
 
 //skinned_mesh//
@@ -238,6 +287,9 @@ int pressedButtons(int _padNum, int _button);
 
 DirectX::XMINT2 getThumbL(int _padNum);
 DirectX::XMINT2 getThumbR(int _padNum);
+void startViblation(int index, float timer, float motor);
+void stopViblation(int index);
+
 
 
 //keyborad

@@ -11,8 +11,7 @@ void HP_UI::Init()
 		data[i].color = DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 		data[i].exist = false;
 
-		data[i].texPos = DirectX::XMFLOAT2(0.0f, 0.0f);
-		data[i].texSize = DirectX::XMFLOAT2(1024.0f, 222.0f);
+		data[i].type = 0;
 	}
 
 	exist = true;
@@ -22,10 +21,10 @@ void HP_UI::Init()
 	aliveDataNum = 0;
 	state = 0;
 }
-void HP_UI::UnInit()
-{
-
-}
+//void HP_UI::UnInit()
+//{
+//
+//}
 void HP_UI::Update(Donya::Vector3 _bossPos)
 {
 	if (exist)
@@ -69,7 +68,7 @@ void HP_UI::Draw()
 	{
 		if (data[i].exist)
 		{
-			billboardRender(&data[i].pMesh, viewProjection, data[i].pos, data[i].scale, data[i].angle, getCamPos(), data[i].texPos, data[i].texSize, data[i].color.w);
+			billboardRender(&billboard, viewProjection, data[i].pos, data[i].scale, data[i].angle, getCamPos(), data[i].color.w);
 		}
 	}
 }

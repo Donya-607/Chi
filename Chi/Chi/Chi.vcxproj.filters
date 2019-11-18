@@ -136,7 +136,9 @@
     <ClInclude Include="AIBase.h" />
     <ClInclude Include="Catapult.h" />
     <ClInclude Include="Shield.h" />
+    <ClInclude Include="Donya\Timer.h" />
     <ClInclude Include="filter.h" />
+    <ClInclude Include="Fade.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp">
@@ -239,7 +241,9 @@
     <ClCompile Include="AIBase.cpp" />
     <ClCompile Include="Catapult.cpp" />
     <ClCompile Include="Shield.cpp" />
+    <ClCompile Include="Donya\Timer.cpp" />
     <ClCompile Include="filter.cpp" />
+    <ClCompile Include="Fade.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="geometric_phong_ps.hlsl">

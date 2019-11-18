@@ -6,6 +6,8 @@
 #include "GameLibFunctions.h"
 #include "skinned_mesh.h"
 
+#include "Effect.h"
+
 #undef max
 #undef min
 
@@ -31,9 +33,9 @@ ShieldParam::Member ShieldParam::Open()
 	return Get().Content();
 }
 
-float ShieldParam::CalcUnfoldPercent( int currentTime )
+float ShieldParam::CalcUnfoldPercent( float currentTime )
 {
-	return scast<float>( currentTime ) / scast<float>( m.maxUnfoldableFrame );
+	return currentTime / m.maxUnfoldableFrame;
 }
 
 void ShieldParam::LoadParameter( bool isBinary )
@@ -67,11 +69,11 @@ void ShieldParam::UseImGui()
 	{
 		if ( ImGui::TreeNode( "Shield.AdjustData" ) )
 		{
-			ImGui::DragInt( "Frame.MaxUnfoldableFrame", &m.maxUnfoldableFrame );
-			ImGui::DragInt( "Frame.DecreaseSpeed", &m.decreaseSpeed );
-			ImGui::DragInt( "Frame.IncreaseSpeed", &m.increaseSpeed );
-			ImGui::DragInt( "Frame.When.Use.ConsumptionAmount", &m.consumptionAmount );
-			ImGui::DragInt( "Frame.When.Protected.RecoveryAmount", &m.recoveryAmount );
+			ImGui::DragFloat( "Frame.MaxUnfoldableFrame", &m.maxUnfoldableFrame );
+			ImGui::DragFloat( "Frame.DecreaseSpeed", &m.decreaseSpeed );
+			ImGui::DragFloat( "Frame.IncreaseSpeed", &m.increaseSpeed );
+			ImGui::DragFloat( "Frame.When.Use.ConsumptionAmount", &m.consumptionAmount );
+			ImGui::DragFloat( "Frame.When.Protected.RecoveryAmount", &m.recoveryAmount );
 			ImGui::Text( "" );
 
 			ImGui::DragFloat ( "Draw.Scale.Maximum", &m.drawScaleMax );
@@ -194,13 +196,15 @@ void Shield::Init()
 	ShieldParam::Get().Init( MOTION_COUNT );
 
 	LoadModels();
+
+	unfoldTimer = ShieldParam::Open().maxUnfoldableFrame;
 }
 void Shield::Uninit()
 {
 	ShieldParam::Get().Uninit();
 }
 
-void Shield::Update( bool isUnfolding )
+void Shield::Update( float elapsedTime, bool isUnfolding, const Donya::Vector3 &wsParentPosition )
 {
 #if USE_IMGUI
 
@@ -211,11 +215,11 @@ void Shield::Update( bool isUnfolding )
 
 	// I want detect the end after once call to FBXRender() from after change the motion.
 	// Because the end flag of animation is update in FBXRender(), so if not call, the flag is not updated(will detected a "true" immediately).
-	DetectEndAnimation();
+	DetectEndAnimation( wsParentPosition );
 
 	ApplyState( isUnfolding );
 
-	Fluctuate();
+	Fluctuate( elapsedTime );
 
 	Elapse();
 }
@@ -230,7 +234,7 @@ void Shield::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Dony
 	const Donya::Vector3 drawOffset = PARAM.drawOffset;
 	const Donya::Vector4x4 DRAW_OFFSET = Donya::Vector4x4::MakeTranslation( drawOffset );
 
-	auto CalcCurrentScale = []( int currentUnfoldTimer )
+	auto CalcCurrentScale = []( float currentUnfoldTimer )
 	{
 		float	percent	= ShieldParam::Get().CalcUnfoldPercent( currentUnfoldTimer );
 		float	max		= ShieldParam::Open().drawScaleMax;
@@ -349,7 +353,7 @@ void Shield::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Dony
 #endif // DEBUG_MODE
 }
 
-void Shield::z_Draw(fbx_shader& HLSL, const Donya::Vector4x4& matView, const Donya::Vector4x4& matProjection, const Donya::Vector4x4& matParent)
+void Shield::z_Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matProjection, const Donya::Vector4x4 &matParent )
 {
 	if (status == State::NotExist) { return; }
 	// else
@@ -359,9 +363,9 @@ void Shield::z_Draw(fbx_shader& HLSL, const Donya::Vector4x4& matView, const Don
 	const Donya::Vector3 drawOffset = PARAM.drawOffset;
 	const Donya::Vector4x4 DRAW_OFFSET = Donya::Vector4x4::MakeTranslation(drawOffset);
 
-	auto CalcCurrentScale = [](int currentUnfoldTimer)
+	auto CalcCurrentScale = []( float  currentUnfoldTimer )
 	{
-		float	percent = ShieldParam::Get().CalcUnfoldPercent(currentUnfoldTimer);
+		float	percent = ShieldParam::Get().CalcUnfoldPercent( currentUnfoldTimer );
 		float	max = ShieldParam::Open().drawScaleMax;
 		float	min = ShieldParam::Open().drawScaleMin;
 		float	diff = max - min;
@@ -369,7 +373,7 @@ void Shield::z_Draw(fbx_shader& HLSL, const Donya::Vector4x4& matView, const Don
 		return	min + (diff * percent);
 	};
 
-	Donya::Vector4x4 S = Donya::Vector4x4::MakeScaling(CalcCurrentScale(unfoldTimer));
+	Donya::Vector4x4 S = Donya::Vector4x4::MakeScaling( CalcCurrentScale( unfoldTimer ) );
 	Donya::Vector4x4 M = S * DRAW_OFFSET;
 	Donya::Vector4x4 W = M * matParent;
 	Donya::Vector4x4 WVP = W * matView * matProjection;
@@ -389,7 +393,7 @@ void Shield::z_Draw(fbx_shader& HLSL, const Donya::Vector4x4& matView, const Don
 	}
 }
 
-void Shield::bloom_Draw(fbx_shader& HLSL, const Donya::Vector4x4& matView, const Donya::Vector4x4& matProjection, const Donya::Vector4x4& matParent)
+void Shield::bloom_Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matProjection, const Donya::Vector4x4 &matParent )
 {
 	if (status == State::NotExist) { return; }
 	// else
@@ -397,22 +401,22 @@ void Shield::bloom_Draw(fbx_shader& HLSL, const Donya::Vector4x4& matView, const
 	const auto& PARAM = ShieldParam::Open();
 
 	const Donya::Vector3 drawOffset = PARAM.drawOffset;
-	const Donya::Vector4x4 DRAW_OFFSET = Donya::Vector4x4::MakeTranslation(drawOffset);
+	const Donya::Vector4x4 DRAW_OFFSET = Donya::Vector4x4::MakeTranslation( drawOffset );
 
-	auto CalcCurrentScale = [](int currentUnfoldTimer)
+	auto CalcCurrentScale	= []( float currentUnfoldTimer )
 	{
-		float	percent = ShieldParam::Get().CalcUnfoldPercent(currentUnfoldTimer);
-		float	max = ShieldParam::Open().drawScaleMax;
-		float	min = ShieldParam::Open().drawScaleMin;
-		float	diff = max - min;
+		float	percent	= ShieldParam::Get().CalcUnfoldPercent( currentUnfoldTimer );
+		float	max		= ShieldParam::Open().drawScaleMax;
+		float	min		= ShieldParam::Open().drawScaleMin;
+		float	diff	= max - min;
 
-		return	min + (diff * percent);
+		return	min + ( diff * percent );
 	};
 
-	Donya::Vector4x4 S = Donya::Vector4x4::MakeScaling(CalcCurrentScale(unfoldTimer));
-	Donya::Vector4x4 M = S * DRAW_OFFSET;
-	Donya::Vector4x4 W = M * matParent;
-	Donya::Vector4x4 WVP = W * matView * matProjection;
+	Donya::Vector4x4 S		= Donya::Vector4x4::MakeScaling( CalcCurrentScale( unfoldTimer ) );
+	Donya::Vector4x4 M		= S * DRAW_OFFSET;
+	Donya::Vector4x4 W		= M * matParent;
+	Donya::Vector4x4 WVP	= W * matView * matProjection;
 
 	switch (status)
 	{
@@ -497,10 +501,10 @@ void Shield::LoadModels()
 	Donya::OutputDebugStr( "End Shield::LoadModels.\n" );
 }
 
-void Shield::AddTimer( int addition )
+void Shield::AddTimer( float addition )
 {
 	unfoldTimer += addition;
-	unfoldTimer = std::max( 0, std::min( ShieldParam::Open().maxUnfoldableFrame, unfoldTimer ) );
+	unfoldTimer = std::max( 0.0f, std::min( ShieldParam::Open().maxUnfoldableFrame, unfoldTimer ) );
 }
 
 void Shield::ApplyState( bool isUnfolding )
@@ -523,11 +527,11 @@ void Shield::ApplyState( bool isUnfolding )
 	}
 }
 
-void Shield::Fluctuate()
+void Shield::Fluctuate( float elapsedTime )
 {
 	( nowUnfolding )
-	? fluctuation -= ShieldParam::Open().decreaseSpeed
-	: fluctuation += ShieldParam::Open().increaseSpeed;
+	? fluctuation -= ShieldParam::Open().decreaseSpeed * elapsedTime
+	: fluctuation += ShieldParam::Open().increaseSpeed * elapsedTime;
 }
 
 void Shield::Elapse()
@@ -584,14 +588,19 @@ void Shield::ChangeMotion( State newStatus )
 	}
 }
 
-void Shield::DetectEndAnimation()
+void Shield::DetectEndAnimation( const Donya::Vector3 &wsParentPosition )
 {
 	if ( currentMotion == Idle || currentMotion == MOTION_COUNT ) { return; }
 	// else
 
-	if ( models.pOpen->getAnimFinFlg() || models.pReact->getAnimFinFlg() )
+	if ( bool wasOpen = models.pOpen->getAnimFinFlg() || models.pReact->getAnimFinFlg() )
 	{
 		ChangeMotion( State::Idle );
+
+		if ( wasOpen )
+		{
+			EffectManager::GetInstance()->ShieldEffectSet( wsParentPosition );
+		}
 	}
 }
 
@@ -618,7 +627,7 @@ void Shield::UseImGui()
 			};
 			std::string statusCaption = "Status : " + GetStatusName( status );
 			ImGui::Text( statusCaption.c_str() );
-			ImGui::Text( "Timer : %d", unfoldTimer );
+			ImGui::Text( "Timer : %f", unfoldTimer );
 			ImGui::Text( "NowUnfolding : %d", nowUnfolding ? 1 : 0 );
 			ImGui::Text( "" );
 

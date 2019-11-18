@@ -2,16 +2,16 @@
     "RivalAI": {
         "cereal_class_version": 1,
         "wholeFrame": {
-            "value0": 235,
-            "value1": 230,
-            "value2": 150,
-            "value3": 180
+            "value0": 2.3299999237060549,
+            "value1": 3.3299999237060549,
+            "value2": 2.5,
+            "value3": 1.6699999570846558
         },
         "coolTimeFrame": {
-            "value0": 60,
-            "value1": 60,
-            "value2": 60,
-            "value3": 60
+            "value0": 1.0,
+            "value1": 0.0,
+            "value2": 0.8299999833106995,
+            "value3": 0.0
         },
         "pAttackChoosers": {
             "value0": {
@@ -24,24 +24,24 @@
                         "data": [
                             {
                                 "cereal_class_version": 0,
-                                "distance": 0.2240000069141388,
+                                "distance": 0.15000000596046449,
                                 "action": {
                                     "cereal_class_version": 0,
-                                    "waitNo": 2,
+                                    "waitNo": 4,
                                     "nextAttackNo": 0
                                 }
                             },
                             {
-                                "distance": 0.5379999876022339,
+                                "distance": 0.5,
                                 "action": {
                                     "waitNo": 4,
-                                    "nextAttackNo": -1
+                                    "nextAttackNo": 2
                                 }
                             },
                             {
                                 "distance": 1.0,
                                 "action": {
-                                    "waitNo": 4,
+                                    "waitNo": 2,
                                     "nextAttackNo": 1
                                 }
                             }
@@ -56,16 +56,23 @@
                     "data": {
                         "data": [
                             {
-                                "distance": 0.19900000095367433,
+                                "distance": 0.15000000596046449,
                                 "action": {
                                     "waitNo": 2,
                                     "nextAttackNo": 0
                                 }
                             },
                             {
-                                "distance": 0.6639999747276306,
+                                "distance": 0.44999998807907107,
                                 "action": {
-                                    "waitNo": 4,
+                                    "waitNo": 3,
+                                    "nextAttackNo": 0
+                                }
+                            },
+                            {
+                                "distance": 0.699999988079071,
+                                "action": {
+                                    "waitNo": 2,
                                     "nextAttackNo": 2
                                 }
                             },
@@ -73,7 +80,7 @@
                                 "distance": 1.0,
                                 "action": {
                                     "waitNo": 2,
-                                    "nextAttackNo": -1
+                                    "nextAttackNo": 1
                                 }
                             }
                         ]
@@ -81,39 +88,98 @@
                 }
             },
             "value2": {
-                "polymorphic_id": 2147483650,
-                "polymorphic_name": "FixedLottery",
+                "polymorphic_id": 1,
                 "ptr_wrapper": {
                     "valid": 1,
                     "data": {
-                        "cereal_class_version": 0,
-                        "action": {
-                            "waitNo": 4,
-                            "nextAttackNo": 0
-                        }
+                        "data": [
+                            {
+                                "distance": 0.20000000298023225,
+                                "action": {
+                                    "waitNo": 2,
+                                    "nextAttackNo": 0
+                                }
+                            },
+                            {
+                                "distance": 0.5,
+                                "action": {
+                                    "waitNo": 2,
+                                    "nextAttackNo": 1
+                                }
+                            },
+                            {
+                                "distance": 0.800000011920929,
+                                "action": {
+                                    "waitNo": 2,
+                                    "nextAttackNo": 1
+                                }
+                            },
+                            {
+                                "distance": 1.0,
+                                "action": {
+                                    "waitNo": 3,
+                                    "nextAttackNo": 1
+                                }
+                            }
+                        ]
                     }
                 }
             },
             "value3": {
-                "polymorphic_id": 2,
+                "polymorphic_id": 1,
                 "ptr_wrapper": {
                     "valid": 1,
                     "data": {
-                        "action": {
-                            "waitNo": 3,
-                            "nextAttackNo": 0
-                        }
+                        "data": [
+                            {
+                                "distance": 0.10000000149011612,
+                                "action": {
+                                    "waitNo": 2,
+                                    "nextAttackNo": 0
+                                }
+                            },
+                            {
+                                "distance": 0.5,
+                                "action": {
+                                    "waitNo": 3,
+                                    "nextAttackNo": 0
+                                }
+                            },
+                            {
+                                "distance": 0.699999988079071,
+                                "action": {
+                                    "waitNo": 1,
+                                    "nextAttackNo": 0
+                                }
+                            },
+                            {
+                                "distance": 0.800000011920929,
+                                "action": {
+                                    "waitNo": 2,
+                                    "nextAttackNo": 1
+                                }
+                            },
+                            {
+                                "distance": 1.0,
+                                "action": {
+                                    "waitNo": 3,
+                                    "nextAttackNo": 1
+                                }
+                            }
+                        ]
                     }
                 }
             }
         },
         "initStorage": {
             "waitNo": 0,
-            "nextAttackNo": -1
+            "nextAttackNo": 0
         },
-        "initCoolTime": 120,
+        "initCoolTime": 1.5,
         "gapIntervals": [
-            3,
+            4,
+            2,
+            4,
             2
         ]
     }

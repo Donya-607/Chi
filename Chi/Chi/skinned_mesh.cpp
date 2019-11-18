@@ -1,5 +1,9 @@
 #include "skinned_mesh.h"
+
 #include <iostream>
+
+#include "Donya/Useful.h"
+
 //#undef max
 //#undef min
 
@@ -304,7 +308,8 @@ void skinned_mesh::setInfo(ID3D11Device* _device, const std::string& _fbxFileNam
 			{
 				for (auto& it : p.subsets)
 				{
-					std::wstring dummy(it.diffuse.texture_filename.begin(), it.diffuse.texture_filename.end());
+					// std::wstring dummy(it.diffuse.texture_filename.begin(), it.diffuse.texture_filename.end());
+					std::wstring dummy = Donya::MultiToWide( it.diffuse.texture_filename );
 					if (dummy.empty())
 						continue;	ResourceManager::LoadShaderResourceView(_device, dummy, &it.diffuse.shader_resource_view, &tex2dDesc);
 
@@ -866,13 +871,14 @@ void skinned_mesh::render(ID3D11DeviceContext* context, fbx_shader& hlsl, const 
 							animation_flame = it.anim.size() - 1;
 							anim_fin = true;
 						}
-
 						else
+						{
 							if (!stop_animation && stop_time <= 0)
 							{
 								anim_fin = false;
 								it.anim.animation_tick += elapsed_time * magnification;
 							}
+						}
 					}
 				}
 
@@ -1832,7 +1838,8 @@ bool bone_animation::find_file(std::string& file_name)
 		std::wstring name = data.cFileName;
 		size_t start = name.find_last_of(L"\\") + 1;
 		std::wstring _name = name.substr(start, name.size() - start);
-		std::string dummy(_name.begin(), _name.end());
+		// std::string dummy(_name.begin(), _name.end());
+		std::string dummy = Donya::WideToMulti( _name );
 		if (dummy == file_name)
 		{
 			FindClose(hnd);
@@ -1850,7 +1857,8 @@ bool bone_animation::find_file(std::string& file_name)
 			std::wstring name = data.cFileName;
 			size_t start = name.find_last_of(L"\\") + 1;
 			std::wstring _name = name.substr(start, name.size() - start);
-			std::string dummy(_name.begin(), _name.end());
+			// std::string dummy(_name.begin(), _name.end());
+			std::string dummy = Donya::WideToMulti( _name );
 			if (dummy == file_name)
 			{
 				FindClose(hnd);

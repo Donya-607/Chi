@@ -603,7 +603,7 @@ void static_mesh::createSphere(ID3D11Device* _device, u_int slices, u_int stacks
 	createBuffer(_device, vertices.data(), vertices.size(), indices.data(), indices.size());
 }
 
-void static_mesh::createBillboard(ID3D11Device* _device, const wchar_t* _textureName)
+void static_mesh::createBillboard(ID3D11Device* _device, const wchar_t* _textureName, const DirectX::XMFLOAT2& texpos,const DirectX::XMFLOAT2& texsize)
 {
 	D3D11_INPUT_ELEMENT_DESC input_desc[] =
 	{
@@ -644,10 +644,11 @@ void static_mesh::createBillboard(ID3D11Device* _device, const wchar_t* _texture
 		vertices[numV + 3].normal = DirectX::XMFLOAT3(+0.0f, +0.0f, -1.0f);
 	indices[numI + 0] = numV + 0;	indices[numI + 1] = numV + 1;	indices[numI + 2] = numV + 2;
 	indices[numI + 3] = numV + 1;	indices[numI + 4] = numV + 3;	indices[numI + 5] = numV + 2;
-	vertices[0].texcoord = { 0,0 };
-	vertices[1].texcoord = { 1,0 };
-	vertices[2].texcoord = { 0,1 };
-	vertices[3].texcoord = { 1,1 };
+	DirectX::XMINT2 tex = { (int)materials.back().tex2dDesc.Width,(int)materials.back().tex2dDesc.Height };
+	vertices[0].texcoord = { texpos.x / tex.x * 1.0f,texpos.y / tex.y * 1.0f };
+	vertices[1].texcoord = { (texpos.x + texsize.x) / tex.x * 1.0f,texpos.y / tex.y * 1.0f };
+	vertices[2].texcoord = { texpos.x / tex.x * 1.0f,(texpos.y + texsize.y) / tex.y * 1.0f };
+	vertices[3].texcoord = { (texpos.x + texsize.x) / tex.x * 1.0f,(texpos.y + texsize.y) / tex.y * 1.0f };
 
 	numV = 4;
 	numI = 6;
@@ -1094,36 +1095,9 @@ void static_mesh::billboardRender(
 	const DirectX::XMFLOAT2 scale,
 	const float angle,
 	const DirectX::XMFLOAT4& camPos,
-	const DirectX::XMFLOAT2& texpos, const DirectX::XMFLOAT2& texsize,
 	const float alpha, const DirectX::XMFLOAT3& color)
 {
 
-	HRESULT hr = S_OK;
-	D3D11_MAP map = D3D11_MAP_WRITE_DISCARD;
-	D3D11_MAPPED_SUBRESOURCE mapped_buffer;
-	hr = context->Map(vertex_buffer, 0, map, 0, &mapped_buffer);
-	_ASSERT_EXPR(SUCCEEDED(hr), hr_trace(hr));
-
-	vertex* vertices = static_cast<vertex*>(mapped_buffer.pData);
-
-	DirectX::XMINT2 tex = { (int)materials.back().tex2dDesc.Width,(int)materials.back().tex2dDesc.Height };
-	vertices[0].texcoord = { texpos.x / tex.x * 1.0f,texpos.y / tex.y * 1.0f };
-	vertices[1].texcoord = { (texpos.x + texsize.x) / tex.x * 1.0f,texpos.y / tex.y * 1.0f };
-	vertices[2].texcoord = { texpos.x / tex.x * 1.0f,(texpos.y + texsize.y) / tex.y * 1.0f };
-	vertices[3].texcoord = { (texpos.x + texsize.x) / tex.x * 1.0f,(texpos.y + texsize.y) / tex.y * 1.0f };
-
-	vertices[0].position = DirectX::XMFLOAT3(-0.5f, +0.5f, 0);
-	vertices[1].position = DirectX::XMFLOAT3(+0.5f, +0.5f, 0);
-	vertices[2].position = DirectX::XMFLOAT3(-0.5f, -0.5f, 0);
-	vertices[3].position = DirectX::XMFLOAT3(+0.5f, -0.5f, 0);
-
-
-	vertices[0].normal = vertices[1].normal =
-		vertices[2].normal = vertices[3].normal = DirectX::XMFLOAT3(+0.0f, +0.0f, -1.0f);
-
-	context->Unmap(vertex_buffer, 0);
-
-	//transformVertex
 
 	DirectX::XMFLOAT3 direction = { camPos.x - pos.x,camPos.y - pos.y,camPos.z - pos.z };
 	float size = sqrtf(direction.x * direction.x + direction.y * direction.y + direction.z * direction.z);
@@ -1205,34 +1179,8 @@ void static_mesh::billboardRender(
 
 }
 
-void static_mesh::billboard_z_render(ID3D11DeviceContext* context, const DirectX::XMFLOAT4X4& SynthesisMatrix, const DirectX::XMFLOAT4& pos, const DirectX::XMFLOAT2 scale, const float angle, const DirectX::XMFLOAT4& camPos, const DirectX::XMFLOAT2& texpos, const DirectX::XMFLOAT2& texsize, const float alpha, const DirectX::XMFLOAT3& color)
+void static_mesh::billboard_z_render(ID3D11DeviceContext* context, const DirectX::XMFLOAT4X4& SynthesisMatrix, const DirectX::XMFLOAT4& pos, const DirectX::XMFLOAT2 scale, const float angle, const DirectX::XMFLOAT4& camPos, const float alpha, const DirectX::XMFLOAT3& color)
 {
-	HRESULT hr = S_OK;
-	D3D11_MAP map = D3D11_MAP_WRITE_DISCARD;
-	D3D11_MAPPED_SUBRESOURCE mapped_buffer;
-	hr = context->Map(vertex_buffer, 0, map, 0, &mapped_buffer);
-	_ASSERT_EXPR(SUCCEEDED(hr), hr_trace(hr));
-
-	vertex* vertices = static_cast<vertex*>(mapped_buffer.pData);
-
-	DirectX::XMINT2 tex = { (int)materials.back().tex2dDesc.Width,(int)materials.back().tex2dDesc.Height };
-	vertices[0].texcoord = { texpos.x / tex.x * 1.0f,texpos.y / tex.y * 1.0f };
-	vertices[1].texcoord = { (texpos.x + texsize.x) / tex.x * 1.0f,texpos.y / tex.y * 1.0f };
-	vertices[2].texcoord = { texpos.x / tex.x * 1.0f,(texpos.y + texsize.y) / tex.y * 1.0f };
-	vertices[3].texcoord = { (texpos.x + texsize.x) / tex.x * 1.0f,(texpos.y + texsize.y) / tex.y * 1.0f };
-
-	vertices[0].position = DirectX::XMFLOAT3(-0.5f, +0.5f, 0);
-	vertices[1].position = DirectX::XMFLOAT3(+0.5f, +0.5f, 0);
-	vertices[2].position = DirectX::XMFLOAT3(-0.5f, -0.5f, 0);
-	vertices[3].position = DirectX::XMFLOAT3(+0.5f, -0.5f, 0);
-
-
-	vertices[0].normal = vertices[1].normal =
-		vertices[2].normal = vertices[3].normal = DirectX::XMFLOAT3(+0.0f, +0.0f, -1.0f);
-
-	context->Unmap(vertex_buffer, 0);
-
-	//transformVertex
 
 	DirectX::XMFLOAT3 direction = { camPos.x - pos.x,camPos.y - pos.y,camPos.z - pos.z };
 	float size = sqrtf(direction.x * direction.x + direction.y * direction.y + direction.z * direction.z);
@@ -1316,35 +1264,8 @@ void static_mesh::billboard_z_render(ID3D11DeviceContext* context, const DirectX
 
 }
 
-void static_mesh::billboard_bloom_SRV_render(ID3D11DeviceContext* context, const DirectX::XMFLOAT4X4& SynthesisMatrix, const DirectX::XMFLOAT4& pos, const DirectX::XMFLOAT2 scale, const float angle, const DirectX::XMFLOAT4& camPos, const DirectX::XMFLOAT2& texpos, const DirectX::XMFLOAT2& texsize, const float alpha, const DirectX::XMFLOAT3& color, const DirectX::XMFLOAT4& judge_color, ID3D11ShaderResourceView* z_SRV)
+void static_mesh::billboard_bloom_SRV_render(ID3D11DeviceContext* context, const DirectX::XMFLOAT4X4& SynthesisMatrix, const DirectX::XMFLOAT4& pos, const DirectX::XMFLOAT2 scale, const float angle, const DirectX::XMFLOAT4& camPos, const float alpha, const DirectX::XMFLOAT3& color, const DirectX::XMFLOAT4& judge_color, ID3D11ShaderResourceView* z_SRV)
 {
-	HRESULT hr = S_OK;
-	D3D11_MAP map = D3D11_MAP_WRITE_DISCARD;
-	D3D11_MAPPED_SUBRESOURCE mapped_buffer;
-	hr = context->Map(vertex_buffer, 0, map, 0, &mapped_buffer);
-	_ASSERT_EXPR(SUCCEEDED(hr), hr_trace(hr));
-
-	vertex* vertices = static_cast<vertex*>(mapped_buffer.pData);
-
-	DirectX::XMINT2 tex = { (int)materials.back().tex2dDesc.Width,(int)materials.back().tex2dDesc.Height };
-	vertices[0].texcoord = { texpos.x / tex.x * 1.0f,texpos.y / tex.y * 1.0f };
-	vertices[1].texcoord = { (texpos.x + texsize.x) / tex.x * 1.0f,texpos.y / tex.y * 1.0f };
-	vertices[2].texcoord = { texpos.x / tex.x * 1.0f,(texpos.y + texsize.y) / tex.y * 1.0f };
-	vertices[3].texcoord = { (texpos.x + texsize.x) / tex.x * 1.0f,(texpos.y + texsize.y) / tex.y * 1.0f };
-
-	vertices[0].position = DirectX::XMFLOAT3(-0.5f, +0.5f, 0);
-	vertices[1].position = DirectX::XMFLOAT3(+0.5f, +0.5f, 0);
-	vertices[2].position = DirectX::XMFLOAT3(-0.5f, -0.5f, 0);
-	vertices[3].position = DirectX::XMFLOAT3(+0.5f, -0.5f, 0);
-
-
-	vertices[0].normal = vertices[1].normal =
-		vertices[2].normal = vertices[3].normal = DirectX::XMFLOAT3(+0.0f, +0.0f, -1.0f);
-
-	context->Unmap(vertex_buffer, 0);
-
-	//transformVertex
-
 	DirectX::XMFLOAT3 direction = { camPos.x - pos.x,camPos.y - pos.y,camPos.z - pos.z };
 	float size = sqrtf(direction.x * direction.x + direction.y * direction.y + direction.z * direction.z);
 	direction = { -direction.x / size,-direction.y / size,-direction.z / size };

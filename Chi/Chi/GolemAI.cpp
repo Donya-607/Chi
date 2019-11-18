@@ -38,7 +38,7 @@ void GolemAI::Init()
 	attackTimes = gapIntervals.front();
 }
 
-void GolemAI::Update( float normalizedTargetDistance )
+void GolemAI::Update( float elapsedTime, float normalizedTargetDistance )
 {
 #if USE_IMGUI
 
@@ -49,7 +49,7 @@ void GolemAI::Update( float normalizedTargetDistance )
 	if ( stopUpdate ) { return; }
 	// else
 
-	timer--;
+	timer -= 1.0f * elapsedTime;
 	if ( timer <= 0 )
 	{
 		timer = 0;
@@ -212,7 +212,7 @@ void GolemAI::ImGui( float normalizedTargetDistance )
 
 			if ( ACTION_STATE_COUNT <= i ) { return "Error Name"; }
 			// else
-			return std::string{ NAMES[i] };
+			return  NAMES[i];
 		};
 		auto GetWaitName	= []( int i )->std::string
 		{
@@ -227,7 +227,7 @@ void GolemAI::ImGui( float normalizedTargetDistance )
 
 			if ( WAIT_STATE_COUNT <= i ) { return "Error Name"; }
 			// else
-			return std::string{ NAMES[i] };
+			return NAMES[i];
 		};
 		auto GetAttackName	= []( int i )->std::string
 		{
@@ -240,19 +240,23 @@ void GolemAI::ImGui( float normalizedTargetDistance )
 
 			if ( ALL_ATTACK_COUNT <= i ) { return "Error Name"; }
 			// else
-			return std::string{ NAMES[i] };
+			return NAMES[i];
 		};
 
 		if ( ImGui::TreeNode( "CurrentParameter" ) )
 		{
-			ImGui::Text( "Status : %d", GetActionName( scast<int>( status ) ).c_str() );
-			ImGui::Text( "Timer : %d", timer );
-			ImGui::Text( "CoolTime : %d", coolTime );
+			ImGui::Text( "Status : %s", GetActionName( scast<int>( status ) ).c_str() );
+			ImGui::Text( "Next.WaitNo : %d", storage.waitNo );
+			ImGui::Text( "Next.AttackNo : %d", storage.nextAttackNo );
+			ImGui::Text( "Next.AttackKind : %s", GetAttackName( storage.nextAttackNo ) );
+			ImGui::Text( "AttackTimes : %d", attackTimes );
+			ImGui::Text( "Timer : %f", timer );
+			ImGui::Text( "CoolTime : %f", coolTime );
 			ImGui::Text( "Distance.Target : %f", normalizedTargetDistance );
 
 			// Show whole frame.
 			{
-				const std::string caption{ ".WholeFrame : %d" };
+				const std::string caption{ ".WholeFrame : %f" };
 				int i = 0;
 				for ( const auto &it : wholeFrame )
 				{
@@ -263,7 +267,7 @@ void GolemAI::ImGui( float normalizedTargetDistance )
 			
 			// Show cool-time.
 			{
-				const std::string caption{ ".CoolTime : %d" };
+				const std::string caption{ ".CoolTime : %f" };
 				int i = 0;
 				for ( const auto &it : coolTimeFrame )
 				{
@@ -294,7 +298,7 @@ void GolemAI::ImGui( float normalizedTargetDistance )
 		{
 			if ( ImGui::TreeNode( "Initialize" ) )
 			{
-				ImGui::DragInt( "CoolTime", &initCoolTime );
+				ImGui::DragFloat( "CoolTime", &initCoolTime );
 				initStorage.ShowImGuiNode( "FirstChoice" );
 
 				ImGui::TreePop();
@@ -339,7 +343,7 @@ void GolemAI::ImGui( float normalizedTargetDistance )
 				int i = 0;
 				for ( auto &it : wholeFrame )
 				{
-					ImGui::SliderInt( GetAttackName( i ).c_str(), &it, 1, 1024 );
+					ImGui::DragFloat( GetAttackName( i ).c_str(), &it );
 					i++;
 				}
 
@@ -351,7 +355,7 @@ void GolemAI::ImGui( float normalizedTargetDistance )
 				int i = 0;
 				for ( auto &it : coolTimeFrame )
 				{
-					ImGui::SliderInt( GetAttackName( i ).c_str(), &it, 0, 1024 );
+					ImGui::DragFloat( GetAttackName( i ).c_str(), &it );
 					i++;
 				}
 

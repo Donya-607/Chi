@@ -5,7 +5,7 @@
 #include "Donya/Collision.h"
 #include "imgui.h"
 #include "GameLibFunctions.h"
-
+#include "Donya/Sound.h"
 
 class Stone
 {
@@ -17,7 +17,8 @@ public:
 	Donya::Vector3 scale;
 	Donya::Vector3 angle;
 	bool exist;
-	Donya::Sphere hitSphere;
+//	Donya::Sphere hitSphere;
+	Donya::OBB hitOBB;
 
 public:
 	Stone() :
@@ -28,9 +29,13 @@ public:
 		scale(),
 		angle(),
 		exist(false),
-		hitSphere()
+		//hitSphere(),
+		hitOBB()
 	{}
-	~Stone() {}
+	~Stone() 
+	{
+		Donya::Sound::Play(ROCK);
+	}
 
 	void Init(Donya::Vector3 _pos, Donya::Vector3 _speed, Donya::Vector3 _accel, Donya::Vector3 _scale, Donya::Vector3 _angle);
 	void Update();

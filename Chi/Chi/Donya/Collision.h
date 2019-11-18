@@ -362,9 +362,9 @@ namespace Donya
 
 	struct SphereFrame
 	{
-		int currentFrame{};
-		int enableFrameStart{};	// WIll be serialize. Contain start frame.
-		int enableFrameLast{};	// WIll be serialize. Contain last frame.
+		float  currentFrame{};
+		float  enableFrameStart{};	// WIll be serialize. Contain start frame.
+		float  enableFrameLast{};	// WIll be serialize. Contain last frame.
 		Sphere collision{};
 	private:
 		friend class cereal::access;
@@ -384,7 +384,7 @@ namespace Donya
 			}
 		}
 	public:
-		void Update( int elapsedTime = 1 )
+		void Update( float elapsedTime )
 		{
 			currentFrame += elapsedTime;
 
@@ -399,10 +399,10 @@ namespace Donya
 
 	struct OBBFrame
 	{
-		int currentFrame{};
-		int enableFrameStart{};			// WIll be serialize. Contain start frame.
-		int enableFrameLast{};			// WIll be serialize. Contain last frame.
-		OBB OBB{};
+		float currentFrame{};
+		float enableFrameStart{};			// WIll be serialize. Contain start frame.
+		float enableFrameLast{};			// WIll be serialize. Contain last frame.
+		OBB   OBB{};
 	private:
 		friend class cereal::access;
 		template<class Archive>
@@ -421,7 +421,7 @@ namespace Donya
 			}
 		}
 	public:
-		void Update( int elapsedTime = 1 )
+		void Update( float elapsedTime )
 		{
 			currentFrame += elapsedTime;
 

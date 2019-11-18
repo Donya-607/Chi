@@ -62,6 +62,8 @@ namespace GameLib
 		std::vector<wstring> loadFileName;
 		bool loadFin;
 		std::vector<DirectX::XMFLOAT4> judge_color;
+
+		float anim_rate;
 	};
 
 	static Members m;
@@ -192,7 +194,7 @@ namespace GameLib
 
 	float getDeltaTime()
 	{
-		return m.hrTimer.time_interval();
+		return m.hrTimer.time_interval()*m.anim_rate;
 	}
 
 	DirectX::XMINT2 getWindowSize()
@@ -258,7 +260,7 @@ namespace GameLib
 		ImGui_ImplDX11_NewFrame();
 		ImGui_ImplWin32_NewFrame();
 		ImGui::NewFrame();
-		m.cam->update();
+		m.cam->update(m.hrTimer.time_interval());
 		input::xInput::getState();
 		input::keyboard::update();
 		float ClearColor[4] = { 0.5f, .0f, .0f, 1.0f }; //red,green,blue,alpha
@@ -271,6 +273,11 @@ namespace GameLib
 		clearRT(m.bloom_RT, { 0,0,0,0 });
 		clearRT(m.z_RT, { 0,0,0,0 });
 		clearRT(m.filter_RT, { 0,0,0,0 });
+
+		for (int index = 0; index < 4; index++)
+		{
+			m.pad[index].update(index, m.hrTimer.time_interval());
+		}
 
 		m.context->OMSetRenderTargets(1, &m.renderTargetView, m.depthStencilView);
 
@@ -423,6 +430,14 @@ namespace GameLib
 			m.drag_drop.moveFile(hwnd, m.loadFin);
 			break;
 		default:
+			//m_lpMediaControl->Stop();
+			////スレッドとしてグラフを完全に停止させるためタイムスライスをゆずる
+			////Sleep(0);
+			////先頭に移動
+			//LONGLONG llAbsoluteTime = 0;
+			//hr = m_lpMediaSeeking->SetPositions(&llAbsoluteTime, AM_SEEKING_AbsolutePositioning, NULL, AM_SEEKING_NoPositioning);
+			////再度再生
+			//hr = m_lpMediaControl->Run();
 			return DefWindowProc(hwnd, msg, wParam, lParam);
 		}
 		return 0;
@@ -553,6 +568,7 @@ namespace GameLib
 			m.Bloom.init(m.device);
 			m.cam = new Camera();
 			m.Filter.init(m.device, m.context);
+			m.anim_rate = 1.0f;
 			createSRV(&m.original_SRV, &m.original_RT);
 			createSRV(&m.bloom_SRV, &m.bloom_RT);
 			createSRV(&m.z_SRV, &m.z_RT);
@@ -594,6 +610,14 @@ namespace GameLib
 	{
 		m.context->ClearRenderTargetView(RT, (const float*)&color);
 		m.context->ClearDepthStencilView(m.depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1, 0);
+	}
+	void setFlameSpeed(float anim_speed)
+	{
+		m.anim_rate = anim_speed;
+	}
+	float getAnimSpeed()
+	{
+		return m.anim_rate;
 	}
 	void clearDepth()
 	{
@@ -670,6 +694,69 @@ namespace GameLib
 	bool getLoadFlg()
 	{
 		return m.loadFin;
+	}
+
+	void playVideo(wchar_t* filename, bool loop_flg)
+	{
+		//動画用
+		IGraphBuilder* pGraphBuilder = NULL;
+		IMediaControl* pMediaControl = NULL;
+		IMediaEvent* pMediaEvent = NULL;
+		long eventCode = 0;
+		IVideoWindow* pVideoWindow = NULL;
+
+		CoInitialize(NULL);
+
+		CoCreateInstance(CLSID_FilterGraph,
+			NULL,
+			CLSCTX_INPROC,
+			IID_IGraphBuilder,
+			(LPVOID*)&pGraphBuilder);
+
+		pGraphBuilder->QueryInterface(IID_IMediaControl,
+			(LPVOID*)&pMediaControl);
+
+		pGraphBuilder->QueryInterface(IID_IMediaEvent,
+			(LPVOID*)&pMediaEvent);
+
+		pMediaControl->RenderFile(filename);
+
+		pGraphBuilder->QueryInterface(IID_IVideoWindow,
+			(LPVOID*)&pVideoWindow);
+
+		// Full Screen 開始
+		pVideoWindow->put_FullScreenMode(OATRUE);
+		pMediaControl->Run();
+
+		if (!loop_flg)
+		{
+			pMediaEvent->WaitForCompletion(-1, &eventCode);
+
+
+			pVideoWindow->Release();
+			pMediaEvent->Release();
+			pMediaControl->Release();
+			pGraphBuilder->Release();
+			pVideoWindow = NULL;
+			pMediaEvent = NULL;
+			pMediaControl = NULL;
+			pGraphBuilder = NULL;
+			CoUninitialize();
+
+		}
+	}
+
+	void stopVideo()
+	{
+		//m.pVideoWindow->Release();
+		//m.pMediaEvent->Release();
+		//m.pMediaControl->Release();
+		//m.pGraphBuilder->Release();
+		//m.pVideoWindow = NULL;
+		//m.pMediaEvent = NULL;
+		//m.pMediaControl = NULL;
+		//m.pGraphBuilder = NULL;
+		//CoUninitialize();
 	}
 
 	namespace blend
@@ -859,9 +946,9 @@ namespace GameLib
 			_plane->createPlane(m.device, _vertical, _side);
 		}
 
-		void createBillboard(static_mesh* _mesh, const wchar_t* _textureName)
+		void createBillboard(static_mesh* _mesh, const wchar_t* _textureName, const DirectX::XMFLOAT2& texpos, const DirectX::XMFLOAT2& texsize)
 		{
-			_mesh->createBillboard(m.device, _textureName);
+			_mesh->createBillboard(m.device, _textureName,texpos,texsize);
 		}
 
 		void loadMesh(static_mesh* _mesh, const wchar_t* objName)
@@ -893,25 +980,25 @@ namespace GameLib
 			_mesh->render(m.context, SynthesisMatrix, worldMatrix, camPos, _line_light, _point_light, materialColor, wireFlg);
 		}
 
-		void builboradRender(static_mesh* _mesh, const DirectX::XMFLOAT4X4& view_projection, const DirectX::XMFLOAT4& _pos, const DirectX::XMFLOAT2 _scale, const float _angle, const DirectX::XMFLOAT4& _cam_pos, const DirectX::XMFLOAT2& texpos, const DirectX::XMFLOAT2& texsize, const float alpha, const DirectX::XMFLOAT3& color)
+		void builboradRender(static_mesh* _mesh, const DirectX::XMFLOAT4X4& view_projection, const DirectX::XMFLOAT4& _pos, const DirectX::XMFLOAT2 _scale, const float _angle, const DirectX::XMFLOAT4& _cam_pos, const float alpha, const DirectX::XMFLOAT3& color)
 		{
 			blend::setBlendMode(blend::ALPHA, 255);
 			setRenderTarget(&m.original_RT);
-			_mesh->billboardRender(m.context, view_projection, _pos, _scale, _angle, _cam_pos, texpos, texsize, alpha, color);
+			_mesh->billboardRender(m.context, view_projection, _pos, _scale, _angle, _cam_pos, alpha, color);
 			blend::setBlendMode(blend::NONE, 255);
 		}
 
-		void builborad_z_Render(static_mesh* _mesh, const DirectX::XMFLOAT4X4& view_projection, const DirectX::XMFLOAT4& _pos, const DirectX::XMFLOAT2 _scale, const float _angle, const DirectX::XMFLOAT4& camPos, const DirectX::XMFLOAT2& texpos, const DirectX::XMFLOAT2& texsize, const float alpha, const DirectX::XMFLOAT3& color)
+		void builborad_z_Render(static_mesh* _mesh, const DirectX::XMFLOAT4X4& view_projection, const DirectX::XMFLOAT4& _pos, const DirectX::XMFLOAT2 _scale, const float _angle, const DirectX::XMFLOAT4& camPos, const float alpha, const DirectX::XMFLOAT3& color)
 		{
 			setRenderTarget(&m.z_RT);
-			_mesh->billboard_z_render(m.context, view_projection, _pos, _scale, _angle, camPos, texpos, texsize, alpha, color);
+			_mesh->billboard_z_render(m.context, view_projection, _pos, _scale, _angle, camPos, alpha, color);
 		}
 
-		void builborad_bloom_Render(static_mesh* _mesh, const DirectX::XMFLOAT4X4& view_projection, const DirectX::XMFLOAT4& _pos, const DirectX::XMFLOAT2 _scale, const float _angle, const DirectX::XMFLOAT4& _cam_pos, const DirectX::XMFLOAT2& texpos, const DirectX::XMFLOAT2& texsize, const float alpha, const DirectX::XMFLOAT3& color, const DirectX::XMFLOAT4& judge_color)
+		void builborad_bloom_Render(static_mesh* _mesh, const DirectX::XMFLOAT4X4& view_projection, const DirectX::XMFLOAT4& _pos, const DirectX::XMFLOAT2 _scale, const float _angle, const DirectX::XMFLOAT4& _cam_pos, const float alpha, const DirectX::XMFLOAT3& color, const DirectX::XMFLOAT4& judge_color)
 		{
 			blend::setBlendMode(blend::ALPHA, 255);
 			setRenderTarget(&m.bloom_RT);
-			_mesh->billboard_bloom_SRV_render(m.context, view_projection, _pos, _scale, _angle, _cam_pos, texpos, texsize, alpha, color, judge_color, m.z_SRV);
+			_mesh->billboard_bloom_SRV_render(m.context, view_projection, _pos, _scale, _angle, _cam_pos, alpha, color, judge_color, m.z_SRV);
 			blend::setBlendMode(blend::NONE, 255);
 		}
 
@@ -1001,7 +1088,7 @@ namespace GameLib
 		void skinnedMeshRender(skinned_mesh* _mesh, fbx_shader& hlsl, float magnification, const DirectX::XMFLOAT4X4& SynthesisMatrix, const DirectX::XMFLOAT4X4& worldMatrix, const DirectX::XMFLOAT4& camPos, line_light& lineLight, std::vector<point_light>& _point_light, const DirectX::XMFLOAT4& materialColor, bool wireFlg, bool animation_flg)
 		{
 			setRenderTarget(&m.original_RT);
-			_mesh->render(m.context, hlsl, SynthesisMatrix, worldMatrix, camPos, lineLight, _point_light, materialColor, wireFlg, m.hrTimer.time_interval(), magnification, animation_flg);
+			_mesh->render(m.context, hlsl, SynthesisMatrix, worldMatrix, camPos, lineLight, _point_light, materialColor, wireFlg, m.hrTimer.time_interval()*m.anim_rate, magnification, animation_flg);
 
 		}
 
@@ -1056,7 +1143,7 @@ namespace GameLib
 
 		void setAnimFlame(bone_animation* _anim, const int _anim_flame)
 		{
-			_anim->setAnimFlame(_anim_flame);
+			_anim->setAnimFlame(static_cast<float>(_anim_flame));
 		}
 
 
@@ -1105,6 +1192,10 @@ namespace GameLib
 		DirectX::XMFLOAT4 getTarget()
 		{
 			return m.cam->getCamTarget();
+		}
+		void startShake(float _shake_power, float _time)
+		{
+			m.cam->startShake(_shake_power, _time);
 		}
 	}
 
@@ -1180,6 +1271,31 @@ namespace GameLib
 			{
 				return m.pad[_padNum].getThumbR();
 			}
+
+			void startViblation(int index, float timer, float motor)
+			{
+				if ( motor < 0 )
+				{
+					motor = 0;
+				}
+				else if ( motor > 100.0f )
+				{
+					motor = 100.0f;
+				}
+
+				WORD right = static_cast<WORD>( motor * 655.35f * 2.0f );
+				WORD left  = static_cast<WORD>( motor * 655.35f * 2.0f );
+				m.pad[index].startViblation(index, left, right);
+				m.pad[index].timer = timer;
+			}
+
+			void stopViblation(int index)
+			{
+				m.pad[index].startViblation(index, 0, 0);
+				m.pad[index].timer = 0;
+
+			}
+
 
 		}
 	}

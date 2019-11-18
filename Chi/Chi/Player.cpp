@@ -12,6 +12,8 @@
 #include "GameLibFunctions.h"	// For load and render model.
 #include "skinned_mesh.h"
 
+#include "Effect.h"
+
 #if DEBUG_MODE
 
 #include "static_mesh.h"		// For drawing collision.
@@ -24,7 +26,7 @@
 #define scast static_cast
 
 PlayerParam::PlayerParam() :
-	frameUnfoldableDefence( 1 ), shieldsRecastFrame( 1 ), frameCancelableAttack( 1 ), frameWholeAttacking( 1 ),
+	FXIntervalFrame( 1.0f ), frameUnfoldableDefence( 1 ), shieldsRecastFrame( 1 ), frameCancelableAttack( 1 ), frameWholeAttacking( 1 ),
 	advanceStartFrame(), advanceFinFrame(), returnFinFrame(),
 	advanceEaseKind(), advanceEaseType(), returnEaseKind(), returnEaseType(),
 	scale( 1.0f ), runSpeed( 1.0f ), rotSlerpFactor( 0.3f ),
@@ -44,6 +46,11 @@ void PlayerParam::Init( size_t motionCount )
 {
 	motionSpeeds.resize( motionCount );
 	LoadParameter();
+
+	if ( motionSpeeds.size() != motionCount )
+	{
+		motionSpeeds.resize( motionCount );
+	}
 }
 void PlayerParam::Uninit()
 {
@@ -81,12 +88,14 @@ void PlayerParam::UseImGui()
 	{
 		if ( ImGui::TreeNode( "Player.AdjustData" ) )
 		{
-			// Unused. // ImGui::SliderInt( "Defence.MaxUnfoldableFrame",		&frameUnfoldableDefence,	1, 360 );
-			ImGui::SliderInt( "Defence.RecastFrame",			&shieldsRecastFrame,		0, 360 );
-			ImGui::SliderInt( "Attack.StopAnime.Timing(Frame)",	&frameStopTiming,			1, 360 );
-			ImGui::SliderInt( "Attack.StopAnime.Lenth(Frame)",	&frameStopAnime,			1, 360 );
-			ImGui::SliderInt( "Attack.CancelableFrame",			&frameCancelableAttack,		1, frameWholeAttacking );
-			ImGui::SliderInt( "Attack.WholeAttackingFrame",		&frameWholeAttacking,		1, 300 );
+			ImGui::DragFloat( "FX.GenerateInterval",			&FXIntervalFrame, 0.01f );
+			ImGui::Text( "" );
+			// Unused. // ImGui::SliderFloat( "Defence.MaxUnfoldableFrame",		&frameUnfoldableDefence,	100f, 0.1f );
+			ImGui::DragFloat( "Defence.RecastFrame",			&shieldsRecastFrame );
+			ImGui::DragFloat( "Attack.StopAnime.Timing(Frame)",	&frameStopTiming );
+			ImGui::DragFloat( "Attack.StopAnime.Lenth(Frame)",	&frameStopAnime );
+			ImGui::DragFloat( "Attack.CancelableFrame",			&frameCancelableAttack );
+			ImGui::DragFloat( "Attack.WholeAttackingFrame",		&frameWholeAttacking );
 			ImGui::Text( "" );
 
 			ImGui::SliderFloat( "Scale", &scale, 0.0f, 8.0f );
@@ -96,10 +105,10 @@ void PlayerParam::UseImGui()
 
 			if ( ImGui::TreeNode( "Attack.Advance" ) )
 			{
-				ImGui::SliderFloat( "Advance.MoveDistance",	&advanceDistance,	0.0f, 360.0f );
-				ImGui::SliderInt( "Advance.StartFrame",		&advanceStartFrame,	1, frameWholeAttacking );
-				ImGui::SliderInt( "Advance.FinishFrame",	&advanceFinFrame,	1, frameWholeAttacking );
-				ImGui::SliderInt( "Return.FinishFrame",		&returnFinFrame,	1, frameWholeAttacking );
+				ImGui::DragFloat( "Advance.MoveDistance",	&advanceDistance );
+				ImGui::DragFloat( "Advance.StartFrame",		&advanceStartFrame );
+				ImGui::DragFloat( "Advance.FinishFrame",	&advanceFinFrame );
+				ImGui::DragFloat( "Return.FinishFrame",		&returnFinFrame );
 
 				// Easing parameter.
 				{
@@ -134,6 +143,7 @@ void PlayerParam::UseImGui()
 					"Run",
 					"Defend",
 					"Attack",
+					"Defeat",
 				};
 				const size_t COUNT = motionSpeeds.size();
 				_ASSERT_EXPR( motionNames.size() == COUNT, L"Error : Logical error by human !" );
@@ -183,8 +193,8 @@ void PlayerParam::UseImGui()
 				};
 				auto ShowOBBF	= [&ShowOBB]( const std::string &prefix, Donya::OBBFrame	*pOBBF	)
 				{
-					ImGui::DragInt( ( prefix + ".EnableFrame.Start" ).c_str(), &pOBBF->enableFrameStart );
-					ImGui::DragInt( ( prefix + ".EnableFrame.Last"  ).c_str(), &pOBBF->enableFrameLast  );
+					ImGui::DragFloat( ( prefix + ".EnableFrame.Start" ).c_str(), &pOBBF->enableFrameStart );
+					ImGui::DragFloat( ( prefix + ".EnableFrame.Last"  ).c_str(), &pOBBF->enableFrameLast  );
 
 					bool oldExistFlag = pOBBF->OBB.exist;
 					ShowOBB( prefix, &pOBBF->OBB );
@@ -307,8 +317,8 @@ Player::Input Player::Input::MakeByExternalInput( Donya::Vector4x4 viewMat )
 
 Player::Player() :
 	status( State::Idle ),
-	timer( 0 ), shieldsRecastTime( 0 ),
-	fieldRadius( 0 ),
+	stageNo(),
+	timer( 0 ), shieldsRecastTime( 0 ), FXIntervalTimer(), fieldRadius( 0 ),
 	currentMotion( Idle ),
 	pos(), velocity(), lookDirection(), extraOffset(),
 	orientation(),
@@ -329,6 +339,7 @@ Player::Player() :
 		&models.pRun,
 		&models.pDefend,
 		&models.pAttack,
+		&models.pDefeat,
 	};
 	for ( auto &it : modelRefs )
 	{
@@ -337,7 +348,7 @@ Player::Player() :
 }
 Player::~Player() = default;
 
-void Player::Init( const Donya::Vector3 &wsInitPos, const Donya::Vector3 &initRadians, const std::vector<Donya::Box> &wsWallCollisions )
+void Player::Init( int stageNumber, const Donya::Vector3 &wsInitPos, const Donya::Vector3 &initRadians, const std::vector<Donya::Box> &wsWallCollisions )
 {
 	PlayerParam::Get().Init( MOTION_COUNT );
 	SetFieldRadius( 0.0f ); // Set to body's radius.
@@ -346,6 +357,8 @@ void Player::Init( const Donya::Vector3 &wsInitPos, const Donya::Vector3 &initRa
 
 	shield.Init();
 	
+	stageNo			= stageNumber;
+	FXIntervalTimer = PlayerParam::Get().FXGenerateInterval();
 	pos				= wsInitPos;
 	orientation		= Donya::Quaternion::Make( initRadians.x, initRadians.y, initRadians.z );
 	lookDirection	= orientation.LocalFront();
@@ -367,7 +380,7 @@ void Player::Uninit()
 	wallCollisions.clear();
 }
 
-void Player::Update( Input input )
+void Player::Update( Input input, float elapsedTime )
 {
 #if USE_IMGUI
 
@@ -376,10 +389,12 @@ void Player::Update( Input input )
 
 #endif // USE_IMGUI
 
-	ChangeStatus( input );
-	UpdateCurrentStatus( input );
+	ChangeStatus( input, elapsedTime );
+	UpdateCurrentStatus( input, elapsedTime );
 
-	ShieldUpdate();
+	ShieldUpdate( elapsedTime );
+
+	FXUpdate( elapsedTime );
 }
 void Player::PhysicUpdate( const std::vector<Donya::Circle> &xzCylinderWalls )
 {
@@ -406,6 +421,9 @@ void Player::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Dony
 		break;
 	case Player::State::Attack:
 		FBXRender( models.pAttack.get(), HLSL, WVP, W, motionSpeed );
+		break;
+	case Player::State::Dead:
+		FBXRender( models.pDefeat.get(), HLSL, WVP, W, motionSpeed );
 		break;
 	default: break;
 	}
@@ -486,60 +504,62 @@ void Player::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Dony
 #endif // DEBUG_MODE
 }
 
-void Player::z_Draw(fbx_shader& HLSL, const Donya::Vector4x4& matView, const Donya::Vector4x4& matProjection)
+bool Player::IsDefeated() const
+{
+	return ( status == State::Dead && models.pDefeat->getAnimFinFlg() ) ? true : false;
+}
 
+void Player::DrawZ( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matProjection )
 {
 	Donya::Vector4x4 W = CalcWorldMatrix();
 	Donya::Vector4x4 WVP = W * matView * matProjection;
 
-	float motionSpeed = PlayerParam::Get().MotionSpeeds()->at(scast<int>(currentMotion));
-	switch (status)
+	float motionSpeed = PlayerParam::Get().MotionSpeeds()->at( scast<int>( currentMotion ) );
+	switch ( status )
 	{
 	case Player::State::Idle:
-		z_render(models.pIdle.get(), HLSL, WVP, W);
+		z_render( models.pIdle.get(), HLSL, WVP, W );
 		break;
 	case Player::State::Run:
-		z_render(models.pRun.get(), HLSL, WVP, W);
+		z_render( models.pRun.get(), HLSL, WVP, W );
 		break;
 	case Player::State::Defend:
-		z_render(models.pDefend.get(), HLSL, WVP, W);
+		z_render( models.pDefend.get(), HLSL, WVP, W );
 		break;
 	case Player::State::Attack:
-		z_render(models.pAttack.get(), HLSL, WVP, W);
+		z_render( models.pAttack.get(), HLSL, WVP, W );
 		break;
 	default: break;
 	}
 
-	shield.z_Draw(HLSL, matView, matProjection, W);
+	shield.z_Draw( HLSL, matView, matProjection, W );
 
 }
 
-void Player::bloom_Draw(fbx_shader& HLSL, const Donya::Vector4x4& matView, const Donya::Vector4x4& matProjection)
-
+void Player::DrawBloom( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matProjection )
 {
 	Donya::Vector4x4 W = CalcWorldMatrix();
 	Donya::Vector4x4 WVP = W * matView * matProjection;
 
-	float motionSpeed = PlayerParam::Get().MotionSpeeds()->at(scast<int>(currentMotion));
+	float motionSpeed = PlayerParam::Get().MotionSpeeds()->at( scast<int>( currentMotion ) );
 	switch (status)
 	{
 	case Player::State::Idle:
-		bloom_SRVrender(models.pIdle.get(), HLSL, WVP, W);
+		bloom_SRVrender( models.pIdle.get(), HLSL, WVP, W );
 		break;
 	case Player::State::Run:
-		bloom_SRVrender(models.pRun.get(), HLSL, WVP, W);
+		bloom_SRVrender( models.pRun.get(), HLSL, WVP, W );
 		break;
 	case Player::State::Defend:
-		bloom_SRVrender(models.pDefend.get(), HLSL, WVP, W);
+		bloom_SRVrender( models.pDefend.get(), HLSL, WVP, W );
 		break;
 	case Player::State::Attack:
-		bloom_SRVrender(models.pAttack.get(), HLSL, WVP, W);
+		bloom_SRVrender( models.pAttack.get(), HLSL, WVP, W );
 		break;
 	default: break;
 	}
 
-	shield.bloom_Draw(HLSL, matView, matProjection, W);
-
+	shield.bloom_Draw( HLSL, matView, matProjection, W );
 }
 
 static Donya::OBB MakeOBB( const Donya::AABB &AABB, const Donya::Vector3 &wsPos, const Donya::Quaternion &orientation )
@@ -556,6 +576,7 @@ Donya::OBB Player::GetHurtBox() const
 	const auto &HITBOX = PlayerParam::Get().HitBoxBody();
 
 	Donya::OBB wsOBB = MakeOBB( HITBOX, GetPosition(), orientation );
+	if ( status == State::Dead ) { wsOBB.enable = false; }
 	return wsOBB;
 }
 Donya::OBB Player::GetShieldHitBox() const
@@ -620,6 +641,9 @@ Donya::OBB Player::CalcAttackHitBox() const
 	}
 
 	// Should I also apply parent's scale ?
+
+	if ( status == State::Dead ) { resultOBB.enable = false; }
+
 	return resultOBB;
 }
 
@@ -632,8 +656,7 @@ void Player::SucceededDefence()
 
 void Player::ReceiveImpact()
 {
-	status		= State::Dead;
-	velocity	= 0.0f;
+	DefeatInit();
 }
 
 void Player::SetFieldRadius( float newFieldRadius )
@@ -654,11 +677,14 @@ void Player::LoadModel()
 	Donya::OutputDebugStr( "Done PlayerModel.Defend\n" );
 	loadFBX( models.pAttack.get(),	GetModelPath( ModelAttribute::PlayerAtk		) );
 	Donya::OutputDebugStr( "Done PlayerModel.Attack\n" );
+	loadFBX( models.pDefeat.get(),	GetModelPath( ModelAttribute::PlayerDefeat	) );
+	Donya::OutputDebugStr( "Done PlayerModel.Defeat\n" );
 
 	std::vector<std::shared_ptr<skinned_mesh> *> dontLoopModels
 	{
 		&models.pDefend,
 		&models.pAttack,
+		&models.pDefeat,
 	};
 	for ( auto &it : dontLoopModels )
 	{
@@ -672,27 +698,15 @@ Donya::Vector4x4 Player::CalcWorldMatrix() const
 {
 	Donya::Vector4x4 S = Donya::Vector4x4::MakeScaling( PlayerParam::Get().Scale() );
 	Donya::Vector4x4 R = orientation.RequireRotationMatrix();
-#if DEBUG_MODE
-	if ( status == State::Dead ) { R = Donya::Quaternion::Make( Donya::Vector3::Front(), ToRadian( 180.0f ) ).RequireRotationMatrix(); }
-#endif // DEBUG_MODE
 	Donya::Vector4x4 T = Donya::Vector4x4::MakeTranslation( GetPosition() );
 	return S * R * T;
 }
 
-void Player::ChangeStatus( Input input )
+void Player::ChangeStatus( Input input, float elapsedTime )
 {
-#if DEBUG_MODE
-
-	if ( status == State::Dead && input.doAttack )
-	{
-		status = State::Idle;
-	}
-
-#endif // DEBUG_MODE
-
 	if ( 0 < shieldsRecastTime )
 	{
-		shieldsRecastTime--;
+		shieldsRecastTime -= 1.0f * elapsedTime;
 	}
 	if ( !input.doDefend && isContinuingDefence )
 	{
@@ -707,17 +721,19 @@ void Player::ChangeStatus( Input input )
 	case Player::State::Run:	ChangeStatusFromRun   ( input );	break;
 	case Player::State::Defend:	ChangeStatusFromDefend( input );	break;
 	case Player::State::Attack:	ChangeStatusFromAttack( input );	break;
+	case Player::State::Dead:	break;
 	default: break;
 	}
 }
-void Player::UpdateCurrentStatus( Input input )
+void Player::UpdateCurrentStatus( Input input, float elapsedTime )
 {
 	switch ( status )
 	{
-	case Player::State::Idle:	IdleUpdate  ( input );	break;
-	case Player::State::Run:	RunUpdate   ( input );	break;
-	case Player::State::Defend:	DefendUpdate( input );	break;
-	case Player::State::Attack:	AttackUpdate( input );	break;
+	case Player::State::Idle:	IdleUpdate  ( input, elapsedTime );	break;
+	case Player::State::Run:	RunUpdate   ( input, elapsedTime );	break;
+	case Player::State::Defend:	DefendUpdate( input, elapsedTime );	break;
+	case Player::State::Attack:	AttackUpdate( input, elapsedTime );	break;
+	case Player::State::Dead:	DefeatUpdate( elapsedTime );		break;
 	default: break;
 	}
 }
@@ -763,7 +779,7 @@ void Player::IdleInit( Input input )
 
 	setAnimFlame( models.pIdle.get(), 0 );
 }
-void Player::IdleUpdate( Input input )
+void Player::IdleUpdate( Input input, float elapsedTime )
 {
 	// No op.
 }
@@ -805,7 +821,7 @@ void Player::RunInit( Input input )
 
 	setAnimFlame( models.pRun.get(), 0 );
 }
-void Player::RunUpdate( Input input )
+void Player::RunUpdate( Input input, float elapsedTime )
 {
 	if ( input.onlyRotation )
 	{
@@ -815,7 +831,7 @@ void Player::RunUpdate( Input input )
 	}
 	// else
 
-	AssignInputVelocity( input );
+	AssignInputVelocity( input, elapsedTime );
 }
 void Player::RunUninit()
 {
@@ -854,7 +870,7 @@ void Player::ChangeStatusFromDefend( Input input )
 		DefendUninit();
 
 		// This process only doing if remain frame of shield is zero.
-		if ( shield.GetRemainingFrame() == 0 && !wasSucceededDefence )
+		if ( ZeroEqual( shield.GetRemainingFrame() ) && !wasSucceededDefence )
 		{
 			shieldsRecastTime = PlayerParam::Get().FrameReuseShield();
 		}
@@ -880,7 +896,7 @@ void Player::DefendInit( Input input )
 
 	Donya::Sound::Play( scast<int>( MusicAttribute::PlayerDefend ) );
 }
-void Player::DefendUpdate( Input input )
+void Player::DefendUpdate( Input input, float elapsedTime )
 {
 	if ( !input.moveVector.IsZero() )
 	{
@@ -914,10 +930,10 @@ void Player::ChangeStatusFromAttack( Input input )
 	}
 	// else
 
-	const auto &PARAM		= PlayerParam::Get();
-	const int  WHOLE_FRAME	= PARAM.FrameWholeAttacking();
-	const int  CANCELABLE	= PARAM.FrameCancelableAttack();
-	const bool withinCancelableRange = ( WHOLE_FRAME - CANCELABLE ) <= timer;
+	const auto  &PARAM		= PlayerParam::Get();
+	const float WHOLE_FRAME	= PARAM.FrameWholeAttacking();
+	const float CANCELABLE	= PARAM.FrameCancelableAttack();
+	const bool  withinCancelableRange = ( WHOLE_FRAME - CANCELABLE ) <= timer;
 	if ( input.doDefend && CanUnfoldShield() && withinCancelableRange )
 	{
 		AttackUninit();
@@ -939,41 +955,47 @@ void Player::AttackInit( Input input )
 	Donya::OBBFrame *pOBBF = PlayerParam::Get().HitBoxAttackF();
 	pOBBF->currentFrame = 0;
 	setAnimFlame( models.pAttack.get(), 0 );
-}
-void Player::AttackUpdate( Input input )
-{
-	timer--;
 
-	const int  WHOLE_FRAME	= PlayerParam::Get().FrameWholeAttacking();
-	const int  CANCELABLE	= PlayerParam::Get().FrameCancelableAttack();
-	const bool withinCancelableRange = ( WHOLE_FRAME - CANCELABLE ) <= timer;
+	EffectManager::GetInstance()->PlayerAbsorptionEffectSet( GetPosition() );
+}
+void Player::AttackUpdate( Input input, float elapsedTime )
+{
+	timer -= 1.0f * elapsedTime;
+
+	const float WHOLE_FRAME	= PlayerParam::Get().FrameWholeAttacking();
+
+	float ascendingTime = WHOLE_FRAME - timer;
+
+	const float CANCELABLE	= PlayerParam::Get().FrameCancelableAttack();
+	const bool  withinCancelableRange = ( WHOLE_FRAME - CANCELABLE ) <= timer;
 	if ( !input.moveVector.IsZero() && withinCancelableRange )
 	{
 		lookDirection = input.moveVector;
 	}
 
-	const int  STOP_TIMING	= PlayerParam::Get().FrameStopAnimeTiming();
-	const int  STOP_LENGTH	= PlayerParam::Get().FrameStopAnimeLength();
-	if ( timer == ( WHOLE_FRAME - STOP_TIMING ) )
+	const float STOP_TIMING	= PlayerParam::Get().FrameStopAnimeTiming();
+	const float STOP_LENGTH	= PlayerParam::Get().FrameStopAnimeLength();
+	if ( ascendingTime <= STOP_TIMING )
 	{
 		setStopAnimation( models.pAttack.get(), /* is_stop = */ true );
 	}
-	else
-	if ( timer == ( WHOLE_FRAME - STOP_TIMING ) - STOP_LENGTH )
+	// else
+	if ( STOP_TIMING + STOP_LENGTH < ascendingTime && models.pAttack->getAnimationStopFlg() )
 	{
 		setStopAnimation( models.pAttack.get(), /* is_stop = */ false );
+		EffectManager::GetInstance()->PlayerAbsorptionEffectReSet();
 	}
 
 	// Easing process.
 	{
-		const int ADVANCE_START	= PlayerParam::Get().FrameAdvanceStart();
-		const int ADVANCE_FIN	= PlayerParam::Get().FrameAdvanceFin();
-		const int RETURN_START	= ADVANCE_FIN;
-		const int RETURN_FIN	= PlayerParam::Get().FrameReturnFin();
+		const float ADVANCE_START	= PlayerParam::Get().FrameAdvanceStart();
+		const float ADVANCE_FIN		= PlayerParam::Get().FrameAdvanceFin();
+		const float RETURN_START	= ADVANCE_FIN;
+		const float RETURN_FIN		= PlayerParam::Get().FrameReturnFin();
 
-		auto CalcEaseFactor		= []( int elapsedTime, int start, int fin, int kind, int type )
+		auto CalcEaseFactor			= []( float elapsedTime, float start, float fin, int kind, int type )
 		{
-			float percent = scast<float>( elapsedTime - start ) / scast<float>( fin - start );
+			float percent = ( elapsedTime - start ) / ( fin - start );
 			return Donya::Easing::Ease
 			(
 				scast<Donya::Easing::Kind>( kind ),
@@ -982,57 +1004,52 @@ void Player::AttackUpdate( Input input )
 			);
 		};
 
-		auto ApplyExtraOffset	= [&]()->void
+		auto ApplyExtraOffset		= [&]()->void
 		{
 			// Apply movement and reset extraOffset.
 			pos += extraOffset;
 			extraOffset = 0.0f;
 		};
 
-		int elapsedTime = WHOLE_FRAME - timer;
-		if ( ADVANCE_START <= elapsedTime && elapsedTime < ADVANCE_FIN )
+		if ( ADVANCE_START <= ascendingTime && ascendingTime < ADVANCE_FIN )
 		{
 			float ease = CalcEaseFactor
 			(
-				elapsedTime,
+				ascendingTime,
 				ADVANCE_START, ADVANCE_FIN,
 				PlayerParam::Get().AdvanceEaseKind(),
 				PlayerParam::Get().AdvanceEaseType()
 			);
 			
 			extraOffset = orientation.LocalFront() * ( PlayerParam::Get().AdvanceDistance() * ease );
-
-			if ( elapsedTime == ADVANCE_FIN - 1 )
-			{
-				ApplyExtraOffset();
-			}
 		}
 		else
-		if ( RETURN_START <= elapsedTime && elapsedTime < RETURN_FIN )
+		if ( RETURN_START <= ascendingTime && ascendingTime < RETURN_FIN )
 		{
 			float ease = CalcEaseFactor
 			(
-				elapsedTime,
+				ascendingTime,
 				RETURN_START, RETURN_FIN,
 				PlayerParam::Get().ReturnEaseKind(),
 				PlayerParam::Get().ReturnEaseType()
 			);
 
-			extraOffset = -orientation.LocalFront() * ( PlayerParam::Get().AdvanceDistance() * ease );
-
-			if ( elapsedTime == RETURN_FIN - 1 )
-			{
-				ApplyExtraOffset();
-			}
+			Donya::Vector3 advanceMax = orientation.LocalFront() * PlayerParam::Get().AdvanceDistance();
+			extraOffset =  advanceMax - orientation.LocalFront() * ( PlayerParam::Get().AdvanceDistance() * ease );
+		}
+		else
+		if ( !extraOffset.IsZero() )
+		{
+			ApplyExtraOffset();
 		}
 	}
 
 	Donya::OBBFrame *pOBBF	= PlayerParam::Get().HitBoxAttackF();
-	pOBBF->Update();
+	pOBBF->Update( elapsedTime );
 }
 void Player::AttackUninit()
 {
-	timer		= 0;
+	timer		= 0.0f;
 	extraOffset	= 0.0f;
 
 	Donya::OBBFrame *pOBBF = PlayerParam::Get().HitBoxAttackF();
@@ -1040,10 +1057,31 @@ void Player::AttackUninit()
 	setAnimFlame( models.pAttack.get(), 0 );
 }
 
-void Player::AssignInputVelocity( Input input )
+void Player::DefeatInit()
+{
+	status			= State::Dead;
+	timer			= 0;
+	velocity		= 0.0f;
+	currentMotion	= Defeat;
+	extraOffset		= 0.0f;
+
+	setAnimFlame( models.pDefeat.get(), 0 );
+}
+void Player::DefeatUpdate( float elapsedTime )
+{
+	timer += 1.0f * elapsedTime;
+}
+void Player::DefeatUninit()
+{
+	timer = 0;
+
+	setAnimFlame( models.pDefeat.get(), 0 );
+}
+
+void Player::AssignInputVelocity( Input input, float elapsedTime )
 {
 	velocity = input.moveVector;
-	velocity *= PlayerParam::Get().RunSpeed();
+	velocity *= PlayerParam::Get().RunSpeed() * elapsedTime;
 }
 
 void Player::ApplyVelocity( const std::vector<Donya::Circle> &xzCylinderWalls )
@@ -1207,14 +1245,34 @@ void Player::CollideToStagesWall()
 	}
 }
 
-void Player::ShieldUpdate()
+void Player::ShieldUpdate( float elapsedTime )
 {
 	bool nowUnfolding = ( status == State::Defend ) ? true : false;
-	shield.Update( nowUnfolding );
+	shield.Update( elapsedTime, nowUnfolding, GetPosition() );
 }
 bool Player::CanUnfoldShield() const
 {
-	return ( shield.CanUnfold() && !shieldsRecastTime && !isContinuingDefence ) ? true : false;
+	return ( shield.CanUnfold() && ZeroEqual( shieldsRecastTime ) && !isContinuingDefence ) ? true : false;
+}
+
+void Player::FXUpdate( float elapsedTime )
+{
+	if ( currentMotion != Run )
+	{
+		// Prepare for play the sound immediately at next running.
+		FXIntervalTimer = 0.0f;
+		return;
+	}
+	// else
+
+	FXIntervalTimer -= elapsedTime;
+	if ( FXIntervalTimer <= 0.0f )
+	{
+		FXIntervalTimer = PlayerParam::Get().FXGenerateInterval();
+
+		EffectManager::GetInstance()->DustEffectSet( GetPosition(), stageNo );
+		// TODO : Play the running sound here.
+	}
 }
 
 #if USE_IMGUI
@@ -1240,8 +1298,8 @@ void Player::UseImGui()
 			};
 			std::string statusCaption = "Status : " + GetStatusName( status );
 			ImGui::Text( statusCaption.c_str() );
-			ImGui::Text( "Timer : %d",				timer );
-			ImGui::Text( "ShieldRecast : %d",		shieldsRecastTime );
+			ImGui::Text( "Timer : %f",				timer );
+			ImGui::Text( "ShieldRecast : %f",		shieldsRecastTime );
 			ImGui::Text( "ShieldSucceeded : %d",	wasSucceededDefence ? 1 : 0 );
 			ImGui::Text( "FieldRadius : %f",		fieldRadius );
 			ImGui::Text( "" );
@@ -1272,6 +1330,11 @@ void Player::UseImGui()
 			}
 
 			ImGui::TreePop();
+		}
+
+		if ( ImGui::Button( "GenerateDust" ) )
+		{
+			EffectManager::GetInstance()->DustEffectSet( GetPosition(), 0 );
 		}
 
 		ImGui::End();

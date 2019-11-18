@@ -41,9 +41,9 @@ void SceneEffect::init()
 #if 0
 	createBillboard(&data.pMesh, L"./Data/Images/UI/particle.png");
 #else
-	createBillboard(&data.pMesh, L"./Data/Images/UI/Telop.png");
+	//createBillboard(&data.pMesh, L"./Data/Images/UI/Telop.png");
 #endif
-	UIManager::GetInstance()->Init();
+	//UIManager::GetInstance()->Init();
 
 	shieldExist = false;
 
@@ -95,7 +95,7 @@ void SceneEffect::update()
 	locusParticle.Emit();
 	accelParticle.Emit(originPos, direction);
 
-	UIManager::GetInstance()->Update(Donya::Vector3(0.0f, 0.0f, 0.0f));
+	//UIManager::GetInstance()->Update(Donya::Vector3(0.0f, 0.0f, 0.0f));
 }
 void SceneEffect::render()
 {
@@ -118,9 +118,15 @@ void SceneEffect::render()
 
 	DirectX::XMFLOAT4X4 viewProjection;
 	DirectX::XMStoreFloat4x4(&viewProjection, getViewMatrix() * getProjectionMatrix());
-	billboardRender(&data.pMesh, viewProjection, data.pos, data.scale, data.angle, getCamPos(), data.texPos, data.texSize);
+	//billboardRender(&data.pMesh, viewProjection, data.pos, data.scale, data.angle, getCamPos(), data.texPos, data.texSize);
+	origin_SRV = (void*)GameLib::getOriginalScreen();
 
-	UIManager::GetInstance()->Draw();
+	//blur’l‚ðŒã‚Å‘ã“ü
+	postEffect_Bloom(0, false);
+	//ƒ‚ƒmƒg[ƒ“‚É‚·‚é‚Æ‚«‚Í‘æˆêˆø”‚ð‰º‚°‚é
+	filterScreen(1.0f);
+
+//	UIManager::GetInstance()->Draw();
 }
 void SceneEffect::uninit()
 {
@@ -128,7 +134,7 @@ void SceneEffect::uninit()
 }
 void SceneEffect::imGui()
 {
-	UIManager::GetInstance()->Imgui();
+	//UIManager::GetInstance()->Imgui();
 	ImGui::Begin("Effect");
 	if (ImGui::TreeNode("BillBoard Test Draw Parametor"))
 	{
@@ -254,7 +260,7 @@ void SceneEffect::imGui()
 		ImGui::DragFloat3("boss pos", &bossPos.x);
 		if (ImGui::Button("Set"))
 		{
-			EffectManager::GetInstance()->BossAttackMomentEffectSet(60, 0);
+			EffectManager::GetInstance()->BossAttackMomentEffectSet(30, 0);
 		}
 		ImGui::TreePop();
 	}
@@ -278,14 +284,14 @@ void SceneEffect::imGui()
 		}
 		ImGui::TreePop();
 	}
-	if (ImGui::TreeNode("UI Effect"))
-	{
-		if (ImGui::Button("On"))
-		{
-			UIManager::GetInstance()->Init();
-		}
-		ImGui::TreePop();
-	}
+	//if (ImGui::TreeNode("UI Effect"))
+	//{
+	//	if (ImGui::Button("On"))
+	//	{
+	//		UIManager::GetInstance()->Init();
+	//	}
+	//	ImGui::TreePop();
+	//}
 	ImGui::End();
 
 	ImGui::Begin("Light");
@@ -332,13 +338,6 @@ void SceneEffect::imGui()
 		ImGui::TreePop();
 	}
 	ImGui::End();
-
-	ImGui::Begin("Particle");
-	flashParticle.ImGui();
-	bubbleParticle.ImGui();
-	ImGui::End();
-
-	flashParticle.UseImGui();
 
 	ImGui::Begin("GolemAI");
 	bossAI.ImGui( NULL );

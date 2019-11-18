@@ -2,45 +2,18 @@
     "KnightAI": {
         "cereal_class_version": 2,
         "wholeFrame": {
-            "value0": 133,
-            "value1": 260,
-            "value2": 480
+            "value0": 1.159999966621399,
+            "value1": 1.8300000429153443,
+            "value2": 6.0
         },
         "coolTimeFrame": {
-            "value0": 60,
-            "value1": 60,
-            "value2": 60
+            "value0": 0.8299999833106995,
+            "value1": 0.17000000178813935,
+            "value2": 0.5
         },
         "pAttackChoosers": {
             "value0": {
                 "polymorphic_id": 2147483649,
-                "polymorphic_name": "FixedLottery",
-                "ptr_wrapper": {
-                    "valid": 1,
-                    "data": {
-                        "cereal_class_version": 0,
-                        "action": {
-                            "cereal_class_version": 0,
-                            "waitNo": 2,
-                            "nextAttackNo": -1
-                        }
-                    }
-                }
-            },
-            "value1": {
-                "polymorphic_id": 1,
-                "ptr_wrapper": {
-                    "valid": 1,
-                    "data": {
-                        "action": {
-                            "waitNo": 2,
-                            "nextAttackNo": -1
-                        }
-                    }
-                }
-            },
-            "value2": {
-                "polymorphic_id": 2147483650,
                 "polymorphic_name": "DistanceLottery",
                 "ptr_wrapper": {
                     "valid": 1,
@@ -49,7 +22,77 @@
                         "data": [
                             {
                                 "cereal_class_version": 0,
-                                "distance": 0.20000000298023225,
+                                "distance": 0.25,
+                                "action": {
+                                    "cereal_class_version": 0,
+                                    "waitNo": 3,
+                                    "nextAttackNo": 0
+                                }
+                            },
+                            {
+                                "distance": 0.6000000238418579,
+                                "action": {
+                                    "waitNo": 0,
+                                    "nextAttackNo": 1
+                                }
+                            },
+                            {
+                                "distance": 1.0,
+                                "action": {
+                                    "waitNo": 1,
+                                    "nextAttackNo": 1
+                                }
+                            }
+                        ]
+                    }
+                }
+            },
+            "value1": {
+                "polymorphic_id": 1,
+                "ptr_wrapper": {
+                    "valid": 1,
+                    "data": {
+                        "data": [
+                            {
+                                "distance": 0.5,
+                                "action": {
+                                    "waitNo": 4,
+                                    "nextAttackNo": 0
+                                }
+                            },
+                            {
+                                "distance": 0.800000011920929,
+                                "action": {
+                                    "waitNo": 4,
+                                    "nextAttackNo": 1
+                                }
+                            },
+                            {
+                                "distance": 1.0,
+                                "action": {
+                                    "waitNo": 1,
+                                    "nextAttackNo": 0
+                                }
+                            }
+                        ]
+                    }
+                }
+            },
+            "value2": {
+                "polymorphic_id": 1,
+                "ptr_wrapper": {
+                    "valid": 1,
+                    "data": {
+                        "data": [
+                            {
+                                "distance": 0.20499999821186067,
+                                "action": {
+                                    "waitNo": 4,
+                                    "nextAttackNo": 0
+                                }
+                            },
+                            {
+                                "distance": 0.6010000109672546,
                                 "action": {
                                     "waitNo": 4,
                                     "nextAttackNo": 0
@@ -68,11 +111,15 @@
             }
         },
         "initStorage": {
-            "waitNo": 0,
-            "nextAttackNo": -1
+            "waitNo": 2,
+            "nextAttackNo": 1
         },
-        "initCoolTime": 81,
+        "initCoolTime": 1.5,
         "gapIntervals": [
+            3,
+            4,
+            2,
+            4,
             3,
             2
         ]

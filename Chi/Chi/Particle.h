@@ -14,7 +14,6 @@
 class Particle
 {
 public:
-	static_mesh pMesh;
 
 protected:
 	DirectX::XMFLOAT4 pos;			// 座標
@@ -25,20 +24,18 @@ protected:
 	float angle;					// 角度
 	bool exist;						// 存在フラグ
 
-	DirectX::XMFLOAT2 texPos;
-	DirectX::XMFLOAT2 texSize;
+	int type;
 
 public:
 	Particle()
-		: pMesh(),
+		:
 		pos(0.0f, 0.0f, 0.0f, 1.0f), speed(0.0f, 0.0f, 0.0f),
 		accel(0.0f, 0.0f, 0.0f), color(1.0f, 1.0f, 1.0f, 1.0f),
-		angle(0.0f), exist(false), scale(1.0f, 1.0f),
-		texPos(0.0f, 0.0f), texSize(0.0f, 0.0f)
+		angle(0.0f), exist(false), scale(1.0f, 1.0f)
 	{}
 	~Particle() {}
 
-	void Init(DirectX::XMFLOAT4 _pos, DirectX::XMFLOAT3 _speed, DirectX::XMFLOAT3 _accel, DirectX::XMFLOAT2 _scale, DirectX::XMFLOAT2 _texPos, DirectX::XMFLOAT2 _texSize, bool _exist = true);
+	void Init(DirectX::XMFLOAT4 _pos, DirectX::XMFLOAT3 _speed, DirectX::XMFLOAT3 _accel, DirectX::XMFLOAT2 _scale, int _type, bool _exist = true);
 	void Update();
 
 public: // Get関数
@@ -50,9 +47,7 @@ public: // Get関数
 	DirectX::XMFLOAT4 GetColor() { return color; }
 	float GetAngle() { return angle; }
 	bool GetExist() { return exist; }
-
-	DirectX::XMFLOAT2 GetTexPos() { return texPos; }
-	DirectX::XMFLOAT2 GetTexSize() { return texSize; }
+	int GetType() { return type; }
 
 public: // Set関数
 //	void SetMesh( static_mesh _pMesh )					{ pMesh = _pMesh;		}
@@ -68,8 +63,6 @@ public: // Set関数
 	void SetAngle(float _angle) { angle = _angle; }
 	void SetExist(bool _exist) { exist = _exist; }
 
-	void SetTexPos(DirectX::XMFLOAT2 _texPos) { texPos = _texPos; }
-	void SetTexSize(DirectX::XMFLOAT2 _texSize) { texSize = _texSize; }
 
 public:
 	void AddPosX(float _addX) { pos.x += _addX; }
@@ -80,164 +73,6 @@ public:
 	void AddSpeedY(float _addY) { speed.y += _addY; }
 	void AddSpeedZ(float _addZ) { speed.z += _addZ; }
 };
-
-class FlashParticle
-{
-private:
-	struct ParticleImGuiData
-	{
-		int speed[3];
-		//int accel[3];
-		int accelStart[3];
-		int accelStage[3];
-	};
-
-private:
-	static const int MAX_SIZE = 10;
-	static const int MAX_CNT = 30;
-
-	bool emitting;
-	Particle data[MAX_SIZE];
-	ParticleImGuiData imguiData;
-	DirectX::XMFLOAT3 originPos;	// 放出源の座標
-	int cnt;
-
-private:
-	friend class cereal::access;
-	template<class Archive>
-	void serialize(Archive& archive, std::uint32_t version)
-	{
-		archive
-		(
-			CEREAL_NVP(imguiData.speed),
-			CEREAL_NVP(imguiData.accelStart),
-			CEREAL_NVP(imguiData.accelStage)
-		);
-
-		if (1 <= version)
-		{
-			// archive( CEREAL_NVP( x ) );
-		}
-	}
-	static constexpr const char* SERIAL_ID = "Flash";
-
-	void LoadParameter(bool isBinary = true);
-
-#if USE_IMGUI
-
-	void SaveParameter();
-
-public:
-	void UseImGui();
-
-#endif // USE_IMGUI
-
-public:
-	void Set();
-	void Emit();
-	void Render();
-	void ImGuiDataInit();
-	void ImGui();
-};
-CEREAL_CLASS_VERSION(FlashParticle, 0)
-
-class BubbleParticle
-{
-private:
-	struct ParticleImGuiData
-	{
-		int speed[3];
-		int accel[3];
-		int accelStart[3];
-		int accelStage[3];
-	};
-
-private:
-	static const int MAX_SIZE = 10;
-	static const int MAX_CNT = 30;
-
-	bool emitting;
-	Particle data[MAX_SIZE];
-	ParticleImGuiData imguiData;
-	DirectX::XMFLOAT3 originPos;	// 放出源の座標
-	int cnt;
-
-public:
-	void Set();
-	void Emit();
-	void ImGuiDataInit();
-	void ImGui();
-};
-
-class FireFryParticle
-{
-private:
-	struct ParticleImGuiData
-	{
-		int speed[3];
-		//int accel[3];
-		int accelStart[3];
-		int accelStage[3];
-	};
-
-private:
-	static const int MAX_SIZE = 100;
-	static const int MAX_CNT = 180;
-
-	bool emitting;
-	Particle data[MAX_SIZE];
-	ParticleImGuiData imguiData;
-	DirectX::XMFLOAT4 originPos;	// 放出源の座標
-	int cnt[MAX_SIZE];
-
-public:
-	FireFryParticle() : emitting(false) {}
-	~FireFryParticle() {}
-
-private:
-	friend class cereal::access;
-	template<class Archive>
-	void serialize(Archive& archive, std::uint32_t version)
-	{
-		archive
-		(
-			CEREAL_NVP(imguiData.speed),
-			CEREAL_NVP(imguiData.accelStart),
-			CEREAL_NVP(imguiData.accelStage)
-		);
-
-		if (1 <= version)
-		{
-			// archive( CEREAL_NVP( x ) );
-		}
-	}
-	static constexpr const char* SERIAL_ID = "Flash";
-
-	void LoadParameter(bool isBinary = true);
-
-#if USE_IMGUI
-
-	void SaveParameter();
-
-public:
-	void UseImGui();
-
-#endif // USE_IMGUI
-
-public:
-	void Set();
-	void Emit();
-	void Draw();
-	void ImGuiDataInit();
-	void ImGui();
-
-	// 放出位置の設定関数
-	void SetOriginPos(DirectX::XMFLOAT4 _originPos) { originPos = _originPos; }
-
-	// パーティクルの最大サイズ
-	int GetMaxSize() { return MAX_SIZE; }
-};
-CEREAL_CLASS_VERSION(FireFryParticle, 0)
 
 class EruptionParticle
 {
@@ -262,15 +97,13 @@ private:
 	int cnt[MAX_SIZE];
 	int totalCnt;
 
-	std::shared_ptr<static_mesh> billboard;
+	static_mesh billboard[2];
 
 public:
 	EruptionParticle() : emitting(false)
 	{
-		for (int i = 0; i < MAX_SIZE; i++)
-		{
-			createBillboard(&data[i].pMesh, L"./Data/Images/UI/particle.png");
-		}
+		createBillboard(&billboard[0], L"./Data/Images/UI/particle.png", DirectX::XMFLOAT2(0.0f, 240.0f), DirectX::XMFLOAT2(142.0f, 142.0f));
+		createBillboard(&billboard[1], L"./Data/Images/UI/particle.png", DirectX::XMFLOAT2(0.0f, 240.0f), DirectX::XMFLOAT2(142.0f, 142.0f));
 	}
 	~EruptionParticle() {}
 
@@ -346,13 +179,13 @@ private:
 	int cnt[MAX_SIZE];
 	int sw;
 
+	static_mesh billboard[2];
+
 public:
 	AbsorptionParticle() : emitting(false)
 	{
-		for (int i = 0; i < MAX_SIZE; i++)
-		{
-			createBillboard(&data[i].pMesh, L"./Data/Images/UI/particle.png");
-		}
+		createBillboard(&billboard[0], L"./Data/Images/UI/particle.png", DirectX::XMFLOAT2(0.0f, 630.0f), DirectX::XMFLOAT2(142.0f, 142.0f));
+		createBillboard(&billboard[1], L"./Data/Images/UI/particle.png", DirectX::XMFLOAT2(0.0f, 1420.0f), DirectX::XMFLOAT2(142.0f, 142.0f));
 	}
 	~AbsorptionParticle() {}
 
@@ -396,15 +229,17 @@ private:
 	int cnt[MAX_SIZE];
 	int totalCnt;
 
-	std::shared_ptr<static_mesh> billboard;
+	static_mesh billboard[6];
 
 public:
 	DustParticle() : emitting(false)
 	{
-		for (int i = 0; i < MAX_SIZE; i++)
-		{
-			createBillboard(&data[i].pMesh, L"./Data/Images/UI/particle.png");
-		}
+		createBillboard(&billboard[0], L"./Data/Images/UI/particle.png", DirectX::XMFLOAT2(0.0f, 1010.0f), DirectX::XMFLOAT2(142.0f, 142.0f));
+		createBillboard(&billboard[1], L"./Data/Images/UI/particle.png", DirectX::XMFLOAT2(0.0f, 1150.0f), DirectX::XMFLOAT2(142.0f, 142.0f));
+		createBillboard(&billboard[2], L"./Data/Images/UI/particle.png", DirectX::XMFLOAT2(0.0f, 1270.0f), DirectX::XMFLOAT2(142.0f, 142.0f));
+		createBillboard(&billboard[3], L"./Data/Images/UI/particle.png", DirectX::XMFLOAT2(0.0f, 1670.0f), DirectX::XMFLOAT2(142.0f, 142.0f));
+		createBillboard(&billboard[4], L"./Data/Images/UI/particle.png", DirectX::XMFLOAT2(0.0f, 1800.0f), DirectX::XMFLOAT2(142.0f, 142.0f));
+		createBillboard(&billboard[5], L"./Data/Images/UI/particle.png", DirectX::XMFLOAT2(0.0f, 1920.0f), DirectX::XMFLOAT2(142.0f, 142.0f));
 	}
 	~DustParticle() {}
 
@@ -482,15 +317,12 @@ private:
 	bool alive[MAX_SIZE];
 	//	int totalCnt;
 
-	//	std::shared_ptr<static_mesh> billboard;
+	static_mesh billboard;
 
 public:
 	SparkParticle() : emitting(false)
 	{
-		for (int i = 0; i < MAX_SIZE; i++)
-		{
-			createBillboard(&data[i].pMesh, L"./Data/Images/UI/particle.png");
-		}
+		createBillboard(&billboard, L"./Data/Images/UI/particle.png", DirectX::XMFLOAT2(0.0f, 900.0f), DirectX::XMFLOAT2(142.0f, 142.0f));
 	}
 	~SparkParticle() {}
 
@@ -568,15 +400,13 @@ private:
 	bool alive[MAX_SIZE];
 	//	int totalCnt;
 
-	//	std::shared_ptr<static_mesh> billboard;
+	static_mesh billboard;
 
 public:
 	LocusParticle() : emitting(false)
 	{
-		for (int i = 0; i < MAX_SIZE; i++)
-		{
-			createBillboard(&data[i].pMesh, L"./Data/Images/UI/particle.png");
-		}
+
+		createBillboard(&billboard, L"./Data/Images/UI/particle.png", DirectX::XMFLOAT2(0.0f, 780.0f), DirectX::XMFLOAT2(142.0f, 142.0f));
 	}
 	~LocusParticle() {}
 
@@ -653,13 +483,11 @@ private:
 	int cnt[MAX_SIZE];
 	bool alive[MAX_SIZE];
 
+	static_mesh billboard;
 public:
 	AccelParticle() : emitting(false)
 	{
-		for (int i = 0; i < MAX_SIZE; i++)
-		{
-			createBillboard(&data[i].pMesh, L"./Data/Images/UI/particle.png");
-		}
+		createBillboard(&billboard, L"./Data/Images/UI/particle.png", DirectX::XMFLOAT2(0.0f, 1420.0f), DirectX::XMFLOAT2(142.0f, 142.0f));
 	}
 	~AccelParticle() {}
 
@@ -736,13 +564,14 @@ private:
 	int cnt[MAX_SIZE];
 	bool alive[MAX_SIZE];
 
+
+	static_mesh billboard[3];
 public:
 	StoneBreakParticle() : emitting(false)
 	{
-		for (int i = 0; i < MAX_SIZE; i++)
-		{
-			createBillboard(&data[i].pMesh, L"./Data/Images/UI/particleC.png");
-		}
+		createBillboard(&billboard[0], L"./Data/Images/UI/particleC.png", DirectX::XMFLOAT2(0.0f, 0.0f), DirectX::XMFLOAT2(512.0f, 512.0f));
+		createBillboard(&billboard[1], L"./Data/Images/UI/particleC.png", DirectX::XMFLOAT2(0.0f, 512.0f), DirectX::XMFLOAT2(512.0f, 512.0f));
+		createBillboard(&billboard[2], L"./Data/Images/UI/particleC.png", DirectX::XMFLOAT2(0.0f, 1024.0f), DirectX::XMFLOAT2(512.0f, 512.0f));
 	}
 	~StoneBreakParticle() {}
 
@@ -819,13 +648,14 @@ private:
 	int cnt[MAX_SIZE];
 	bool alive[MAX_SIZE];
 
+	static_mesh billboard[3];
+
 public:
 	CatapultBreakParticle() : emitting(false)
 	{
-		for (int i = 0; i < MAX_SIZE; i++)
-		{
-			createBillboard(&data[i].pMesh, L"./Data/Images/UI/particleC.png");
-		}
+		createBillboard(&billboard[0], L"./Data/Images/UI/particleC.png",DirectX::XMFLOAT2(0.0f, 1536.0f), DirectX::XMFLOAT2(512.0f, 512.0f));
+		createBillboard(&billboard[1], L"./Data/Images/UI/particleC.png",DirectX::XMFLOAT2(0.0f, 2048.0f), DirectX::XMFLOAT2(512.0f, 512.0f));
+		createBillboard(&billboard[2], L"./Data/Images/UI/particleC.png", DirectX::XMFLOAT2(0.0f, 2560), DirectX::XMFLOAT2(512.0f, 512.0f));
 	}
 	~CatapultBreakParticle() {}
 
@@ -876,3 +706,171 @@ public:
 	int GetMaxSize() { return MAX_SIZE; }
 };
 CEREAL_CLASS_VERSION(CatapultBreakParticle, 0)
+
+class ShieldParticle
+{
+private:
+	struct ParticleImGuiData
+	{
+		int speed[3];
+		//int accel[3];
+		int accelStart[3];
+		int accelStage[3];
+		float radius;
+	};
+
+private:
+	static const int MAX_SIZE = 100;
+	static const int MAX_CNT = 30;
+
+	bool emitting;
+	int state;
+	Particle data[MAX_SIZE];
+	ParticleImGuiData imguiData;
+	DirectX::XMFLOAT4 originPos[MAX_SIZE];		// 放出源の座標
+	DirectX::XMFLOAT3 originSpeed[MAX_SIZE];
+	DirectX::XMFLOAT2 originScale[MAX_SIZE];
+	int cnt;
+	bool alive[MAX_SIZE];
+
+	static_mesh billboard;
+
+public:
+	ShieldParticle() : emitting(false)
+	{
+		createBillboard(&billboard, L"./Data/Images/UI/particle.png", DirectX::XMFLOAT2(0.0f, 630.0f), DirectX::XMFLOAT2(142.0f, 142.0f));
+	}
+	~ShieldParticle() {}
+
+private:
+	friend class cereal::access;
+	template<class Archive>
+	void serialize(Archive& archive, std::uint32_t version)
+	{
+		archive
+		(
+			CEREAL_NVP(imguiData.speed),
+			CEREAL_NVP(imguiData.accelStart),
+			CEREAL_NVP(imguiData.accelStage),
+			CEREAL_NVP(imguiData.radius)
+		);
+
+		if (1 <= version)
+		{
+			// archive( CEREAL_NVP( x ) );
+		}
+	}
+	static constexpr const char* SERIAL_ID = "Absorption";
+
+	void LoadParameter(bool isBinary = true);
+
+#if USE_IMGUI
+
+	void SaveParameter();
+
+public:
+	void UseImGui();
+
+#endif // USE_IMGUI
+
+public:
+	void Set(DirectX::XMFLOAT3 _pos);
+	void Emit();
+	void Draw();
+	void bloom_Draw();
+	void ImGuiDataInit();
+	void ImGui();
+	bool GetEmitting() { return emitting; }
+
+	// 放出位置の設定関数
+//	void SetOriginPos(DirectX::XMFLOAT3 _originPos) { originPos = _originPos; }
+
+	// パーティクルの最大サイズ
+	int GetMaxSize() { return MAX_SIZE; }
+};
+CEREAL_CLASS_VERSION(ShieldParticle, 0)
+
+class DisappearanceParticle
+{
+private:
+	struct ParticleImGuiData
+	{
+		int speed[3];
+		//int accel[3];
+		int accelStart[3];
+		int accelStage[3];
+		float radius;
+	};
+
+private:
+	static const int MAX_SIZE = 500;
+	static const int MAX_CNT = 60;
+
+	ParticleImGuiData imguiData;
+	bool emitting;
+	Particle data[MAX_SIZE];
+	bool alive[MAX_SIZE];
+	float radius[MAX_SIZE];
+	float angle[MAX_SIZE];
+	int cnt[MAX_SIZE];
+	Donya::Vector3 originPos;
+
+	static_mesh billboard;
+
+public:
+	DisappearanceParticle() : emitting(false)
+	{
+		for (int i = 0; i < MAX_SIZE; i++)
+		{
+			createBillboard(&billboard, L"./Data/Images/UI/particle.png", DirectX::XMFLOAT2(0.0f, 1420.0f), DirectX::XMFLOAT2(142.0f, 142.0f));
+		}
+	}
+	~DisappearanceParticle() {}
+
+private:
+	friend class cereal::access;
+	template<class Archive>
+	void serialize(Archive& archive, std::uint32_t version)
+	{
+		archive
+		(
+			CEREAL_NVP(imguiData.speed),
+			CEREAL_NVP(imguiData.accelStart),
+			CEREAL_NVP(imguiData.accelStage),
+			CEREAL_NVP(imguiData.radius)
+		);
+
+		if (1 <= version)
+		{
+			// archive( CEREAL_NVP( x ) );
+		}
+	}
+	static constexpr const char* SERIAL_ID = "Absorption";
+
+	void LoadParameter(bool isBinary = true);
+
+#if USE_IMGUI
+
+	void SaveParameter();
+
+public:
+	void UseImGui();
+
+#endif // USE_IMGUI
+
+public:
+	void Set(DirectX::XMFLOAT3 _pos);
+	void Emit();
+	void Draw();
+	void bloom_Draw();
+	void ImGuiDataInit();
+	void ImGui();
+	bool GetEmitting() { return emitting; }
+
+	// 放出位置の設定関数
+//	void SetOriginPos(DirectX::XMFLOAT3 _originPos) { originPos = _originPos; }
+
+	// パーティクルの最大サイズ
+	int GetMaxSize() { return MAX_SIZE; }
+};
+CEREAL_CLASS_VERSION(DisappearanceParticle, 0)

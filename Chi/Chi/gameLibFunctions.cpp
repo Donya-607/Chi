@@ -124,6 +124,66 @@ void setBlendMode_SCREEN(const float alpha)
 }
 
 
+void play_movie(wchar_t* filename, bool* loop)
+{
+
+	//“®‰æ—p
+	IGraphBuilder* pGraphBuilder = NULL;
+	IMediaControl* pMediaControl = NULL;
+	IMediaEvent* pMediaEvent = NULL;
+	long eventCode = 0;
+	IVideoWindow* pVideoWindow = NULL;
+	IMediaPosition* pMediaPosition = NULL;
+
+	CoInitialize(NULL);
+
+	CoCreateInstance(CLSID_FilterGraph,
+		NULL,
+		CLSCTX_INPROC,
+		IID_IGraphBuilder,
+		(LPVOID*)&pGraphBuilder);
+
+	pGraphBuilder->QueryInterface(IID_IMediaControl,
+		(LPVOID*)&pMediaControl);
+
+	pGraphBuilder->QueryInterface(IID_IMediaEvent,
+		(LPVOID*)&pMediaEvent);
+
+	pMediaControl->RenderFile(filename);
+
+	pGraphBuilder->QueryInterface(IID_IVideoWindow,
+		(LPVOID*)&pVideoWindow);
+	pGraphBuilder->QueryInterface(IID_IMediaPosition,
+		(LPVOID*)&pMediaPosition);
+	// Full Screen ŠJŽn
+	pVideoWindow->put_FullScreenMode(OATRUE);
+	pMediaControl->Run();
+
+	pMediaEvent->WaitForCompletion(-1, &eventCode);
+
+	while (1)
+	{
+		bool loop_flg = *loop;
+		if (loop_flg)
+			break;
+		pMediaPosition->put_CurrentPosition(0);
+		pMediaEvent->WaitForCompletion(-1, &eventCode);
+	}
+
+
+	pVideoWindow->Release();
+	pMediaEvent->Release();
+	pMediaControl->Release();
+	pGraphBuilder->Release();
+	pMediaPosition->Release();
+	pMediaPosition = NULL;
+	pVideoWindow = NULL;
+	pMediaEvent = NULL;
+	pMediaControl = NULL;
+	pGraphBuilder = NULL;
+	CoUninitialize();
+}
+
 //PRIMITIVE//
 void drawRect(const float x, const float y, const float w, const float h, const float cx, const float cy, const float angle, const float r, const float g, const float b)
 {
@@ -193,15 +253,15 @@ void spriteRenderRect(Sprite* _sprite, const float pos_x, const float pos_y, con
 	GameLib::texture::SpriteRender(
 		_sprite,
 		pos_x, pos_y, pos_x + texSize_x, pos_y + texSize_y,
-		texPos_x, texPos_y, texPos_x + texSize_x, texPos_y + texSize_y,
+		texPos_x, texPos_y, texSize_x, texSize_y,
 		0, 1, 1, 1, 0, 0, _tempX, _tempY);
 }
 void spriteRenderRect(Sprite* _sprite, const DirectX::XMFLOAT2& pos, const DirectX::XMFLOAT2& texPos, const DirectX::XMFLOAT2& texSize, bool _tempX, bool _tempY)
 {
 	GameLib::texture::SpriteRender(
 		_sprite,
-		pos.x, pos.y, pos.x + texSize.x, pos.y + texSize.y,
-		texPos.x, texPos.y, texPos.x + texSize.x, texPos.y + texSize.y,
+		pos.x, pos.y, texSize.x, texSize.y,
+		texPos.x, texPos.y, texSize.x, texSize.y,
 		0, 1, 1, 1, 0, 0, _tempX, _tempY);
 }
 
@@ -327,7 +387,7 @@ void spriteRenderRota(Sprite* _sprite, const DirectX::XMFLOAT2 pos, const float 
 {
 	GameLib::texture::SpriteRender(
 		_sprite,
-		pos.x, pos.y, pos.x + _sprite->getSize().x * Magnification, pos.y + _sprite->getSize().y * Magnification,
+		pos.x, pos.y, _sprite->getSize().x * Magnification, _sprite->getSize().y * Magnification,
 		0, 0, _sprite->getSize().x, _sprite->getSize().y,
 		angle, 1, 1, 1, 0, 0, _tempX, _tempY);
 }
@@ -383,7 +443,7 @@ void spriteRenderRectRota(Sprite* _sprite, const DirectX::XMFLOAT2& pos, const D
 	GameLib::texture::SpriteRender(
 		_sprite,
 		pos.x, pos.y, pos.x + texSize.x, pos.y + texSize.y,
-		texPos.x, texPos.y, texPos.x + texSize.x, texPos.y + texSize.y,
+		texPos.x, texPos.y, texSize.x, texSize.y,
 		angle, 1, 1, 1, 0, 0, _tempX, _tempY);
 }
 
@@ -392,7 +452,7 @@ void spriteRenderRectRota2(Sprite* _sprite, const float pos_x, const float pos_y
 	GameLib::texture::SpriteRender(
 		_sprite,
 		pos_x, pos_y,
-		pos_x + texSize_x * Magnification_x, pos_y + texSize_y * Magnification_y,
+		texSize_x * Magnification_x, texSize_y * Magnification_y,
 		texPos_x, texPos_y, texPos_x + texSize_x, texPos_y + texSize_y,
 		angle, 1, 1, 1, 0, 0, _tempX, _tempY);
 }
@@ -402,7 +462,7 @@ void spriteRenderRectRota2(Sprite* _sprite, const DirectX::XMFLOAT2& pos, const 
 		_sprite,
 		pos.x, pos.y,
 		pos.x + texSize.x * Magnification.x, pos.y + texSize.y * Magnification.y,
-		texPos.x, texPos.y, texPos.x + texSize.x, texPos.y + texSize.y,
+		texPos.x, texPos.y, texSize.x, texSize.y,
 		angle, 1, 1, 1, 0, 0, _tempX, _tempY);
 }
 
@@ -467,6 +527,11 @@ DirectX::XMFLOAT4 getCamTarget()
 	return GameLib::camera::getTarget();
 }
 
+void startShake(float _shake_power, float _time)
+{
+	GameLib::camera::startShake(_shake_power, _time);
+}
+
 //light//
 
 void setLineLight(const DirectX::XMFLOAT4& _position, const DirectX::XMFLOAT4& _lightAmbient, const DirectX::XMFLOAT4& _lightColor)
@@ -525,9 +590,9 @@ void createPlane(static_mesh* _plane, u_int _vertical, u_int _side)
 	GameLib::staticMesh::createPlane(_plane, _vertical, _side);
 }
 
-void createBillboard(static_mesh* _mesh, const wchar_t* _textureName)
+void createBillboard(static_mesh* _mesh, const wchar_t* _textureName, const DirectX::XMFLOAT2& texpos, const DirectX::XMFLOAT2& texsize)
 {
-	GameLib::staticMesh::createBillboard(_mesh, _textureName);
+	GameLib::staticMesh::createBillboard(_mesh, _textureName,texpos,texsize);
 }
 
 void loadOBJ(static_mesh* staticMesh, const wchar_t* objName)
@@ -550,19 +615,19 @@ void OBJRender(static_mesh* staticMesh, const DirectX::XMFLOAT4X4& SynthesisMatr
 	GameLib::staticMesh::staticMeshRender(staticMesh, SynthesisMatrix, worldMatrix, getCamPos(), getLineLight(), getPointLight(), materialColor, wireFlg);
 }
 
-void billboardRender(static_mesh* _mesh, const DirectX::XMFLOAT4X4& view_projection, const DirectX::XMFLOAT4& _pos, const DirectX::XMFLOAT2 _scale, const float _angle, const DirectX::XMFLOAT4& _cam_pos, const DirectX::XMFLOAT2& texpos, const DirectX::XMFLOAT2& texsize, const float alpha, const DirectX::XMFLOAT3& color)
+void billboardRender(static_mesh* _mesh, const DirectX::XMFLOAT4X4& view_projection, const DirectX::XMFLOAT4& _pos, const DirectX::XMFLOAT2 _scale, const float _angle, const DirectX::XMFLOAT4& _cam_pos, const float alpha, const DirectX::XMFLOAT3& color)
 {
-	GameLib::staticMesh::builboradRender(_mesh, view_projection, _pos, _scale, _angle, _cam_pos, texpos, texsize, alpha, color);
+	GameLib::staticMesh::builboradRender(_mesh, view_projection, _pos, _scale, _angle, _cam_pos, alpha, color);
 }
 
-void billboard_z_Render(static_mesh* _mesh, const DirectX::XMFLOAT4X4& view_projection, const DirectX::XMFLOAT4& _pos, const DirectX::XMFLOAT2 _scale, const float angle, const DirectX::XMFLOAT4& _cam_pos, const DirectX::XMFLOAT2& texpos, const DirectX::XMFLOAT2& texsize, const float alpha, const DirectX::XMFLOAT3& color)
+void billboard_z_Render(static_mesh* _mesh, const DirectX::XMFLOAT4X4& view_projection, const DirectX::XMFLOAT4& _pos, const DirectX::XMFLOAT2 _scale, const float angle, const DirectX::XMFLOAT4& _cam_pos, const float alpha, const DirectX::XMFLOAT3& color)
 {
-	GameLib::staticMesh::builborad_z_Render(_mesh, view_projection, _pos, _scale, angle, _cam_pos, texpos, texsize, alpha, color);
+	GameLib::staticMesh::builborad_z_Render(_mesh, view_projection, _pos, _scale, angle, _cam_pos, alpha, color);
 }
 
-void billboard_bloom_Render(static_mesh* _mesh, const DirectX::XMFLOAT4X4& view_projection, const DirectX::XMFLOAT4& _pos, const DirectX::XMFLOAT2 _scale, const float angle, const DirectX::XMFLOAT4& _cam_pos, const DirectX::XMFLOAT2& texpos, const DirectX::XMFLOAT2& texsize, const DirectX::XMFLOAT4& judge_color, const float alpha, const DirectX::XMFLOAT3& color)
+void billboard_bloom_Render(static_mesh* _mesh, const DirectX::XMFLOAT4X4& view_projection, const DirectX::XMFLOAT4& _pos, const DirectX::XMFLOAT2 _scale, const float angle, const DirectX::XMFLOAT4& _cam_pos, const DirectX::XMFLOAT4& judge_color, const float alpha, const DirectX::XMFLOAT3& color)
 {
-	GameLib::staticMesh::builborad_bloom_Render(_mesh, view_projection, _pos, _scale, angle, _cam_pos, texpos, texsize, alpha, color, judge_color);
+	GameLib::staticMesh::builborad_bloom_Render(_mesh, view_projection, _pos, _scale, angle, _cam_pos, alpha, color, judge_color);
 }
 
 
@@ -684,6 +749,16 @@ DirectX::XMINT2 getThumbL(int _padNum)
 DirectX::XMINT2 getThumbR(int _padNum)
 {
 	return GameLib::input::xInput::getThumbR(_padNum);
+}
+
+void startViblation(int index, float timer, float motor)
+{
+	GameLib::input::xInput::startViblation(index, timer, motor);
+}
+
+void stopViblation(int index)
+{
+	GameLib::input::xInput::stopViblation(index);
 }
 
 

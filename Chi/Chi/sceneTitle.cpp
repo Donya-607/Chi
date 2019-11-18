@@ -7,7 +7,7 @@
 #include "Donya/FilePath.h"
 #include "Donya/Keyboard.h"	// Insert by Donya.
 #include "Donya/Useful.h"	// Insert by Donya.
-
+#include "Donya/Sound.h"
 #define scast static_cast
 
 
@@ -30,105 +30,127 @@ void sceneTitle::init()
 		setPointLight(i);
 	}
 
-	loadFBX(pStageModel.get(), GetModelPath(ModelAttribute::TutorialStage));
-	loadFBX(pTitleModel.get(), "./Data/model/TestMove.fbx");
+	loading_thread = std::make_unique<std::thread>([&]() //&ÇÕñ≥ñºä÷êî, éüÇ™ä÷êîÇÃà¯êî, {}ÇÃíÜÇ™ä÷êîÇÃíÜêg
+	{
+		std::lock_guard<std::mutex> lock(loading_mutex);
 
-	createBillboard(&attackUIdata.pMesh, L"./Data/Images/UI/Telop.png");
-	createBillboard(&guardUIdata.pMesh, L"./Data/Images/UI/Telop.png");
+		loadFBX(pStageModel.get(), GetModelPath(ModelAttribute::TutorialStage));
+		loadFBX(pTitleModel.get(), "./Data/model/TestMove.fbx");
 
-	attackUIdata.pos = Donya::Vector4(0.0f, 2445.0f, 5645.0f, 1.0f);
-	attackUIdata.scale = Donya::Vector2(300.0f, 100.0f);
-	attackUIdata.texPos = Donya::Vector2(0.0f, 0.0f);
-	attackUIdata.texSize = Donya::Vector2(1690.0f, 557.0f);
-	attackUIdata.angle = 180.0f;
+		attackUIdata.pos = Donya::Vector4(0.0f, 2445.0f, 5645.0f, 1.0f);
+		attackUIdata.scale = Donya::Vector2(300.0f, 100.0f);
+		attackUIdata.texPos = Donya::Vector2(0.0f, 0.0f);
+		attackUIdata.texSize = Donya::Vector2(1690.0f, 557.0f);
+		attackUIdata.angle = 180.0f;
 
-	guardUIdata.pos = Donya::Vector4(-296.0f, 2426.0f, 11482.0f, 1.0f);
-	guardUIdata.scale = Donya::Vector2(300.0f, 100.0f);
-	guardUIdata.texPos = Donya::Vector2(0.0f, 553.0f);
-	guardUIdata.texSize = Donya::Vector2(1690.0f, 557.0f);
-	guardUIdata.angle = 293.0f;
+		guardUIdata.pos = Donya::Vector4(-296.0f, 2577.0f, 9668.0f, 1.0f);
+		guardUIdata.scale = Donya::Vector2(300.0f, 100.0f);
+		guardUIdata.texPos = Donya::Vector2(0.0f, 553.0f);
+		guardUIdata.texSize = Donya::Vector2(1690.0f, 557.0f);
+		guardUIdata.angle = 261.0f;
 
-	std::vector<Donya::Box> wallHitBox_vector;
-	Donya::Box wallHitBox;
+		createBillboard(&attackUIdata.pMesh, L"./Data/Images/UI/Telop.png", attackUIdata.texPos, attackUIdata.texSize);
+		createBillboard(&guardUIdata.pMesh, L"./Data/Images/UI/Telop.png", guardUIdata.texPos, guardUIdata.texSize);
 
-	// left
-	wallHitBox.cx = 650.0f;
-	wallHitBox.cy = 0.0f;
-	wallHitBox.w = 10.0f;
-	wallHitBox.h = 16000.0f;
-	wallHitBox_vector.push_back(wallHitBox);
 
-	// right
-	wallHitBox.cx = -650.0f;
-	wallHitBox.cy = 0.0f;
-	wallHitBox.w = 10.0f;
-	wallHitBox.h = 16000.0f;
-	wallHitBox_vector.push_back(wallHitBox);
+		std::vector<Donya::Box> wallHitBox_vector;
+		Donya::Box wallHitBox;
 
-	// left block
-	wallHitBox.cx = 650.0f;
-	wallHitBox.cy = 14000.0f;
-	wallHitBox.w = 160.0f;
-	wallHitBox.h = 300.0f;
-	wallHitBox_vector.push_back(wallHitBox);
+		// left
+		wallHitBox.cx = 650.0f;
+		wallHitBox.cy = 0.0f;
+		wallHitBox.w = 10.0f;
+		wallHitBox.h = 16000.0f;
+		wallHitBox_vector.push_back(wallHitBox);
 
-	// right block
-	wallHitBox.cx = -650.0f;
-	wallHitBox.cy = 14000.0f;
-	wallHitBox.w = 160.0f;
-	wallHitBox.h = 300.0f;
-	wallHitBox_vector.push_back(wallHitBox);
+		// right
+		wallHitBox.cx = -650.0f;
+		wallHitBox.cy = 0.0f;
+		wallHitBox.w = 10.0f;
+		wallHitBox.h = 16000.0f;
+		wallHitBox_vector.push_back(wallHitBox);
 
-	// left block Guard
-	wallHitBox.cx = 650.0f;
-	wallHitBox.cy = 11431.0f;
-	wallHitBox.w = 320.0f;
-	wallHitBox.h = 300.0f;
-	wallHitBox_vector.push_back(wallHitBox);
+		// left block
+		wallHitBox.cx = 650.0f;
+		wallHitBox.cy = 14000.0f;
+		wallHitBox.w = 160.0f;
+		wallHitBox.h = 300.0f;
+		wallHitBox_vector.push_back(wallHitBox);
 
-	// right block Guard
-	wallHitBox.cx = -650.0f;
-	wallHitBox.cy = 11431.0f;
-	wallHitBox.w = 320.0f;
-	wallHitBox.h = 300.0f;
-	wallHitBox_vector.push_back(wallHitBox);
+		// right block
+		wallHitBox.cx = -650.0f;
+		wallHitBox.cy = 14000.0f;
+		wallHitBox.w = 160.0f;
+		wallHitBox.h = 300.0f;
+		wallHitBox_vector.push_back(wallHitBox);
 
-	// front
-	wallHitBox.cx = 0.0f;
-	wallHitBox.cy = 4750.0f;
-	wallHitBox.w = 881.0f;
-	wallHitBox.h = 1000.0f;
-	wallHitBox_vector.push_back(wallHitBox);
+		// left block Guard
+		wallHitBox.cx = 650.0f;
+		wallHitBox.cy = 9668.0f;
+		wallHitBox.w = 320.0f * 1.5f;
+		wallHitBox.h = 300.0f;
+		wallHitBox_vector.push_back(wallHitBox);
 
-	// back
-	wallHitBox.cx = 0.0f;
-	wallHitBox.cy = 14200.0f;
-	wallHitBox.w = 1000.0f;
-	wallHitBox.h = 150.0f;
-	wallHitBox_vector.push_back(wallHitBox);
+		// right block Guard
+		wallHitBox.cx = -650.0f;
+		wallHitBox.cy = 9668.0f;
+		wallHitBox.w = 320.0f * 1.5f;
+		wallHitBox.h = 300.0f;
+		wallHitBox_vector.push_back(wallHitBox);
 
-	player.Init(Donya::Vector3(0.0f, 2222.5f, 14000.0f), Donya::Vector3(0.0f, 0.0f * 0.01745f, 0.0f), wallHitBox_vector);
-	player.SetFieldRadius(9999999.0f);
+		// front
+		wallHitBox.cx = 0.0f;
+		wallHitBox.cy = 4750.0f;
+		wallHitBox.w = 881.0f;
+		wallHitBox.h = 1000.0f;
+		wallHitBox_vector.push_back(wallHitBox);
 
-	catapult.Init(Donya::Vector3(0.0f, 2208.0f, 4981.0f), Donya::Vector3(1.0f, 1.0f, 1.0f), Donya::Vector3(0.0f, 0.0f, 0.0f));
+		// back
+		wallHitBox.cx = 0.0f;
+		wallHitBox.cy = 14200.0f;
+		wallHitBox.w = 1000.0f;
+		wallHitBox.h = 150.0f;
+		wallHitBox_vector.push_back(wallHitBox);
 
-	titlePos = Donya::Vector3(0.0f, 3354.0f, 11531.0f);
-	titleScale = Donya::Vector3(250.0f, 250.0f, 250.0f);
-	cubePos = Donya::Vector3(0.0f, 2230.0f, 11531.0f);
-	cubeScale = Donya::Vector3(100.0f, 250.0f, 100.0f);
+		constexpr int STAGE_NO = 0;
+		player.Init( STAGE_NO, Donya::Vector3(0.0f, 2222.5f, 14000.0f), Donya::Vector3(0.0f, 0.0f * 0.01745f, 0.0f), wallHitBox_vector);
+		player.SetFieldRadius(9999999.0f);
 
-	sceneState = 0;
-	tutorialState = 0;
+		catapult.Init(Donya::Vector3(0.0f, 2208.0f, 4981.0f), Donya::Vector3(1.0f, 1.0f, 1.0f), Donya::Vector3(0.0f, 0.0f, 0.0f));
 
-	moveCnt = 0;
-	titleExist = true;
+		titlePos = Donya::Vector3(0.0f, 3354.0f, 11531.0f);
+		titleScale = Donya::Vector3(250.0f, 250.0f, 250.0f);
+		cubePos = Donya::Vector3(0.0f, 2230.0f, 11531.0f);
+		cubeScale = Donya::Vector3(100.0f, 250.0f, 100.0f);
 
-	nextGameCnt = 0;
-	returnTitleCnt = 0;
+		sceneState = 0;
+		tutorialState = 0;
+
+		moveCnt = 0;
+		titleExist = true;
+
+		nextGameCnt = 0;
+		returnTitleCnt = 0;
+
+	});
+	
+	origin_SRV = (void*)GameLib::getOriginalScreen();
+	Donya::Sound::Play(MUSIC_ID::TITLE);
 }
 
 void sceneTitle::update()
 {
+	Fade::GetInstance()->Update();
+
+	if (is_now_loading())
+	{
+		return; //ÉçÅ[ÉhÇ™äÆóπÇµÇƒÇ¢Ç»Ç©Ç¡ÇΩÇÁë¶return
+	}
+	if (loading_thread && loading_thread->joinable())
+	{
+		loading_thread->join();
+	}
+
 #if DEBUG_MODE
 
 	if (Donya::Keyboard::Press(VK_MENU))
@@ -249,8 +271,10 @@ void sceneTitle::TutorialStartUpdate()
 	setCamPos(camPos);
 	setTarget(camTarget);
 
+	float deltaTime = GameLib::getDeltaTime();
+
 	Donya::Vector4x4 matView = Donya::Vector4x4::FromMatrix(GameLib::camera::GetViewMatrix());
-	player.Update(Player::Input::MakeByExternalInput(matView));
+	player.Update(Player::Input::MakeByExternalInput(matView), deltaTime);
 
 	std::vector<Donya::Circle> nullBodies{};
 	player.PhysicUpdate(nullBodies);
@@ -258,18 +282,18 @@ void sceneTitle::TutorialStartUpdate()
 	auto WithinStartupArea = [&]()->bool
 	{
 		return
-			(
-				player.GetPosition().z <= 11431.0f
-				/*
-				11431.0f - 100.0f / 2.0f <= player.GetPosition().z
-				&& player.GetPosition().z <= 11431.0f + 100.0f / 2.0f
+		(
+			player.GetPosition().z <= 9668.0f
+			/*
+			11431.0f - 100.0f / 2.0f <= player.GetPosition().z
+			&& player.GetPosition().z <= 11431.0f + 100.0f / 2.0f
 
-				&& -100.0f / 2.0f <= player.GetPosition().x
-				&& player.GetPosition().x <= 100.0f / 2.0f
-				*/
-				)
-			? true
-			: false;
+			&& -100.0f / 2.0f <= player.GetPosition().x
+			&& player.GetPosition().x <= 100.0f / 2.0f
+			*/
+			)
+		? true
+		: false;
 	};
 	if (WithinStartupArea())
 	{
@@ -285,11 +309,13 @@ void sceneTitle::TutorialGuardUpdate()
 	setCamPos(camPos);
 	setTarget(camTarget);
 
+	float deltaTime = GameLib::getDeltaTime();
+
 	Donya::Vector4x4 matView = Donya::Vector4x4::FromMatrix(GameLib::camera::GetViewMatrix());
 	Player::Input input = Player::Input::MakeByExternalInput(matView);
 	// input.doAttack = false;
 	input.onlyRotation = true;
-	player.Update(input);
+	player.Update(input, deltaTime);
 
 	std::vector<Donya::Circle> nullBodies{};
 	player.PhysicUpdate(nullBodies);
@@ -304,8 +330,10 @@ void sceneTitle::TutorialAttackUpdate()
 	setCamPos(camPos);
 	setTarget(camTarget);
 
+	float deltaTime = GameLib::getDeltaTime();
+
 	Donya::Vector4x4 matView = Donya::Vector4x4::FromMatrix(GameLib::camera::GetViewMatrix());
-	player.Update(Player::Input::MakeByExternalInput(matView));
+	player.Update(Player::Input::MakeByExternalInput(matView), deltaTime);
 
 	std::vector<Donya::Circle> nullBodies{};
 	player.PhysicUpdate(nullBodies);
@@ -320,17 +348,23 @@ void sceneTitle::TutorialEndUpdate()
 	if (MAX_NEXT_GAME_CNT <= nextGameCnt++)
 	{
 		nextGameCnt = 0;
-		pSceneManager->setNextScene(new SceneGame, false);
+		GameTimer::GetInstance()->Init();
+		//pSceneManager->setNextScene(new SceneGame(), false);
+
+		Fade::GetInstance()->Init(1);
 	}
 }
 
 void sceneTitle::TutorialReturnTitle()
 {
-	if (MAX_RETRUN_TITLE_CNT <= returnTitleCnt++)
+	// if (MAX_RETRUN_TITLE_CNT <= returnTitleCnt++)
+	if ( player.IsDefeated() )
 	{
 		returnTitleCnt = 0;
 		// TODO : éÄñSââèoí«â¡Ç…ÇÊÇËïœçXÇ†ÇË
-		pSceneManager->setNextScene(new sceneTitle(), false);
+		//pSceneManager->setNextScene(new sceneTitle(), false);
+
+		Fade::GetInstance()->Init(0);
 	}
 }
 
@@ -417,6 +451,12 @@ void sceneTitle::render()
 	clearWindow(0.5f, 0.5f, 0.5f, 1.0f);
 	//	setString({ 0,0 }, L"sceneTitle %d : %f", 1, 20.2f);
 
+	if (is_now_loading())
+	{
+		//ÉçÅ[ÉhíÜ
+		Fade::GetInstance()->Draw();
+		return;
+	}
 
 	Donya::Vector4x4 V = Donya::Vector4x4::FromMatrix(getViewMatrix());
 	Donya::Vector4x4 P = Donya::Vector4x4::FromMatrix(getProjectionMatrix());
@@ -440,124 +480,164 @@ void sceneTitle::render()
 		player.Draw(shader, V, P);
 		catapult.Draw(shader, V, P);
 
-		billboardRender(&attackUIdata.pMesh, V * P, attackUIdata.pos, attackUIdata.scale, attackUIdata.angle, getCamPos(), attackUIdata.texPos, attackUIdata.texSize);
-		billboardRender(&guardUIdata.pMesh, V * P, guardUIdata.pos, guardUIdata.scale, guardUIdata.angle, getCamPos(), guardUIdata.texPos, guardUIdata.texSize);
+		if (sceneState != SceneState::TITLE)
+		{
+			billboardRender(&attackUIdata.pMesh, V * P, attackUIdata.pos, attackUIdata.scale, attackUIdata.angle, getCamPos());
+			billboardRender(&guardUIdata.pMesh, V * P, guardUIdata.pos, guardUIdata.scale, guardUIdata.angle, getCamPos());
+		}
 
 		EffectManager::GetInstance()->Render(shader);
 
-		if (Donya::IsShowCollision())
-		{
-			auto GenerateCube = []()->std::shared_ptr<static_mesh>
-			{
-				std::shared_ptr<static_mesh> tmpCube = std::make_shared<static_mesh>();
-				createCube(tmpCube.get());
-				return tmpCube;
-			};
-			static std::shared_ptr<static_mesh> pCube = GenerateCube();
+		//if (Donya::IsShowCollision())
+		//{
+		//	auto GenerateCube = []()->std::shared_ptr<static_mesh>
+		//	{
+		//		std::shared_ptr<static_mesh> tmpCube = std::make_shared<static_mesh>();
+		//		createCube(tmpCube.get());
+		//		return tmpCube;
+		//	};
+		//	static std::shared_ptr<static_mesh> pCube = GenerateCube();
 
-			Donya::Vector4x4 CS = Donya::Vector4x4::MakeScaling(cubeScale); // Half size->Whole size.
-			Donya::Vector4x4 CR = Donya::Vector4x4::MakeRotationEuler(Donya::Vector3(0.0f, 0.0f, 0.0f));
-			Donya::Vector4x4 CT = Donya::Vector4x4::MakeTranslation(cubePos);
-			Donya::Vector4x4 CW = CS * CR * CT;
-			Donya::Vector4x4 CWVP = CW * V * P;
+		//	Donya::Vector4x4 CS = Donya::Vector4x4::MakeScaling(cubeScale); // Half size->Whole size.
+		//	Donya::Vector4x4 CR = Donya::Vector4x4::MakeRotationEuler(Donya::Vector3(0.0f, 0.0f, 0.0f));
+		//	Donya::Vector4x4 CT = Donya::Vector4x4::MakeTranslation(cubePos);
+		//	Donya::Vector4x4 CW = CS * CR * CT;
+		//	Donya::Vector4x4 CWVP = CW * V * P;
 
-			OBJRender(pCube.get(), CWVP, CW, Donya::Vector4(0.0f, 0.8f, 0.3f, 0.6f));
-		}
+		//	OBJRender(pCube.get(), CWVP, CW, Donya::Vector4(0.0f, 0.8f, 0.3f, 0.6f));
+		//}
 		GameLib::clearDepth();
 
 	}
 
-	//z screen : billboardÇÕÇ±ÇÃäKëwÇ…ÇÕï`âÊÇµÇ»Ç¢Ç≈Ç≠ÇæÇ≥Ç¢
-	{
-		Donya::Vector4x4 W = Donya::Vector4x4::Identity();
-		Donya::Vector4x4 WVP = W * V * P;
-		z_render(pStageModel.get(), shader, WVP, W);
+	////z screen : billboardÇÕÇ±ÇÃäKëwÇ…ÇÕï`âÊÇµÇ»Ç¢Ç≈Ç≠ÇæÇ≥Ç¢
+	//{
+	//	Donya::Vector4x4 W = Donya::Vector4x4::Identity();
+	//	Donya::Vector4x4 WVP = W * V * P;
+	//	z_render(pStageModel.get(), shader, WVP, W);
 
-		if (titleExist)
-		{
-			Donya::Vector4x4 S = Donya::Vector4x4::MakeScaling(titleScale);
-			Donya::Vector4x4 R = Donya::Vector4x4::MakeRotationEuler(Donya::Vector3(0.0f, 0.0f, 0.0f));
-			Donya::Vector4x4 T = Donya::Vector4x4::MakeTranslation(titlePos);
-			W = S * R * T;
-			WVP = W * V * P;
-			z_render(pTitleModel.get(), shader, WVP, W);
-		}
+	//	if (titleExist)
+	//	{
+	//		Donya::Vector4x4 S = Donya::Vector4x4::MakeScaling(titleScale);
+	//		Donya::Vector4x4 R = Donya::Vector4x4::MakeRotationEuler(Donya::Vector3(0.0f, 0.0f, 0.0f));
+	//		Donya::Vector4x4 T = Donya::Vector4x4::MakeTranslation(titlePos);
+	//		W = S * R * T;
+	//		WVP = W * V * P;
+	//		z_render(pTitleModel.get(), shader, WVP, W);
+	//	}
 
-		player.z_Draw(shader, V, P);
-		catapult.z_Draw(shader, V, P);
+	//	player.DrawZ(shader, V, P);
+	//	catapult.z_Draw(shader, V, P);
 
-		EffectManager::GetInstance()->z_Render(shader);
-		GameLib::clearDepth();
+	//	EffectManager::GetInstance()->z_Render(shader);
+	//	GameLib::clearDepth();
 
-	}
+	//}
 
-	//bloom screen
-	{
-		Donya::Vector4x4 W = Donya::Vector4x4::Identity();
-		Donya::Vector4x4 WVP = W * V * P;
-		bloom_SRVrender(pStageModel.get(), shader, WVP, W);
+	////bloom screen
+	//{
+	//	Donya::Vector4x4 W = Donya::Vector4x4::Identity();
+	//	Donya::Vector4x4 WVP = W * V * P;
+	//	bloom_SRVrender(pStageModel.get(), shader, WVP, W);
 
-		if (titleExist)
-		{
-			Donya::Vector4x4 S = Donya::Vector4x4::MakeScaling(titleScale);
-			Donya::Vector4x4 R = Donya::Vector4x4::MakeRotationEuler(Donya::Vector3(0.0f, 0.0f, 0.0f));
-			Donya::Vector4x4 T = Donya::Vector4x4::MakeTranslation(titlePos);
-			W = S * R * T;
-			WVP = W * V * P;
-			bloom_SRVrender(pTitleModel.get(), shader, WVP, W);
-		}
+	//	if (titleExist)
+	//	{
+	//		Donya::Vector4x4 S = Donya::Vector4x4::MakeScaling(titleScale);
+	//		Donya::Vector4x4 R = Donya::Vector4x4::MakeRotationEuler(Donya::Vector3(0.0f, 0.0f, 0.0f));
+	//		Donya::Vector4x4 T = Donya::Vector4x4::MakeTranslation(titlePos);
+	//		W = S * R * T;
+	//		WVP = W * V * P;
+	//		bloom_SRVrender(pTitleModel.get(), shader, WVP, W);
+	//	}
 
-		player.bloom_Draw(shader, V, P);
-		catapult.bloom_Draw(shader, V, P);
+	//	player.DrawBloom(shader, V, P);
+	//	catapult.bloom_Draw(shader, V, P);
 
-		billboard_bloom_Render(&attackUIdata.pMesh, V * P, attackUIdata.pos, attackUIdata.scale, attackUIdata.angle, getCamPos(), attackUIdata.texPos, attackUIdata.texSize);
-		billboard_bloom_Render(&guardUIdata.pMesh, V * P, guardUIdata.pos, guardUIdata.scale, guardUIdata.angle, getCamPos(), guardUIdata.texPos, guardUIdata.texSize);
+	//	billboard_bloom_Render(&attackUIdata.pMesh, V * P, attackUIdata.pos, attackUIdata.scale, attackUIdata.angle, getCamPos());
+	//	billboard_bloom_Render(&guardUIdata.pMesh, V * P, guardUIdata.pos, guardUIdata.scale, guardUIdata.angle, getCamPos());
 
-		EffectManager::GetInstance()->bloom_Render(shader);
+	//	EffectManager::GetInstance()->bloom_Render(shader);
 
-		GameLib::clearDepth();
-	}
+	//	GameLib::clearDepth();
+	//}
+
+
+	origin_SRV = (void*)GameLib::getOriginalScreen();
 
 	//blurílÇå„Ç≈ë„ì¸
-	postEffect_Bloom(0);
+	postEffect_Bloom(0, false);
 	//ÉÇÉmÉgÅ[ÉìÇ…Ç∑ÇÈÇ∆Ç´ÇÕëÊàÍà¯êîÇâ∫Ç∞ÇÈ
 	filterScreen(1.0f);
+
+	Fade::GetInstance()->Draw();
+
+	//if ( Donya::IsShowCollision() )
+	//{
+	//	auto GenerateCube = []()->std::shared_ptr<static_mesh>
+	//	{
+	//		std::shared_ptr<static_mesh> tmpCube = std::make_shared<static_mesh>();
+	//		createCube( tmpCube.get() );
+	//		return tmpCube;
+	//	};
+	//	static std::shared_ptr<static_mesh> pCube = GenerateCube();
+
+	//	Donya::Vector4x4 CS = Donya::Vector4x4::MakeScaling( cubeScale ); // Half size->Whole size.
+	//	Donya::Vector4x4 CR = Donya::Vector4x4::MakeRotationEuler( Donya::Vector3( 0.0f, 0.0f, 0.0f ) );
+	//	Donya::Vector4x4 CT = Donya::Vector4x4::MakeTranslation( cubePos );
+	//	Donya::Vector4x4 CW = CS * CR * CT;
+	//	Donya::Vector4x4 CWVP = CW * V * P;
+
+	//	OBJRender( pCube.get(), CWVP, CW, Donya::Vector4( 0.0f, 0.8f, 0.3f, 0.6f ) );
+	//}
 }
 
 void sceneTitle::uninit()
 {
-
+	Donya::Sound::Stop(TITLE);
 }
 
 void sceneTitle::imGui()
 {
+	if (is_now_loading())
+	{
+		//ÉçÅ[ÉhíÜ
+		return;
+	}
+
 #if USE_IMGUI
 
 	ImGui::SetNextWindowSize(ImVec2(500.0f, getWindowSize().y / 2.0f), ImGuiSetCond_Once);
 	ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiSetCond_Once);
 	ImGui::Begin("Scene", NULL, ImGuiWindowFlags_MenuBar);
 
+	//ImGui::NewLine();
+	//ImGui::Image(origin_SRV, { 512,512 });
+	//ImGui::NewLine();
 	if (ImGui::Button("Game"))
 	{
-		pSceneManager->setNextScene(new SceneGame(), false);
+		//pSceneManager->setNextScene(new SceneGame(), false);
+		Fade::GetInstance()->Init(1);
 	}
 	else if (Donya::Keyboard::Press(VK_LCONTROL) && Donya::Keyboard::Trigger('G'))
 	{
-		pSceneManager->setNextScene(new SceneGame(), false);
+		//pSceneManager->setNextScene(new SceneGame(), false);
+		Fade::GetInstance()->Init(1);
 	}
 	else
-		if (ImGui::Button("Effect"))
-		{
-			pSceneManager->setNextScene(new SceneEffect, false);
-		}
-		else if (ImGui::Button("Result"))
-		{
-			pSceneManager->setNextScene(new SceneResult(60), false);
-		}
-		else if (ImGui::Button("GameOver"))
-		{
-			pSceneManager->setNextScene(new SceneGameOver, false);
-		}
+	if (ImGui::Button("Effect"))
+	{
+		pSceneManager->setNextScene(new SceneEffect, false);
+	}
+	else if (ImGui::Button("Result"))
+	{
+		//pSceneManager->setNextScene(new SceneResult(), false);
+		Fade::GetInstance()->Init(3);
+	}
+	else if (ImGui::Button("GameOver"))
+	{
+		//pSceneManager->setNextScene(new SceneGameOver, false);
+		Fade::GetInstance()->Init(2);
+	}
 
 	ImGui::End();
 
@@ -796,24 +876,24 @@ void sceneTitle::ProcessCollision()
 
 	bool wasHitToShield = false;
 
-	if (Donya::OBB::IsHitSphere(playerShieldBox, catapult.stone.hitSphere))
+	if (Donya::OBB::IsHitOBB(playerShieldBox, catapult.stone.hitOBB))
 	{
 		EffectManager::GetInstance()->StoneBreakEffectSet(catapult.stone.pos);
 		setStopAnimation(catapult.pModel.get(), true);
 		catapult.stone.exist = false;
-		catapult.stone.hitSphere.exist = false;
-		catapult.stone.hitSphere.enable = false;
+		catapult.stone.hitOBB.exist = false;
+		catapult.stone.hitOBB.enable = false;
 		wasHitToShield = true;
 		player.SucceededDefence();
 		tutorialState++;
 	}
-	if (!wasHitToShield && Donya::OBB::IsHitSphere(playerBodyBox, catapult.stone.hitSphere))
+	if (!wasHitToShield && Donya::OBB::IsHitOBB(playerBodyBox, catapult.stone.hitOBB))
 	{
 		EffectManager::GetInstance()->StoneBreakEffectSet(catapult.stone.pos);
 		setStopAnimation(catapult.pModel.get(), true);
 		catapult.stone.exist = false;
-		catapult.stone.hitSphere.exist = false;
-		catapult.stone.hitSphere.enable = false;
+		catapult.stone.hitOBB.exist = false;
+		catapult.stone.hitOBB.enable = false;
 		player.ReceiveImpact();
 		tutorialState = sceneTitle::RETURN_TITLE;
 	}

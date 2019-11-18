@@ -3,6 +3,9 @@
 
 #include <Windows.h>	// Insert by Donya, must include this before "Xinput.h".
 #include <Xinput.h>
+#include <mutex>
+#include <thread>
+#include <memory>
 
 #include "baseScene.h"
 
@@ -19,15 +22,17 @@
 #include "light.h"
 #include "Donya/ChiUtility.h"
 #include "Donya/Serializer.h"
+#include "Donya/Timer.h"
 
 #include "Mouse.h"
+#include "Fade.h"
 
 using namespace DirectX;
 class sceneTitle : public baseScene
 {
 private:
-	Donya::Vector3 camPos = { 0.0f, 2450.0f, 15000.0f };
-	Donya::Vector3 camTarget = { 0.0f, 2000.0f, 0.0f };
+	Donya::Vector3 camPos = { 0.0f, 2420.0f, 15000.0f };
+	Donya::Vector3 camTarget = { 0.0f, 2590.0f, 0.0f };
 	float cameraDistance;
 
 	Donya::Vector3 camTitlePos = { 0.0f, 2226.0f, 14446.0f };
@@ -43,6 +48,10 @@ private:
 	Donya::Vector3 cubeScale;
 	std::unique_ptr<skinned_mesh> pStageModel;
 	std::unique_ptr<skinned_mesh> pTitleModel;
+
+	ImTextureID origin_SRV;
+	ImTextureID z_SRV;
+	ImTextureID bloom_SRV;
 
 	struct billboard
 	{
@@ -133,8 +142,22 @@ private:
 	DirectX::XMFLOAT4 judged_color;
 #endif
 
+private: // multi thread
+	std::unique_ptr<std::thread> loading_thread;
+	std::unique_ptr<Sprite> font;
+	std::mutex loading_mutex;
+	bool is_now_loading()
+	{
+		if (loading_thread && loading_mutex.try_lock())
+		{
+			loading_mutex.unlock();
+			return false;
+		}
+		return true;
+	}
+
 public:
-	sceneTitle() : 
+	sceneTitle(): 
 		shader(),
 		lights(),
 		player(),
@@ -173,6 +196,22 @@ public:
 	struct Impl;
 private:
 	std::unique_ptr<Impl> pImpl;
+
+private: // multi thread
+	std::unique_ptr<std::thread> loading_thread;
+	std::unique_ptr<Sprite> font;
+	std::mutex loading_mutex;
+	bool endLoad;
+	bool loadFinish;
+	bool is_now_loading()
+	{
+		if (loading_thread && loading_mutex.try_lock())
+		{
+			loading_mutex.unlock();
+			return false;
+		}
+		return true;
+	}
 
 public:
 	SceneGame();
@@ -214,8 +253,6 @@ public:
 class SceneEffect : public baseScene
 {
 private:
-	FlashParticle flashParticle;
-	BubbleParticle bubbleParticle;
 	EruptionParticle eruqtionParticle;
 	AbsorptionParticle absorptionParticle;
 	DustParticle dustParticle;
@@ -265,7 +302,9 @@ private:
 	DirectX::XMFLOAT3 bossPos;
 	bool shieldExist;
 
-
+	ImTextureID origin_SRV;
+	ImTextureID z_SRV;
+	ImTextureID bloom_SRV;
 
 public:
 	SceneEffect() : stage(), cameraPos(), cameraFocusOffset(), lights(), shader(){}
@@ -317,7 +356,28 @@ private:
 	// light
 	Lights	lights;
 
-	Sprite sprite;
+	Sprite back;
+	Sprite text;
+	Sprite result;
+	Sprite ranking;
+
+	struct SpriteData
+	{
+		Donya::Vector2 pos;
+		Donya::Vector2 texPos;
+		Donya::Vector2 texSize;
+	};
+	SpriteData backData;
+	SpriteData textData;
+	SpriteData bossBackData[3];
+	SpriteData boss1TimeData[10];
+	SpriteData boss2TimeData[10];
+	SpriteData boss3TimeData[10];
+	SpriteData totalTimeData[10];
+	SpriteData nextTelopData;
+
+	SpriteData rankingData;
+
 
 	DirectX::XMFLOAT3 rankingPos;
 	DirectX::XMFLOAT3 yourScorePos;
@@ -353,7 +413,7 @@ public:
 #endif // USE_IMGUI
 
 public:
-	SceneResult(int clearTime);
+	SceneResult();
 	~SceneResult() {}
 
 	void init();
@@ -367,7 +427,19 @@ CEREAL_CLASS_VERSION(SceneResult, 0)
 class SceneGameOver : public baseScene
 {
 private:
+	Sprite sprite;
 
+	struct SpriteData
+	{
+		Donya::Vector2 pos;
+		Donya::Vector2 texPos;
+		Donya::Vector2 texSize;
+	};
+	SpriteData logo;
+	SpriteData continuity;
+	SpriteData toTitle;
+
+	int state;
 
 private:
 	friend class cereal::access;
