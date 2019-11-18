@@ -16,6 +16,7 @@ void EffectManager::Update()
 	jumpEffect.Update();
 	stoneBreakParticle.Emit();
 	catapultBreakParticle.Emit();
+	shieldEffect.Update();
 }
 
 void EffectManager::AccelEffectUpdate(Donya::Vector3 pos, Donya::Vector3 dir)
@@ -42,6 +43,7 @@ void EffectManager::Render( fbx_shader &HLSL )
 	bossAttackMomentEffect.Draw();
 	stoneBreakParticle.Draw();
 	catapultBreakParticle.Draw();
+	shieldEffect.Draw();
 }
 
 std::string GetEffectModelPath(EffectModel effectModel)

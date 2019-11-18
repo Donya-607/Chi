@@ -259,14 +259,27 @@ public:
 	void Update();
 	void Render(fbx_shader& HLSL);
 
-	bool GetActivated() const { return activated; }
-	std::vector<Donya::Sphere>& GetHitSphereVector() { return hitSphere; }
 	void SetEnable(int num, bool _enable = false)
 	{
 		if (MAX_SIZE <= num) return;
 
 		hitSphere[num].enable = _enable;
 	}
+	void SetExist(int num, bool _exist = false)
+	{
+		if (MAX_SIZE <= num) return;
+
+		hitSphere[num].exist = _exist;
+	}
+	void SetDataExist(int num, bool _exist)
+	{
+		if (MAX_SIZE <= num) return;
+
+		data[num].SetExist(_exist);
+	}
+
+	bool GetActivated() const { return activated; }
+	std::vector<Donya::Sphere>& GetHitSphereVector() { return hitSphere; }
 
 private:
 	bool CollideToWall(Donya::Vector3 pos);
@@ -320,6 +333,28 @@ public:
 			{
 				longAttackEffect[i].pModel[j] = std::make_shared<skinned_mesh>();
 				longAttackEffect[i].pModel[j] = _pModel;
+			}
+		}
+	}
+
+	void AllReSetExist()
+	{
+		for (int i = 0; i < MAX_SIZE; i++)
+		{
+			for (int j = 0; j < longAttackEffect[i].MAX_SIZE; j++)
+			{
+				longAttackEffect[i].SetDataExist(j, false);
+			}
+		}
+	}
+	void AllReSetCollision()
+	{
+		for (int i = 0; i < MAX_SIZE; i++)
+		{
+			for (int j = 0; j < longAttackEffect[i].MAX_SIZE; j++)
+			{
+				longAttackEffect[i].SetExist(j, false);
+				longAttackEffect[i].SetEnable(j, false);
 			}
 		}
 	}
@@ -460,6 +495,44 @@ public:
 	}
 };
 
+class ShieldEffect
+{
+private:
+	static const int MAX_SIZE = 5;
+	ShieldParticle shieldParticle[MAX_SIZE];
+
+public:
+	ShieldEffect() {}
+	~ShieldEffect() {}
+
+
+	void Set(Donya::Vector3 _pos)
+	{
+		for (int i = 0; i < MAX_SIZE; i++)
+		{
+			if (!shieldParticle[i].GetEmitting())
+			{
+				shieldParticle[i].Set(_pos);
+				break;
+			}
+		}
+	}
+	void Update()
+	{
+		for (int i = 0; i < MAX_SIZE; i++)
+		{
+			shieldParticle[i].Emit();
+		}
+	}
+	void Draw()
+	{
+		for (int i = 0; i < MAX_SIZE; i++)
+		{
+			shieldParticle[i].Draw();
+		}
+	}
+};
+
 class EffectManager
 {
 private:
@@ -477,6 +550,7 @@ private:
 	BossAttackMomentEffect	bossAttackMomentEffect;
 	StoneBreakParticle		stoneBreakParticle;
 	CatapultBreakParticle	catapultBreakParticle;
+	ShieldEffect			shieldEffect;
 
 public:
 	EffectManager() {}
@@ -490,7 +564,11 @@ public:
 
 public:
 	void Init() {}
-	void UnInit() {}
+	void UnInit()
+	{
+		EruptionEffectReSetCollision();
+		LongAttackEffectReSetCollision();
+	}
 
 	void Update();
 	void AccelEffectUpdate(Donya::Vector3 pos, Donya::Vector3 dir);
@@ -559,6 +637,14 @@ public:
 	{
 		longAttackEffectManager.SetData(playerPos, bossPos);
 	}
+	void LongAttackEffectReSetExist() // 表示OFF
+	{
+		longAttackEffectManager.AllReSetExist();
+	}
+	void LongAttackEffectReSetCollision() // 当たり判定OFF
+	{
+		longAttackEffectManager.AllReSetCollision();
+	}
 
 	// BOSS1 ジャンプ攻撃
 	void JumpEffectSet(Donya::Vector3 pos)
@@ -592,6 +678,12 @@ public:
 	void CatapultBreakEffectSet(Donya::Vector3 pos)
 	{
 		catapultBreakParticle.Set(pos);
+	}
+
+	// プレイヤーシールド展開
+	void ShieldEffectSet(Donya::Vector3 pos)
+	{
+		shieldEffect.Set(pos);
 	}
 
 	std::vector<EruptionEffect> &GetEruptionEffectVector()
