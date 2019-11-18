@@ -356,7 +356,28 @@ private:
 	// light
 	Lights	lights;
 
-	Sprite sprite;
+	Sprite back;
+	Sprite text;
+	Sprite result;
+	Sprite ranking;
+
+	struct SpriteData
+	{
+		Donya::Vector2 pos;
+		Donya::Vector2 texPos;
+		Donya::Vector2 texSize;
+	};
+	SpriteData backData;
+	SpriteData textData;
+	SpriteData bossBackData[3];
+	SpriteData boss1TimeData[10];
+	SpriteData boss2TimeData[10];
+	SpriteData boss3TimeData[10];
+	SpriteData totalTimeData[10];
+	SpriteData nextTelopData;
+
+	SpriteData rankingData;
+
 
 	DirectX::XMFLOAT3 rankingPos;
 	DirectX::XMFLOAT3 yourScorePos;
@@ -418,14 +439,7 @@ private:
 	SpriteData continuity;
 	SpriteData toTitle;
 
-	/*continuity.pos = Donya::Vector2(1920.0f / 4.0f, 1080.0f / 0.5f);
-	continuity.texPos = Donya::Vector2(0.0f, 0.0f);
-	continuity.texSize = Donya::Vector2(434.0f, 114.0f);
-
-	toTitle.pos = Donya::Vector2(1920.0f / 0.5f, 1080.0f / 0.5f);
-	toTitle.texPos = Donya::Vector2(0.0f, 114.0f);
-	toTitle.texSize = Donya::Vector2(434.0f, 114.0f);*/
-
+	int state;
 
 private:
 	friend class cereal::access;

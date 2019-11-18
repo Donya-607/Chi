@@ -143,6 +143,8 @@ void setTarget(const float x, const float y, const float z);
 
 DirectX::XMFLOAT4 getCamPos();
 DirectX::XMFLOAT4 getCamTarget();
+void startShake(float _shake_power, float _time);
+
 
 //light//
 void setLineLight(const DirectX::XMFLOAT4& position, const DirectX::XMFLOAT4& _lightAmbient, const DirectX::XMFLOAT4& lightColor);
@@ -238,6 +240,9 @@ int pressedButtons(int _padNum, int _button);
 
 DirectX::XMINT2 getThumbL(int _padNum);
 DirectX::XMINT2 getThumbR(int _padNum);
+void startViblation(int index, float timer, float motor);
+void stopViblation(int index);
+
 
 
 //keyborad

@@ -29,9 +29,10 @@ class XboxPad
 private:
 public:
 	XINPUT_STATE pad;
-//	XINPUT_VIBRATION vibration;
+	//	XINPUT_VIBRATION vibration;
 	const SHORT deadZone = 10000;
 	XINPUT_VIBRATION vibration;
+	float timer;
 
 	bool getState(int padNum)
 	{
@@ -39,7 +40,7 @@ public:
 			return true;
 		return false;
 	}
-	
+
 	bool pressedButton(int _button)
 	{
 		return pad.Gamepad.wButtons & _button;
@@ -47,7 +48,7 @@ public:
 
 	DirectX::XMINT2 getThumbL()
 	{
-		DirectX::XMINT2 ThumbPos = { pad.Gamepad.sThumbLX ,pad.Gamepad.sThumbLY};
+		DirectX::XMINT2 ThumbPos = { pad.Gamepad.sThumbLX ,pad.Gamepad.sThumbLY };
 		if (ThumbPos.x < deadZone && ThumbPos.x > -deadZone)
 			ThumbPos.x = 0;
 		if (ThumbPos.y < deadZone && ThumbPos.y > -deadZone)
@@ -71,6 +72,25 @@ public:
 		vibration.wRightMotorSpeed = rightmotor;
 		XInputSetState(index, &vibration);
 	}
+
+	void update(int index, float elapsed_time)
+	{
+		if (timer<=0)
+		{
+			startViblation(index, 0, 0);
+			timer = 0;
+			return;
+		}
+		timer -= elapsed_time;
+		if (timer<=0)
+		{
+			startViblation(index, 0, 0);
+			timer = 0;
+			return;
+		}
+
+	}
+
 };
 
 

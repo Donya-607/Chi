@@ -508,62 +508,62 @@ void sceneTitle::render()
 
 	}
 
-	//z screen : billboard‚Í‚±‚ÌŠK‘w‚É‚Í•`‰æ‚µ‚È‚¢‚Å‚­‚¾‚³‚¢
-	{
-		Donya::Vector4x4 W = Donya::Vector4x4::Identity();
-		Donya::Vector4x4 WVP = W * V * P;
-		z_render(pStageModel.get(), shader, WVP, W);
+	////z screen : billboard‚Í‚±‚ÌŠK‘w‚É‚Í•`‰æ‚µ‚È‚¢‚Å‚­‚¾‚³‚¢
+	//{
+	//	Donya::Vector4x4 W = Donya::Vector4x4::Identity();
+	//	Donya::Vector4x4 WVP = W * V * P;
+	//	z_render(pStageModel.get(), shader, WVP, W);
 
-		if (titleExist)
-		{
-			Donya::Vector4x4 S = Donya::Vector4x4::MakeScaling(titleScale);
-			Donya::Vector4x4 R = Donya::Vector4x4::MakeRotationEuler(Donya::Vector3(0.0f, 0.0f, 0.0f));
-			Donya::Vector4x4 T = Donya::Vector4x4::MakeTranslation(titlePos);
-			W = S * R * T;
-			WVP = W * V * P;
-			z_render(pTitleModel.get(), shader, WVP, W);
-		}
+	//	if (titleExist)
+	//	{
+	//		Donya::Vector4x4 S = Donya::Vector4x4::MakeScaling(titleScale);
+	//		Donya::Vector4x4 R = Donya::Vector4x4::MakeRotationEuler(Donya::Vector3(0.0f, 0.0f, 0.0f));
+	//		Donya::Vector4x4 T = Donya::Vector4x4::MakeTranslation(titlePos);
+	//		W = S * R * T;
+	//		WVP = W * V * P;
+	//		z_render(pTitleModel.get(), shader, WVP, W);
+	//	}
 
-		player.DrawZ(shader, V, P);
-		catapult.z_Draw(shader, V, P);
+	//	player.DrawZ(shader, V, P);
+	//	catapult.z_Draw(shader, V, P);
 
-		EffectManager::GetInstance()->z_Render(shader);
-		GameLib::clearDepth();
+	//	EffectManager::GetInstance()->z_Render(shader);
+	//	GameLib::clearDepth();
 
-	}
+	//}
 
-	//bloom screen
-	{
-		Donya::Vector4x4 W = Donya::Vector4x4::Identity();
-		Donya::Vector4x4 WVP = W * V * P;
-		bloom_SRVrender(pStageModel.get(), shader, WVP, W);
+	////bloom screen
+	//{
+	//	Donya::Vector4x4 W = Donya::Vector4x4::Identity();
+	//	Donya::Vector4x4 WVP = W * V * P;
+	//	bloom_SRVrender(pStageModel.get(), shader, WVP, W);
 
-		if (titleExist)
-		{
-			Donya::Vector4x4 S = Donya::Vector4x4::MakeScaling(titleScale);
-			Donya::Vector4x4 R = Donya::Vector4x4::MakeRotationEuler(Donya::Vector3(0.0f, 0.0f, 0.0f));
-			Donya::Vector4x4 T = Donya::Vector4x4::MakeTranslation(titlePos);
-			W = S * R * T;
-			WVP = W * V * P;
-			bloom_SRVrender(pTitleModel.get(), shader, WVP, W);
-		}
+	//	if (titleExist)
+	//	{
+	//		Donya::Vector4x4 S = Donya::Vector4x4::MakeScaling(titleScale);
+	//		Donya::Vector4x4 R = Donya::Vector4x4::MakeRotationEuler(Donya::Vector3(0.0f, 0.0f, 0.0f));
+	//		Donya::Vector4x4 T = Donya::Vector4x4::MakeTranslation(titlePos);
+	//		W = S * R * T;
+	//		WVP = W * V * P;
+	//		bloom_SRVrender(pTitleModel.get(), shader, WVP, W);
+	//	}
 
-		player.DrawBloom(shader, V, P);
-		catapult.bloom_Draw(shader, V, P);
+	//	player.DrawBloom(shader, V, P);
+	//	catapult.bloom_Draw(shader, V, P);
 
-		billboard_bloom_Render(&attackUIdata.pMesh, V * P, attackUIdata.pos, attackUIdata.scale, attackUIdata.angle, getCamPos());
-		billboard_bloom_Render(&guardUIdata.pMesh, V * P, guardUIdata.pos, guardUIdata.scale, guardUIdata.angle, getCamPos());
+	//	billboard_bloom_Render(&attackUIdata.pMesh, V * P, attackUIdata.pos, attackUIdata.scale, attackUIdata.angle, getCamPos());
+	//	billboard_bloom_Render(&guardUIdata.pMesh, V * P, guardUIdata.pos, guardUIdata.scale, guardUIdata.angle, getCamPos());
 
-		EffectManager::GetInstance()->bloom_Render(shader);
+	//	EffectManager::GetInstance()->bloom_Render(shader);
 
-		GameLib::clearDepth();
-	}
+	//	GameLib::clearDepth();
+	//}
 
 
 	origin_SRV = (void*)GameLib::getOriginalScreen();
 
 	//blur’l‚ðŒã‚Å‘ã“ü
-	postEffect_Bloom(0);
+	postEffect_Bloom(0, false);
 	//ƒ‚ƒmƒg[ƒ“‚É‚·‚é‚Æ‚«‚Í‘æˆêˆø”‚ð‰º‚°‚é
 	filterScreen(1.0f);
 
@@ -613,11 +613,13 @@ void sceneTitle::imGui()
 	//ImGui::NewLine();
 	if (ImGui::Button("Game"))
 	{
-		pSceneManager->setNextScene(new SceneGame(), false);
+		//pSceneManager->setNextScene(new SceneGame(), false);
+		Fade::GetInstance()->Init(1);
 	}
 	else if (Donya::Keyboard::Press(VK_LCONTROL) && Donya::Keyboard::Trigger('G'))
 	{
-		pSceneManager->setNextScene(new SceneGame(), false);
+		//pSceneManager->setNextScene(new SceneGame(), false);
+		Fade::GetInstance()->Init(1);
 	}
 	else
 	if (ImGui::Button("Effect"))
@@ -626,11 +628,13 @@ void sceneTitle::imGui()
 	}
 	else if (ImGui::Button("Result"))
 	{
-		pSceneManager->setNextScene(new SceneResult(), false);
+		//pSceneManager->setNextScene(new SceneResult(), false);
+		Fade::GetInstance()->Init(3);
 	}
 	else if (ImGui::Button("GameOver"))
 	{
-		pSceneManager->setNextScene(new SceneGameOver, false);
+		//pSceneManager->setNextScene(new SceneGameOver, false);
+		Fade::GetInstance()->Init(2);
 	}
 
 	ImGui::End();

@@ -7,35 +7,74 @@ Camera::Camera()
 	target = DirectX::XMFLOAT3(.0f, .0f, .0f);
 	state = cameraNumber::MONITORING;
 	fov = DirectX::XMConvertToRadians(30.0f);
-	aspect = static_cast<float>( pSystem->SCREEN_WIDTH ) / static_cast<float>( pSystem->SCREEN_HEIGHT );
+	aspect = static_cast<float>(pSystem->SCREEN_WIDTH) / static_cast<float>(pSystem->SCREEN_HEIGHT);
 	near_panel = 0.1f;
 	far_panel = 100000.0f;
+	timer = 0;
+	shakepos = { 0,0 };
+	shakeSpeed = { 0,0 };
+	shake_power = 0;
+	srand((unsigned int)time(NULL));
 }
 
-void Camera::update()
+void Camera::update(float elapsed_time)
 {
-	switch (state)
+	if (timer <= 0)
 	{
-	case cameraNumber::MONITORING:
-		MonitoringCam();
-		break;
-
-	case cameraNumber::RELATIVE_POS:
-		RelativePosCam();
-		break;
-
-	case cameraNumber::TPS:
-		TPSCam();
-		break;
-
-	case cameraNumber::TRACK:
-		TrackCam();
-		break;
-
-	case cameraNumber::FPS:
-		FPSCam();
-		break;
+		timer = 0;
+		shakepos = { 0,0 };
+		return;
 	}
+	timer -= elapsed_time;
+
+	if (shakepos.x < -shake_power || shakepos.x > shake_power)
+	{
+		float add = shake_power / (1 + rand() % 20);
+		if (rand()%2)
+			add *= -1.0f;
+		shakeSpeed.x += add;
+		shakeSpeed.x *= -1;
+	}
+	if (shakepos.y < -shake_power || shakepos.y > shake_power)
+	{
+		float add = shake_power / (1 + rand() % 20);
+		if (rand()%2)
+			add *= -1.0f;
+		shakeSpeed.y += add;
+		shakeSpeed.y *= -1;
+	}
+	shakepos.x += shakeSpeed.x;
+	shakepos.y += shakeSpeed.y;
+
+	//if (shakepos.x < -shake_power)
+	//	shakepos.x = -shake_power;
+
+	//if (shakepos.x > shake_power)
+	//	shakepos.x = shake_power;
+
+	//if (shakepos.y < -shake_power)
+	//	shakepos.y = -shake_power;
+
+	//if (shakepos.y > shake_power)
+	//	shakepos.y = shake_power;
+
+}
+
+void Camera::startShake(float _shake_power, float _time)
+{
+	shake_power = _shake_power;
+	timer = _time;
+	if (rand() % 100 < 50)
+		shakeSpeed.x = shake_power / 10;
+	else
+		shakeSpeed.x = -shake_power / 10;
+
+	if (rand() % 200 < 100)
+		shakeSpeed.y = shake_power / 10;
+	else
+		shakeSpeed.y = -shake_power / 10;
+
+
 }
 
 void Camera::MonitoringCam()
@@ -79,8 +118,8 @@ DirectX::XMMATRIX Camera::GetViewMatrix()
 {
 	DirectX::XMVECTOR p, t, up;
 
-	p = DirectX::XMVectorSet(position.x, position.y, position.z, 1.0f);
-	t = DirectX::XMVectorSet(target.x, target.y, target.z, 1.0f);
+	p = DirectX::XMVectorSet(position.x + shakepos.x, position.y + shakepos.y, position.z, 1.0f);
+	t = DirectX::XMVectorSet(target.x+shakepos.x, target.y+shakepos.y, target.z, 1.0f);
 	up = DirectX::XMVectorSet(0.0f, 10.0f, 0.0f, 1.0f);
 	return DirectX::XMMatrixLookAtLH(p, t, up);
 }
@@ -90,12 +129,12 @@ DirectX::XMMATRIX Camera::GetLightViewMatrix(DirectX::XMFLOAT3 _pos, DirectX::XM
 	DirectX::XMVECTOR p, t, up;
 
 	p = DirectX::XMVectorSet(_pos.x, _pos.y, _pos.z, 1.0f);
-	t = DirectX::XMVectorSet(_target.x,_target.y,_target.z, 1.0f);
+	t = DirectX::XMVectorSet(_target.x, _target.y, _target.z, 1.0f);
 	up = DirectX::XMVectorSet(0.0f, 10.0f, 0.0f, 1.0f);
 	return DirectX::XMMatrixLookAtLH(p, t, up);
 }
 
 DirectX::XMMATRIX Camera::GetLightProjectionMatrix()
 {
-	return DirectX::XMMatrixOrthographicLH(pSystem->SCREEN_WIDTH/15.0f, pSystem->SCREEN_HEIGHT/15.0f, 0.1f, 1000.0f);
+	return DirectX::XMMatrixOrthographicLH(pSystem->SCREEN_WIDTH / 15.0f, pSystem->SCREEN_HEIGHT / 15.0f, 0.1f, 1000.0f);
 }

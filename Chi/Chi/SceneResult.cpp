@@ -10,7 +10,7 @@
 
 SceneResult::SceneResult() :
 	rankingScore(), rankingRender(), yourScore(), yourScoreRender(),
-	lights(), sprite(), rankingPos(), yourScorePos(), rankingWidth()
+	lights(), rankingPos(), yourScorePos(), rankingWidth()
 {
 	/*pLogo = std::make_shared<skinned_mesh>();
 	pRanking = std::make_shared<skinned_mesh>();
@@ -27,7 +27,43 @@ SceneResult::SceneResult() :
 
 	yourScore = GameTimer::GetInstance()->totalTimer.AllCurren();
 
-	spriteLoad(&sprite, L"./Data/Images/UI/UI.png");
+	spriteLoad(&back, L"./Data/Images/UI/ResultFlame.png");
+	spriteLoad(&text, L"./Data/Images/UI/ResultFont.png");
+	spriteLoad(&result, L"./Data/Images/UI/ResultParts.png");
+	spriteLoad(&ranking, L"./Data/Images/UI/Ranking.png");
+
+	backData.pos = Donya::Vector2(0.0f, 0.0f);
+	backData.texPos = Donya::Vector2(0.0f, 0.0f);
+	backData.texSize = Donya::Vector2(1920.0f, 1080.0f);
+
+	textData.pos = Donya::Vector2(1920.0f - 1110.0f, 0.0f);
+	textData.texPos = Donya::Vector2(0.0f, 0.0f);
+	textData.texSize = Donya::Vector2(1110.0f, 1080.0f);
+
+	for (int i = 0; i < 3; i++)
+	{
+		bossBackData[i].pos = Donya::Vector2(1920.0f - 1054.0f, 0.0f);
+		bossBackData[i].texPos = Donya::Vector2(0.0f, 88.0f * i);
+		bossBackData[i].texSize = Donya::Vector2(1054.0f, 88.0f);
+	}
+	for (int i = 0; i < 10; i++)
+	{
+		boss1TimeData[i].pos = Donya::Vector2(0.0f, 0.0f);
+		boss1TimeData[i].texPos = Donya::Vector2(0.0f, 0.0f);
+		boss1TimeData[i].texSize = Donya::Vector2(1920.0f, 1080.0f);
+
+		boss2TimeData[i].pos = Donya::Vector2(0.0f, 0.0f);
+		boss2TimeData[i].texPos = Donya::Vector2(0.0f, 0.0f);
+		boss2TimeData[i].texSize = Donya::Vector2(1920.0f, 1080.0f);
+
+		boss3TimeData[i].pos = Donya::Vector2(0.0f, 0.0f);
+		boss3TimeData[i].texPos = Donya::Vector2(0.0f, 0.0f);
+		boss3TimeData[i].texSize = Donya::Vector2(1920.0f, 1080.0f);
+
+		totalTimeData[i].pos = Donya::Vector2(0.0f, 0.0f);
+		totalTimeData[i].texPos = Donya::Vector2(0.0f, 0.0f);
+		totalTimeData[i].texSize = Donya::Vector2(1920.0f, 1080.0f);
+	}
 }
 
 void SceneResult::init()  
@@ -155,18 +191,9 @@ void SceneResult::render()
 	DirectX::XMFLOAT4X4 viewProjection;
 	DirectX::XMStoreFloat4x4(&viewProjection, getViewMatrix() * getProjectionMatrix());
 
-	// ranking draw
-	/*for (int i = 0; i < MAX_SIZE; i++)
-	{
-		for (int j = rankingRender[i].num.size() - 1; 0 <= j; j--)
-		{
-			billboardRender(&rankingRender[i].pMesh[j], viewProjection, DirectX::XMFLOAT4(0.0f + 100.0f * (rankingRender[i].num.size() - j), 0.0f + 100.0f * i, -300, 0.0f), DirectX::XMFLOAT2(10.0f, 10.0f),
-				0.0f, getCamPos(), DirectX::XMFLOAT2(36.0f * rankingRender[i].num[j], 696.0f), DirectX::XMFLOAT2(36.0f, 60.0f));
-		}
-	}*/
-
-	// your score draw
-	spriteRender(&sprite, 200.0f, 200.0f);
+	setBlendMode_NONE(0.75f);
+	//spriteRenderRect(&back, logo.pos, logo.texPos, logo.texSize);
+	setBlendMode_ALPHA(1.0f);
 }
 
 void SceneResult::uninit()

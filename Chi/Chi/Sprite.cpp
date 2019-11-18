@@ -30,7 +30,7 @@ void Sprite::RoadSprite(ID3D11Device* _device, const wchar_t* _fileName)
 	_ASSERT_EXPR(!m_input, L"'input_layout' must be uncreated.");
 	D3D11_INPUT_ELEMENT_DESC input_element_desc[] =
 	{
-		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
@@ -122,7 +122,7 @@ void Sprite::Render(ID3D11DeviceContext* _dContext, float _dx, float _dy, float 
 	float screen_width = viewport.Width;
 	float screen_height = viewport.Height;
 
-	vector2 rate = { (_dw - _dx) / (_sw - _sx),(_dh - _dy) / (_sh - _sy) };
+	vector2 rate = { (_dw) / (_sw),(_dh) / (_sh) };
 	// Set each sprite's vertices coordinate to screen spaceenum BLEND_STATE
 	// ç∂è„
 	float x0 = _dx - _cx * rate.x;

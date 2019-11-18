@@ -306,48 +306,48 @@ public:
 			GameLib::clearDepth();
 		}
 
-		// z screen
-		if ( 1 )
-		{
-			stage.z_Draw(shader, V, P);
+		//// z screen
+		//if ( 1 )
+		//{
+		//	stage.z_Draw(shader, V, P);
 
-			player.DrawZ(shader, V, P);
+		//	player.DrawZ(shader, V, P);
 
-			switch (stageNo)
-			{
-			case KnightNo:	knight.z_Draw(shader, V, P);	break;
-			case GolemNo:	golem.z_Draw(shader, V, P);		break;
-			case RivalNo:	rival.z_Draw(shader, V, P);		break;
-			default:		Donya::OutputDebugStr("Error : The boss does not draw !\n");	break;
-			}
+		//	switch (stageNo)
+		//	{
+		//	case KnightNo:	knight.z_Draw(shader, V, P);	break;
+		//	case GolemNo:	golem.z_Draw(shader, V, P);		break;
+		//	case RivalNo:	rival.z_Draw(shader, V, P);		break;
+		//	default:		Donya::OutputDebugStr("Error : The boss does not draw !\n");	break;
+		//	}
 
-			EffectManager::GetInstance()->z_Render(shader);
+		//	EffectManager::GetInstance()->z_Render(shader);
 
-			GameLib::clearDepth();
-		}
+		//	GameLib::clearDepth();
+		//}
 
-		// bloom screen
-		if ( 1 )
-		{
-			stage.bloom_Draw(shader, V, P);
+		//// bloom screen
+		//if ( 1 )
+		//{
+		//	stage.bloom_Draw(shader, V, P);
 
-			player.DrawBloom(shader, V, P);
+		//	player.DrawBloom(shader, V, P);
 
-			switch (stageNo)
-			{
-			case KnightNo:	knight.bloom_Draw(shader, V, P);	break;
-			case GolemNo:	golem.bloom_Draw(shader, V, P);		break;
-			case RivalNo:	rival.bloom_Draw(shader, V, P);		break;
-			default:		Donya::OutputDebugStr("Error : The boss does not draw !\n");	break;
-			}
+		//	switch (stageNo)
+		//	{
+		//	case KnightNo:	knight.bloom_Draw(shader, V, P);	break;
+		//	case GolemNo:	golem.bloom_Draw(shader, V, P);		break;
+		//	case RivalNo:	rival.bloom_Draw(shader, V, P);		break;
+		//	default:		Donya::OutputDebugStr("Error : The boss does not draw !\n");	break;
+		//	}
 
-			EffectManager::GetInstance()->bloom_Render(shader);
+		//	EffectManager::GetInstance()->bloom_Render(shader);
 
-			GameLib::clearDepth();
-		}
+		//	GameLib::clearDepth();
+		//}
 
 		//TODO blur値入れる
-		postEffect_Bloom(0);
+		postEffect_Bloom(0, false);
 
 		//TODO GameOver時は画面をモノトーンにするので第一引数の値を小さくする
 		filterScreen(1.0f);
