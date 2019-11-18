@@ -25,61 +25,61 @@
                 "z": 0.0
             },
             "size": {
-                "x": 16.0,
+                "x": 45.0,
                 "y": 128.0,
-                "z": 16.0
+                "z": 45.0
             },
             "exist": true
         },
         "m.move": {
             "cereal_class_version": 0,
-            "moveSpeed": 15.0,
+            "moveSpeed": 900.0,
             "slerpFactor": 0.10000000149011612
         },
         "m.barrage": {
             "cereal_class_version": 1,
-            "moveSpeed": 8.0,
-            "slerpFactor": 0.10000000149011612,
+            "moveSpeed": 120.0,
+            "slerpFactor": 0.20000000298023225,
             "collideMeshName": "MDL_BlackSword",
             "collisions": [
                 {
                     "cereal_class_version": 0,
-                    "enableFrameStart": 20,
-                    "enableFrameLast": 40,
+                    "enableFrameStart": 0.33000001311302187,
+                    "enableFrameLast": 0.6700000166893005,
                     "collision": {
                         "cereal_class_version": 0,
                         "pos": {
                             "x": 0.0,
                             "y": 0.0,
-                            "z": 32.0
+                            "z": 40.0
                         },
-                        "radius": 30.0,
+                        "radius": 45.0,
                         "exist": true
                     }
                 },
                 {
-                    "enableFrameStart": 50,
-                    "enableFrameLast": 70,
+                    "enableFrameStart": 0.8299999833106995,
+                    "enableFrameLast": 1.1699999570846558,
                     "collision": {
                         "pos": {
                             "x": 0.0,
                             "y": 0.0,
-                            "z": 32.0
+                            "z": 40.0
                         },
-                        "radius": 30.0,
+                        "radius": 45.0,
                         "exist": false
                     }
                 },
                 {
-                    "enableFrameStart": 90,
-                    "enableFrameLast": 110,
+                    "enableFrameStart": 1.5,
+                    "enableFrameLast": 1.8300000429153443,
                     "collision": {
                         "pos": {
                             "x": 0.0,
                             "y": 0.0,
-                            "z": 32.0
+                            "z": 40.0
                         },
-                        "radius": 30.0,
+                        "radius": 45.0,
                         "exist": false
                     }
                 }
@@ -87,49 +87,49 @@
             "walkTimings": [
                 {
                     "cereal_class_version": 0,
-                    "start": 20,
-                    "last": 40,
-                    "speed": 9.0
+                    "start": 0.33000001311302187,
+                    "last": 0.6700000166893005,
+                    "speed": 15.0
                 },
                 {
-                    "start": 50,
-                    "last": 70,
-                    "speed": 9.0
+                    "start": 0.8299999833106995,
+                    "last": 1.1699999570846558,
+                    "speed": 15.0
                 },
                 {
-                    "start": 90,
-                    "last": 110,
-                    "speed": 9.0
+                    "start": 1.5,
+                    "last": 1.8300000429153443,
+                    "speed": 15.0
                 }
             ]
         },
         "m.line": {
             "cereal_class_version": 1,
             "moveSpeed": 0.0,
-            "slerpFactor": 0.10000000149011612,
-            "generateFrame": 1
+            "slerpFactor": 0.20000000298023225,
+            "generateFrame": 0.017000000923871995
         },
         "m.raid": {
             "cereal_class_version": 1,
-            "moveSpeed": 3.0,
-            "slerpFactor": 0.05999999865889549,
+            "moveSpeed": 1500.0,
+            "slerpFactor": 1.0,
             "easingKind": 7,
             "easingType": 1,
-            "jumpStartFrame": 10,
-            "jumpLastFrame": 80,
+            "jumpStartFrame": 0.16699999570846559,
+            "jumpLastFrame": 1.3300000429153443,
             "jumpDistance": 600.0,
             "hitBox": {
                 "cereal_class_version": 0,
                 "sphereF": {
-                    "enableFrameStart": 40,
-                    "enableFrameLast": 60,
+                    "enableFrameStart": 0.6700000166893005,
+                    "enableFrameLast": 1.0,
                     "collision": {
                         "pos": {
                             "x": 0.0,
                             "y": 0.0,
-                            "z": 32.0
+                            "z": 40.0
                         },
-                        "radius": 30.0,
+                        "radius": 45.0,
                         "exist": false
                     }
                 },
@@ -139,10 +139,10 @@
         "m.rush": {
             "cereal_class_version": 1,
             "moveSpeed": 0.0,
-            "slerpFactor": 0.10000000149011612,
-            "waitLength": 60,
-            "rushSpeed": 50.0,
-            "slashStopAnimeFrame": 8,
+            "slerpFactor": 0.20000000298023225,
+            "waitLength": 1.0,
+            "rushSpeed": 3000.0,
+            "slashStopAnimeFrame": 0.13300000131130219,
             "slashOccurRange": {
                 "pos": {
                     "x": 0.0,
@@ -153,15 +153,15 @@
                 "exist": true
             },
             "hitBox": {
-                "enableFrameStart": 20,
-                "enableFrameLast": 40,
+                "enableFrameStart": 0.33000001311302187,
+                "enableFrameLast": 0.6700000166893005,
                 "collision": {
                     "pos": {
                         "x": 0.0,
                         "y": 64.0,
                         "z": 96.0
                     },
-                    "radius": 30.0,
+                    "radius": 45.0,
                     "exist": false
                 }
             }
@@ -170,16 +170,16 @@
             "cereal_class_version": 0,
             "moveSpeed": 0.0,
             "slerpFactor": 0.0,
-            "breakFrame": 60,
+            "breakFrame": 1.0,
             "leaveEasingKind": 7,
             "leaveEasingType": 1,
-            "leaveWholeFrame": 60,
-            "leaveMoveFrame": 60,
+            "leaveWholeFrame": 1.0,
+            "leaveMoveFrame": 1.0,
             "leaveDistance": 640.0
         },
         "m.defeat": {
             "cereal_class_version": 0,
-            "motionLength": 333,
+            "motionLength": 5.550000190734863,
             "hideSpeed": 0.009999999776482582
         },
         "m.motionSpeeds": [

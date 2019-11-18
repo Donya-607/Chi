@@ -2,14 +2,14 @@
     "KnightAI": {
         "cereal_class_version": 2,
         "wholeFrame": {
-            "value0": 90.0,
-            "value1": 130.0,
-            "value2": 240.0
+            "value0": 1.159999966621399,
+            "value1": 1.8300000429153443,
+            "value2": 6.0
         },
         "coolTimeFrame": {
-            "value0": 30.0,
-            "value1": 30.0,
-            "value2": 30.0
+            "value0": 0.8299999833106995,
+            "value1": 0.17000000178813935,
+            "value2": 0.5
         },
         "pAttackChoosers": {
             "value0": {
@@ -40,7 +40,7 @@
                                 "distance": 1.0,
                                 "action": {
                                     "waitNo": 1,
-                                    "nextAttackNo": -1
+                                    "nextAttackNo": 1
                                 }
                             }
                         ]
@@ -54,14 +54,14 @@
                     "data": {
                         "data": [
                             {
-                                "distance": 0.10000000149011612,
+                                "distance": 0.5,
                                 "action": {
-                                    "waitNo": 2,
+                                    "waitNo": 4,
                                     "nextAttackNo": 0
                                 }
                             },
                             {
-                                "distance": 0.4000000059604645,
+                                "distance": 0.800000011920929,
                                 "action": {
                                     "waitNo": 4,
                                     "nextAttackNo": 1
@@ -71,7 +71,7 @@
                                 "distance": 1.0,
                                 "action": {
                                     "waitNo": 1,
-                                    "nextAttackNo": -1
+                                    "nextAttackNo": 0
                                 }
                             }
                         ]
@@ -112,12 +112,16 @@
         },
         "initStorage": {
             "waitNo": 2,
-            "nextAttackNo": -1
+            "nextAttackNo": 1
         },
-        "initCoolTime": 90.0,
+        "initCoolTime": 1.5,
         "gapIntervals": [
             3,
-            3
+            4,
+            2,
+            4,
+            3,
+            2
         ]
     }
 }

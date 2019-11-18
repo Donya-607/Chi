@@ -22,6 +22,7 @@ class PlayerParam final : public Donya::Singleton<PlayerParam>
 {
 	friend Donya::Singleton<PlayerParam>;
 private:
+	float				FXIntervalFrame{};		// Interval of generate the FX and SFX.
 	float				frameUnfoldableDefence;	// 1 ~ N. Use when State::Defend.
 	float				shieldsRecastFrame;		// Frame of reuse shield.
 	float				frameStopAnime;			// 1 ~ N. Frame of stopping animation of attack.Use when State::Attack.
@@ -122,6 +123,10 @@ private:
 		}
 		if ( 10 <= version )
 		{
+			archive( CEREAL_NVP( FXIntervalFrame ) );
+		}
+		if ( 11 <= version )
+		{
 			// archive( CEREAL_NVP( x ) );
 		}
 	}
@@ -130,6 +135,7 @@ public:
 	void Init( size_t motionCount  );
 	void Uninit();
 public:
+	float			FXGenerateInterval()	const { return FXIntervalFrame; }
 	float			FrameWholeDefence()		const { return frameUnfoldableDefence; }
 	float			FrameReuseShield()		const { return shieldsRecastFrame; }
 	float			FrameStopAnimeLength()	const { return frameStopAnime; }
@@ -166,7 +172,7 @@ public:
 
 #endif // USE_IMGUI
 };
-CEREAL_CLASS_VERSION( PlayerParam, 9 )
+CEREAL_CLASS_VERSION( PlayerParam, 10 )
 
 class  skinned_mesh;	// With pointer. because I'm not want include this at header.
 struct fbx_shader;		// Use for argument.
@@ -228,8 +234,10 @@ private:
 	};
 private:
 	State					status;
+	int						stageNo;			// 0-based.
 	float					timer;				// Recycle between each state.
 	float					shieldsRecastTime;	// I can defend when this time is zero.
+	float					FXIntervalTimer;	// Used to only FX's generate timing and SE.
 	float					fieldRadius;		// For collision to wall. the field is perfect-circle, so I can detect collide to wall by distance.
 	MotionKind				currentMotion;
 	Donya::Vector3			pos;				// In world space.
@@ -246,7 +254,7 @@ public:
 	Player();
 	~Player();
 public:
-	void Init( const Donya::Vector3 &wsInitialPos, const Donya::Vector3 &initialAnglesRadian, const std::vector<Donya::Box> &wsXZWallCollisions );
+	void Init( int stageNumber, const Donya::Vector3 &wsInitialPos, const Donya::Vector3 &initialAnglesRadian, const std::vector<Donya::Box> &wsXZWallCollisions );
 	void Uninit();
 
 	void Update( Input input, float elapsedTime );
@@ -344,6 +352,8 @@ private:
 private:
 	void ShieldUpdate( float elapsedTime );
 	bool CanUnfoldShield() const;
+
+	void FXUpdate( float elapsedTime );
 private:
 #if USE_IMGUI
 

@@ -26,7 +26,7 @@
 #define scast static_cast
 
 PlayerParam::PlayerParam() :
-	frameUnfoldableDefence( 1 ), shieldsRecastFrame( 1 ), frameCancelableAttack( 1 ), frameWholeAttacking( 1 ),
+	FXIntervalFrame( 1.0f ), frameUnfoldableDefence( 1 ), shieldsRecastFrame( 1 ), frameCancelableAttack( 1 ), frameWholeAttacking( 1 ),
 	advanceStartFrame(), advanceFinFrame(), returnFinFrame(),
 	advanceEaseKind(), advanceEaseType(), returnEaseKind(), returnEaseType(),
 	scale( 1.0f ), runSpeed( 1.0f ), rotSlerpFactor( 0.3f ),
@@ -88,6 +88,8 @@ void PlayerParam::UseImGui()
 	{
 		if ( ImGui::TreeNode( "Player.AdjustData" ) )
 		{
+			ImGui::DragFloat( "FX.GenerateInterval",			&FXIntervalFrame, 0.01f );
+			ImGui::Text( "" );
 			// Unused. // ImGui::SliderFloat( "Defence.MaxUnfoldableFrame",		&frameUnfoldableDefence,	100f, 0.1f );
 			ImGui::DragFloat( "Defence.RecastFrame",			&shieldsRecastFrame );
 			ImGui::DragFloat( "Attack.StopAnime.Timing(Frame)",	&frameStopTiming );
@@ -315,8 +317,8 @@ Player::Input Player::Input::MakeByExternalInput( Donya::Vector4x4 viewMat )
 
 Player::Player() :
 	status( State::Idle ),
-	timer( 0 ), shieldsRecastTime( 0 ),
-	fieldRadius( 0 ),
+	stageNo(),
+	timer( 0 ), shieldsRecastTime( 0 ), FXIntervalTimer(), fieldRadius( 0 ),
 	currentMotion( Idle ),
 	pos(), velocity(), lookDirection(), extraOffset(),
 	orientation(),
@@ -346,7 +348,7 @@ Player::Player() :
 }
 Player::~Player() = default;
 
-void Player::Init( const Donya::Vector3 &wsInitPos, const Donya::Vector3 &initRadians, const std::vector<Donya::Box> &wsWallCollisions )
+void Player::Init( int stageNumber, const Donya::Vector3 &wsInitPos, const Donya::Vector3 &initRadians, const std::vector<Donya::Box> &wsWallCollisions )
 {
 	PlayerParam::Get().Init( MOTION_COUNT );
 	SetFieldRadius( 0.0f ); // Set to body's radius.
@@ -355,6 +357,8 @@ void Player::Init( const Donya::Vector3 &wsInitPos, const Donya::Vector3 &initRa
 
 	shield.Init();
 	
+	stageNo			= stageNumber;
+	FXIntervalTimer = PlayerParam::Get().FXGenerateInterval();
 	pos				= wsInitPos;
 	orientation		= Donya::Quaternion::Make( initRadians.x, initRadians.y, initRadians.z );
 	lookDirection	= orientation.LocalFront();
@@ -389,6 +393,8 @@ void Player::Update( Input input, float elapsedTime )
 	UpdateCurrentStatus( input, elapsedTime );
 
 	ShieldUpdate( elapsedTime );
+
+	FXUpdate( elapsedTime );
 }
 void Player::PhysicUpdate( const std::vector<Donya::Circle> &xzCylinderWalls )
 {
@@ -1249,6 +1255,26 @@ bool Player::CanUnfoldShield() const
 	return ( shield.CanUnfold() && ZeroEqual( shieldsRecastTime ) && !isContinuingDefence ) ? true : false;
 }
 
+void Player::FXUpdate( float elapsedTime )
+{
+	if ( currentMotion != Run )
+	{
+		// Prepare for play the sound immediately at next running.
+		FXIntervalTimer = 0.0f;
+		return;
+	}
+	// else
+
+	FXIntervalTimer -= elapsedTime;
+	if ( FXIntervalTimer <= 0.0f )
+	{
+		FXIntervalTimer = PlayerParam::Get().FXGenerateInterval();
+
+		EffectManager::GetInstance()->DustEffectSet( GetPosition(), stageNo );
+		// TODO : Play the running sound here.
+	}
+}
+
 #if USE_IMGUI
 
 void Player::UseImGui()
@@ -1274,7 +1300,7 @@ void Player::UseImGui()
 			ImGui::Text( statusCaption.c_str() );
 			ImGui::Text( "Timer : %f",				timer );
 			ImGui::Text( "ShieldRecast : %f",		shieldsRecastTime );
-			ImGui::Text( "ShieldSucceeded : %f",	wasSucceededDefence ? 1 : 0 );
+			ImGui::Text( "ShieldSucceeded : %d",	wasSucceededDefence ? 1 : 0 );
 			ImGui::Text( "FieldRadius : %f",		fieldRadius );
 			ImGui::Text( "" );
 

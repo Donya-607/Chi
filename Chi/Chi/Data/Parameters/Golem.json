@@ -11,7 +11,7 @@
                     "y": 0.0,
                     "z": 8.0
                 },
-                "radius": 200.0,
+                "radius": 250.0,
                 "exist": true
             },
             {
@@ -46,8 +46,8 @@
         "OBBAttacksSwing": [
             {
                 "cereal_class_version": 0,
-                "enableFrameStart": 8,
-                "enableFrameLast": 79,
+                "enableFrameStart": 0.12999999523162843,
+                "enableFrameLast": 1.3200000524520875,
                 "OBB": {
                     "cereal_class_version": 0,
                     "pos": {
@@ -75,44 +75,44 @@
             {
                 "cereal_class_version": 0,
                 "OBBF": {
-                    "enableFrameStart": 30,
-                    "enableFrameLast": 55,
+                    "enableFrameStart": 0.5,
+                    "enableFrameLast": 0.9200000166893005,
                     "OBB": {
                         "pos": {
-                            "x": 96.0,
+                            "x": 0.0,
                             "y": -128.0,
                             "z": -60.0
                         },
                         "size": {
-                            "x": 80.0,
-                            "y": 80.0,
-                            "z": 80.0
+                            "x": 140.0,
+                            "y": 120.0,
+                            "z": 90.0
                         },
                         "orientation": {
                             "x": 0.0,
-                            "y": 0.4794255495071411,
+                            "y": -0.4794255495071411,
                             "z": 0.0,
                             "w": 0.8775825500488281
                         },
-                        "exist": false
+                        "exist": true
                     }
                 },
                 "meshName": "MDL_HandL"
             },
             {
                 "OBBF": {
-                    "enableFrameStart": 100,
-                    "enableFrameLast": 125,
+                    "enableFrameStart": 1.6699999570846558,
+                    "enableFrameLast": 2.0799999237060549,
                     "OBB": {
                         "pos": {
-                            "x": -64.0,
+                            "x": 0.0,
                             "y": -128.0,
                             "z": -60.0
                         },
                         "size": {
-                            "x": 80.0,
-                            "y": 80.0,
-                            "z": 80.0
+                            "x": 140.0,
+                            "y": 120.0,
+                            "z": 90.0
                         },
                         "orientation": {
                             "x": 0.0,
@@ -127,22 +127,22 @@
             },
             {
                 "OBBF": {
-                    "enableFrameStart": 185,
-                    "enableFrameLast": 210,
+                    "enableFrameStart": 3.0799999237060549,
+                    "enableFrameLast": 3.5,
                     "OBB": {
                         "pos": {
-                            "x": 96.0,
+                            "x": 0.0,
                             "y": -128.0,
                             "z": -60.0
                         },
                         "size": {
-                            "x": 80.0,
-                            "y": 80.0,
-                            "z": 80.0
+                            "x": 140.0,
+                            "y": 120.0,
+                            "z": 90.0
                         },
                         "orientation": {
                             "x": 0.0,
-                            "y": 0.4794255495071411,
+                            "y": -0.4794255495071411,
                             "z": 0.0,
                             "w": 0.8775825500488281
                         },
@@ -155,37 +155,76 @@
         "stageBodyRadius": -29.0,
         "targetDistNear": 0.20000000298023225,
         "targetDistFar": 0.44999998807907107,
-        "moveMoveSpeed": 10.0,
-        "attackFastMoveSpeed": 6.0,
+        "moveMoveSpeed": 600.0,
+        "attackFastMoveSpeed": 360.0,
         "idleSlerpFactor": 0.30000001192092898,
         "moveSlerpFactor": 0.15000000596046449,
-        "attackFastSlerpFactor": 0.009999999776482582,
-        "attackRotateMoveSpeed": 2.0,
+        "attackFastSlerpFactor": 0.15399999916553498,
+        "attackRotateMoveSpeed": 120.0,
         "attackRotateSlerpFactor": 1.0,
         "rotateAttackCollisions": [
             {
                 "cereal_class_version": 0,
-                "enableFrameStart": 45,
-                "enableFrameLast": 120,
+                "enableFrameStart": 0.75,
+                "enableFrameLast": 0.9200000166893005,
                 "collision": {
                     "pos": {
                         "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0
+                        "y": 80.0,
+                        "z": 250.0
                     },
-                    "radius": 401.0,
+                    "radius": 180.0,
+                    "exist": false
+                }
+            },
+            {
+                "enableFrameStart": 1.3300000429153443,
+                "enableFrameLast": 1.5,
+                "collision": {
+                    "pos": {
+                        "x": 0.0,
+                        "y": 80.0,
+                        "z": 250.0
+                    },
+                    "radius": 180.0,
+                    "exist": false
+                }
+            },
+            {
+                "enableFrameStart": 1.5800000429153443,
+                "enableFrameLast": 1.6699999570846558,
+                "collision": {
+                    "pos": {
+                        "x": 0.0,
+                        "y": 80.0,
+                        "z": 250.0
+                    },
+                    "radius": 180.0,
+                    "exist": false
+                }
+            },
+            {
+                "enableFrameStart": 2.0,
+                "enableFrameLast": 2.1700000762939455,
+                "collision": {
+                    "pos": {
+                        "x": 0.0,
+                        "y": 80.0,
+                        "z": 250.0
+                    },
+                    "radius": 180.0,
                     "exist": false
                 }
             }
         ],
         "rotLeaveEaseKind": 8,
         "rotLeaveEaseType": 1,
-        "rotLeaveStartFrame": 70,
-        "rotLeaveWholeFrame": 60,
-        "rotLeaveDistance": 666.0,
-        "swingStopFrame": 130,
-        "swingStopLength": 4.0,
-        "defeatMotionLength": 360,
+        "rotLeaveStartFrame": 1.1699999570846558,
+        "rotLeaveWholeFrame": 1.0,
+        "rotLeaveDistance": 11.100000381469727,
+        "swingStopFrame": 2.1700000762939455,
+        "swingStopLength": 1.0,
+        "defeatMotionLength": 6.0,
         "defeatHideSpeed": 0.0010000000474974514,
         "motionSpeeds": [
             1.5,

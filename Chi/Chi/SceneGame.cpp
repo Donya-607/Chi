@@ -165,7 +165,7 @@ public:
 		Donya::OutputDebugStr( "Objects count : 4\n" );
 
 		Donya::OutputDebugStr( "No.1 Begin Player::Init.\n" );
-		player.Init( Donya::Vector3::Zero(), Donya::Vector3::Zero(), std::vector<Donya::Box>(/* empty */) );
+		player.Init( stageNo, Donya::Vector3::Zero(), Donya::Vector3::Zero(), std::vector<Donya::Box>(/* empty */) );
 		player.SetFieldRadius( fieldRadius );
 		Donya::OutputDebugStr( "No.1 End Player::Init.\n" );
 
@@ -421,7 +421,7 @@ public:
 			status = State::Win;
 		}
 		else // TODO : Prevent the competition between the boss's defeat and player's defeat.
-		if ( player.IsDefeated() )
+		if ( player.IsDefeated() && !Fade::GetInstance()->GetExist() )
 		{
 			SetStageNo( 0 );
 
@@ -460,7 +460,10 @@ public:
 
 				ResetEffects();
 
-				Fade::GetInstance()->Init( 3 );
+				if ( !Fade::GetInstance()->GetExist() )
+				{
+					Fade::GetInstance()->Init( 3 );
+				}
 			}
 			else
 			{

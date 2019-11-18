@@ -6,14 +6,14 @@
         "m.targetDistNear": 0.05000000074505806,
         "m.targetDistFar": 0.17000000178813935,
         "m.idleSlerpFactor": 0.10000000149011612,
-        "m.moveMoveSpeed": 150.0,
+        "m.moveMoveSpeed": 1200.0,
         "m.moveSlerpFactor": 0.10000000149011612,
         "m.explMoveSpeed": 0.0,
-        "m.explSlerpFactor": 0.0,
-        "m.swingMoveSpeed": 0.0,
-        "m.swingSlerpFactor": 0.0,
-        "m.raidMoveSpeed": 150.0,
-        "m.raidSlerpFactor": 0.004999999888241291,
+        "m.explSlerpFactor": 0.5,
+        "m.swingMoveSpeed": 540.0,
+        "m.swingSlerpFactor": 0.4000000059604645,
+        "m.raidMoveSpeed": 900.0,
+        "m.raidSlerpFactor": 0.05000000074505806,
         "m.initPos": {
             "cereal_class_version": 0,
             "x": 10.0,
@@ -32,52 +32,52 @@
                 "y": 64.0,
                 "z": 0.0
             },
-            "radius": 106.0,
+            "radius": 150.0,
             "exist": true
         },
         "m.hitBoxSwing": {
             "cereal_class_version": 0,
             "sphereF": {
                 "cereal_class_version": 0,
-                "enableFrameStart": 35.0,
-                "enableFrameLast": 55.0,
+                "enableFrameStart": 0.5799999833106995,
+                "enableFrameLast": 0.9200000166893005,
                 "collision": {
                     "pos": {
                         "x": 0.0,
                         "y": 0.0,
-                        "z": -40.0
+                        "z": -60.0
                     },
-                    "radius": 100.0,
-                    "exist": false
+                    "radius": 140.0,
+                    "exist": true
                 }
             },
             "meshName": "MDL_Ax"
         },
         "m.hitBoxRaid": {
             "sphereF": {
-                "enableFrameStart": 34.0,
-                "enableFrameLast": 130.0,
+                "enableFrameStart": 0.5699999928474426,
+                "enableFrameLast": 1.4199999570846558,
                 "collision": {
                     "pos": {
                         "x": 0.0,
                         "y": 0.0,
-                        "z": -25.0
+                        "z": -45.0
                     },
-                    "radius": 100.0,
+                    "radius": 140.0,
                     "exist": false
                 }
             },
             "meshName": "MDL_Ax"
         },
-        "m.explRotationSpeed": 0.07999999821186066,
+        "m.explRotationSpeed": 6.0,
         "m.explScaleStart": 0.0010000000474974514,
-        "m.explScaleLast": 1000.0,
-        "m.explScalingFrame": 1200.0,
-        "m.explChargeFrame": 450.0,
-        "m.explReviveColFrame": 100.0,
+        "m.explScaleLast": 1200.0,
+        "m.explScalingFrame": 2.0,
+        "m.explChargeFrame": 1.5,
+        "m.explReviveColFrame": 0.17000000178813935,
         "m.hitBoxExpl": {
-            "enableFrameStart": 2.0,
-            "enableFrameLast": 130.0,
+            "enableFrameStart": 0.029999999329447748,
+            "enableFrameLast": 4.0,
             "collision": {
                 "pos": {
                     "x": 0.0,
@@ -89,13 +89,13 @@
             }
         },
         "m.explScaleDraw": 100.0,
-        "m.explHideSpeed": 0.03500000014901161,
-        "m.raidJumpStartFrame": 50.0,
-        "m.raidJumpLastFrame": 60.0,
-        "m.raidJumpDistance": 666.0,
+        "m.explHideSpeed": 1.0,
+        "m.raidJumpStartFrame": 0.8299999833106995,
+        "m.raidJumpLastFrame": 1.0,
+        "m.raidJumpDistance": 11.100000381469727,
         "m.raidEaseKind": 7,
         "m.raidEaseType": 1,
-        "m.defeatMotionLength": 5.0,
+        "m.defeatMotionLength": 3.799999952316284,
         "m.defeatHideSpeed": 0.0010000000474974514,
         "m.motionSpeeds": [
             1.5,
@@ -104,10 +104,10 @@
             2.0,
             2.0,
             2.0,
+            1.0,
             1.5,
             1.5,
-            1.5,
-            1.5
+            1.0
         ]
     }
 }

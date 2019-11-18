@@ -3,8 +3,8 @@
         "cereal_class_version": 0,
         "m.maxUnfoldableFrame": 300.0,
         "m.consumptionAmount": 30.0,
-        "m.decreaseSpeed": 10.0,
-        "m.increaseSpeed": 10.0,
+        "m.decreaseSpeed": 1.0,
+        "m.increaseSpeed": 1.0,
         "m.recoveryAmount": 30.0,
         "m.drawScaleMax": 1.0,
         "m.drawScaleMin": 0.25,
@@ -44,7 +44,7 @@
         "m.motionSpeeds": [
             3.0,
             1.0,
-            2.0
+            3.0
         ]
     }
 }

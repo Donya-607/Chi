@@ -112,7 +112,8 @@ void sceneTitle::init()
 		wallHitBox.h = 150.0f;
 		wallHitBox_vector.push_back(wallHitBox);
 
-		player.Init(Donya::Vector3(0.0f, 2222.5f, 14000.0f), Donya::Vector3(0.0f, 0.0f * 0.01745f, 0.0f), wallHitBox_vector);
+		constexpr int STAGE_NO = 0;
+		player.Init( STAGE_NO, Donya::Vector3(0.0f, 2222.5f, 14000.0f), Donya::Vector3(0.0f, 0.0f * 0.01745f, 0.0f), wallHitBox_vector);
 		player.SetFieldRadius(9999999.0f);
 
 		catapult.Init(Donya::Vector3(0.0f, 2208.0f, 4981.0f), Donya::Vector3(1.0f, 1.0f, 1.0f), Donya::Vector3(0.0f, 0.0f, 0.0f));
