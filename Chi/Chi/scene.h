@@ -45,6 +45,10 @@ private:
 	std::unique_ptr<skinned_mesh> pStageModel;
 	std::unique_ptr<skinned_mesh> pTitleModel;
 
+	ImTextureID origin_SRV;
+	ImTextureID z_SRV;
+	ImTextureID bloom_SRV;
+
 	struct billboard
 	{
 		static_mesh pMesh;
@@ -215,8 +219,6 @@ public:
 class SceneEffect : public baseScene
 {
 private:
-	FlashParticle flashParticle;
-	BubbleParticle bubbleParticle;
 	EruptionParticle eruqtionParticle;
 	AbsorptionParticle absorptionParticle;
 	DustParticle dustParticle;
@@ -266,7 +268,9 @@ private:
 	DirectX::XMFLOAT3 bossPos;
 	bool shieldExist;
 
-
+	ImTextureID origin_SRV;
+	ImTextureID z_SRV;
+	ImTextureID bloom_SRV;
 
 public:
 	SceneEffect() : stage(), cameraPos(), cameraFocusOffset(), lights(), shader(){}

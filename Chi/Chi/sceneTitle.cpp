@@ -126,6 +126,8 @@ void sceneTitle::init()
 
 	nextGameCnt = 0;
 	returnTitleCnt = 0;
+	
+	origin_SRV = (void*)GameLib::getOriginalScreen();
 }
 
 void sceneTitle::update()
@@ -520,6 +522,7 @@ void sceneTitle::render()
 
 		GameLib::clearDepth();
 	}
+	origin_SRV = (void*)GameLib::getOriginalScreen();
 
 	//blur’l‚ðŒã‚Å‘ã“ü
 	postEffect_Bloom(0);
@@ -559,6 +562,9 @@ void sceneTitle::imGui()
 	ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiSetCond_Once);
 	ImGui::Begin("Scene", NULL, ImGuiWindowFlags_MenuBar);
 
+	ImGui::NewLine();
+	ImGui::Image(origin_SRV, { 512,512 });
+	ImGui::NewLine();
 	if (ImGui::Button("Game"))
 	{
 		pSceneManager->setNextScene(new SceneGame(), false);

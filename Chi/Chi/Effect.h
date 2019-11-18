@@ -454,9 +454,9 @@ private:
 public:
 	BossAttackMomentEffect()
 	{
-		createBillboard(&billboard[0], L"./Data/Images/UI/CheckPoint.png");
-		createBillboard(&billboard[1], L"./Data/Images/UI/CheckPoint.png");
-		createBillboard(&billboard[2], L"./Data/Images/UI/CheckPoint.png");
+		createBillboard(&billboard[0], L"./Data/Images/UI/CheckPoint.png", DirectX::XMFLOAT2(0.0f, 0.0f),       DirectX::XMFLOAT2(1480.0f, 1420.0f));
+		createBillboard(&billboard[1], L"./Data/Images/UI/CheckPoint.png", DirectX::XMFLOAT2(0.0f, 1150.0f),    DirectX::XMFLOAT2(1480.0f, 1420.0f));
+		createBillboard(&billboard[2], L"./Data/Images/UI/CheckPoint.png", DirectX::XMFLOAT2(0.0f, 2300.0f),    DirectX::XMFLOAT2(1480.0f, 1420.0f));
 	}
 	~BossAttackMomentEffect() {}
 
@@ -465,7 +465,7 @@ public:
 		DirectX::XMFLOAT4 _posFloat4 = DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
 		DirectX::XMFLOAT3 _speed = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f);
 		DirectX::XMFLOAT3 _accel = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f);
-		DirectX::XMFLOAT2 _scale = DirectX::XMFLOAT2(100.0f, 100.0f);
+		DirectX::XMFLOAT2 _scale = DirectX::XMFLOAT2(400.0f, 400.0f);
 
 		data.Init(_posFloat4, _speed, _accel, _scale, bossNo);
 		data.SetColor(DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
@@ -485,7 +485,7 @@ public:
 			Donya::Vector3 vec = playerPos - bossPos;
 			vec.Normalize();
 
-			data.SetPos(Donya::Vector4(vec.x * len, 50.0f, vec.z * len, 1.0f));
+			data.SetPos(Donya::Vector4(bossPos.x + vec.x * len, bossPos.y + 50.0f, bossPos.z + vec.z * len, 1.0f));
 			data.SetAlpha(1.0f - (static_cast<float>(cnt) / static_cast<float>(aliveFrameMAX)));
 			cnt++;
 		}
@@ -493,7 +493,7 @@ public:
 
 	void Draw()
 	{
-		setBlendMode_ADD(1.0f);
+		//setBlendMode_ADD(1.0f);
 		DirectX::XMFLOAT4X4 viewProjection;
 		DirectX::XMStoreFloat4x4(&viewProjection, getViewMatrix() * getProjectionMatrix());
 		if (data.GetExist())
@@ -507,8 +507,6 @@ public:
 				data.GetScale(),
 				data.GetAngle(),
 				getCamPos(),
-				{ 1.0f, 1.0f },
-				{ 1.0f, 1.0f },
 				data.GetColor().w
 			);
 
@@ -516,7 +514,7 @@ public:
 			//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
 			//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
 		}
-		setBlendMode_ALPHA(1.0f);
+		//setBlendMode_ALPHA(1.0f);
 	}
 	void bloom_Draw()
 	{
@@ -534,8 +532,6 @@ public:
 				data.GetScale(),
 				data.GetAngle(),
 				getCamPos(),
-				{ 1.0f,1.0f },
-				{ 1.0f, 1.0f },
 				{ 1.0f, 1.0f, 1.0f, 1.0f },
 				data.GetColor().w
 			);
