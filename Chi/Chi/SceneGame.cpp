@@ -402,6 +402,13 @@ public:
 		stage.Update();
 
 		Player::Input  playerInput = Player::Input::MakeByExternalInput( Donya::Vector4x4::FromMatrix( GameLib::camera::GetViewMatrix() ) );
+		// If the movement is nothing, set the player's direction to boss.
+		if ( playerInput.moveVector.IsZero() )
+		{
+			playerInput.moveVector = GetBossPosition() - player.GetPosition();
+			playerInput.moveVector.Normalized();
+			playerInput.onlyRotation = true;
+		}
 		player.Update( playerInput, elapsedTime );
 
 		BossUpdate( elapsedTime );
@@ -577,6 +584,18 @@ public:
 		}
 
 		return bodies;
+	}
+	Donya::Vector3 GetBossPosition() const
+	{
+		switch ( stageNo )
+		{
+		case KnightNo:	return knight.GetPos();
+		case GolemNo:	return golem.GetPos();
+		case RivalNo:	return rival.GetPos();
+		default:		_ASSERT_EXPR( 0, "Error : Choosed unexpected boss!\n" ); break;
+		}
+
+		return Donya::Vector3::Zero();
 	}
 	bool IsBossDefeated() const
 	{
