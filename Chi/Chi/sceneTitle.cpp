@@ -7,12 +7,13 @@
 #include "Donya/FilePath.h"
 #include "Donya/Keyboard.h"	// Insert by Donya.
 #include "Donya/Useful.h"	// Insert by Donya.
-
+#include "Donya/Sound.h"
 #define scast static_cast
 
 
 void sceneTitle::init()
 {
+	Donya::Sound::Load('BGM', "./Data/SOunds/BGM/Stage02.wav", true);
 	setCamPos(camPos);
 	setTarget(camTarget);
 	cameraDistance = 1000.0f;
@@ -92,7 +93,7 @@ void sceneTitle::init()
 		wallHitBox_vector.push_back(wallHitBox);
 
 		// right block Guard
-		wallHitBox.cx = -650.0f;
+		wallHitBox.cx = -600.0f;
 		wallHitBox.cy = 9668.0f;
 		wallHitBox.w = 320.0f * 1.5f;
 		wallHitBox.h = 300.0f;
@@ -132,6 +133,11 @@ void sceneTitle::init()
 		nextGameCnt = 0;
 		returnTitleCnt = 0;
 
+		spriteLoad(&_texture[0], L"./Data/Images/Pause/Pause.png");
+		spriteLoad(&_texture[1], L"./Data/Images/Pause/PauseFlame.png");
+
+		im_texture = (void*)_texture[1].getSRV();
+		Donya::Sound::Play('BGM');
 	});
 	
 	origin_SRV = (void*)GameLib::getOriginalScreen();
@@ -166,6 +172,20 @@ void sceneTitle::update()
 		{
 			Donya::ToggleShowStateOfImGui();
 		}
+	}
+
+	if (getKeyState(KEY_INPUT_RETURN) == 1)
+	{
+		startViblation(0, 2.0f, 100);
+	}
+	if (getKeyState(KEY_INPUT_S) == 1)
+	{
+		startShake(20, 2);
+	}
+	if (getKeyState(KEY_INPUT_P) == 1)
+	{
+		pSceneManager->setNextScene(new scenePose, true);
+		return;
 	}
 
 #endif // DEBUG_MODE
@@ -615,9 +635,6 @@ void sceneTitle::imGui()
 	ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiSetCond_Once);
 	ImGui::Begin("Scene", NULL, ImGuiWindowFlags_MenuBar);
 
-	//ImGui::NewLine();
-	//ImGui::Image(origin_SRV, { 512,512 });
-	//ImGui::NewLine();
 	if (ImGui::Button("Game"))
 	{
 		//pSceneManager->setNextScene(new SceneGame(), false);
@@ -628,8 +645,7 @@ void sceneTitle::imGui()
 		//pSceneManager->setNextScene(new SceneGame(), false);
 		Fade::GetInstance()->Init(1);
 	}
-	else
-	if (ImGui::Button("Effect"))
+	else if (ImGui::Button("Effect"))
 	{
 		pSceneManager->setNextScene(new SceneEffect, false);
 	}
@@ -643,7 +659,6 @@ void sceneTitle::imGui()
 		//pSceneManager->setNextScene(new SceneGameOver, false);
 		Fade::GetInstance()->Init(2);
 	}
-
 	ImGui::End();
 
 	ImGui::Begin("billboard");
