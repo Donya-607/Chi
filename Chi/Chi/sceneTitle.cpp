@@ -350,7 +350,10 @@ void sceneTitle::TutorialEndUpdate()
 		GameTimer::GetInstance()->Init();
 		//pSceneManager->setNextScene(new SceneGame(), false);
 
-		Fade::GetInstance()->Init(1);
+		if ( !Fade::GetInstance()->GetExist() )
+		{
+			Fade::GetInstance()->Init( 1 );
+		}
 	}
 }
 
@@ -363,7 +366,10 @@ void sceneTitle::TutorialReturnTitle()
 		// TODO : Ž€–S‰‰o’Ç‰Á‚É‚æ‚è•ÏX‚ ‚è
 		//pSceneManager->setNextScene(new sceneTitle(), false);
 
-		Fade::GetInstance()->Init(0);
+		if ( !Fade::GetInstance()->GetExist() )
+		{
+			Fade::GetInstance()->Init(0);
+		}
 	}
 }
 
