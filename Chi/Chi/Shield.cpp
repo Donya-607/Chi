@@ -194,6 +194,8 @@ void Shield::Init()
 	ShieldParam::Get().Init( MOTION_COUNT );
 
 	LoadModels();
+
+	unfoldTimer = ShieldParam::Open().maxUnfoldableFrame;
 }
 void Shield::Uninit()
 {
