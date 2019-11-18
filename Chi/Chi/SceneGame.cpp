@@ -670,7 +670,7 @@ public:
 			if ( shieldCollided )
 			{
 				wasHitToShield = true;
-				player.SucceededDefence( elapsedTime );
+				player.SucceededDefence();
 			}
 
 			bool bodyCollided = ( shieldCollided ) ? false : knight.IsCollideAttackHitBoxes( playerBodyBox, /* disableCollidingHitBoxes = */ false );
@@ -711,7 +711,7 @@ public:
 					{
 						it.enable = false;
 						wasHitToShield = true;
-						player.SucceededDefence( elapsedTime );
+						player.SucceededDefence();
 					}
 					if ( !wasHitToShield && Donya::OBB::IsHitSphere( playerBodyBox, it ) )
 					{
@@ -726,7 +726,7 @@ public:
 			if ( shieldCollided )
 			{
 				wasHitToShield = true;
-				player.SucceededDefence( elapsedTime );
+				player.SucceededDefence();
 			}
 
 			bool bodyCollided = ( shieldCollided ) ? false : golem.IsCollideAttackHitBoxes( playerBodyBox, /* disableCollidingHitBoxes = */ false );
@@ -766,7 +766,7 @@ public:
 			if ( shieldCollided )
 			{
 				wasHitToShield = true;
-				player.SucceededDefence( elapsedTime );
+				player.SucceededDefence();
 				rival.WasDefended();
 			}
 
@@ -788,7 +788,7 @@ public:
 					{
 						it.enable		= false;
 						wasHitToShield	= true;
-						player.SucceededDefence( elapsedTime );
+						player.SucceededDefence();
 					}
 					if ( !wasHitToShield && Donya::OBB::IsHitSphere( playerBodyBox, it ) )
 					{

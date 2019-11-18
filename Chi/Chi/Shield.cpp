@@ -33,9 +33,9 @@ ShieldParam::Member ShieldParam::Open()
 	return Get().Content();
 }
 
-float ShieldParam::CalcUnfoldPercent( int currentTime )
+float ShieldParam::CalcUnfoldPercent( float currentTime )
 {
-	return scast<float>( currentTime ) / scast<float>( m.maxUnfoldableFrame );
+	return currentTime / m.maxUnfoldableFrame;
 }
 
 void ShieldParam::LoadParameter( bool isBinary )
@@ -217,7 +217,7 @@ void Shield::Update( float elapsedTime, bool isUnfolding, const Donya::Vector3 &
 	// Because the end flag of animation is update in FBXRender(), so if not call, the flag is not updated(will detected a "true" immediately).
 	DetectEndAnimation( wsParentPosition );
 
-	ApplyState( elapsedTime, isUnfolding );
+	ApplyState( isUnfolding );
 
 	Fluctuate( elapsedTime );
 
@@ -234,7 +234,7 @@ void Shield::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Dony
 	const Donya::Vector3 drawOffset = PARAM.drawOffset;
 	const Donya::Vector4x4 DRAW_OFFSET = Donya::Vector4x4::MakeTranslation( drawOffset );
 
-	auto CalcCurrentScale = []( int currentUnfoldTimer )
+	auto CalcCurrentScale = []( float currentUnfoldTimer )
 	{
 		float	percent	= ShieldParam::Get().CalcUnfoldPercent( currentUnfoldTimer );
 		float	max		= ShieldParam::Open().drawScaleMax;
@@ -353,7 +353,7 @@ void Shield::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Dony
 #endif // DEBUG_MODE
 }
 
-void Shield::z_Draw(fbx_shader& HLSL, const Donya::Vector4x4& matView, const Donya::Vector4x4& matProjection, const Donya::Vector4x4& matParent)
+void Shield::z_Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matProjection, const Donya::Vector4x4 &matParent )
 {
 	if (status == State::NotExist) { return; }
 	// else
@@ -363,9 +363,9 @@ void Shield::z_Draw(fbx_shader& HLSL, const Donya::Vector4x4& matView, const Don
 	const Donya::Vector3 drawOffset = PARAM.drawOffset;
 	const Donya::Vector4x4 DRAW_OFFSET = Donya::Vector4x4::MakeTranslation(drawOffset);
 
-	auto CalcCurrentScale = [](int currentUnfoldTimer)
+	auto CalcCurrentScale = []( float  currentUnfoldTimer )
 	{
-		float	percent = ShieldParam::Get().CalcUnfoldPercent(currentUnfoldTimer);
+		float	percent = ShieldParam::Get().CalcUnfoldPercent( currentUnfoldTimer );
 		float	max = ShieldParam::Open().drawScaleMax;
 		float	min = ShieldParam::Open().drawScaleMin;
 		float	diff = max - min;
@@ -373,7 +373,7 @@ void Shield::z_Draw(fbx_shader& HLSL, const Donya::Vector4x4& matView, const Don
 		return	min + (diff * percent);
 	};
 
-	Donya::Vector4x4 S = Donya::Vector4x4::MakeScaling(CalcCurrentScale(unfoldTimer));
+	Donya::Vector4x4 S = Donya::Vector4x4::MakeScaling( CalcCurrentScale( unfoldTimer ) );
 	Donya::Vector4x4 M = S * DRAW_OFFSET;
 	Donya::Vector4x4 W = M * matParent;
 	Donya::Vector4x4 WVP = W * matView * matProjection;
@@ -393,7 +393,7 @@ void Shield::z_Draw(fbx_shader& HLSL, const Donya::Vector4x4& matView, const Don
 	}
 }
 
-void Shield::bloom_Draw(fbx_shader& HLSL, const Donya::Vector4x4& matView, const Donya::Vector4x4& matProjection, const Donya::Vector4x4& matParent)
+void Shield::bloom_Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matProjection, const Donya::Vector4x4 &matParent )
 {
 	if (status == State::NotExist) { return; }
 	// else
@@ -401,22 +401,22 @@ void Shield::bloom_Draw(fbx_shader& HLSL, const Donya::Vector4x4& matView, const
 	const auto& PARAM = ShieldParam::Open();
 
 	const Donya::Vector3 drawOffset = PARAM.drawOffset;
-	const Donya::Vector4x4 DRAW_OFFSET = Donya::Vector4x4::MakeTranslation(drawOffset);
+	const Donya::Vector4x4 DRAW_OFFSET = Donya::Vector4x4::MakeTranslation( drawOffset );
 
-	auto CalcCurrentScale = [](int currentUnfoldTimer)
+	auto CalcCurrentScale	= []( float currentUnfoldTimer )
 	{
-		float	percent = ShieldParam::Get().CalcUnfoldPercent(currentUnfoldTimer);
-		float	max = ShieldParam::Open().drawScaleMax;
-		float	min = ShieldParam::Open().drawScaleMin;
-		float	diff = max - min;
+		float	percent	= ShieldParam::Get().CalcUnfoldPercent( currentUnfoldTimer );
+		float	max		= ShieldParam::Open().drawScaleMax;
+		float	min		= ShieldParam::Open().drawScaleMin;
+		float	diff	= max - min;
 
-		return	min + (diff * percent);
+		return	min + ( diff * percent );
 	};
 
-	Donya::Vector4x4 S = Donya::Vector4x4::MakeScaling(CalcCurrentScale(unfoldTimer));
-	Donya::Vector4x4 M = S * DRAW_OFFSET;
-	Donya::Vector4x4 W = M * matParent;
-	Donya::Vector4x4 WVP = W * matView * matProjection;
+	Donya::Vector4x4 S		= Donya::Vector4x4::MakeScaling( CalcCurrentScale( unfoldTimer ) );
+	Donya::Vector4x4 M		= S * DRAW_OFFSET;
+	Donya::Vector4x4 W		= M * matParent;
+	Donya::Vector4x4 WVP	= W * matView * matProjection;
 
 	switch (status)
 	{

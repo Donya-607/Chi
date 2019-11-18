@@ -71,7 +71,7 @@ public:
 	Member Content() const { return m; }
 	static Member Open();
 
-	float CalcUnfoldPercent( int currentTime );
+	float CalcUnfoldPercent( float currentTime );
 public:
 	void LoadParameter( bool isBinary = true );
 
@@ -135,7 +135,7 @@ public:
 	/// <summary>
 	/// Returns remaining unfoldable frame.
 	/// </summary>
-	int GetRemainingFrame() const { return unfoldTimer; }
+	float GetRemainingFrame() const { return unfoldTimer; }
 
 	/// <summary>
 	/// Returns local space AABB.
