@@ -53,6 +53,9 @@ private:
 	ImTextureID z_SRV;
 	ImTextureID bloom_SRV;
 
+	Sprite _texture[2];
+	ImTextureID im_texture;
+
 	struct billboard
 	{
 		static_mesh pMesh;
@@ -360,6 +363,7 @@ private:
 	Sprite text;
 	Sprite result;
 	Sprite ranking;
+	Sprite testBack;
 
 	struct SpriteData
 	{
@@ -378,11 +382,58 @@ private:
 
 	SpriteData rankingData;
 
+	Donya::Vector2 boss1TimePos;
+	Donya::Vector2 boss2TimePos;
+	Donya::Vector2 boss3TimePos;
+	Donya::Vector2 totalTimePos;
 
 	DirectX::XMFLOAT3 rankingPos;
 	DirectX::XMFLOAT3 yourScorePos;
 
 	DirectX::XMFLOAT2 rankingWidth;
+
+	float addW1;
+	float addW2;
+
+	float addW1_1;
+	float addW2_1;
+
+	float addW2_2;
+
+	int state;
+	int lastState;
+	int cnt;
+
+	static const int MAX_CNT = 30;
+
+	Donya::Vector2 rankingBackPos;
+	Donya::Vector2 rankingBackTexPos;
+	Donya::Vector2 rankingBackTexSize;
+
+	struct RankingTimer
+	{
+		int current;	// 0 ~ 59.
+		int second;		// 0 ~ 59.
+		int minute;		// 0 ~ 99.
+	};
+	RankingTimer rankingTimer[MAX_SIZE];
+	SpriteData ranking1TimeData[8];
+	SpriteData ranking2TimeData[8];
+	SpriteData ranking3TimeData[8];
+	SpriteData ranking4TimeData[8];
+	SpriteData ranking5TimeData[8];
+
+	Donya::Vector2 ranking1TimePos;
+	Donya::Vector2 ranking2TimePos;
+	Donya::Vector2 ranking3TimePos;
+	Donya::Vector2 ranking4TimePos;
+	Donya::Vector2 ranking5TimePos;
+
+	float addW1_r;
+	float addW2_r;
+
+	SpriteData continuity;
+	SpriteData toTitle;
 
 private:
 	friend class cereal::access;
