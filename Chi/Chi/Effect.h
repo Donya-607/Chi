@@ -454,9 +454,9 @@ private:
 public:
 	BossAttackMomentEffect()
 	{
-		createBillboard(&billboard[0], L"./Data/Images/UI/CheckPoint.png", DirectX::XMFLOAT2(0.0f, 0.0f), DirectX::XMFLOAT2(1480.0f, 1150.0f));
-		createBillboard(&billboard[1], L"./Data/Images/UI/CheckPoint.png",DirectX::XMFLOAT2(0.0f, 1150.0f), DirectX::XMFLOAT2(1480.0f, 1150.0f));
-		createBillboard(&billboard[2], L"./Data/Images/UI/CheckPoint.png", DirectX::XMFLOAT2(0.0f, 2300.0f), DirectX::XMFLOAT2(1480.0f, 1150.0f));
+		createBillboard(&billboard[0], L"./Data/Images/UI/CheckPoint.png");
+		createBillboard(&billboard[1], L"./Data/Images/UI/CheckPoint.png");
+		createBillboard(&billboard[2], L"./Data/Images/UI/CheckPoint.png");
 	}
 	~BossAttackMomentEffect() {}
 
@@ -498,7 +498,20 @@ public:
 		DirectX::XMStoreFloat4x4(&viewProjection, getViewMatrix() * getProjectionMatrix());
 		if (data.GetExist())
 		{
-			billboardRender(&billboard[data.GetType()], viewProjection, data.GetPos(), data.GetScale(), data.GetAngle(), getCamPos(), data.GetColor().w);
+			// billboardRender(&billboard[data.GetType()], viewProjection, data.GetPos(), data.GetScale(), data.GetAngle(), getCamPos(), data.GetColor().w);
+			billboardRender
+			(
+				&billboard[data.GetType()],
+				viewProjection,
+				data.GetPos(),
+				data.GetScale(),
+				data.GetAngle(),
+				getCamPos(),
+				{ 1.0f, 1.0f },
+				{ 1.0f, 1.0f },
+				data.GetColor().w
+			);
+
 			//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
 			//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
 			//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
@@ -512,7 +525,21 @@ public:
 		DirectX::XMStoreFloat4x4(&viewProjection, getViewMatrix() * getProjectionMatrix());
 		if (data.GetExist())
 		{
-			billboard_bloom_Render(&billboard[data.GetType()], viewProjection, data.GetPos(), data.GetScale(), data.GetAngle(), getCamPos(), {1.0f,1.0f,1.0f,1.0f}, data.GetColor().w);
+			// billboard_bloom_Render(&billboard[data.GetType()], viewProjection, data.GetPos(), data.GetScale(), data.GetAngle(), getCamPos(), {1.0f,1.0f,1.0f,1.0f}, data.GetColor().w);
+			billboard_bloom_Render
+			(
+				&billboard[data.GetType()],
+				viewProjection,
+				data.GetPos(),
+				data.GetScale(),
+				data.GetAngle(),
+				getCamPos(),
+				{ 1.0f,1.0f },
+				{ 1.0f, 1.0f },
+				{ 1.0f, 1.0f, 1.0f, 1.0f },
+				data.GetColor().w
+			);
+
 			//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
 			//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
 			//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());

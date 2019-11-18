@@ -1735,7 +1735,7 @@ void Rival::DefeatUpdate()
 	const int MOTION_LENGTH = RivalParam::Open().defeat.motionLength;
 	if ( timer == MOTION_LENGTH )
 	{
-
+		EffectManager::GetInstance()->DisappearanceEffectSet( GetPos() );
 	}
 }
 void Rival::DefeatUninit()

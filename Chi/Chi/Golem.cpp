@@ -1493,6 +1493,12 @@ void Golem::DefeatInit()
 void Golem::DefeatUpdate()
 {
 	timer++;
+
+	const int MOTION_LENGTH = GolemParam::Get().DefeatMotionLength();
+	if ( timer == MOTION_LENGTH )
+	{
+		EffectManager::GetInstance()->DisappearanceEffectSet( GetPos() );
+	}
 }
 void Golem::DefeatUninit()
 {

@@ -1277,6 +1277,12 @@ void Knight::DefeatInit()
 void Knight::DefeatUpdate()
 {
 	timer++;
+
+	const int MOTION_LENGTH = KnightParam::Open().defeatMotionLength;
+	if ( timer == MOTION_LENGTH )
+	{
+		EffectManager::GetInstance()->DisappearanceEffectSet( GetPos() );
+	}
 }
 void Knight::DefeatUninit()
 {
