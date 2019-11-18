@@ -17,6 +17,7 @@ void EffectManager::Update()
 	stoneBreakParticle.Emit();
 	catapultBreakParticle.Emit();
 	shieldEffect.Update();
+	disappearanceParticle.Emit();
 }
 
 void EffectManager::AccelEffectUpdate(Donya::Vector3 pos, Donya::Vector3 dir)
@@ -44,6 +45,7 @@ void EffectManager::Render(fbx_shader& HLSL)
 	stoneBreakParticle.Draw();
 	catapultBreakParticle.Draw();
 	shieldEffect.Draw();
+	disappearanceParticle.Draw();
 }
 
 void EffectManager::z_Render(fbx_shader& HLSL)

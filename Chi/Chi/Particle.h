@@ -979,7 +979,7 @@ private:
 
 private:
 	static const int MAX_SIZE = 500;
-	static const int MAX_CNT = 30;
+	static const int MAX_CNT = 60;
 
 	ParticleImGuiData imguiData;
 	bool emitting;
@@ -987,7 +987,7 @@ private:
 	bool alive[MAX_SIZE];
 	float radius[MAX_SIZE];
 	float angle[MAX_SIZE];
-	int cnt[MAX_CNT];
+	int cnt[MAX_SIZE];
 	Donya::Vector3 originPos;
 
 public:
