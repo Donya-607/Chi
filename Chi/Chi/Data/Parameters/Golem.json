@@ -94,7 +94,7 @@
                             "z": 0.0,
                             "w": 0.8775825500488281
                         },
-                        "exist": true
+                        "exist": false
                     }
                 },
                 "meshName": "MDL_HandL"
@@ -225,7 +225,7 @@
         "swingStopFrame": 2.1700000762939455,
         "swingStopLength": 1.0,
         "defeatMotionLength": 6.0,
-        "defeatHideSpeed": 0.0010000000474974514,
+        "defeatHideSpeed": 0.10000000149011612,
         "motionSpeeds": [
             1.5,
             1.5,

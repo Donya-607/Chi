@@ -831,7 +831,9 @@ void Player::RunUpdate( Input input, float elapsedTime )
 		// Prevent taking a running motion.
 
 		RunUninit();
-		IdleInit( input );
+		// IdleInit( input ); // Don't reset the motion's current frame.
+		status = State::Idle;
+		currentMotion = Idle;
 
 		return;
 	}

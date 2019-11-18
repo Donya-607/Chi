@@ -47,8 +47,8 @@
         },
         "hitBoxLance": {
             "cereal_class_version": 0,
-            "enableFrameStart": 0.5,
-            "enableFrameLast": 1.100000023841858,
+            "enableFrameStart": 0.699999988079071,
+            "enableFrameLast": 1.399999976158142,
             "OBB": {
                 "cereal_class_version": 0,
                 "pos": {
