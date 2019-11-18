@@ -164,7 +164,7 @@ void createSphere(static_mesh* sphere, u_int slice, u_int stack);
 
 void createPlane(static_mesh* _plane, u_int _vertical = 1, u_int _side = 1);
 
-void createBillboard(static_mesh*, const wchar_t* _textureName);
+void createBillboard(static_mesh*, const wchar_t* _textureName, const DirectX::XMFLOAT2& texpos, const DirectX::XMFLOAT2& texsize);
 
 void loadOBJ(static_mesh* staticMesh, const wchar_t* objName);
 
@@ -174,9 +174,9 @@ static_mesh::primitive_material& getPrimitiveMaterial(static_mesh* _mesh);
 
 void OBJRender(static_mesh* staticMesh, const DirectX::XMFLOAT4X4& SynthesisMatrix, const DirectX::XMFLOAT4X4& worldMatrix, const DirectX::XMFLOAT4& materialColor = { 1.0f,1.0f,1.0f,1.0f }, bool wireFlg = false);
 
-void billboardRender(static_mesh* _mesh, const DirectX::XMFLOAT4X4&, const DirectX::XMFLOAT4&, const DirectX::XMFLOAT2, const float, const DirectX::XMFLOAT4&, const DirectX::XMFLOAT2& texpos, const DirectX::XMFLOAT2& texsize, const float alpha = 1.0f, const DirectX::XMFLOAT3& color = { 1.0f,1.0f,1.0f });
-void billboard_z_Render(static_mesh* _mesh, const DirectX::XMFLOAT4X4&, const DirectX::XMFLOAT4&, const DirectX::XMFLOAT2, const float, const DirectX::XMFLOAT4&, const DirectX::XMFLOAT2& texpos, const DirectX::XMFLOAT2& texsize, const float alpha = 1.0f, const DirectX::XMFLOAT3& color = { 1.0f,1.0f,1.0f });
-void billboard_bloom_Render(static_mesh* _mesh, const DirectX::XMFLOAT4X4&, const DirectX::XMFLOAT4&, const DirectX::XMFLOAT2, const float, const DirectX::XMFLOAT4&, const DirectX::XMFLOAT2& texpos, const DirectX::XMFLOAT2& texsize, const DirectX::XMFLOAT4& judge_color = { 1.0f,1.0f,1.0f,1.0f }, const float alpha = 1.0f, const DirectX::XMFLOAT3& color = { 1.0f,1.0f,1.0f });
+void billboardRender(static_mesh* _mesh, const DirectX::XMFLOAT4X4&, const DirectX::XMFLOAT4&, const DirectX::XMFLOAT2, const float, const DirectX::XMFLOAT4&, const float alpha = 1.0f, const DirectX::XMFLOAT3& color = { 1.0f,1.0f,1.0f });
+void billboard_z_Render(static_mesh* _mesh, const DirectX::XMFLOAT4X4&, const DirectX::XMFLOAT4&, const DirectX::XMFLOAT2, const float, const DirectX::XMFLOAT4&, const float alpha = 1.0f, const DirectX::XMFLOAT3& color = { 1.0f,1.0f,1.0f });
+void billboard_bloom_Render(static_mesh* _mesh, const DirectX::XMFLOAT4X4&, const DirectX::XMFLOAT4&, const DirectX::XMFLOAT2, const float, const DirectX::XMFLOAT4&, const DirectX::XMFLOAT4& judge_color = { 1.0f,1.0f,1.0f,1.0f }, const float alpha = 1.0f, const DirectX::XMFLOAT3& color = { 1.0f,1.0f,1.0f });
 
 
 //skinned_mesh//

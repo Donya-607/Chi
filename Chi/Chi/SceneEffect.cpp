@@ -41,7 +41,7 @@ void SceneEffect::init()
 #if 0
 	createBillboard(&data.pMesh, L"./Data/Images/UI/particle.png");
 #else
-	createBillboard(&data.pMesh, L"./Data/Images/UI/Telop.png");
+	//createBillboard(&data.pMesh, L"./Data/Images/UI/Telop.png");
 #endif
 	UIManager::GetInstance()->Init();
 
@@ -118,7 +118,7 @@ void SceneEffect::render()
 
 	DirectX::XMFLOAT4X4 viewProjection;
 	DirectX::XMStoreFloat4x4(&viewProjection, getViewMatrix() * getProjectionMatrix());
-	billboardRender(&data.pMesh, viewProjection, data.pos, data.scale, data.angle, getCamPos(), data.texPos, data.texSize);
+	//billboardRender(&data.pMesh, viewProjection, data.pos, data.scale, data.angle, getCamPos(), data.texPos, data.texSize);
 
 	UIManager::GetInstance()->Draw();
 }

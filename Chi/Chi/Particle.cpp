@@ -7,7 +7,7 @@
 //#define USE_ACCEL
 
 
-void Particle::Init( DirectX::XMFLOAT4 _pos, DirectX::XMFLOAT3 _speed, DirectX::XMFLOAT3 _accel, DirectX::XMFLOAT2 _scale, DirectX::XMFLOAT2 _texPos, DirectX::XMFLOAT2 _texSize, bool _exist )
+void Particle::Init(DirectX::XMFLOAT4 _pos, DirectX::XMFLOAT3 _speed, DirectX::XMFLOAT3 _accel, DirectX::XMFLOAT2 _scale, int _type, bool _exist)
 {
 	pos = _pos;
 	speed = _speed;
@@ -15,10 +15,9 @@ void Particle::Init( DirectX::XMFLOAT4 _pos, DirectX::XMFLOAT3 _speed, DirectX::
 	scale = _scale;
 	exist = _exist;
 
-	texPos = _texPos;
-	texSize = _texSize;
+	type = _type;
 
-	color = DirectX::XMFLOAT4( 1.0f, 1.0f, 1.0f, 1.0f );
+	color = DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 }
 
 void Particle::Update()
@@ -58,7 +57,7 @@ void Particle::Emit()
 				float randSpeedZ = static_cast<float>(rand() % flashImGuiData.speed[2]) / 100.0f - (flashImGuiData.speed[2] / 2.0f / 100.0f);
 				float randAccelX = static_cast<float>(rand() % flashImGuiData.accel[0]) / 1000.0f - (flashImGuiData.accel[0] / 2.0f / 1000.0f);
 				float randAccelY = static_cast<float>(rand() % flashImGuiData.accel[1]) / 1000.0f - (flashImGuiData.accel[1] / 2.0f / 1000.0f);
-				float randAccelZ = static_cast<float>(rand() % flashImGuiData.accel[2]) / 1000.0f - (flashImGuiData.accel[2] / 2.0f / 1000.0f); 
+				float randAccelZ = static_cast<float>(rand() % flashImGuiData.accel[2]) / 1000.0f - (flashImGuiData.accel[2] / 2.0f / 1000.0f);
 				speed[i] = DirectX::XMFLOAT3(randSpeedX, randSpeedY, randSpeedZ);
 				accel[i] = DirectX::XMFLOAT3(randAccelX, -randAccelY, randAccelZ);
 				color[i].w = 1.0f;
@@ -117,8 +116,6 @@ void FlashParticle::Set()
 {
 	for (int i = 0; i < MAX_SIZE; i++)
 	{
-		data[i].Init(DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f), DirectX::XMFLOAT3(1.0f, 1.0f, 1.0f), DirectX::XMFLOAT3(1.0f, 1.0f, 1.0f),
-			DirectX::XMFLOAT2(1.0f, 1.0f), DirectX::XMFLOAT2(0.0f, 0.0f), DirectX::XMFLOAT2(0.0f, 0.0f), 1.0f);
 	}
 	emitting = true;
 	originPos = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f);
@@ -173,7 +170,6 @@ void FlashParticle::Render()
 	DirectX::XMStoreFloat4x4(&view_projection, getViewMatrix() * getProjectionMatrix());
 	for (int i = 0; i < MAX_SIZE; i++)
 	{
-		billboardRender(&data[i].pMesh, view_projection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
 	}
 }
 
@@ -266,8 +262,6 @@ void BubbleParticle::Set()
 {
 	for (int i = 0; i < MAX_SIZE; i++)
 	{
-		data[i].Init(DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f), DirectX::XMFLOAT3(1.0f, 1.0f, 1.0f), DirectX::XMFLOAT3(1.0f, 1.0f, 1.0f),
-			DirectX::XMFLOAT2(1.0f, 1.0f), DirectX::XMFLOAT2(0.0f, 0.0f), DirectX::XMFLOAT2(0.0f, 0.0f), 1.0f);
 	}
 	emitting = true;
 	originPos = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f);
@@ -336,8 +330,6 @@ void FireFryParticle::Set()
 {
 	for (int i = 0; i < MAX_SIZE; i++)
 	{
-		data[i].Init(DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f), DirectX::XMFLOAT3(1.0f, 1.0f, 1.0f), DirectX::XMFLOAT3(1.0f, 1.0f, 1.0f),
-			DirectX::XMFLOAT2(1.0f, 1.0f), DirectX::XMFLOAT2(0.0f, 0.0f), DirectX::XMFLOAT2(0.0f, 0.0f), false);
 		cnt[i] = 0;
 	}
 	emitting = true;
@@ -492,7 +484,7 @@ void EruptionParticle::Set(DirectX::XMFLOAT3 _pos)
 			//if (rand() % 2 == 0) _posZ *= -1;
 
 			data[i].Init(originPos[i], DirectX::XMFLOAT3(_posX, _posY, _posZ), DirectX::XMFLOAT3(0.0f, -0.5f, 0.0f),
-				DirectX::XMFLOAT2(7.5f, 7.5f), DirectX::XMFLOAT2(0.0f, 240.0f), DirectX::XMFLOAT2(142.0f, 142.0f), true);
+				DirectX::XMFLOAT2(7.5f, 7.5f), 0, true);
 		}
 		else // ‰¡‚Éã‚ª‚é‚â‚Â
 		{
@@ -504,7 +496,7 @@ void EruptionParticle::Set(DirectX::XMFLOAT3 _pos)
 			if (rand() % 2 == 0) _posZ *= -1;
 
 			data[i].Init(originPos[i], DirectX::XMFLOAT3(_posX, _posY, _posZ), DirectX::XMFLOAT3(0.0f, -0.05f, 0.0f),
-				DirectX::XMFLOAT2(7.5f, 7.5f), DirectX::XMFLOAT2(0.0f, 240.0f), DirectX::XMFLOAT2(142.0f, 142.0f), true);
+				DirectX::XMFLOAT2(7.5f, 7.5f), 1, true);
 		}
 		cnt[i] = 0;
 	}
@@ -579,7 +571,7 @@ void EruptionParticle::Draw()
 	{
 		if (data[i].GetExist())
 		{
-			billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
+			billboardRender(&billboard[data[i].GetType()], viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos());
 		}
 	}
 }
@@ -592,7 +584,7 @@ void EruptionParticle::bloom_Draw()
 	{
 		if (data[i].GetExist())
 		{
-			billboard_bloom_Render(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
+			billboard_bloom_Render(&billboard[data[i].GetType()], viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos());
 		}
 	}
 }
@@ -698,12 +690,12 @@ void AbsorptionParticle::Set(int type, DirectX::XMFLOAT3 _pos)
 		if (type == 0) // player
 		{
 			data[i].Init(DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f), DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f), DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f),
-				DirectX::XMFLOAT2(7.5f, 7.5f), DirectX::XMFLOAT2(0.0f, 630.0f), DirectX::XMFLOAT2(142.0f, 142.0f), false);
+				DirectX::XMFLOAT2(7.5f, 7.5f), 0, false);
 		}
 		else if (type == 1) // boss2
 		{
 			data[i].Init(DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f), DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f), DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f),
-				DirectX::XMFLOAT2(7.5f, 7.5f), DirectX::XMFLOAT2(0.0f, 1420.0f), DirectX::XMFLOAT2(142.0f, 142.0f), false);
+				DirectX::XMFLOAT2(7.5f, 7.5f), 1, false);
 		}
 
 #if 0
@@ -819,7 +811,7 @@ void AbsorptionParticle::Draw()
 			if (data[i].GetExist())
 			{
 				//	setBlendMode_ADD(1.0f);
-				billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
+				billboardRender(&billboard[data[i].GetType()], viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos());
 				//	billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
 				//	setBlendMode_ALPHA(1.0f);
 			}
@@ -838,7 +830,7 @@ void AbsorptionParticle::bloom_Draw()
 			if (data[i].GetExist())
 			{
 				//	setBlendMode_ADD(1.0f);
-				billboard_bloom_Render(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
+				billboard_bloom_Render(&billboard[data[i].GetType()], viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos());
 				//	billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
 				//	setBlendMode_ALPHA(1.0f);
 			}
@@ -895,15 +887,15 @@ void DustParticle::Set(DirectX::XMFLOAT3 _pos, int stageNum)
 				{
 				case 0:
 					data[i].Init(originPos[i], DirectX::XMFLOAT3(_posX, _posY, _posZ), DirectX::XMFLOAT3(-(_posX / 100.0f), -0.05f, -(_posZ / 100.0f)),
-						DirectX::XMFLOAT2(7.5f, 7.5f), DirectX::XMFLOAT2(0.0f, 1010.0f), DirectX::XMFLOAT2(142.0f, 142.0f), true);
+						DirectX::XMFLOAT2(7.5f, 7.5f), 0, true);
 					break;
 				case 1:
 					data[i].Init(originPos[i], DirectX::XMFLOAT3(_posX, _posY, _posZ), DirectX::XMFLOAT3(-(_posX / 100.0f), -0.05f, -(_posZ / 100.0f)),
-						DirectX::XMFLOAT2(7.5f, 7.5f), DirectX::XMFLOAT2(0.0f, 1150.0f), DirectX::XMFLOAT2(142.0f, 142.0f), true);
+						DirectX::XMFLOAT2(7.5f, 7.5f), 1, true);
 					break;
 				case 2:
 					data[i].Init(originPos[i], DirectX::XMFLOAT3(_posX, _posY, _posZ), DirectX::XMFLOAT3(-(_posX / 100.0f), -0.05f, -(_posZ / 100.0f)),
-						DirectX::XMFLOAT2(7.5f, 7.5f), DirectX::XMFLOAT2(0.0f, 1270.0f), DirectX::XMFLOAT2(142.0f, 142.0f), true);
+						DirectX::XMFLOAT2(7.5f, 7.5f), 2, true);
 					break;
 				}
 			}
@@ -914,15 +906,15 @@ void DustParticle::Set(DirectX::XMFLOAT3 _pos, int stageNum)
 				{
 				case 0:
 					data[i].Init(originPos[i], DirectX::XMFLOAT3(_posX, _posY, _posZ), DirectX::XMFLOAT3(-(_posX / 100.0f), -0.05f, -(_posZ / 100.0f)),
-						DirectX::XMFLOAT2(7.5f, 7.5f), DirectX::XMFLOAT2(0.0f, 1670.0f), DirectX::XMFLOAT2(142.0f, 142.0f), true);
+						DirectX::XMFLOAT2(7.5f, 7.5f), 3, true);
 					break;
 				case 1:
 					data[i].Init(originPos[i], DirectX::XMFLOAT3(_posX, _posY, _posZ), DirectX::XMFLOAT3(-(_posX / 100.0f), -0.05f, -(_posZ / 100.0f)),
-						DirectX::XMFLOAT2(7.5f, 7.5f), DirectX::XMFLOAT2(0.0f, 1800.0f), DirectX::XMFLOAT2(142.0f, 142.0f), true);
+						DirectX::XMFLOAT2(7.5f, 7.5f), 4, true);
 					break;
 				case 2:
 					data[i].Init(originPos[i], DirectX::XMFLOAT3(_posX, _posY, _posZ), DirectX::XMFLOAT3(-(_posX / 100.0f), -0.05f, -(_posZ / 100.0f)),
-						DirectX::XMFLOAT2(7.5f, 7.5f), DirectX::XMFLOAT2(0.0f, 1920.0f), DirectX::XMFLOAT2(142.0f, 142.0f), true);
+						DirectX::XMFLOAT2(7.5f, 7.5f), 5, true);
 					break;
 				}
 			}
@@ -965,7 +957,7 @@ void DustParticle::Emit()
 				continue;
 			}
 
-			
+
 			data[i].AddSpeedX(data[i].GetAccel().x);
 			data[i].AddSpeedY(data[i].GetAccel().y);
 			data[i].AddSpeedZ(data[i].GetAccel().z);
@@ -997,7 +989,7 @@ void DustParticle::Draw()
 		if (data[i].GetExist())
 		{
 			setBlendMode_ALPHA(data[i].GetColor().w);
-			billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize(), data[i].GetColor().w);
+			billboardRender(&billboard[data[i].GetType()], viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetColor().w);
 			setBlendMode_ALPHA(1.0f);
 		}
 	}
@@ -1012,7 +1004,7 @@ void DustParticle::bloom_Draw()
 		if (data[i].GetExist())
 		{
 			setBlendMode_ALPHA(data[i].GetColor().w);
-			billboard_bloom_Render(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize(), {1.0f,1.0f,1.0f,1.0f}, data[i].GetColor().w);
+			billboard_bloom_Render(&billboard[data[i].GetType()], viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), { 1.0f,1.0f,1.0f,1.0f }, data[i].GetColor().w);
 			setBlendMode_ALPHA(1.0f);
 		}
 	}
@@ -1109,14 +1101,14 @@ void SparkParticle::Set(DirectX::XMFLOAT3 _pos)
 	for (int i = 0; i < MAX_SIZE; i++)
 	{
 		data[i].Init(DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f), DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f), DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f),
-			DirectX::XMFLOAT2(7.5f, 7.5f), DirectX::XMFLOAT2(0.0f, 900.0f), DirectX::XMFLOAT2(142.0f, 142.0f), true);
+			DirectX::XMFLOAT2(7.5f, 7.5f), 0, true);
 
-		data[i].SetPos(DirectX::XMFLOAT4(_pos.x , _pos.y, _pos.z, 1.0f));
+		data[i].SetPos(DirectX::XMFLOAT4(_pos.x, _pos.y, _pos.z, 1.0f));
 		originPos[i] = data[i].GetPos();
 
 		float radiusRand = (65 + rand() % 35) / 2.0f;
 		DirectX::XMFLOAT3 nextPos = DirectX::XMFLOAT3(_pos.x + radiusRand * cosf(((360.0f / MAX_SIZE) * i) * 0.01745f),
-			_pos.y + (rand() % 150)  / 2.0f,
+			_pos.y + (rand() % 150) / 2.0f,
 			_pos.z + radiusRand * sinf(((360.0f / MAX_SIZE) * i) * 0.01745f));
 
 		DirectX::XMFLOAT3 vec;
@@ -1133,7 +1125,7 @@ void SparkParticle::Set(DirectX::XMFLOAT3 _pos)
 		originSpeed[i] = data[i].GetSpeed();
 #endif
 		cnt[i] = 0;
-	//	alive[i] = false;
+		//	alive[i] = false;
 	}
 	emitting = true;
 }
@@ -1154,7 +1146,7 @@ void SparkParticle::ImGuiDataInit()
 	imguiData.accelStage[0] = 0;
 	imguiData.accelStage[1] = 0;
 	imguiData.accelStage[2] = 0;
-//	imguiData.radius = 100.0f;
+	//	imguiData.radius = 100.0f;
 }
 
 void SparkParticle::Emit()
@@ -1220,7 +1212,7 @@ void SparkParticle::Draw()
 		{
 			if (data[i].GetExist())
 			{
-				billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize(), data[i].GetColor().w);
+				billboardRender(&billboard, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetColor().w);
 				//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
 				//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
 				//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
@@ -1241,7 +1233,7 @@ void SparkParticle::bloom_Draw()
 		{
 			if (data[i].GetExist())
 			{
-				billboard_bloom_Render(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize(), {1.0f,1.0f,1.0f,1.0f}, data[i].GetColor().w);
+				billboard_bloom_Render(&billboard, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), { 1.0f,1.0f,1.0f,1.0f }, data[i].GetColor().w);
 				//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
 				//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
 				//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
@@ -1365,7 +1357,7 @@ void LocusParticle::Set(DirectX::XMFLOAT3 _pos, DirectX::XMFLOAT3 _dir)
 	for (int i = 0; i < MAX_SIZE; i++)
 	{
 		data[i].Init(DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f), DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f), DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f),
-			DirectX::XMFLOAT2(7.5f, 7.5f), DirectX::XMFLOAT2(0.0f, 780.0f), DirectX::XMFLOAT2(142.0f, 142.0f), true);
+			DirectX::XMFLOAT2(7.5f, 7.5f), 0, true);
 
 		data[i].SetPos(DirectX::XMFLOAT4(_pos.x, _pos.y, _pos.z, 1.0f));
 		originPos[i] = data[i].GetPos();
@@ -1473,7 +1465,7 @@ void LocusParticle::Draw()
 		{
 			if (data[i].GetExist())
 			{
-				billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize(), data[i].GetColor().w);
+				billboardRender(&billboard, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetColor().w);
 				//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
 				//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
 				//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
@@ -1494,7 +1486,7 @@ void LocusParticle::bloom_Draw()
 		{
 			if (data[i].GetExist())
 			{
-				billboard_bloom_Render(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize(), {1.0f,1.0f,1.0f,1.0f},data[i].GetColor().w);
+				billboard_bloom_Render(&billboard, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), { 1.0f,1.0f,1.0f,1.0f }, data[i].GetColor().w);
 				//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
 				//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
 				//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
@@ -1642,8 +1634,6 @@ void AccelParticle::Emit(DirectX::XMFLOAT3 _pos, DirectX::XMFLOAT3 _dir)
 					DirectX::XMFLOAT3 _speed = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f);
 					DirectX::XMFLOAT3 _accel = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f);
 					DirectX::XMFLOAT2 _scale = DirectX::XMFLOAT2(5.0f, 5.0f);
-					DirectX::XMFLOAT2 _texPos = DirectX::XMFLOAT2(0.0f, 1420.0f);
-					DirectX::XMFLOAT2 _texSize = DirectX::XMFLOAT2(142.0f, 142.0f);
 
 					_posFloat4.x += static_cast<float>(-10 + rand() % 20);
 					_posFloat4.y += static_cast<float>(-10 + rand() % 20);
@@ -1708,7 +1698,7 @@ void AccelParticle::Emit(DirectX::XMFLOAT3 _pos, DirectX::XMFLOAT3 _dir)
 					_accel.y = _speed.y / (MAX_CNT * 4.0f);
 					if (_accel.y < 0) _accel.y *= -1;
 
-					data[i].Init(_posFloat4, _speed, _accel, _scale, _texPos, _texSize);
+					data[i].Init(_posFloat4, _speed, _accel, _scale, 0);
 					break;
 				}
 			}
@@ -1754,7 +1744,7 @@ void AccelParticle::Draw()
 		{
 			if (data[i].GetExist())
 			{
-				billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize(), data[i].GetColor().w);
+				billboardRender(&billboard, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetColor().w);
 				//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
 				//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
 				//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
@@ -1775,7 +1765,7 @@ void AccelParticle::bloom_Draw()
 		{
 			if (data[i].GetExist())
 			{
-				billboard_bloom_Render(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize(), {1.0f,1.0f,1.0f,1.0f},data[i].GetColor().w);
+				billboard_bloom_Render(&billboard, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), { 1.0f,1.0f,1.0f,1.0f }, data[i].GetColor().w);
 				//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
 				//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
 				//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
@@ -1875,7 +1865,7 @@ void StoneBreakParticle::Set(DirectX::XMFLOAT3 _pos)
 	for (int i = 0; i < MAX_SIZE; i++)
 	{
 		data[i].Init(DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f), DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f), DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f),
-			DirectX::XMFLOAT2(30.0f, 30.0f), DirectX::XMFLOAT2(0.0f, 512.0f * static_cast<float>(rand() % 3)), DirectX::XMFLOAT2(512.0f, 512.0f), true);
+			DirectX::XMFLOAT2(30.0f, 30.0f), rand() % 3, true);
 
 		data[i].SetPos(DirectX::XMFLOAT4(_pos.x, _pos.y, _pos.z, 1.0f));
 		originPos[i] = data[i].GetPos();
@@ -1987,7 +1977,7 @@ void StoneBreakParticle::Draw()
 		{
 			if (data[i].GetExist())
 			{
-				billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize(), data[i].GetColor().w);
+				billboardRender(&billboard[data[i].GetType()], viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetColor().w);
 				//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
 				//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
 				//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
@@ -2008,7 +1998,7 @@ void StoneBreakParticle::bloom_Draw()
 		{
 			if (data[i].GetExist())
 			{
-				billboard_bloom_Render(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize(), {1.0f,1.0f,1.0f,1.0f},data[i].GetColor().w);
+				billboard_bloom_Render(&billboard[data[i].GetType()], viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), { 1.0f,1.0f,1.0f,1.0f }, data[i].GetColor().w);
 				//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
 				//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
 				//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
@@ -2108,7 +2098,7 @@ void CatapultBreakParticle::Set(DirectX::XMFLOAT3 _pos)
 	for (int i = 0; i < MAX_SIZE; i++)
 	{
 		data[i].Init(DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f), DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f), DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f),
-			DirectX::XMFLOAT2(50.0f, 50.0f), DirectX::XMFLOAT2(0.0f, 1536.0f + 512.0f * static_cast<float>(rand() % 3)), DirectX::XMFLOAT2(512.0f, 512.0f), true);
+			DirectX::XMFLOAT2(50.0f, 50.0f), rand()%3, true);
 
 		data[i].SetPos(DirectX::XMFLOAT4(_pos.x, _pos.y, _pos.z, 1.0f));
 		originPos[i] = data[i].GetPos();
@@ -2220,7 +2210,7 @@ void CatapultBreakParticle::Draw()
 		{
 			if (data[i].GetExist())
 			{
-				billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize(), data[i].GetColor().w);
+				billboardRender(&billboard[data[i].GetType()], viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetColor().w);
 				//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
 				//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
 				//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
@@ -2241,7 +2231,7 @@ void CatapultBreakParticle::bloom_Draw()
 		{
 			if (data[i].GetExist())
 			{
-				billboard_bloom_Render(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize(), {1.0f,1.0f,1.0f,1.0f},data[i].GetColor().w);
+				billboard_bloom_Render(&billboard[data[i].GetType()], viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), { 1.0f,1.0f,1.0f,1.0f }, data[i].GetColor().w);
 				//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
 				//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
 				//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());

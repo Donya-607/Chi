@@ -31,6 +31,7 @@ public:
 	XINPUT_STATE pad;
 //	XINPUT_VIBRATION vibration;
 	const SHORT deadZone = 10000;
+	XINPUT_VIBRATION vibration;
 
 	bool getState(int padNum)
 	{
@@ -64,7 +65,12 @@ public:
 		return ThumbPos;
 	}
 
-	
+	void startViblation(int index, WORD leftmotor, WORD rightmotor)
+	{
+		vibration.wLeftMotorSpeed = leftmotor;
+		vibration.wRightMotorSpeed = rightmotor;
+		XInputSetState(index, &vibration);
+	}
 };
 
 

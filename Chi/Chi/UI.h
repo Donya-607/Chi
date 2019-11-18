@@ -7,7 +7,6 @@
 class UI_Data
 {
 public:
-	static_mesh pMesh;
 
 	DirectX::XMFLOAT4 pos;			// 座標
 	DirectX::XMFLOAT2 scale;		// 中心座標からの半径
@@ -15,8 +14,7 @@ public:
 	float angle;					// 角度
 	bool exist;						// 存在フラグ
 
-	DirectX::XMFLOAT2 texPos;
-	DirectX::XMFLOAT2 texSize;
+	int type;
 };
 
 class HP_UI
@@ -32,12 +30,13 @@ private:
 	int aliveDataNum;
 	int state;
 
+	static_mesh billboard;
 public:
 	HP_UI()
 	{
 		for (int i = 0; i < MAX_SIZE; i++)
 		{
-			createBillboard(&data[i].pMesh, L"./Data/Images/UI/hpUI.png");
+			createBillboard(&billboard, L"./Data/Images/UI/hpUI.png", DirectX::XMFLOAT2(0.0f, 0.0f), DirectX::XMFLOAT2(1024.0f, 222.0f));
 		}
 	}
 	~HP_UI() {}
