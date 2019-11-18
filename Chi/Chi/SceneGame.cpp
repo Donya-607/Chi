@@ -250,7 +250,7 @@ public:
 
 		// original screen
 		{
-			//stage.Draw( shader, V, P );
+			stage.Draw( shader, V, P );
 
 			player.Draw( shader, V, P );
 
@@ -262,7 +262,7 @@ public:
 			default:		Donya::OutputDebugStr("Error : The boss does not draw !\n");	break;
 			}
 
-			//EffectManager::GetInstance()->Render( shader );
+			EffectManager::GetInstance()->Render( shader );
 
 #if DEBUG_MODE
 			if (!wallCollisions.empty())
@@ -303,8 +303,8 @@ public:
 #endif // DEBUG_MODE
 		}
 
-		//z screen
-		if ( 0 )
+		// z screen
+		if ( 1 )
 		{
 			stage.z_Draw(shader, V, P);
 
@@ -321,8 +321,8 @@ public:
 			EffectManager::GetInstance()->z_Render(shader);
 		}
 
-		//bloom screen
-		if ( 0 )
+		// bloom screen
+		if ( 1 )
 		{
 			stage.bloom_Draw(shader, V, P);
 
