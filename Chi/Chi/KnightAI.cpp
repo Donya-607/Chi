@@ -38,7 +38,7 @@ void KnightAI::Init()
 	attackTimes = gapIntervals.front();
 }
 
-void KnightAI::Update( float targetDistance )
+void KnightAI::Update( float elapsedTime, float targetDistance )
 {
 #if USE_IMGUI
 
@@ -49,7 +49,7 @@ void KnightAI::Update( float targetDistance )
 	if ( stopUpdate ) { return; }
 	// else
 
-	timer--;
+	timer -= 1.0f * elapsedTime;
 	if ( timer <= 0 )
 	{
 		timer = 0;
@@ -250,13 +250,13 @@ void KnightAI::ImGui( float targetDistance )
 			ImGui::Text( "Next.AttackNo : %d", storage.nextAttackNo );
 			ImGui::Text( "Next.AttackKind : %s", GetAttackName( storage.nextAttackNo ) );
 			ImGui::Text( "AttackTimes : %d", attackTimes );
-			ImGui::Text( "Timer : %d", timer );
-			ImGui::Text( "CoolTime : %d", coolTime );
+			ImGui::Text( "Timer : %f", timer );
+			ImGui::Text( "CoolTime : %f", coolTime );
 			ImGui::Text( "Distance.Target : %f", targetDistance );
 
 			// Show whole frame.
 			{
-				const std::string caption{ ".WholeFrame : %d" };
+				const std::string caption{ ".WholeFrame : %f" };
 				int i = 0;
 				for ( const auto &it : wholeFrame )
 				{
@@ -267,7 +267,7 @@ void KnightAI::ImGui( float targetDistance )
 
 			// Show cool-time.
 			{
-				const std::string caption{ ".CoolTime : %d" };
+				const std::string caption{ ".CoolTime : %f" };
 				int i = 0;
 				for ( const auto &it : coolTimeFrame )
 				{
@@ -298,7 +298,7 @@ void KnightAI::ImGui( float targetDistance )
 		{
 			if ( ImGui::TreeNode( "Initialize" ) )
 			{
-				ImGui::DragInt( "CoolTime", &initCoolTime );
+				ImGui::DragFloat( "CoolTime", &initCoolTime );
 				initStorage.ShowImGuiNode( "FirstChoice" );
 
 				ImGui::TreePop();
@@ -343,7 +343,7 @@ void KnightAI::ImGui( float targetDistance )
 				int i = 0;
 				for ( auto &it : wholeFrame )
 				{
-					ImGui::SliderInt( GetAttackName( i ).c_str(), &it, 1, 1024 );
+					ImGui::DragFloat( GetAttackName( i ).c_str(), &it );
 					i++;
 				}
 
@@ -355,7 +355,7 @@ void KnightAI::ImGui( float targetDistance )
 				int i = 0;
 				for ( auto &it : coolTimeFrame )
 				{
-					ImGui::SliderInt( GetAttackName( i ).c_str(), &it, 0, 1024 );
+					ImGui::DragFloat( GetAttackName( i ).c_str(), &it );
 					i++;
 				}
 
