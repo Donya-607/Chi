@@ -113,14 +113,15 @@ void SceneResult::init()
 		_score /= 10;
 	}
 
-	for (int i = 0; i < MAX_SIZE; i++)
-	{
-		rankingRender[i].pMesh.resize(rankingRender[i].num.size());
-		for (int j = 0; j < static_cast<int>( rankingRender[i].num.size() ); j++)
-		{
-			createBillboard(&rankingRender[i].pMesh[j], L"./Data/Images/UI/UI.png");
-		}
-	}
+
+	//for (int i = 0; i < MAX_SIZE; i++)
+	//{
+	//	rankingRender[i].pMesh.resize(rankingRender[i].num.size());
+	//	for (int j = 0; j < static_cast<int>( rankingRender[i].num.size() ); j++)
+	//	{
+	//		createBillboard(&rankingRender[i].pMesh[j], L"./Data/Images/UI/UI.png");
+	//	}
+	//}
 
 	rankingPos = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f);
 	yourScorePos = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f);

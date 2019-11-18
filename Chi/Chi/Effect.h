@@ -449,11 +449,14 @@ private:
 	static constexpr float len = 50.0f;
 	int aliveFrameMAX;
 	int cnt;
+	static_mesh billboard[3];
 
 public:
 	BossAttackMomentEffect()
 	{
-		createBillboard(&data.pMesh, L"./Data/Images/UI/CheckPoint.png");
+		createBillboard(&billboard[0], L"./Data/Images/UI/CheckPoint.png", DirectX::XMFLOAT2(0.0f, 0.0f), DirectX::XMFLOAT2(1480.0f, 1150.0f));
+		createBillboard(&billboard[1], L"./Data/Images/UI/CheckPoint.png",DirectX::XMFLOAT2(0.0f, 1150.0f), DirectX::XMFLOAT2(1480.0f, 1150.0f));
+		createBillboard(&billboard[2], L"./Data/Images/UI/CheckPoint.png", DirectX::XMFLOAT2(0.0f, 2300.0f), DirectX::XMFLOAT2(1480.0f, 1150.0f));
 	}
 	~BossAttackMomentEffect() {}
 
@@ -463,10 +466,8 @@ public:
 		DirectX::XMFLOAT3 _speed = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f);
 		DirectX::XMFLOAT3 _accel = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f);
 		DirectX::XMFLOAT2 _scale = DirectX::XMFLOAT2(100.0f, 100.0f);
-		DirectX::XMFLOAT2 _texPos = DirectX::XMFLOAT2(0.0f, 1150.0f * bossNo);
-		DirectX::XMFLOAT2 _texSize = DirectX::XMFLOAT2(1480.0f, 1150.0f);
 
-		data.Init(_posFloat4, _speed, _accel, _scale, _texPos, _texSize);
+		data.Init(_posFloat4, _speed, _accel, _scale, bossNo);
 		data.SetColor(DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
 
 		aliveFrameMAX = aliveFrameMax;
@@ -497,7 +498,7 @@ public:
 		DirectX::XMStoreFloat4x4(&viewProjection, getViewMatrix() * getProjectionMatrix());
 		if (data.GetExist())
 		{
-			billboardRender(&data.pMesh, viewProjection, data.GetPos(), data.GetScale(), data.GetAngle(), getCamPos(), data.GetTexPos(), data.GetTexSize(), data.GetColor().w);
+			billboardRender(&billboard[data.GetType()], viewProjection, data.GetPos(), data.GetScale(), data.GetAngle(), getCamPos(), data.GetColor().w);
 			//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
 			//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
 			//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
@@ -511,7 +512,7 @@ public:
 		DirectX::XMStoreFloat4x4(&viewProjection, getViewMatrix() * getProjectionMatrix());
 		if (data.GetExist())
 		{
-			billboard_bloom_Render(&data.pMesh, viewProjection, data.GetPos(), data.GetScale(), data.GetAngle(), getCamPos(), data.GetTexPos(), data.GetTexSize(), {1.0f,1.0f,1.0f,1.0f}, data.GetColor().w);
+			billboard_bloom_Render(&billboard[data.GetType()], viewProjection, data.GetPos(), data.GetScale(), data.GetAngle(), getCamPos(), {1.0f,1.0f,1.0f,1.0f}, data.GetColor().w);
 			//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
 			//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
 			//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());

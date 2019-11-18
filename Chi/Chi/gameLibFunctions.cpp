@@ -525,9 +525,9 @@ void createPlane(static_mesh* _plane, u_int _vertical, u_int _side)
 	GameLib::staticMesh::createPlane(_plane, _vertical, _side);
 }
 
-void createBillboard(static_mesh* _mesh, const wchar_t* _textureName)
+void createBillboard(static_mesh* _mesh, const wchar_t* _textureName, const DirectX::XMFLOAT2& texpos, const DirectX::XMFLOAT2& texsize)
 {
-	GameLib::staticMesh::createBillboard(_mesh, _textureName);
+	GameLib::staticMesh::createBillboard(_mesh, _textureName,texpos,texsize);
 }
 
 void loadOBJ(static_mesh* staticMesh, const wchar_t* objName)
@@ -550,19 +550,19 @@ void OBJRender(static_mesh* staticMesh, const DirectX::XMFLOAT4X4& SynthesisMatr
 	GameLib::staticMesh::staticMeshRender(staticMesh, SynthesisMatrix, worldMatrix, getCamPos(), getLineLight(), getPointLight(), materialColor, wireFlg);
 }
 
-void billboardRender(static_mesh* _mesh, const DirectX::XMFLOAT4X4& view_projection, const DirectX::XMFLOAT4& _pos, const DirectX::XMFLOAT2 _scale, const float _angle, const DirectX::XMFLOAT4& _cam_pos, const DirectX::XMFLOAT2& texpos, const DirectX::XMFLOAT2& texsize, const float alpha, const DirectX::XMFLOAT3& color)
+void billboardRender(static_mesh* _mesh, const DirectX::XMFLOAT4X4& view_projection, const DirectX::XMFLOAT4& _pos, const DirectX::XMFLOAT2 _scale, const float _angle, const DirectX::XMFLOAT4& _cam_pos, const float alpha, const DirectX::XMFLOAT3& color)
 {
-	GameLib::staticMesh::builboradRender(_mesh, view_projection, _pos, _scale, _angle, _cam_pos, texpos, texsize, alpha, color);
+	GameLib::staticMesh::builboradRender(_mesh, view_projection, _pos, _scale, _angle, _cam_pos, alpha, color);
 }
 
-void billboard_z_Render(static_mesh* _mesh, const DirectX::XMFLOAT4X4& view_projection, const DirectX::XMFLOAT4& _pos, const DirectX::XMFLOAT2 _scale, const float angle, const DirectX::XMFLOAT4& _cam_pos, const DirectX::XMFLOAT2& texpos, const DirectX::XMFLOAT2& texsize, const float alpha, const DirectX::XMFLOAT3& color)
+void billboard_z_Render(static_mesh* _mesh, const DirectX::XMFLOAT4X4& view_projection, const DirectX::XMFLOAT4& _pos, const DirectX::XMFLOAT2 _scale, const float angle, const DirectX::XMFLOAT4& _cam_pos, const float alpha, const DirectX::XMFLOAT3& color)
 {
-	GameLib::staticMesh::builborad_z_Render(_mesh, view_projection, _pos, _scale, angle, _cam_pos, texpos, texsize, alpha, color);
+	GameLib::staticMesh::builborad_z_Render(_mesh, view_projection, _pos, _scale, angle, _cam_pos, alpha, color);
 }
 
-void billboard_bloom_Render(static_mesh* _mesh, const DirectX::XMFLOAT4X4& view_projection, const DirectX::XMFLOAT4& _pos, const DirectX::XMFLOAT2 _scale, const float angle, const DirectX::XMFLOAT4& _cam_pos, const DirectX::XMFLOAT2& texpos, const DirectX::XMFLOAT2& texsize, const DirectX::XMFLOAT4& judge_color, const float alpha, const DirectX::XMFLOAT3& color)
+void billboard_bloom_Render(static_mesh* _mesh, const DirectX::XMFLOAT4X4& view_projection, const DirectX::XMFLOAT4& _pos, const DirectX::XMFLOAT2 _scale, const float angle, const DirectX::XMFLOAT4& _cam_pos, const DirectX::XMFLOAT4& judge_color, const float alpha, const DirectX::XMFLOAT3& color)
 {
-	GameLib::staticMesh::builborad_bloom_Render(_mesh, view_projection, _pos, _scale, angle, _cam_pos, texpos, texsize, alpha, color, judge_color);
+	GameLib::staticMesh::builborad_bloom_Render(_mesh, view_projection, _pos, _scale, angle, _cam_pos, alpha, color, judge_color);
 }
 
 

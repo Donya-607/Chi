@@ -134,7 +134,7 @@ public:
 	void createCube(ID3D11Device* _device);
 	void createPlane(ID3D11Device* _device, u_int _vertical = 1, u_int _side = 1);
 	void createSphere(ID3D11Device* _device, u_int slices, u_int stacks);
-	void createBillboard(ID3D11Device* _device, const wchar_t* _textureName);
+	void createBillboard(ID3D11Device* _device, const wchar_t* _textureName, const DirectX::XMFLOAT2& texpos,const DirectX::XMFLOAT2& texsize);
 	primitive_material& getPrimitiveMaterial()
 	{
 		return primitiveMaterial;
@@ -177,8 +177,6 @@ public:
 		const DirectX::XMFLOAT2,	//スケール
 		const float,	//アングル
 		const DirectX::XMFLOAT4&,	//カメラ座標
-		const DirectX::XMFLOAT2& texpos,
-		const DirectX::XMFLOAT2& texsize,
 		const float alpha,
 		const DirectX::XMFLOAT3& color
 	);
@@ -190,8 +188,6 @@ public:
 		const DirectX::XMFLOAT2,	//スケール
 		const float,	//アングル
 		const DirectX::XMFLOAT4&,	//カメラ座標
-		const DirectX::XMFLOAT2& texpos,
-		const DirectX::XMFLOAT2& texsize,
 		const float alpha,
 		const DirectX::XMFLOAT3& color
 	);
@@ -203,8 +199,6 @@ public:
 		const DirectX::XMFLOAT2,	//スケール
 		const float,	//アングル
 		const DirectX::XMFLOAT4&,	//カメラ座標
-		const DirectX::XMFLOAT2& texpos,
-		const DirectX::XMFLOAT2& texsize,
 		const float alpha,
 		const DirectX::XMFLOAT3& color,
 		const DirectX::XMFLOAT4& judge_color,

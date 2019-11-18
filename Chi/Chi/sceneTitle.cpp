@@ -33,9 +33,6 @@ void sceneTitle::init()
 	loadFBX(pStageModel.get(), GetModelPath(ModelAttribute::TutorialStage));
 	loadFBX(pTitleModel.get(), "./Data/model/TestMove.fbx");
 
-	createBillboard(&attackUIdata.pMesh, L"./Data/Images/UI/Telop.png");
-	createBillboard(&guardUIdata.pMesh, L"./Data/Images/UI/Telop.png");
-
 	attackUIdata.pos = Donya::Vector4(0.0f, 2445.0f, 5645.0f, 1.0f);
 	attackUIdata.scale = Donya::Vector2(300.0f, 100.0f);
 	attackUIdata.texPos = Donya::Vector2(0.0f, 0.0f);
@@ -47,6 +44,10 @@ void sceneTitle::init()
 	guardUIdata.texPos = Donya::Vector2(0.0f, 553.0f);
 	guardUIdata.texSize = Donya::Vector2(1690.0f, 557.0f);
 	guardUIdata.angle = 261.0f;
+
+	createBillboard(&attackUIdata.pMesh, L"./Data/Images/UI/Telop.png",attackUIdata.texPos,attackUIdata.texSize);
+	createBillboard(&guardUIdata.pMesh, L"./Data/Images/UI/Telop.png",guardUIdata.texPos,guardUIdata.texSize);
+
 
 	std::vector<Donya::Box> wallHitBox_vector;
 	Donya::Box wallHitBox;
@@ -442,8 +443,8 @@ void sceneTitle::render()
 		player.Draw(shader, V, P);
 		catapult.Draw(shader, V, P);
 
-		billboardRender(&attackUIdata.pMesh, V * P, attackUIdata.pos, attackUIdata.scale, attackUIdata.angle, getCamPos(), attackUIdata.texPos, attackUIdata.texSize);
-		billboardRender(&guardUIdata.pMesh, V * P, guardUIdata.pos, guardUIdata.scale, guardUIdata.angle, getCamPos(), guardUIdata.texPos, guardUIdata.texSize);
+		billboardRender(&attackUIdata.pMesh, V * P, attackUIdata.pos, attackUIdata.scale, attackUIdata.angle, getCamPos());
+		billboardRender(&guardUIdata.pMesh, V * P, guardUIdata.pos, guardUIdata.scale, guardUIdata.angle, getCamPos());
 
 		EffectManager::GetInstance()->Render(shader);
 
@@ -512,8 +513,8 @@ void sceneTitle::render()
 		player.DrawBloom(shader, V, P);
 		catapult.bloom_Draw(shader, V, P);
 
-		billboard_bloom_Render(&attackUIdata.pMesh, V * P, attackUIdata.pos, attackUIdata.scale, attackUIdata.angle, getCamPos(), attackUIdata.texPos, attackUIdata.texSize);
-		billboard_bloom_Render(&guardUIdata.pMesh, V * P, guardUIdata.pos, guardUIdata.scale, guardUIdata.angle, getCamPos(), guardUIdata.texPos, guardUIdata.texSize);
+		billboard_bloom_Render(&attackUIdata.pMesh, V * P, attackUIdata.pos, attackUIdata.scale, attackUIdata.angle, getCamPos());
+		billboard_bloom_Render(&guardUIdata.pMesh, V * P, guardUIdata.pos, guardUIdata.scale, guardUIdata.angle, getCamPos());
 
 		EffectManager::GetInstance()->bloom_Render(shader);
 

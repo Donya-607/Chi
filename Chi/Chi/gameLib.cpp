@@ -859,9 +859,9 @@ namespace GameLib
 			_plane->createPlane(m.device, _vertical, _side);
 		}
 
-		void createBillboard(static_mesh* _mesh, const wchar_t* _textureName)
+		void createBillboard(static_mesh* _mesh, const wchar_t* _textureName, const DirectX::XMFLOAT2& texpos, const DirectX::XMFLOAT2& texsize)
 		{
-			_mesh->createBillboard(m.device, _textureName);
+			_mesh->createBillboard(m.device, _textureName,texpos,texsize);
 		}
 
 		void loadMesh(static_mesh* _mesh, const wchar_t* objName)
@@ -893,25 +893,25 @@ namespace GameLib
 			_mesh->render(m.context, SynthesisMatrix, worldMatrix, camPos, _line_light, _point_light, materialColor, wireFlg);
 		}
 
-		void builboradRender(static_mesh* _mesh, const DirectX::XMFLOAT4X4& view_projection, const DirectX::XMFLOAT4& _pos, const DirectX::XMFLOAT2 _scale, const float _angle, const DirectX::XMFLOAT4& _cam_pos, const DirectX::XMFLOAT2& texpos, const DirectX::XMFLOAT2& texsize, const float alpha, const DirectX::XMFLOAT3& color)
+		void builboradRender(static_mesh* _mesh, const DirectX::XMFLOAT4X4& view_projection, const DirectX::XMFLOAT4& _pos, const DirectX::XMFLOAT2 _scale, const float _angle, const DirectX::XMFLOAT4& _cam_pos, const float alpha, const DirectX::XMFLOAT3& color)
 		{
 			blend::setBlendMode(blend::ALPHA, 255);
 			setRenderTarget(&m.original_RT);
-			_mesh->billboardRender(m.context, view_projection, _pos, _scale, _angle, _cam_pos, texpos, texsize, alpha, color);
+			_mesh->billboardRender(m.context, view_projection, _pos, _scale, _angle, _cam_pos, alpha, color);
 			blend::setBlendMode(blend::NONE, 255);
 		}
 
-		void builborad_z_Render(static_mesh* _mesh, const DirectX::XMFLOAT4X4& view_projection, const DirectX::XMFLOAT4& _pos, const DirectX::XMFLOAT2 _scale, const float _angle, const DirectX::XMFLOAT4& camPos, const DirectX::XMFLOAT2& texpos, const DirectX::XMFLOAT2& texsize, const float alpha, const DirectX::XMFLOAT3& color)
+		void builborad_z_Render(static_mesh* _mesh, const DirectX::XMFLOAT4X4& view_projection, const DirectX::XMFLOAT4& _pos, const DirectX::XMFLOAT2 _scale, const float _angle, const DirectX::XMFLOAT4& camPos, const float alpha, const DirectX::XMFLOAT3& color)
 		{
 			setRenderTarget(&m.z_RT);
-			_mesh->billboard_z_render(m.context, view_projection, _pos, _scale, _angle, camPos, texpos, texsize, alpha, color);
+			_mesh->billboard_z_render(m.context, view_projection, _pos, _scale, _angle, camPos, alpha, color);
 		}
 
-		void builborad_bloom_Render(static_mesh* _mesh, const DirectX::XMFLOAT4X4& view_projection, const DirectX::XMFLOAT4& _pos, const DirectX::XMFLOAT2 _scale, const float _angle, const DirectX::XMFLOAT4& _cam_pos, const DirectX::XMFLOAT2& texpos, const DirectX::XMFLOAT2& texsize, const float alpha, const DirectX::XMFLOAT3& color, const DirectX::XMFLOAT4& judge_color)
+		void builborad_bloom_Render(static_mesh* _mesh, const DirectX::XMFLOAT4X4& view_projection, const DirectX::XMFLOAT4& _pos, const DirectX::XMFLOAT2 _scale, const float _angle, const DirectX::XMFLOAT4& _cam_pos, const float alpha, const DirectX::XMFLOAT3& color, const DirectX::XMFLOAT4& judge_color)
 		{
 			blend::setBlendMode(blend::ALPHA, 255);
 			setRenderTarget(&m.bloom_RT);
-			_mesh->billboard_bloom_SRV_render(m.context, view_projection, _pos, _scale, _angle, _cam_pos, texpos, texsize, alpha, color, judge_color, m.z_SRV);
+			_mesh->billboard_bloom_SRV_render(m.context, view_projection, _pos, _scale, _angle, _cam_pos, alpha, color, judge_color, m.z_SRV);
 			blend::setBlendMode(blend::NONE, 255);
 		}
 
