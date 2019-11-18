@@ -464,7 +464,8 @@ Rival::Rival() :
 	currentMotion( Idle ),
 	pos(), velocity(), extraOffset(),
 	orientation(),
-	models()
+	models(),
+	doOnce( false )
 {
 	auto InitializeModel = []( std::shared_ptr<skinned_mesh> *ppMesh )
 	{
@@ -1403,6 +1404,7 @@ void Rival::AttackLineInit( TargetStatus target, float elapsedTime )
 	slerpFactor		= RivalParam::Get().SlerpFactor( status );
 	velocity		= 0.0f;
 	currentMotion	= AtkLine;
+	doOnce			= false;
 
 	// Revive the effects collision flags.
 	{
@@ -1422,14 +1424,21 @@ void Rival::AttackLineInit( TargetStatus target, float elapsedTime )
 void Rival::AttackLineUpdate( TargetStatus target, float elapsedTime )
 {
 	timer += 1.0f * elapsedTime;
-	if ( ZeroEqual( timer - RivalParam::Open().line.generateFrame ) )
+
+	if ( !doOnce )
 	{
-		EffectManager::GetInstance()->LongAttackEffectSet( target.pos, pos );
+		const float GENERATE_TIMING = RivalParam::Open().line.generateFrame;
+		if ( GENERATE_TIMING <= timer )
+		{
+			doOnce = true;
+			EffectManager::GetInstance()->LongAttackEffectSet( target.pos, pos );
+		}
 	}
 }
 void Rival::AttackLineUninit()
 {
-	timer = 0;
+	timer  = 0;
+	doOnce = false;
 
 	setAnimFlame( models.pAtkLine.get(), 0 );
 }
@@ -1451,28 +1460,19 @@ void Rival::AttackRaidUpdate( TargetStatus target, float elapsedTime )
 	const float START_TIME		= RivalParam::Open().raid.jumpStartFrame;
 	const float LANDING_TIME	= RivalParam::Open().raid.jumpLastFrame;
 	
-	auto ApplyExtraOffset	= [&]()->void
-	{
-		// Apply movement and reset extraOffset.
-		pos += extraOffset;
-		extraOffset = 0.0f;
-	};
-
 	timer += 1.0f * elapsedTime;
 
 	if ( timer <= START_TIME )
 	{
 		// Before jump. move to front slowly.
 
-		extraOffset += orientation.LocalFront() * RivalParam::Get().MoveSpeed( status ) * elapsedTime;
-
-		if ( ZeroEqual( timer - START_TIME ) )
-		{
-			ApplyExtraOffset();
-			slerpFactor = 0.0f;
-		}
+		velocity = orientation.LocalFront() * RivalParam::Get().MoveSpeed( status ) * elapsedTime;
 	}
-	else
+	else if ( !velocity.IsZero() )
+	{
+		velocity = 0.0f;
+	}
+
 	if ( timer <= START_TIME + LANDING_TIME )
 	{
 		// Before landing. move to front with easing.
@@ -1486,15 +1486,12 @@ void Rival::AttackRaidUpdate( TargetStatus target, float elapsedTime )
 		);
 
 		extraOffset = orientation.LocalFront() * ( RivalParam::Open().raid.jumpDistance * elapsedTime * ease );
-
-		if ( ZeroEqual( timer - ( START_TIME + LANDING_TIME ) ) )
-		{
-			ApplyExtraOffset();
-		}
 	}
-	else
+	else if ( !extraOffset.IsZero() )
 	{
-		// No op.
+		// Apply movement and reset extraOffset.
+		pos += extraOffset;
+		extraOffset = 0.0f;
 	}
 
 	auto &hitBox = RivalParam::Get().RaidHitBox();
@@ -1689,7 +1686,7 @@ void Rival::BreakUpdate( TargetStatus target, float elapsedTime )
 
 			extraOffset = -orientation.LocalFront() * ( RivalParam::Open().breakdown.leaveDistance * elapsedTime * ease );
 
-			if ( ZeroEqual( timer - MOVING_FRAME ) )
+			if ( MOVING_FRAME < timer )
 			{
 				ApplyExtraOffset();
 
@@ -1726,21 +1723,28 @@ void Rival::DefeatInit()
 	slerpFactor		= 0.0f;
 	currentMotion	= Defeat;
 
+	doOnce			= false;
+
 	EffectManager::GetInstance()->LongAttackEffectReSetCollision();
 }
 void Rival::DefeatUpdate( float elapsedTime )
 {
 	timer += 1.0f * elapsedTime;
 
-	const float MOTION_LENGTH = RivalParam::Open().defeat.motionLength;
-	if ( ZeroEqual( timer - MOTION_LENGTH ) )
+	if ( !doOnce )
 	{
-		EffectManager::GetInstance()->DisappearanceEffectSet( GetPos() );
+		const float MOTION_LENGTH = RivalParam::Open().defeat.motionLength;
+		if ( MOTION_LENGTH <= timer )
+		{
+			doOnce = true;
+			EffectManager::GetInstance()->DisappearanceEffectSet( GetPos() );
+		}
 	}
 }
 void Rival::DefeatUninit()
 {
-	timer = 0;
+	timer  = 0;
+	doOnce = false;
 }
 
 void Rival::ApplyVelocity( TargetStatus target )

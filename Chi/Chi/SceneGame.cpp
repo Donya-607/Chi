@@ -158,7 +158,7 @@ public:
 
 		FetchNowStageNumber();
 	#if DEBUG_MODE
-		stageNo = AppearStage::GolemNo;
+		stageNo = AppearStage::RivalNo;
 	#endif // DEBUG_MODE
 
 		Donya::OutputDebugStr( "Begin Objects initialize.\n" );
@@ -446,6 +446,13 @@ public:
 		stage.Update();
 
 		Player::Input  playerInput = Player::Input::MakeByExternalInput( Donya::Vector4x4::FromMatrix( GameLib::camera::GetViewMatrix() ) );
+		// If the movement is nothing, set the player's direction to boss.
+		if ( playerInput.moveVector.IsZero() )
+		{
+			playerInput.moveVector = GetBossPosition() - player.GetPosition();
+			playerInput.moveVector.Normalized();
+			playerInput.onlyRotation = true;
+		}
 		player.Update( playerInput, elapsedTime );
 
 		BossUpdate( elapsedTime );
