@@ -404,7 +404,7 @@ public:
 		Player::Input  playerInput = Player::Input::MakeByExternalInput( Donya::Vector4x4::FromMatrix( GameLib::camera::GetViewMatrix() ) );
 		player.Update( playerInput, elapsedTime );
 
-		BossUpdate();
+		BossUpdate( elapsedTime );
 
 		GameTimer::GetInstance()->Update( stageNo );
 		std::vector<Donya::Circle> bossBodies = FetchBossBodies();
@@ -439,7 +439,7 @@ public:
 		Player::Input  playerInput = Player::Input::MakeByExternalInput( Donya::Vector4x4::FromMatrix( GameLib::camera::GetViewMatrix() ) );
 		player.Update( playerInput, elapsedTime );
 
-		BossUpdate();
+		BossUpdate( elapsedTime );
 
 		CameraUpdate( GetCameraTargetPos() );
 
@@ -471,7 +471,7 @@ public:
 		}
 	}
 
-	void BossUpdate()
+	void BossUpdate( float elapsedTime )
 	{
 	#if DEBUG_MODE
 
@@ -489,7 +489,7 @@ public:
 			{
 				Knight::TargetStatus target{};
 				target.pos = player.GetPosition();
-				knight.Update( target );
+				knight.Update( target, elapsedTime );
 
 			#if DEBUG_MODE
 				if ( debugKill ) { knight.ReceiveImpact(); }
@@ -500,7 +500,7 @@ public:
 			{
 				Golem::TargetStatus target{};
 				target.pos = player.GetPosition();
-				golem.Update( target );
+				golem.Update( target, elapsedTime );
 
 			#if DEBUG_MODE
 				if ( debugKill ) { golem.ReceiveImpact(); }
@@ -511,7 +511,7 @@ public:
 			{
 				Rival::TargetStatus target{};
 				target.pos = player.GetPosition();
-				rival.Update( target );
+				rival.Update( target, elapsedTime );
 
 			#if DEBUG_MODE
 				if ( debugKill ) { rival.ReceiveImpact(); }
@@ -767,7 +767,7 @@ public:
 			{
 				wasHitToShield = true;
 				player.SucceededDefence();
-				rival.WasDefended();
+				rival.WasDefended( elapsedTime );
 			}
 
 			bool bodyCollided = ( shieldCollided ) ? false : rival.IsCollideAttackHitBoxes( playerBodyBox, /* disableCollidingHitBoxes = */ false );

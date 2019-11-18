@@ -104,7 +104,7 @@ RivalParam::Member RivalParam::Open()
 	return Get().Content();
 }
 
-void RivalParam::UpdateBarrage( int elapsedTime )
+void RivalParam::UpdateBarrage( float elapsedTime )
 {
 	m.barrage.Update( elapsedTime );
 }
@@ -536,7 +536,7 @@ void Rival::Update( TargetStatus target, float elapsedTime )
 
 #endif // USE_IMGUI
 
-	AI.Update( CalcNormalizedDistance( target.pos ) );
+	AI.Update( elapsedTime, CalcNormalizedDistance( target.pos ) );
 
 	ChangeStatus( target, elapsedTime );
 	UpdateCurrentStatus( target, elapsedTime );
@@ -579,8 +579,8 @@ void Rival::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya
 			break;
 		case ExtraState::DEFEAT:
 			{
-				const int MOTION_LENGTH = RivalParam::Open().defeat.motionLength;
-				int timeDiff = timer - MOTION_LENGTH;
+				const float MOTION_LENGTH = RivalParam::Open().defeat.motionLength;
+				float timeDiff = timer - MOTION_LENGTH;
 				
 				float drawAlpha = 1.0f;
 				if ( 0 < timeDiff )
@@ -801,8 +801,8 @@ void Rival::z_Draw(fbx_shader& HLSL, const Donya::Vector4x4& matView, const Dony
 			break;
 		case ExtraState::DEFEAT:
 		{
-			const int MOTION_LENGTH = RivalParam::Open().defeat.motionLength;
-			int timeDiff = timer - MOTION_LENGTH;
+			const float MOTION_LENGTH = RivalParam::Open().defeat.motionLength;
+			float timeDiff = timer - MOTION_LENGTH;
 
 			float drawAlpha = 1.0f;
 			if (0 < timeDiff)
@@ -885,8 +885,8 @@ void Rival::bloom_Draw(fbx_shader& HLSL, const Donya::Vector4x4& matView, const 
 			break;
 		case ExtraState::DEFEAT:
 		{
-			const int MOTION_LENGTH = RivalParam::Open().defeat.motionLength;
-			int timeDiff = timer - MOTION_LENGTH;
+			const float MOTION_LENGTH = RivalParam::Open().defeat.motionLength;
+			float timeDiff = timer - MOTION_LENGTH;
 
 			float drawAlpha = 1.0f;
 			if (0 < timeDiff)
@@ -1367,7 +1367,7 @@ void Rival::AttackBarrageInit( TargetStatus target, float elapsedTime )
 }
 void Rival::AttackBarrageUpdate( TargetStatus target, float elapsedTime )
 {
-	RivalParam::Get().UpdateBarrage();
+	RivalParam::Get().UpdateBarrage( elapsedTime );
 	
 	const auto nowBarrage = RivalParam::Open().barrage;
 

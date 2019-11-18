@@ -383,7 +383,7 @@ public:
 	/// <summary>
 	/// Update "walkTimings" and "collisions".
 	/// </summary>
-	void UpdateBarrage( int elapsedTime = 1 );
+	void UpdateBarrage( float elapsedTime );
 	/// <summary>
 	/// Reset  "walkTimings" and "collisions".
 	/// </summary>

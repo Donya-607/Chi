@@ -413,7 +413,7 @@ void Knight::Update( TargetStatus target, float elapsedTime )
 	ApplyVelocity( target );
 	CollideToWall();
 
-	FxUpdate( target );
+	FxUpdate( target, elapsedTime );
 }
 
 void Knight::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matProjection, float animeAccel )
@@ -467,7 +467,7 @@ void Knight::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Dony
 			Donya::Vector4x4 FX_W = ( FX_S * FX_R ) * ( S * R * T )/* Except draw offset from parent world matrix.*/;
 			Donya::Vector4x4 FX_WVP = FX_W * matView * matProjection;
 
-			const int VIVID_TIME = KnightParam::Get().HitBoxExplosion().enableFrameLast;
+			const float VIVID_TIME = KnightParam::Get().HitBoxExplosion().enableFrameLast;
 			float drawAlpha = ( VIVID_TIME <= timer )
 			? 1.0f - ( KnightParam::Open().explHideSpeed * ( timer - VIVID_TIME ) )
 			: 1.0f;
@@ -482,8 +482,8 @@ void Knight::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Dony
 		break;
 	case KnightAI::ActionState::END:
 		{
-			const int MOTION_LENGTH = KnightParam::Open().defeatMotionLength;
-			int timeDiff = timer - MOTION_LENGTH;
+			const float MOTION_LENGTH = KnightParam::Open().defeatMotionLength;
+			float timeDiff = timer - MOTION_LENGTH;
 
 			float drawAlpha = 1.0f;
 			if ( 0 < timeDiff )
@@ -651,10 +651,10 @@ void Knight::z_Draw(fbx_shader& HLSL, const Donya::Vector4x4& matView, const Don
 		Donya::Vector4x4 FX_W = (FX_S * FX_R) * (S * R * T)/* Except draw offset from parent world matrix.*/;
 		Donya::Vector4x4 FX_WVP = FX_W * matView * matProjection;
 
-		const int VIVID_TIME = KnightParam::Get().HitBoxExplosion().enableFrameLast;
+		const float VIVID_TIME = KnightParam::Get().HitBoxExplosion().enableFrameLast;
 		float drawAlpha = (VIVID_TIME <= timer)
-			? 1.0f - (KnightParam::Open().explHideSpeed * (timer - VIVID_TIME))
-			: 1.0f;
+		? 1.0f - (KnightParam::Open().explHideSpeed * (timer - VIVID_TIME))
+		: 1.0f;
 		z_render(models.pFxExpl.get(), HLSL, FX_WVP, FX_W);
 	}
 	break;
@@ -666,8 +666,8 @@ void Knight::z_Draw(fbx_shader& HLSL, const Donya::Vector4x4& matView, const Don
 		break;
 	case KnightAI::ActionState::END:
 	{
-		const int MOTION_LENGTH = KnightParam::Open().defeatMotionLength;
-		int timeDiff = timer - MOTION_LENGTH;
+		const float MOTION_LENGTH = KnightParam::Open().defeatMotionLength;
+		float timeDiff = timer - MOTION_LENGTH;
 
 		float drawAlpha = 1.0f;
 		if (0 < timeDiff)
@@ -734,7 +734,7 @@ void Knight::bloom_Draw(fbx_shader& HLSL, const Donya::Vector4x4& matView, const
 		Donya::Vector4x4 FX_W = (FX_S * FX_R) * (S * R * T)/* Except draw offset from parent world matrix.*/;
 		Donya::Vector4x4 FX_WVP = FX_W * matView * matProjection;
 
-		const int VIVID_TIME = KnightParam::Get().HitBoxExplosion().enableFrameLast;
+		const float VIVID_TIME = KnightParam::Get().HitBoxExplosion().enableFrameLast;
 		float drawAlpha = (VIVID_TIME <= timer)
 			? 1.0f - (KnightParam::Open().explHideSpeed * (timer - VIVID_TIME))
 			: 1.0f;
@@ -751,8 +751,8 @@ void Knight::bloom_Draw(fbx_shader& HLSL, const Donya::Vector4x4& matView, const
 		break;
 	case KnightAI::ActionState::END:
 	{
-		const int MOTION_LENGTH = KnightParam::Open().defeatMotionLength;
-		int timeDiff = timer - MOTION_LENGTH;
+		const float MOTION_LENGTH = KnightParam::Open().defeatMotionLength;
+		float timeDiff = timer - MOTION_LENGTH;
 
 		float drawAlpha = 1.0f;
 		if (0 < timeDiff)

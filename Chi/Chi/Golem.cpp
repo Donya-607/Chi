@@ -604,8 +604,8 @@ void Golem::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya
 		break;
 	case GolemAI::ActionState::END:
 		{
-			const int MOTION_LENGTH = GolemParam::Get().DefeatMotionLength();
-			int timeDiff = timer - MOTION_LENGTH;
+			const float MOTION_LENGTH = GolemParam::Get().DefeatMotionLength();
+			float timeDiff = timer - MOTION_LENGTH;
 
 			float drawAlpha = 1.0f;
 			if ( 0 < timeDiff )
@@ -786,8 +786,8 @@ void Golem::z_Draw(fbx_shader& HLSL, const Donya::Vector4x4& matView, const Dony
 		break;
 	case GolemAI::ActionState::END:
 	{
-		const int MOTION_LENGTH = GolemParam::Get().DefeatMotionLength();
-		int timeDiff = timer - MOTION_LENGTH;
+		const float MOTION_LENGTH = GolemParam::Get().DefeatMotionLength();
+		float timeDiff = timer - MOTION_LENGTH;
 
 		float drawAlpha = 1.0f;
 		if (0 < timeDiff)
@@ -842,8 +842,8 @@ void Golem::bloom_Draw(fbx_shader& HLSL, const Donya::Vector4x4& matView, const 
 		break;
 	case GolemAI::ActionState::END:
 	{
-		const int MOTION_LENGTH = GolemParam::Get().DefeatMotionLength();
-		int timeDiff = timer - MOTION_LENGTH;
+		const float MOTION_LENGTH = GolemParam::Get().DefeatMotionLength();
+		float timeDiff = timer - MOTION_LENGTH;
 
 		float drawAlpha = 1.0f;
 		if (0 < timeDiff)
@@ -1145,7 +1145,7 @@ void Golem::SetFieldRadius( float newFieldRadius )
 
 bool Golem::IsDefeated() const
 {
-	const int MOTION_LENGTH = GolemParam::Get().DefeatMotionLength();
+	const float MOTION_LENGTH = GolemParam::Get().DefeatMotionLength();
 	return ( status == GolemAI::ActionState::END && MOTION_LENGTH <= timer ) ? true : false;
 }
 
