@@ -12,6 +12,8 @@
 #include "GameLibFunctions.h"	// For load and render model.
 #include "skinned_mesh.h"
 
+#include "Effect.h"
+
 #if DEBUG_MODE
 
 #include "static_mesh.h"		// For drawing collision.
@@ -944,6 +946,8 @@ void Player::AttackInit( Input input )
 	Donya::OBBFrame *pOBBF = PlayerParam::Get().HitBoxAttackF();
 	pOBBF->currentFrame = 0;
 	setAnimFlame( models.pAttack.get(), 0 );
+
+	EffectManager::GetInstance()->PlayerAbsorptionEffectSet( GetPosition() );
 }
 void Player::AttackUpdate( Input input )
 {
@@ -967,6 +971,7 @@ void Player::AttackUpdate( Input input )
 	if ( timer == ( WHOLE_FRAME - STOP_TIMING ) - STOP_LENGTH )
 	{
 		setStopAnimation( models.pAttack.get(), /* is_stop = */ false );
+		EffectManager::GetInstance()->PlayerAbsorptionEffectReSet();
 	}
 
 	// Easing process.

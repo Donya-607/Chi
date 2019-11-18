@@ -417,6 +417,8 @@ public:
 		{
 			SetStageNo( 0 );
 
+			ResetEffects();
+
 			pSceneManager->setNextScene( new SceneGameOver, false );
 		}
 	}
@@ -445,11 +447,15 @@ public:
 			{
 				SetStageNo( 0 );
 
+				ResetEffects();
+
 				pSceneManager->setNextScene( new SceneResult( NULL ), false );
 			}
 			else
 			{
 				SetStageNo( stageNo + 1 );
+
+				ResetEffects();
 
 				pSceneManager->setNextScene( new SceneGame(), false );
 			}
@@ -553,6 +559,11 @@ public:
 		StorageForScene::SetStorage( storage );
 	}
 
+	void ResetEffects()
+	{
+		EffectManager::GetInstance()->EruptionEffectReSetExist();
+	}
+
 	Donya::Vector3 GetCameraTargetPos() const
 	{
 		Donya::Vector3 cameraTarget{};
@@ -641,6 +652,9 @@ public:
 		{
 			if ( Donya::OBB::IsHitSphere( playerAttackBox, knight.GetBodyHitBox() ) )
 			{
+				Donya::Vector3 hitPosition = playerAttackBox.pos;
+				EffectManager::GetInstance()->SparkEffectSet( hitPosition );
+
 				knight.ReceiveImpact();
 			}
 		}
@@ -697,6 +711,9 @@ public:
 			{
 				if ( Donya::OBB::IsHitSphere( playerAttackBox, it ) )
 				{
+					Donya::Vector3 hitPosition = playerAttackBox.pos;
+					EffectManager::GetInstance()->SparkEffectSet( hitPosition );
+
 					golem.ReceiveImpact();
 					break;
 				}
@@ -765,6 +782,9 @@ public:
 			}
 			if ( Donya::OBB::IsHitOBB( playerAttackBox, wsRivalBody ) )
 			{
+				Donya::Vector3 hitPosition = playerAttackBox.pos;
+				EffectManager::GetInstance()->SparkEffectSet( hitPosition );
+
 				rival.ReceiveImpact();
 			}
 		}
