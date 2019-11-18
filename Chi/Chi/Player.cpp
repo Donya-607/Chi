@@ -956,12 +956,10 @@ void Player::AttackUpdate( Input input, float elapsedTime )
 {
 	timer -= 1.0f * elapsedTime;
 
-	auto Equal = []( float lhs, float rhs )
-	{
-		return ZeroEqual( lhs - rhs ) ? true : false;
-	};
-
 	const float WHOLE_FRAME	= PlayerParam::Get().FrameWholeAttacking();
+
+	float ascendingTime = WHOLE_FRAME - timer;
+
 	const float CANCELABLE	= PlayerParam::Get().FrameCancelableAttack();
 	const bool  withinCancelableRange = ( WHOLE_FRAME - CANCELABLE ) <= timer;
 	if ( !input.moveVector.IsZero() && withinCancelableRange )
@@ -971,12 +969,12 @@ void Player::AttackUpdate( Input input, float elapsedTime )
 
 	const float STOP_TIMING	= PlayerParam::Get().FrameStopAnimeTiming();
 	const float STOP_LENGTH	= PlayerParam::Get().FrameStopAnimeLength();
-	if ( Equal( timer, ( WHOLE_FRAME - STOP_TIMING ) ) )
+	if ( ascendingTime <= STOP_TIMING )
 	{
 		setStopAnimation( models.pAttack.get(), /* is_stop = */ true );
 	}
-	else
-	if ( Equal( timer, ( WHOLE_FRAME - STOP_TIMING ) - STOP_LENGTH ) )
+	// else
+	if ( STOP_TIMING + STOP_LENGTH < ascendingTime && models.pAttack->getAnimationStopFlg() )
 	{
 		setStopAnimation( models.pAttack.get(), /* is_stop = */ false );
 		EffectManager::GetInstance()->PlayerAbsorptionEffectReSet();
@@ -984,14 +982,14 @@ void Player::AttackUpdate( Input input, float elapsedTime )
 
 	// Easing process.
 	{
-		const int ADVANCE_START	= PlayerParam::Get().FrameAdvanceStart();
-		const int ADVANCE_FIN	= PlayerParam::Get().FrameAdvanceFin();
-		const int RETURN_START	= ADVANCE_FIN;
-		const int RETURN_FIN	= PlayerParam::Get().FrameReturnFin();
+		const float ADVANCE_START	= PlayerParam::Get().FrameAdvanceStart();
+		const float ADVANCE_FIN		= PlayerParam::Get().FrameAdvanceFin();
+		const float RETURN_START	= ADVANCE_FIN;
+		const float RETURN_FIN		= PlayerParam::Get().FrameReturnFin();
 
-		auto CalcEaseFactor		= []( int elapsedTime, int start, int fin, int kind, int type )
+		auto CalcEaseFactor			= []( float elapsedTime, float start, float fin, int kind, int type )
 		{
-			float percent = scast<float>( elapsedTime - start ) / scast<float>( fin - start );
+			float percent = ( elapsedTime - start ) / ( fin - start );
 			return Donya::Easing::Ease
 			(
 				scast<Donya::Easing::Kind>( kind ),
@@ -1000,14 +998,13 @@ void Player::AttackUpdate( Input input, float elapsedTime )
 			);
 		};
 
-		auto ApplyExtraOffset	= [&]()->void
+		auto ApplyExtraOffset		= [&]()->void
 		{
 			// Apply movement and reset extraOffset.
 			pos += extraOffset;
 			extraOffset = 0.0f;
 		};
 
-		float ascendingTime = WHOLE_FRAME - timer;
 		if ( ADVANCE_START <= ascendingTime && ascendingTime < ADVANCE_FIN )
 		{
 			float ease = CalcEaseFactor
@@ -1018,12 +1015,7 @@ void Player::AttackUpdate( Input input, float elapsedTime )
 				PlayerParam::Get().AdvanceEaseType()
 			);
 			
-			extraOffset = orientation.LocalFront() * ( PlayerParam::Get().AdvanceDistance() * ease * elapsedTime );
-
-			if ( Equal( ascendingTime, ADVANCE_FIN - 1 ) )
-			{
-				ApplyExtraOffset();
-			}
+			extraOffset = orientation.LocalFront() * ( PlayerParam::Get().AdvanceDistance() * ease );
 		}
 		else
 		if ( RETURN_START <= ascendingTime && ascendingTime < RETURN_FIN )
@@ -1036,12 +1028,13 @@ void Player::AttackUpdate( Input input, float elapsedTime )
 				PlayerParam::Get().ReturnEaseType()
 			);
 
-			extraOffset = -orientation.LocalFront() * ( PlayerParam::Get().AdvanceDistance() * ease * elapsedTime );
-
-			if ( Equal( ascendingTime, RETURN_FIN - 1 ) )
-			{
-				ApplyExtraOffset();
-			}
+			Donya::Vector3 advanceMax = orientation.LocalFront() * PlayerParam::Get().AdvanceDistance();
+			extraOffset =  advanceMax - orientation.LocalFront() * ( PlayerParam::Get().AdvanceDistance() * ease );
+		}
+		else
+		if ( !extraOffset.IsZero() )
+		{
+			ApplyExtraOffset();
 		}
 	}
 

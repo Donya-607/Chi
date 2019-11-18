@@ -465,6 +465,10 @@ public:
 	{
 		return animation_flame;
 	}
+	bool getAnimationStopFlg()
+	{
+		return stop_animation;
+	}
 	bool getAnimFinFlg()
 	{
 		return anim_fin;
