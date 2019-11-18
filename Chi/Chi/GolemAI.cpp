@@ -137,7 +137,7 @@ void GolemAI::AssignAttackState( float targetDistance )
 		timer			= wholeFrame.back();
 		coolTime		= coolTimeFrame.back();
 
-		intervalIndex	= ( intervalIndex <= scast<int>( gapIntervals.size() ) - 1 ) ? 0 : intervalIndex + 1;
+		intervalIndex = ( intervalIndex < scast<int>( gapIntervals.size() ) - 1 ) ? intervalIndex + 1 : 0;
 		attackTimes		= gapIntervals[intervalIndex];
 
 		storage			= pAttackChoosers.back()->Lottery( targetDistance );
