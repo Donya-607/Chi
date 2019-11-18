@@ -137,6 +137,7 @@
     <ClInclude Include="Catapult.h" />
     <ClInclude Include="Shield.h" />
     <ClInclude Include="Donya\Timer.h" />
+    <ClInclude Include="filter.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp">
@@ -240,6 +241,7 @@
     <ClCompile Include="Catapult.cpp" />
     <ClCompile Include="Shield.cpp" />
     <ClCompile Include="Donya\Timer.cpp" />
+    <ClCompile Include="filter.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="geometric_phong_ps.hlsl">
@@ -296,6 +298,30 @@
     <FxCompile Include="bloomSRV.hlsl">
       <Filter>shader</Filter>
     </FxCompile>
+    <FxCompile Include="skinned_mesh_bloom_ps.hlsl">
+      <Filter>shader</Filter>
+    </FxCompile>
+    <FxCompile Include="skinned_mesh_z_ps.hlsl">
+      <Filter>shader</Filter>
+    </FxCompile>
+    <FxCompile Include="obj_bloom_ps.hlsl">
+      <Filter>shader</Filter>
+    </FxCompile>
+    <FxCompile Include="obj_z_ps.hlsl">
+      <Filter>shader</Filter>
+    </FxCompile>
+    <FxCompile Include="geometric_primitive_z_ps.hlsl">
+      <Filter>shader</Filter>
+    </FxCompile>
+    <FxCompile Include="geometric_primitive_bloom_ps.hlsl">
+      <Filter>shader</Filter>
+    </FxCompile>
+    <FxCompile Include="filter_ps.hlsl">
+      <Filter>shader</Filter>
+    </FxCompile>
+    <FxCompile Include="filter_vs.hlsl">
+      <Filter>shader</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="geometric_primitive.hlsli">
@@ -314,6 +340,9 @@
       <Filter>shader</Filter>
     </None>
     <None Include="bloom.hlsli">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="filter.hlsli">
       <Filter>shader</Filter>
     </None>
   </ItemGroup>

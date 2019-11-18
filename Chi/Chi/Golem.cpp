@@ -744,6 +744,118 @@ void Golem::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya
 #endif // DEBUG_MODE
 }
 
+void Golem::z_Draw(fbx_shader& HLSL, const Donya::Vector4x4& matView, const Donya::Vector4x4& matProjection, float animationAcceleration)
+
+{
+	const auto& PARAM = GolemParam::Get();
+
+	const Donya::Vector3 drawOffset = PARAM.GetDrawOffset();
+	const Donya::Vector4x4 DRAW_OFFSET = Donya::Vector4x4::MakeTranslation(drawOffset);
+
+	Donya::Vector4x4 W = CalcWorldMatrix() * DRAW_OFFSET;
+	Donya::Vector4x4 WVP = W * matView * matProjection;
+
+
+	switch (status)
+	{
+	case GolemAI::ActionState::WAIT:
+		z_render(models.pIdle.get(), HLSL, WVP, W);
+		break;
+	case GolemAI::ActionState::MOVE_GET_NEAR:
+		z_render(models.pIdle.get(), HLSL, WVP, W);
+		break;
+	case GolemAI::ActionState::MOVE_GET_FAR:
+		z_render(models.pIdle.get(), HLSL, WVP, W);
+		break;
+	case GolemAI::ActionState::MOVE_SIDE:
+		z_render(models.pIdle.get(), HLSL, WVP, W);
+		break;
+	case GolemAI::ActionState::MOVE_AIM_SIDE:
+		z_render(models.pIdle.get(), HLSL, WVP, W);
+		break;
+	case GolemAI::ActionState::ATTACK_SWING:
+		z_render(models.pAtkSwing.get(), HLSL, WVP, W);
+		break;
+	case GolemAI::ActionState::ATTACK_FAST:
+		z_render(models.pAtkFast.get(), HLSL, WVP, W);
+		break;
+	case GolemAI::ActionState::ATTACK_ROTATE:
+		z_render(models.pAtkRotate.get(), HLSL, WVP, W);
+		break;
+	case GolemAI::ActionState::END:
+	{
+		const int MOTION_LENGTH = GolemParam::Get().DefeatMotionLength();
+		int timeDiff = timer - MOTION_LENGTH;
+
+		float drawAlpha = 1.0f;
+		if (0 < timeDiff)
+		{
+			drawAlpha -= GolemParam::Get().DefeatHideSpeed() * timeDiff;
+			drawAlpha = std::max(0.0f, drawAlpha);
+		}
+		z_render(models.pDefeat.get(), HLSL, WVP, W);
+	}
+	break;
+	default: break;
+	}
+
+}
+void Golem::bloom_Draw(fbx_shader& HLSL, const Donya::Vector4x4& matView, const Donya::Vector4x4& matProjection, float animationAcceleration)
+
+{
+	const auto& PARAM = GolemParam::Get();
+
+	const Donya::Vector3 drawOffset = PARAM.GetDrawOffset();
+	const Donya::Vector4x4 DRAW_OFFSET = Donya::Vector4x4::MakeTranslation(drawOffset);
+
+	Donya::Vector4x4 W = CalcWorldMatrix() * DRAW_OFFSET;
+	Donya::Vector4x4 WVP = W * matView * matProjection;
+
+
+	switch (status)
+	{
+	case GolemAI::ActionState::WAIT:
+		bloom_SRVrender(models.pIdle.get(), HLSL, WVP, W);
+		break;
+	case GolemAI::ActionState::MOVE_GET_NEAR:
+		bloom_SRVrender(models.pIdle.get(), HLSL, WVP, W);
+		break;
+	case GolemAI::ActionState::MOVE_GET_FAR:
+		bloom_SRVrender(models.pIdle.get(), HLSL, WVP, W);
+		break;
+	case GolemAI::ActionState::MOVE_SIDE:
+		bloom_SRVrender(models.pIdle.get(), HLSL, WVP, W);
+		break;
+	case GolemAI::ActionState::MOVE_AIM_SIDE:
+		bloom_SRVrender(models.pIdle.get(), HLSL, WVP, W);
+		break;
+	case GolemAI::ActionState::ATTACK_SWING:
+		bloom_SRVrender(models.pAtkSwing.get(), HLSL, WVP, W);
+		break;
+	case GolemAI::ActionState::ATTACK_FAST:
+		bloom_SRVrender(models.pAtkFast.get(), HLSL, WVP, W);
+		break;
+	case GolemAI::ActionState::ATTACK_ROTATE:
+		bloom_SRVrender(models.pAtkRotate.get(), HLSL, WVP, W);
+		break;
+	case GolemAI::ActionState::END:
+	{
+		const int MOTION_LENGTH = GolemParam::Get().DefeatMotionLength();
+		int timeDiff = timer - MOTION_LENGTH;
+
+		float drawAlpha = 1.0f;
+		if (0 < timeDiff)
+		{
+			drawAlpha -= GolemParam::Get().DefeatHideSpeed() * timeDiff;
+			drawAlpha = std::max(0.0f, drawAlpha);
+		}
+		bloom_SRVrender(models.pDefeat.get(), HLSL, WVP, W);
+	}
+	break;
+	default: break;
+	}
+
+}
 bool Golem::IsCollideAttackHitBoxes( const Donya::AABB   other, bool disableCollidingHitBoxes )
 {
 	if ( !GolemAI::IsAction( status ) || !other.enable || !other.exist ) { return false; }

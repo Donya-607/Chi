@@ -584,6 +584,19 @@ void EruptionParticle::Draw()
 	}
 }
 
+void EruptionParticle::bloom_Draw()
+{
+	DirectX::XMFLOAT4X4 viewProjection;
+	DirectX::XMStoreFloat4x4(&viewProjection, getViewMatrix() * getProjectionMatrix());
+	for (int i = 0; i < MAX_SIZE; i++)
+	{
+		if (data[i].GetExist())
+		{
+			billboard_bloom_Render(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
+		}
+	}
+}
+
 void EruptionParticle::ImGui()
 {
 	if (ImGui::TreeNode(u8"FireFry"))
@@ -814,6 +827,25 @@ void AbsorptionParticle::Draw()
 	}
 }
 
+void AbsorptionParticle::bloom_Draw()
+{
+	if (emitting)
+	{
+		DirectX::XMFLOAT4X4 viewProjection;
+		DirectX::XMStoreFloat4x4(&viewProjection, getViewMatrix() * getProjectionMatrix());
+		for (int i = 0; i < MAX_SIZE; i++)
+		{
+			if (data[i].GetExist())
+			{
+				//	setBlendMode_ADD(1.0f);
+				billboard_bloom_Render(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
+				//	billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
+				//	setBlendMode_ALPHA(1.0f);
+			}
+		}
+	}
+}
+
 void AbsorptionParticle::ImGui()
 {
 	if (ImGui::TreeNode(u8"FireFry"))
@@ -966,6 +998,21 @@ void DustParticle::Draw()
 		{
 			setBlendMode_ALPHA(data[i].GetColor().w);
 			billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize(), data[i].GetColor().w);
+			setBlendMode_ALPHA(1.0f);
+		}
+	}
+}
+
+void DustParticle::bloom_Draw()
+{
+	DirectX::XMFLOAT4X4 viewProjection;
+	DirectX::XMStoreFloat4x4(&viewProjection, getViewMatrix() * getProjectionMatrix());
+	for (int i = 0; i < MAX_SIZE; i++)
+	{
+		if (data[i].GetExist())
+		{
+			setBlendMode_ALPHA(data[i].GetColor().w);
+			billboard_bloom_Render(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize(), {1.0f,1.0f,1.0f,1.0f}, data[i].GetColor().w);
 			setBlendMode_ALPHA(1.0f);
 		}
 	}
@@ -1174,6 +1221,27 @@ void SparkParticle::Draw()
 			if (data[i].GetExist())
 			{
 				billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize(), data[i].GetColor().w);
+				//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
+				//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
+				//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
+			}
+		}
+		//setBlendMode_ALPHA(1.0f);
+	}
+}
+
+void SparkParticle::bloom_Draw()
+{
+	if (emitting)
+	{
+		//setBlendMode_ADD(1.0f);
+		DirectX::XMFLOAT4X4 viewProjection;
+		DirectX::XMStoreFloat4x4(&viewProjection, getViewMatrix() * getProjectionMatrix());
+		for (int i = 0; i < MAX_SIZE; i++)
+		{
+			if (data[i].GetExist())
+			{
+				billboard_bloom_Render(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize(), {1.0f,1.0f,1.0f,1.0f}, data[i].GetColor().w);
 				//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
 				//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
 				//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
@@ -1413,6 +1481,28 @@ void LocusParticle::Draw()
 		}
 		setBlendMode_ALPHA(1.0f);
 	}
+}
+
+void LocusParticle::bloom_Draw()
+{
+	if (emitting)
+	{
+		//setBlendMode_ADD(1.0f);
+		DirectX::XMFLOAT4X4 viewProjection;
+		DirectX::XMStoreFloat4x4(&viewProjection, getViewMatrix() * getProjectionMatrix());
+		for (int i = 0; i < MAX_SIZE; i++)
+		{
+			if (data[i].GetExist())
+			{
+				billboard_bloom_Render(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize(), {1.0f,1.0f,1.0f,1.0f},data[i].GetColor().w);
+				//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
+				//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
+				//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
+			}
+		}
+		//setBlendMode_ALPHA(1.0f);
+	}
+
 }
 
 void LocusParticle::ImGui()
@@ -1674,6 +1764,27 @@ void AccelParticle::Draw()
 	}
 }
 
+void AccelParticle::bloom_Draw()
+{
+	if (emitting)
+	{
+		setBlendMode_ADD(1.0f);
+		DirectX::XMFLOAT4X4 viewProjection;
+		DirectX::XMStoreFloat4x4(&viewProjection, getViewMatrix() * getProjectionMatrix());
+		for (int i = 0; i < MAX_SIZE; i++)
+		{
+			if (data[i].GetExist())
+			{
+				billboard_bloom_Render(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize(), {1.0f,1.0f,1.0f,1.0f},data[i].GetColor().w);
+				//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
+				//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
+				//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
+			}
+		}
+		setBlendMode_ALPHA(1.0f);
+	}
+}
+
 void AccelParticle::ImGui()
 {
 	if (ImGui::TreeNode(u8"FireFry"))
@@ -1886,6 +1997,27 @@ void StoneBreakParticle::Draw()
 	}
 }
 
+void StoneBreakParticle::bloom_Draw()
+{
+	if (emitting)
+	{
+		//setBlendMode_ADD(1.0f);
+		DirectX::XMFLOAT4X4 viewProjection;
+		DirectX::XMStoreFloat4x4(&viewProjection, getViewMatrix() * getProjectionMatrix());
+		for (int i = 0; i < MAX_SIZE; i++)
+		{
+			if (data[i].GetExist())
+			{
+				billboard_bloom_Render(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize(), {1.0f,1.0f,1.0f,1.0f},data[i].GetColor().w);
+				//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
+				//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
+				//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
+			}
+		}
+		//setBlendMode_ALPHA(1.0f);
+	}
+}
+
 void StoneBreakParticle::ImGui()
 {
 	if (ImGui::TreeNode(u8"FireFry"))
@@ -2089,6 +2221,27 @@ void CatapultBreakParticle::Draw()
 			if (data[i].GetExist())
 			{
 				billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize(), data[i].GetColor().w);
+				//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
+				//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
+				//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
+			}
+		}
+		//setBlendMode_ALPHA(1.0f);
+	}
+}
+
+void CatapultBreakParticle::bloom_Draw()
+{
+	if (emitting)
+	{
+		//setBlendMode_ADD(1.0f);
+		DirectX::XMFLOAT4X4 viewProjection;
+		DirectX::XMStoreFloat4x4(&viewProjection, getViewMatrix() * getProjectionMatrix());
+		for (int i = 0; i < MAX_SIZE; i++)
+		{
+			if (data[i].GetExist())
+			{
+				billboard_bloom_Render(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize(), {1.0f,1.0f,1.0f,1.0f},data[i].GetColor().w);
 				//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
 				//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());
 				//billboardRender(&data[i].pMesh, viewProjection, data[i].GetPos(), data[i].GetScale(), data[i].GetAngle(), getCamPos(), data[i].GetTexPos(), data[i].GetTexSize());

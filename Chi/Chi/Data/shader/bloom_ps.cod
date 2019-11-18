@@ -16,8 +16,8 @@
 // Name                 Index   Mask Register SysValue  Format   Used
 // -------------------- ----- ------ -------- -------- ------- ------
 // SV_POSITION              0   xyzw        0      POS   float       
-// COLOR                    0   xyzw        1     NONE   float   xyzw
-// TEXCOORD                 0   xy          2     NONE   float   xy  
+// COLOR                    0   xyzw        1     NONE   float       
+// TEXCOORD                 0   xy          2     NONE   float       
 // TEXCOORD                 1   xy          3     NONE   float   xy  
 // TEXCOORD                 2   xy          4     NONE   float   xy  
 // TEXCOORD                 3   xy          5     NONE   float   xy  
@@ -38,7 +38,6 @@ ps_5_0
 dcl_globalFlags refactoringAllowed | skipOptimization
 dcl_sampler s0, mode_default
 dcl_resource_texture2d (float,float,float,float) t0
-dcl_input_ps linear v1.xyzw
 dcl_input_ps linear v2.xy
 dcl_input_ps linear v3.xy
 dcl_input_ps linear v4.xy
@@ -49,7 +48,7 @@ dcl_input_ps linear v8.xy
 dcl_input_ps linear v9.xy
 dcl_input_ps linear v10.xy
 dcl_output o0.xyzw
-dcl_temps 5
+dcl_temps 4
 dcl_indexrange v2.xy 9
 dcl_indexableTemp x0[9], 4
 //
@@ -67,11 +66,7 @@ dcl_indexableTemp x0[9], 4
 //   v10.x <- input.Tex[8].x; v10.y <- input.Tex[8].y; 
 //   o0.x <- <main return value>.x; o0.y <- <main return value>.y; o0.z <- <main return value>.z; o0.w <- <main return value>.w
 //
-#line 9 "D:\Develop\Chi\Chi\Chi\Chi\bloom.hlsli"
-mov r0.xyz, l(1.200000,1.000000,0.800000,0)  // r0.x <- screenColor.x; r0.y <- screenColor.y; r0.z <- screenColor.z
-
-#line 10
-mov x0[0].x, l(0.125000)
+#line 10 "D:\Develop\Chi\Chi\Chi\Chi\bloom.hlsli"
 mov x0[1].x, l(0.031250)
 mov x0[2].x, l(0.062500)
 mov x0[3].x, l(0.031250)
@@ -82,33 +77,29 @@ mov x0[7].x, l(0.062500)
 mov x0[8].x, l(0.031250)
 
 #line 8 "D:\Develop\Chi\Chi\Chi\Chi\bloom_ps.hlsl"
-itof r1.xyzw, l(0, 0, 0, 0)  // r1.x <- color.x; r1.y <- color.y; r1.z <- color.z; r1.w <- color.w
+itof r0.xyzw, l(0, 0, 0, 0)  // r0.x <- color.x; r0.y <- color.y; r0.z <- color.z; r0.w <- color.w
 
 #line 11
-mov r0.w, l(0)  // r0.w <- i
-mov r2.xyz, r1.xyzx  // r2.x <- color.x; r2.y <- color.y; r2.z <- color.z
-mov r2.w, r1.w  // r2.w <- color.w
-mov r3.x, r0.w  // r3.x <- i
+mov r1.x, l(1)  // r1.x <- i
+mov r2.xyzw, r0.xyzw  // r2.x <- color.x; r2.y <- color.y; r2.z <- color.z; r2.w <- color.w
+mov r1.y, r1.x  // r1.y <- i
 loop 
-  ilt r3.y, r3.x, l(9)
-  breakc_z r3.y
+  ilt r1.z, r1.y, l(9)
+  breakc_z r1.z
 
 #line 12
-  sample_indexable(texture2d)(float,float,float,float) r4.xyzw, v[r3.x + 2].xyxx, t0.xyzw, s0
-  mul r4.xyzw, r4.xyzw, v1.xyzw
-  mov r3.y, x0[r3.x + 0].x
-  mul r4.xyzw, r3.yyyy, r4.xyzw
-  add r2.xyzw, r4.xyzw, r2.xyzw
+  sample_indexable(texture2d)(float,float,float,float) r3.xyzw, v[r1.y + 2].xyxx, t0.xyzw, s0  // r3.x <- sampling_color.x; r3.y <- sampling_color.y; r3.z <- sampling_color.z; r3.w <- sampling_color.w
 
 #line 13
-  iadd r3.x, r3.x, l(1)
-endloop 
+  mov r1.z, x0[r1.y + 0].x
+  mul r3.xyzw, r1.zzzz, r3.xyzw
+  add r2.xyzw, r2.xyzw, r3.xyzw
 
 #line 15
-mul r0.xyz, r0.xyzx, r2.xyzx  // r0.x <- color.x; r0.y <- color.y; r0.z <- color.z
+  iadd r1.y, r1.y, l(1)
+endloop 
 
-#line 17
-mov o0.xyz, r0.xyzx
-mov o0.w, r2.w
+#line 19
+mov o0.xyzw, r2.xyzw
 ret 
-// Approximately 29 instruction slots used
+// Approximately 23 instruction slots used

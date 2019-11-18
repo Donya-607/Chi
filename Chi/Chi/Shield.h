@@ -126,7 +126,9 @@ public:
 
 	void Update( bool isUnfolding );
 
-	void Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matProjection, const Donya::Vector4x4 &matParent );
+	void Draw(fbx_shader& HLSL, const Donya::Vector4x4& matView, const Donya::Vector4x4& matProjection, const Donya::Vector4x4& matParent);
+	void z_Draw(fbx_shader& HLSL, const Donya::Vector4x4& matView, const Donya::Vector4x4& matProjection, const Donya::Vector4x4& matParent);
+	void bloom_Draw(fbx_shader& HLSL, const Donya::Vector4x4& matView, const Donya::Vector4x4& matProjection, const Donya::Vector4x4& matParent);
 public:
 	bool CanUnfold() const;
 

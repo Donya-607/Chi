@@ -1,16 +1,16 @@
 #include "Sprite.h"
 #include "util.h"
 
-void Sprite::RoadSprite(ID3D11Device * _device, const wchar_t* _fileName)
+void Sprite::RoadSprite(ID3D11Device* _device, const wchar_t* _fileName)
 {
 	HRESULT hr = S_OK;
 
 	vertex vertices[] =
 	{
-		{ DirectX::XMFLOAT3(-0.5,+0.5,0),DirectX::XMFLOAT4(1,1,1,1) },
-		{ DirectX::XMFLOAT3(+0.5,+0.5,0),DirectX::XMFLOAT4(1,0,0,1) },
-		{ DirectX::XMFLOAT3(-0.5,-0.5,0),DirectX::XMFLOAT4(0,1,0,1) },
-		{ DirectX::XMFLOAT3(+0.5,-0.5,0),DirectX::XMFLOAT4(0,0,1,1) },
+		{ DirectX::XMFLOAT4(-0.5,+0.5,0,1.0),DirectX::XMFLOAT4(1,1,1,1) },
+		{ DirectX::XMFLOAT4(+0.5,+0.5,0,1.0),DirectX::XMFLOAT4(1,0,0,1) },
+		{ DirectX::XMFLOAT4(-0.5,-0.5,0,1.0),DirectX::XMFLOAT4(0,1,0,1) },
+		{ DirectX::XMFLOAT4(+0.5,-0.5,0,1.0),DirectX::XMFLOAT4(0,0,1,1) },
 	};
 
 	D3D11_BUFFER_DESC i_buffer = {};
@@ -109,7 +109,7 @@ void Sprite::RoadSprite(ID3D11Device * _device, const wchar_t* _fileName)
 	size = { (float)m_tex2dDesc.Width ,(float)m_tex2dDesc.Height };
 }
 
-void Sprite::Render(ID3D11DeviceContext * _dContext, float _dx, float _dy, float _dw, float _dh,
+void Sprite::Render(ID3D11DeviceContext* _dContext, float _dx, float _dy, float _dw, float _dh,
 	float _sx, float _sy, float _sw, float _sh, float _angle, float _r, float _g, float _b, float _a, float _cx, float _cy,
 	bool _flipX, bool _flipY) const
 {
@@ -122,20 +122,20 @@ void Sprite::Render(ID3D11DeviceContext * _dContext, float _dx, float _dy, float
 	float screen_width = viewport.Width;
 	float screen_height = viewport.Height;
 
-	vector2 rate = { (_dw - _dx) / (_sw-_sx),(_dh - _dy) / (_sh-_sy)};
+	vector2 rate = { (_dw - _dx) / (_sw - _sx),(_dh - _dy) / (_sh - _sy) };
 	// Set each sprite's vertices coordinate to screen spaceenum BLEND_STATE
 	// 左上
-	float x0 = _dx - _cx*rate.x;
-	float y0 = _dy - _cy*rate.y;
+	float x0 = _dx - _cx * rate.x;
+	float y0 = _dy - _cy * rate.y;
 	// 右上
-	float x1 = _dx + _dw - _cx*rate.x;
-	float y1 = _dy - _cy*rate.y;
+	float x1 = _dx + _dw - _cx * rate.x;
+	float y1 = _dy - _cy * rate.y;
 	// 左下
-	float x2 = _dx - _cx*rate.x;
-	float y2 = _dy + _dh - _cy*rate.y;
+	float x2 = _dx - _cx * rate.x;
+	float y2 = _dy + _dh - _cy * rate.y;
 	// 右下
-	float x3 = _dx + _dw - _cx*rate.x;
-	float y3 = _dy + _dh - _cy*rate.y;
+	float x3 = _dx + _dw - _cx * rate.x;
+	float y3 = _dy + _dh - _cy * rate.y;
 
 	// 回転、拡大のために中心をセットする
 	float mx = _dx + _cx;
@@ -151,24 +151,24 @@ void Sprite::Render(ID3D11DeviceContext * _dContext, float _dx, float _dy, float
 
 	// 画像の回転
 	float rx, ry;
-	float cos = cosf(_angle*0.01745f);
-	float sin = sinf(_angle*0.01745f);
+	float cos = cosf(_angle * 0.01745f);
+	float sin = sinf(_angle * 0.01745f);
 	rx = x0;
 	ry = y0;
-	x0 = cos*rx + -sin*ry;
-	y0 = sin*rx + cos*ry;
+	x0 = cos * rx + -sin * ry;
+	y0 = sin * rx + cos * ry;
 	rx = x1;
 	ry = y1;
-	x1 = cos*rx + -sin*ry;
-	y1 = sin*rx + cos*ry;
+	x1 = cos * rx + -sin * ry;
+	y1 = sin * rx + cos * ry;
 	rx = x2;
 	ry = y2;
-	x2 = cos*rx + -sin*ry;
-	y2 = sin*rx + cos*ry;
+	x2 = cos * rx + -sin * ry;
+	y2 = sin * rx + cos * ry;
 	rx = x3;
 	ry = y3;
-	x3 = cos*rx + -sin*ry;
-	y3 = sin*rx + cos*ry;
+	x3 = cos * rx + -sin * ry;
+	y3 = sin * rx + cos * ry;
 
 	// Translate sprite's centre to original position
 	x0 += mx;
@@ -181,14 +181,14 @@ void Sprite::Render(ID3D11DeviceContext * _dContext, float _dx, float _dy, float
 	y3 += my;
 
 	// NDC座標に書き換える
-	x0 = 2.0f*x0 / screen_width - 1.0f;
-	y0 = 1.0f - 2.0f*y0 / screen_height;
-	x1 = 2.0f*x1 / screen_width - 1.0f;
-	y1 = 1.0f - 2.0f*y1 / screen_height;
-	x2 = 2.0f*x2 / screen_width - 1.0f;
-	y2 = 1.0f - 2.0f*y2 / screen_height;
-	x3 = 2.0f*x3 / screen_width - 1.0f;
-	y3 = 1.0f - 2.0f*y3 / screen_height;
+	x0 = 2.0f * x0 / screen_width - 1.0f;
+	y0 = 1.0f - 2.0f * y0 / screen_height;
+	x1 = 2.0f * x1 / screen_width - 1.0f;
+	y1 = 1.0f - 2.0f * y1 / screen_height;
+	x2 = 2.0f * x2 / screen_width - 1.0f;
+	y2 = 1.0f - 2.0f * y2 / screen_height;
+	x3 = 2.0f * x3 / screen_width - 1.0f;
+	y3 = 1.0f - 2.0f * y3 / screen_height;
 
 
 	HRESULT hr = S_OK;
@@ -197,7 +197,7 @@ void Sprite::Render(ID3D11DeviceContext * _dContext, float _dx, float _dy, float
 	hr = _dContext->Map(m_buffer, 0, map, 0, &mapped_buffer);
 	_ASSERT_EXPR(SUCCEEDED(hr), hr_trace(hr));
 
-	vertex *vertices = static_cast<vertex *>(mapped_buffer.pData);
+	vertex* vertices = static_cast<vertex*>(mapped_buffer.pData);
 	vertices[0].position.x = x0;
 	vertices[0].position.y = y0;
 	vertices[1].position.x = x1;
@@ -207,6 +207,8 @@ void Sprite::Render(ID3D11DeviceContext * _dContext, float _dx, float _dy, float
 	vertices[3].position.x = x3;
 	vertices[3].position.y = y3;
 	vertices[0].position.z = vertices[1].position.z = vertices[2].position.z = vertices[3].position.z = 0.0f;
+	vertices[0].position.w = vertices[1].position.w = vertices[2].position.w = vertices[3].position.w = 1.0f;
+
 
 	if (_flipX)
 	{
@@ -270,7 +272,7 @@ void Sprite::Render(ID3D11DeviceContext * _dContext, float _dx, float _dy, float
 	_dContext->Draw(4, 0);
 }
 
-void Sprite::textout(ID3D11DeviceContext * _dContext, std::string _string, float _x, float _y, float _w, float _h, float _r, float _g, float _b, float _a) const
+void Sprite::textout(ID3D11DeviceContext* _dContext, std::string _string, float _x, float _y, float _w, float _h, float _r, float _g, float _b, float _a) const
 {
 	float sw = static_cast<float>(m_tex2dDesc.Width / 16);
 	float sh = static_cast<float>(m_tex2dDesc.Height / 16);
@@ -278,14 +280,14 @@ void Sprite::textout(ID3D11DeviceContext * _dContext, std::string _string, float
 	for (auto c : _string)
 	{
 		LONG sx = c % 0x0F;
-		Render(_dContext, _x + cursor, _y, _w, _h, sw*(c & 0x0F), sh*(c >> 4), sw, sh, 0, _r, _g, _b, _a);
+		Render(_dContext, _x + cursor, _y, _w, _h, sw * (c & 0x0F), sh * (c >> 4), sw, sh, 0, _r, _g, _b, _a);
 		cursor += _w;
 	}
 
 
 }
 
-sprite_batch::sprite_batch(ID3D11Device *device, const wchar_t *file_name, size_t max_instance) : MAX_INSTANCES(max_instance)
+sprite_batch::sprite_batch(ID3D11Device* device, const wchar_t* file_name, size_t max_instance) : MAX_INSTANCES(max_instance)
 {
 	HRESULT hr = S_OK;
 
@@ -378,12 +380,12 @@ sprite_batch::sprite_batch(ID3D11Device *device, const wchar_t *file_name, size_
 		//delete[] cso_data;
 	}
 
-	instance *instances = new instance[MAX_INSTANCES];
+	instance* instances = new instance[MAX_INSTANCES];
 	{
 		D3D11_BUFFER_DESC buffer_desc = {};
 		D3D11_SUBRESOURCE_DATA subresource_data = {};
 
-		buffer_desc.ByteWidth = sizeof(instance)*MAX_INSTANCES;
+		buffer_desc.ByteWidth = sizeof(instance) * MAX_INSTANCES;
 		buffer_desc.Usage = D3D11_USAGE_DYNAMIC;
 		buffer_desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 		buffer_desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
@@ -450,13 +452,13 @@ sprite_batch::sprite_batch(ID3D11Device *device, const wchar_t *file_name, size_
 	_ASSERT_EXPR(SUCCEEDED(hr), hr_trace(hr));
 }
 
-void sprite_batch::begin(ID3D11DeviceContext *immediate_context)
+void sprite_batch::begin(ID3D11DeviceContext* immediate_context)
 {
 	HRESULT hr = S_OK;
 
 	UINT strides[2] = { sizeof(vertex), sizeof(instance) };
 	UINT offsets[2] = { 0, 0 };
-	ID3D11Buffer *vbs[2] = { vertex_buffer, instance_buffer };
+	ID3D11Buffer* vbs[2] = { vertex_buffer, instance_buffer };
 	immediate_context->IASetVertexBuffers(0, 2, vbs, strides, offsets);
 	immediate_context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 	immediate_context->IASetInputLayout(input_layout);
@@ -474,7 +476,7 @@ void sprite_batch::begin(ID3D11DeviceContext *immediate_context)
 	D3D11_MAPPED_SUBRESOURCE mapped_buffer;
 	hr = immediate_context->Map(instance_buffer, 0, map, 0, &mapped_buffer);
 	_ASSERT_EXPR(SUCCEEDED(hr), hr_trace(hr));
-	instances = static_cast<instance *>(mapped_buffer.pData);
+	instances = static_cast<instance*>(mapped_buffer.pData);
 
 	count_instance = 0;
 }
@@ -483,37 +485,37 @@ void sprite_batch::render(float dx, float dy, float dw, float dh,
 {
 	_ASSERT_EXPR(count_instance < MAX_INSTANCES, L"Number of instances must be less than MAX_INSTANCES.");
 
-	float cx = dw*0.5f, cy = dh*0.5f; /*Center of Rotation*/
+	float cx = dw * 0.5f, cy = dh * 0.5f; /*Center of Rotation*/
 #if 0
 	DirectX::XMVECTOR scaling = DirectX::XMVectorSet(dw, dh, 1.0f, 0.0f);
 	DirectX::XMVECTOR origin = DirectX::XMVectorSet(cx, cy, 0.0f, 0.0f);
 	DirectX::XMVECTOR translation = DirectX::XMVectorSet(dx, dy, 0.0f, 0.0f);
-	DirectX::XMMATRIX M = DirectX::XMMatrixAffineTransformation2D(scaling, origin, angle*0.01745f, translation);
+	DirectX::XMMATRIX M = DirectX::XMMatrixAffineTransformation2D(scaling, origin, angle * 0.01745f, translation);
 	DirectX::XMMATRIX N(
 		2.0f / viewport.Width, 0.0f, 0.0f, 0.0f,
 		0.0f, -2.0f / viewport.Height, 0.0f, 0.0f,
 		0.0f, 0.0f, 1.0f, 0.0f,
 		-1.0f, 1.0f, 0.0f, 1.0f);
-	XMStoreFloat4x4(&instances[count_instance].ndc_transform, DirectX::XMMatrixTranspose(M*N)); //column_major
+	XMStoreFloat4x4(&instances[count_instance].ndc_transform, DirectX::XMMatrixTranspose(M * N)); //column_major
 #else
-	FLOAT c = cosf(angle*0.01745f);
-	FLOAT s = sinf(angle*0.01745f);
+	FLOAT c = cosf(angle * 0.01745f);
+	FLOAT s = sinf(angle * 0.01745f);
 	FLOAT w = 2.0f / viewport.Width;
 	FLOAT h = -2.0f / viewport.Height;
-	instances[count_instance].ndc_transform._11 = w*dw*c;
-	instances[count_instance].ndc_transform._21 = h*dw*s;
+	instances[count_instance].ndc_transform._11 = w * dw * c;
+	instances[count_instance].ndc_transform._21 = h * dw * s;
 	instances[count_instance].ndc_transform._31 = 0.0f;
 	instances[count_instance].ndc_transform._41 = 0.0f;
-	instances[count_instance].ndc_transform._12 = w*dh*-s;
-	instances[count_instance].ndc_transform._22 = h*dh*c;
+	instances[count_instance].ndc_transform._12 = w * dh * -s;
+	instances[count_instance].ndc_transform._22 = h * dh * c;
 	instances[count_instance].ndc_transform._32 = 0.0f;
 	instances[count_instance].ndc_transform._42 = 0.0f;
 	instances[count_instance].ndc_transform._13 = 0.0f;
 	instances[count_instance].ndc_transform._23 = 0.0f;
 	instances[count_instance].ndc_transform._33 = 1.0f;
 	instances[count_instance].ndc_transform._43 = 0.0f;
-	instances[count_instance].ndc_transform._14 = w*(-cx*c + -cy*-s + cx + dx) - 1.0f;
-	instances[count_instance].ndc_transform._24 = h*(-cx*s + -cy*c + cy + dy) + 1.0f;
+	instances[count_instance].ndc_transform._14 = w * (-cx * c + -cy * -s + cx + dx) - 1.0f;
+	instances[count_instance].ndc_transform._24 = h * (-cx * s + -cy * c + cy + dy) + 1.0f;
 	instances[count_instance].ndc_transform._34 = 0.0f;
 	instances[count_instance].ndc_transform._44 = 1.0f;
 #endif
@@ -534,14 +536,14 @@ float sprite_batch::textout(std::string s,
 	float cursor = 0.0f;
 	for (const auto& c : s)
 	{
-		render(x, y, sx, sy, tw*(c & 0x0F), th*(c >> 4),
+		render(x, y, sx, sy, tw * (c & 0x0F), th * (c >> 4),
 			tw, th, 0, r, g, b, a);
 		cursor += tw * sx;
 	}
 	return th * sy;
 }
 
-void sprite_batch::end(ID3D11DeviceContext *immediate_context)
+void sprite_batch::end(ID3D11DeviceContext* immediate_context)
 {
 	immediate_context->Unmap(instance_buffer, 0);
 
@@ -722,7 +724,7 @@ void SpriteBatch::begin(ID3D11DeviceContext* context)
 
 	UINT strides[2] = { sizeof(vertex), sizeof(instance) };
 	UINT offsets[2] = { 0, 0 };
-	ID3D11Buffer *vbs[2] = { buffer, instanceBuffer };
+	ID3D11Buffer* vbs[2] = { buffer, instanceBuffer };
 	context->IASetVertexBuffers(0, 2, vbs, strides, offsets);
 	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 	context->IASetInputLayout(inputLayout);
@@ -740,7 +742,7 @@ void SpriteBatch::begin(ID3D11DeviceContext* context)
 	D3D11_MAPPED_SUBRESOURCE mappedBuffer;
 	hr = context->Map(instanceBuffer, 0, map, 0, &mappedBuffer);
 	_ASSERT_EXPR(SUCCEEDED(hr), hr_trace(hr));
-	instances = static_cast<instance *>(mappedBuffer.pData);
+	instances = static_cast<instance*>(mappedBuffer.pData);
 
 	instanceCount = 0;
 }
@@ -779,13 +781,13 @@ void SpriteBatch::render(
 	DirectX::XMDirectX::XMFLOAT scaling = DirectX::XMVectorSet(dw, dh, 1.0f, 0.0f);
 	DirectX::XMDirectX::XMFLOAT origin = DirectX::XMVectorSet(cx, cy, 0.0f, 0.0f);
 	DirectX::XMDirectX::XMFLOAT translation = DirectX::XMVectorSet(dx, dy, 0.0f, 0.0f);
-	DirectX::XMMATRIX M = DirectX::XMMatrixAffineTransformation2D(scaling, origin, angle*0.01745f, translation);
+	DirectX::XMMATRIX M = DirectX::XMMatrixAffineTransformation2D(scaling, origin, angle * 0.01745f, translation);
 	DirectX::XMMATRIX N(
 		2.0f / viewport.Width, 0.0f, 0.0f, 0.0f,
 		0.0f, -2.0f / viewport.Height, 0.0f, 0.0f,
 		0.0f, 0.0f, 1.0f, 0.0f,
 		-1.0f, 1.0f, 0.0f, 1.0f);
-	XMStoreFloat4x4(&instances[count_instance].ndc_transform, DirectX::XMMatrixTranspose(M*N)); //column_major
+	XMStoreFloat4x4(&instances[count_instance].ndc_transform, DirectX::XMMatrixTranspose(M * N)); //column_major
 #else
 	FLOAT c = cosf(angle);
 	FLOAT s = sinf(angle);
@@ -844,7 +846,7 @@ float SpriteBatch::textout(std::wstring s,
 	float cursor = 0.0f;
 	for (const auto& c : s)
 	{
-		render(DirectX::XMFLOAT2(pos.x + cursor, pos.y), scale, DirectX::XMFLOAT2(tw*(c & 0x0F), th*(c >> 4)),
+		render(DirectX::XMFLOAT2(pos.x + cursor, pos.y), scale, DirectX::XMFLOAT2(tw * (c & 0x0F), th * (c >> 4)),
 			DirectX::XMFLOAT2(tw, th), DirectX::XMFLOAT2(0, 0), 0, color);
 		cursor += tw * scale.x;
 	}

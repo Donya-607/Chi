@@ -767,6 +767,174 @@ void Rival::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya
 #endif // DEBUG_MODE
 }
 
+void Rival::z_Draw(fbx_shader& HLSL, const Donya::Vector4x4& matView, const Donya::Vector4x4& matProjection, float animationAcceleration)
+
+{
+	const auto& PARAM = RivalParam::Open();
+
+	const Donya::Vector3 drawOffset = PARAM.drawOffset;
+	const Donya::Vector4x4 DRAW_OFFSET = Donya::Vector4x4::MakeTranslation(drawOffset);
+
+	Donya::Vector4x4 W = CalcWorldMatrix() * DRAW_OFFSET;
+	Donya::Vector4x4 WVP = W * matView * matProjection;
+
+	if (extraStatus != ExtraState::NONE)
+	{
+		switch (extraStatus)
+		{
+		case ExtraState::RUSH_WAIT:
+			z_render(models.pAtkRushWait.get(), HLSL, WVP, W);
+			break;
+		case ExtraState::RUSH_RUN:
+			z_render(models.pAtkRushSlash.get(), HLSL, WVP, W);
+			break;
+		case ExtraState::RUSH_SLASH:
+			z_render(models.pAtkRushSlash.get(), HLSL, WVP, W);
+			break;
+		case ExtraState::BREAK:
+			z_render(models.pBreak.get(), HLSL, WVP, W);
+			break;
+		case ExtraState::LEAVE:
+			z_render(models.pLeave.get(), HLSL, WVP, W);
+			break;
+		case ExtraState::DEFEAT:
+		{
+			const int MOTION_LENGTH = RivalParam::Open().defeat.motionLength;
+			int timeDiff = timer - MOTION_LENGTH;
+
+			float drawAlpha = 1.0f;
+			if (0 < timeDiff)
+			{
+				drawAlpha -= RivalParam::Open().defeat.hideSpeed * timeDiff;
+				drawAlpha = std::max(0.0f, drawAlpha);
+			}
+			z_render(models.pDefeat.get(), HLSL, WVP, W);
+		}
+		break;
+		default: break;
+		}
+	}
+	else
+	{
+		switch (status)
+		{
+		case RivalAI::ActionState::WAIT:
+			z_render(models.pIdle.get(), HLSL, WVP, W);
+			break;
+		case RivalAI::ActionState::MOVE_GET_NEAR:
+			z_render(models.pRunFront.get(), HLSL, WVP, W);
+			break;
+		case RivalAI::ActionState::MOVE_GET_FAR:
+			z_render(models.pLeave.get(), HLSL, WVP, W);
+			break;
+		case RivalAI::ActionState::MOVE_SIDE:
+			(Donya::SignBit(moveSign) == 1)
+				? z_render(models.pRunRight.get(), HLSL, WVP, W)
+				: z_render(models.pRunLeft.get(), HLSL, WVP, W);
+			break;
+		case RivalAI::ActionState::MOVE_AIM_SIDE:
+			(Donya::SignBit(moveSign) == 1)
+				? z_render(models.pRunRight.get(), HLSL, WVP, W)
+				: z_render(models.pRunLeft.get(), HLSL, WVP, W);
+			break;
+		case RivalAI::ActionState::ATTACK_BARRAGE:
+			z_render(models.pAtkBarrage.get(), HLSL, WVP, W);
+			break;
+		case RivalAI::ActionState::ATTACK_LINE:
+			z_render(models.pAtkLine.get(), HLSL, WVP, W);
+			break;
+		case RivalAI::ActionState::ATTACK_RAID:
+			z_render(models.pAtkRaid.get(), HLSL, WVP, W);
+			break;
+		default: break;
+		}
+	}
+
+}
+void Rival::bloom_Draw(fbx_shader& HLSL, const Donya::Vector4x4& matView, const Donya::Vector4x4& matProjection, float animationAcceleration)
+
+{
+	const auto& PARAM = RivalParam::Open();
+
+	const Donya::Vector3 drawOffset = PARAM.drawOffset;
+	const Donya::Vector4x4 DRAW_OFFSET = Donya::Vector4x4::MakeTranslation(drawOffset);
+
+	Donya::Vector4x4 W = CalcWorldMatrix() * DRAW_OFFSET;
+	Donya::Vector4x4 WVP = W * matView * matProjection;
+
+	if (extraStatus != ExtraState::NONE)
+	{
+		switch (extraStatus)
+		{
+		case ExtraState::RUSH_WAIT:
+			bloom_SRVrender(models.pAtkRushWait.get(), HLSL, WVP, W);
+			break;
+		case ExtraState::RUSH_RUN:
+			bloom_SRVrender(models.pAtkRushSlash.get(), HLSL, WVP, W);
+			break;
+		case ExtraState::RUSH_SLASH:
+			bloom_SRVrender(models.pAtkRushSlash.get(), HLSL, WVP, W);
+			break;
+		case ExtraState::BREAK:
+			bloom_SRVrender(models.pBreak.get(), HLSL, WVP, W);
+			break;
+		case ExtraState::LEAVE:
+			bloom_SRVrender(models.pLeave.get(), HLSL, WVP, W);
+			break;
+		case ExtraState::DEFEAT:
+		{
+			const int MOTION_LENGTH = RivalParam::Open().defeat.motionLength;
+			int timeDiff = timer - MOTION_LENGTH;
+
+			float drawAlpha = 1.0f;
+			if (0 < timeDiff)
+			{
+				drawAlpha -= RivalParam::Open().defeat.hideSpeed * timeDiff;
+				drawAlpha = std::max(0.0f, drawAlpha);
+			}
+			bloom_SRVrender(models.pDefeat.get(), HLSL, WVP, W);
+		}
+		break;
+		default: break;
+		}
+	}
+	else
+	{
+		switch (status)
+		{
+		case RivalAI::ActionState::WAIT:
+			bloom_SRVrender(models.pIdle.get(), HLSL, WVP, W);
+			break;
+		case RivalAI::ActionState::MOVE_GET_NEAR:
+			bloom_SRVrender(models.pRunFront.get(), HLSL, WVP, W);
+			break;
+		case RivalAI::ActionState::MOVE_GET_FAR:
+			bloom_SRVrender(models.pLeave.get(), HLSL, WVP, W);
+			break;
+		case RivalAI::ActionState::MOVE_SIDE:
+			(Donya::SignBit(moveSign) == 1)
+				? bloom_SRVrender(models.pRunRight.get(), HLSL, WVP, W)
+				: bloom_SRVrender(models.pRunLeft.get(), HLSL, WVP, W);
+			break;
+		case RivalAI::ActionState::MOVE_AIM_SIDE:
+			(Donya::SignBit(moveSign) == 1)
+				? bloom_SRVrender(models.pRunRight.get(), HLSL, WVP, W)
+				: bloom_SRVrender(models.pRunLeft.get(), HLSL, WVP, W);
+			break;
+		case RivalAI::ActionState::ATTACK_BARRAGE:
+			bloom_SRVrender(models.pAtkBarrage.get(), HLSL, WVP, W);
+			break;
+		case RivalAI::ActionState::ATTACK_LINE:
+			bloom_SRVrender(models.pAtkLine.get(), HLSL, WVP, W);
+			break;
+		case RivalAI::ActionState::ATTACK_RAID:
+			bloom_SRVrender(models.pAtkRaid.get(), HLSL, WVP, W);
+			break;
+		default: break;
+		}
+	}
+
+}
 bool Rival::IsCollideAttackHitBoxes( const Donya::AABB other, bool disableCollidingHitBoxes )
 {
 	if ( !RivalAI::IsAction( status ) || !other.enable || !other.exist ) { return false; }

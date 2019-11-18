@@ -19,9 +19,29 @@ namespace GameLib
 		ID3D11Device* device = nullptr;
 		ID3D11DeviceContext* context = nullptr;
 		IDXGISwapChain* swapChain = nullptr;
-		ID3D11RenderTargetView* renderTargetView = nullptr;
+		ID3D11RenderTargetView* renderTargetView = nullptr;//最終書き出しの画面
 		ID3D11DepthStencilView* depthStencilView = nullptr;
 		ID3D11BlendState* blendState = nullptr;
+
+		//普通の画面
+		ID3D11RenderTargetView* original_RT = nullptr;
+		ID3D11ShaderResourceView* original_SRV = nullptr;
+		//z値のテクスチャ用の画面
+		ID3D11RenderTargetView* z_RT = nullptr;
+		ID3D11ShaderResourceView* z_SRV = nullptr;
+		//ブルーム用の指定色書き出し画面
+		ID3D11RenderTargetView* bloom_RT = nullptr;
+		ID3D11ShaderResourceView* bloom_SRV = nullptr;
+		//フィルター用の書き出し画面
+		ID3D11RenderTargetView* filter_RT = nullptr;
+		ID3D11ShaderResourceView* filter_SRV = nullptr;
+
+		//z値用のPS
+		ID3D11PixelShader* skinned_mesh_z_ps;
+		ID3D11PixelShader* static_mesh_z_ps;
+		//ブルーム用のPS
+		ID3D11PixelShader* skinned_mesh_bloom_ps;
+		ID3D11PixelShader* static_mesh_bloom_ps;
 
 		std::wstring projectName;
 
@@ -30,7 +50,7 @@ namespace GameLib
 		Primitive* primitive = nullptr;
 		//PrimitiveBatch*        primitiveBatch;
 		high_resolution_timer    hrTimer;
-		Camera*					 cam;
+		Camera* cam;
 		line_light				 LineLight;
 		std::vector<point_light> pointLights;
 		XboxPad					 pad[4];
@@ -38,8 +58,10 @@ namespace GameLib
 		keyInput				 keyboard;
 		dragDrop				drag_drop;
 		bloom					Bloom;
+		filter					Filter;
 		std::vector<wstring> loadFileName;
 		bool loadFin;
+		std::vector<DirectX::XMFLOAT4> judge_color;
 	};
 
 	static Members m;
@@ -157,6 +179,16 @@ namespace GameLib
 		return true;
 	}
 
+	void setJudgeColor(const DirectX::XMFLOAT4& color)
+	{
+		m.judge_color.push_back(color);
+	}
+
+	DirectX::XMFLOAT4 getJudgeColor(const int index)
+	{
+		return m.judge_color[index];
+	}
+
 
 	float getDeltaTime()
 	{
@@ -187,6 +219,8 @@ namespace GameLib
 		ImGui::CreateContext();
 		ImGui_ImplWin32_Init(m.hwnd);
 		ImGui_ImplDX11_Init(m.device, m.context);
+		UpdateWindow(m.hwnd);
+
 
 	}
 
@@ -232,6 +266,11 @@ namespace GameLib
 		m.context->ClearRenderTargetView(m.renderTargetView, ClearColor);
 
 		m.context->ClearDepthStencilView(m.depthStencilView, D3D11_CLEAR_DEPTH | D3D10_CLEAR_STENCIL, 1.0f, 0);
+
+		clearRT(m.original_RT, { 0,0,0,0 });
+		clearRT(m.bloom_RT, { 0,0,0,0 });
+		clearRT(m.z_RT, { 0,0,0,0 });
+		clearRT(m.filter_RT, { 0,0,0,0 });
 
 		m.context->OMSetRenderTargets(1, &m.renderTargetView, m.depthStencilView);
 
@@ -317,6 +356,16 @@ namespace GameLib
 			return 1;
 		switch (msg)
 		{
+		case WM_DESTROY:
+			PostQuitMessage(0);
+			break;
+		case WM_KEYDOWN:
+			if (wParam == VK_ESCAPE)
+			{
+				PostMessage(hwnd, WM_CLOSE, 0, 0);
+				break;
+			}
+
 		case WM_ACTIVATEAPP:
 		case WM_INPUT:
 		case WM_MOUSEMOVE:
@@ -342,15 +391,6 @@ namespace GameLib
 			EndPaint(hwnd, &ps);
 			break;
 		}
-		case WM_DESTROY:
-			PostQuitMessage(0);
-			break;
-		case WM_KEYDOWN:
-			if (wParam == VK_ESCAPE)
-			{
-				PostMessage(hwnd, WM_CLOSE, 0, 0);
-				break;
-			}
 		case WM_SYSKEYDOWN:
 		case WM_KEYUP:
 		case WM_SYSKEYUP:
@@ -512,8 +552,17 @@ namespace GameLib
 			m.context->OMSetBlendState(m.Blender->states[m.Blender->BS_NONE], nullptr, 0xFFFFFFFF);
 			m.Bloom.init(m.device);
 			m.cam = new Camera();
+			m.Filter.init(m.device, m.context);
+			createSRV(&m.original_SRV, &m.original_RT);
+			createSRV(&m.bloom_SRV, &m.bloom_RT);
+			createSRV(&m.z_SRV, &m.z_RT);
+			createSRV(&m.filter_SRV, &m.filter_RT);
+
+			ResourceManager::LoadPixelShader(m.device, "./Data/shader/skinned_mesh_z_ps.cso", &m.skinned_mesh_z_ps);
+			ResourceManager::LoadPixelShader(m.device, "./Data/shader/skinned_mesh_bloom_ps.cso", &m.skinned_mesh_bloom_ps);
+
 			FontManager::getInstance()->init(m.device);
-			return true;
+			return S_OK;
 		}
 
 
@@ -546,19 +595,65 @@ namespace GameLib
 		m.context->ClearRenderTargetView(RT, (const float*)&color);
 		m.context->ClearDepthStencilView(m.depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1, 0);
 	}
+	void clearDepth()
+	{
+		m.context->ClearDepthStencilView(m.depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1, 0);
+	}
 	void postEffect_Bloom_SRV(ID3D11ShaderResourceView** _shaderResource, DirectX::XMFLOAT4 _judge_color)
 	{
 		m.Bloom.createSRV(m.context, _shaderResource, _judge_color);
 	}
-	void postEffect_Bloom(ID3D11ShaderResourceView** _shaderResource, float _blur_value, DirectX::XMFLOAT4 _judge_color)
+	void postEffect_Bloom(float _blur_value, bool flg)
 	{
-		m.context->OMSetBlendState(m.Blender->states[1], nullptr, 0xFFFFFFFF);
+		setRenderTarget(&m.filter_RT);
 
-		m.Bloom.Render(m.context, _shaderResource, _blur_value, _judge_color);
+		m.Bloom.firstRender(m.context, &m.original_SRV);
 
-		m.context->OMSetBlendState(m.Blender->states[0], nullptr, 0xFFFFFFFF);
+		if (flg)
+		{
+			m.context->OMSetBlendState(m.Blender->states[2], nullptr, 0xFFFFFFFF);
+
+			m.Bloom.Render(m.context, &m.bloom_SRV, _blur_value);
+
+			m.context->OMSetBlendState(m.Blender->states[0], nullptr, 0xFFFFFFFF);
+		}
 	}
 
+	void setBloomRT()
+	{
+		m.context->OMSetRenderTargets(1, &m.bloom_RT, m.depthStencilView);
+	}
+	void clearBloomRT()
+	{
+		DirectX::XMFLOAT4 color(0.5, 0.5, 0.5, 1);
+		m.context->ClearRenderTargetView(m.bloom_RT, (const float*)&color);
+	}
+
+	void filter_screen(float bright, float contrast, float saturate)
+	{
+		resetRendertarget();
+		m.Filter.Render(m.context, &m.filter_SRV, bright, contrast, saturate);
+	}
+
+	ID3D11ShaderResourceView* getOriginalScreen()
+	{
+		return m.original_SRV;
+	}
+
+	ID3D11ShaderResourceView* getZScreen()
+	{
+		return m.z_SRV;
+	}
+
+	ID3D11ShaderResourceView* getBloomScreen()
+	{
+		return m.bloom_SRV;
+	}
+
+	ID3D11ShaderResourceView* getFilterScreen()
+	{
+		return m.filter_SRV;
+	}
 
 	std::wstring getLoadedFileName()
 	{
@@ -702,13 +797,13 @@ namespace GameLib
 
 	namespace light
 	{
-		void setLineLight(const DirectX::XMFLOAT4& _lightDirection, const DirectX::XMFLOAT4& _lightColor)
+		void setLineLight(const DirectX::XMFLOAT4& _position, const DirectX::XMFLOAT4& _lightDirection, const DirectX::XMFLOAT4& _lightColor)
 		{
-			m.LineLight.setLineLight(_lightDirection, _lightColor);
+			m.LineLight.setLineLight(_position, _lightDirection, _lightColor);
 		}
-		void setLineLight(const float x, const float y, const float z, const float w, const float r, const float g, const float b, const float cw)
+		void setLineLight(const float px, const float py, const float pz, const float pw, const float x, const float y, const float z, const float w, const float r, const float g, const float b, const float cw)
 		{
-			m.LineLight.setLineLight({ x, y, z, w }, { r,g,b,cw });
+			m.LineLight.setLineLight({ px,py,pz,pw }, { x, y, z, w }, { r,g,b,cw });
 		}
 
 		line_light& getLineLight()
@@ -794,12 +889,30 @@ namespace GameLib
 			bool wireFlg
 		)
 		{
+			setRenderTarget(&m.original_RT);
 			_mesh->render(m.context, SynthesisMatrix, worldMatrix, camPos, _line_light, _point_light, materialColor, wireFlg);
 		}
 
-		void builboradRender(static_mesh* _mesh, const DirectX::XMFLOAT4X4& view_projection, const DirectX::XMFLOAT4& _pos, const DirectX::XMFLOAT2 _scale, const float _angle, const DirectX::XMFLOAT4& _cam_pos, const DirectX::XMFLOAT2& texpos, const DirectX::XMFLOAT2& texsize,const float alpha,const DirectX::XMFLOAT3& color)
+		void builboradRender(static_mesh* _mesh, const DirectX::XMFLOAT4X4& view_projection, const DirectX::XMFLOAT4& _pos, const DirectX::XMFLOAT2 _scale, const float _angle, const DirectX::XMFLOAT4& _cam_pos, const DirectX::XMFLOAT2& texpos, const DirectX::XMFLOAT2& texsize, const float alpha, const DirectX::XMFLOAT3& color)
 		{
-			_mesh->billboardRender(m.context, view_projection, _pos, _scale, _angle, _cam_pos, texpos, texsize,alpha,color);
+			blend::setBlendMode(blend::ALPHA, 255);
+			setRenderTarget(&m.original_RT);
+			_mesh->billboardRender(m.context, view_projection, _pos, _scale, _angle, _cam_pos, texpos, texsize, alpha, color);
+			blend::setBlendMode(blend::NONE, 255);
+		}
+
+		void builborad_z_Render(static_mesh* _mesh, const DirectX::XMFLOAT4X4& view_projection, const DirectX::XMFLOAT4& _pos, const DirectX::XMFLOAT2 _scale, const float _angle, const DirectX::XMFLOAT4& camPos, const DirectX::XMFLOAT2& texpos, const DirectX::XMFLOAT2& texsize, const float alpha, const DirectX::XMFLOAT3& color)
+		{
+			setRenderTarget(&m.z_RT);
+			_mesh->billboard_z_render(m.context, view_projection, _pos, _scale, _angle, camPos, texpos, texsize, alpha, color);
+		}
+
+		void builborad_bloom_Render(static_mesh* _mesh, const DirectX::XMFLOAT4X4& view_projection, const DirectX::XMFLOAT4& _pos, const DirectX::XMFLOAT2 _scale, const float _angle, const DirectX::XMFLOAT4& _cam_pos, const DirectX::XMFLOAT2& texpos, const DirectX::XMFLOAT2& texsize, const float alpha, const DirectX::XMFLOAT3& color, const DirectX::XMFLOAT4& judge_color)
+		{
+			blend::setBlendMode(blend::ALPHA, 255);
+			setRenderTarget(&m.bloom_RT);
+			_mesh->billboard_bloom_SRV_render(m.context, view_projection, _pos, _scale, _angle, _cam_pos, texpos, texsize, alpha, color, judge_color, m.z_SRV);
+			blend::setBlendMode(blend::NONE, 255);
 		}
 
 		void staticMeshShadowRender1(static_mesh* _mesh,
@@ -826,9 +939,9 @@ namespace GameLib
 
 	namespace skinnedMesh
 	{
-		void loadFBX(skinned_mesh* _mesh, const std::string& _fbxName,bool load_cerealize,bool is_Tpose)
+		void loadFBX(skinned_mesh* _mesh, const std::string& _fbxName, bool load_cerealize, bool is_Tpose)
 		{
-			_mesh->setInfo(m.device, _fbxName, load_cerealize,is_Tpose);
+			_mesh->setInfo(m.device, _fbxName, load_cerealize, is_Tpose);
 		}
 
 		void loadShader(fbx_shader& shader, std::string vertex, std::string pixel, std::string noBoneVertex, std::string notexPS)
@@ -880,15 +993,28 @@ namespace GameLib
 			return _mesh->calcTransformedPosBySpecifyMesh(_pos, _mesh_name);
 		}
 
-		bool calcTransformedPosBySpecifyMesh(skinned_mesh* _mesh, DirectX::XMFLOAT3& _pos, std::string _mesh_name,bone_animation* anim)
+		bool calcTransformedPosBySpecifyMesh(skinned_mesh* _mesh, DirectX::XMFLOAT3& _pos, std::string _mesh_name, bone_animation* anim)
 		{
-			return _mesh->calcTransformedPosBySpecifyMesh(_pos, _mesh_name,anim);
+			return _mesh->calcTransformedPosBySpecifyMesh(_pos, _mesh_name, anim);
 		}
 
-		void skinnedMeshRender(skinned_mesh* _mesh, fbx_shader& hlsl, float magnification, const DirectX::XMFLOAT4X4& SynthesisMatrix, const DirectX::XMFLOAT4X4& worldMatrix, const DirectX::XMFLOAT4& camPos, line_light& lineLight, std::vector<point_light>& _point_light, const DirectX::XMFLOAT4& materialColor, bool wireFlg,bool animation_flg)
+		void skinnedMeshRender(skinned_mesh* _mesh, fbx_shader& hlsl, float magnification, const DirectX::XMFLOAT4X4& SynthesisMatrix, const DirectX::XMFLOAT4X4& worldMatrix, const DirectX::XMFLOAT4& camPos, line_light& lineLight, std::vector<point_light>& _point_light, const DirectX::XMFLOAT4& materialColor, bool wireFlg, bool animation_flg)
 		{
-			_mesh->render(m.context, hlsl, SynthesisMatrix, worldMatrix, camPos, lineLight, _point_light, materialColor, wireFlg, m.hrTimer.time_interval(),magnification,animation_flg);
+			setRenderTarget(&m.original_RT);
+			_mesh->render(m.context, hlsl, SynthesisMatrix, worldMatrix, camPos, lineLight, _point_light, materialColor, wireFlg, m.hrTimer.time_interval(), magnification, animation_flg);
 
+		}
+
+		void z_render(skinned_mesh* _mesh, fbx_shader& hlsl, const DirectX::XMFLOAT4X4& SynthesisMatrix, const DirectX::XMFLOAT4X4& worldMatrix)
+		{
+			setRenderTarget(&m.z_RT);
+			_mesh->z_render(m.context, hlsl, SynthesisMatrix, worldMatrix, m.cam->getCameraPos(), m.skinned_mesh_z_ps);
+		}
+
+		void bloom_SRVrender(skinned_mesh* _mesh, fbx_shader& hlsl, const DirectX::XMFLOAT4X4& SynthesisMatrix, const DirectX::XMFLOAT4X4& worldMatrix, const DirectX::XMFLOAT4& materialColor, const DirectX::XMFLOAT4& judge_color)
+		{
+			setRenderTarget(&m.bloom_RT);
+			_mesh->bloom_SRVrender(m.context, hlsl, SynthesisMatrix, worldMatrix, m.cam->getCameraPos(), m.LineLight, m.pointLights, materialColor, m.skinned_mesh_bloom_ps, judge_color, m.z_SRV);
 		}
 
 		void skinnedMeshRender(
@@ -904,7 +1030,7 @@ namespace GameLib
 			bool wireFlg
 		)
 		{
-			_mesh->render(m.context, hlsl, anim,SynthesisMatrix, worldMatrix, camPos, lineLight, _point_light, materialColor, wireFlg, m.hrTimer.time_interval());
+			_mesh->render(m.context, hlsl, anim, SynthesisMatrix, worldMatrix, camPos, lineLight, _point_light, materialColor, wireFlg, m.hrTimer.time_interval());
 		}
 
 
@@ -930,7 +1056,7 @@ namespace GameLib
 
 		void setAnimFlame(bone_animation* _anim, const int _anim_flame)
 		{
-			_anim->setAnimFlame(static_cast<float>(_anim_flame));
+			_anim->setAnimFlame(_anim_flame);
 		}
 
 

@@ -1,6 +1,7 @@
 struct VS_OUT
 {
 	float4 position : SV_POSITION;
+	float4 pos : POSITION;
 	float4 color : COLOR;
 	float2 texcoord : TEXCOORD;
 
@@ -15,6 +16,7 @@ struct Light
 
 struct lineLight
 {
+	float4 pos;
 	float4 direction;
 	float4 color;
 };
@@ -34,4 +36,7 @@ cbuffer CONSTANT_BUFFER : register(b0)
 	lineLight line_light;
 	Light pntLight[5];
 	Material material;
+	float4 judge_color;
+	float4 screen_size;
+
 };

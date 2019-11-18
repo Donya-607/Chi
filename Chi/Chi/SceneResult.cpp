@@ -129,7 +129,7 @@ void SceneResult::init()
 	SaveParameter();
 
 	lights.direction.color = Donya::Vector4(1.0f, 1.0f, 1.0f, 1.0f);
-	getLineLight().setLineLight(lights.direction.direction, lights.direction.color);
+	getLineLight().setLineLight(lights.direction.position,lights.direction.direction, lights.direction.color);
 	for (const auto i : lights.points)
 	{
 		setPointLight(i);

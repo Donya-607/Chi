@@ -20,7 +20,9 @@ public:
 
 	void Update();
 
-	void Draw( fbx_shader& hlsl,const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matProjection );
+	void Draw(fbx_shader& hlsl, const Donya::Vector4x4& matView, const Donya::Vector4x4& matProjection);
+	void z_Draw(fbx_shader& hlsl, const Donya::Vector4x4& matView, const Donya::Vector4x4& matProjection);
+	void bloom_Draw(fbx_shader& hlsl, const Donya::Vector4x4& matView, const Donya::Vector4x4& matProjection);
 private:
 	void LoadModel();
 };

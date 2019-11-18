@@ -6,10 +6,10 @@ void bloom::init(ID3D11Device* _device)
 
 	vertex vertices[] =
 	{
-		{ DirectX::XMFLOAT4(-0.5,+0.5,0,1.0),DirectX::XMFLOAT4(1,1,1,1) },
-		{ DirectX::XMFLOAT4(+0.5,+0.5,0,1.0),DirectX::XMFLOAT4(1,0,0,1) },
-		{ DirectX::XMFLOAT4(-0.5,-0.5,0,1.0),DirectX::XMFLOAT4(0,1,0,1) },
-		{ DirectX::XMFLOAT4(+0.5,-0.5,0,1.0),DirectX::XMFLOAT4(0,0,1,1) },
+		{ DirectX::XMFLOAT4(-0.5,+0.5,0,1.0),DirectX::XMFLOAT4(1,1,1,1),DirectX::XMFLOAT2(0,0) },
+		{ DirectX::XMFLOAT4(+0.5,+0.5,0,1.0),DirectX::XMFLOAT4(1,0,0,1),DirectX::XMFLOAT2(1,0) },
+		{ DirectX::XMFLOAT4(-0.5,-0.5,0,1.0),DirectX::XMFLOAT4(0,1,0,1),DirectX::XMFLOAT2(0,1) },
+		{ DirectX::XMFLOAT4(+0.5,-0.5,0,1.0),DirectX::XMFLOAT4(0,0,1,1),DirectX::XMFLOAT2(1,1) },
 	};
 
 	D3D11_BUFFER_DESC i_buffer = {};
@@ -45,6 +45,12 @@ void bloom::init(ID3D11Device* _device)
 
 	//Pixel Shader
 	if (!ResourceManager::LoadPixelShader(_device, "./Data/shader/bloom_ps.cso", &m_pixel))
+	{
+		assert(0 && "ピクセルシェーダーの作成に失敗");
+		return;
+	}
+
+	if (!ResourceManager::LoadPixelShader(_device, "./Data/shader/bloom_first_ps.cso", &m_first_pixel))
 	{
 		assert(0 && "ピクセルシェーダーの作成に失敗");
 		return;
@@ -127,7 +133,7 @@ void bloom::init(ID3D11Device* _device)
 
 }
 
-void bloom::Render(ID3D11DeviceContext* _dContext,ID3D11ShaderResourceView** _SRV, float _blur_value, DirectX::XMFLOAT4 _judge_color) const
+void bloom::firstRender(ID3D11DeviceContext* _dContext, ID3D11ShaderResourceView** _SRV) const
 {
 	UINT stride = sizeof(vertex);
 	UINT offset = 0;
@@ -191,14 +197,113 @@ void bloom::Render(ID3D11DeviceContext* _dContext,ID3D11ShaderResourceView** _SR
 	vertices[3].texcoord.y = 1;
 
 
-	DirectX::XMFLOAT4 color = _judge_color;
+	DirectX::XMFLOAT4 color = { 1,1,1,1 };
 	vertices[0].color = vertices[1].color = vertices[2].color = vertices[3].color = color;
-	
+
+	_dContext->Unmap(m_buffer, 0);
+	_dContext->IASetVertexBuffers(0, 1, &m_buffer, &stride, &offset);
+
+	cbuffer cb;
+	cb.blurValue = 0;
+	cb.screenWidth = screen_width;
+	cb.screenHeight = screen_height;
+	_dContext->UpdateSubresource(constant_buffer, 0, nullptr, &cb, 0, 0);
+	_dContext->VSSetConstantBuffers(0, 1, &constant_buffer);
+	_dContext->PSSetConstantBuffers(0, 1, &constant_buffer);
+
+
+
+	_dContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+
+	_dContext->IASetInputLayout(m_input);
+
+	_dContext->RSSetState(m_rasterize);
+
+	_dContext->VSSetShader(m_vertex, nullptr, 0);
+
+	_dContext->PSSetShader(m_first_pixel, nullptr, 0);
+
+	_dContext->PSSetShaderResources(0, 1, _SRV);
+	_dContext->PSSetSamplers(0, 1, &m_sampleState);
+
+	_dContext->OMSetDepthStencilState(m_depth, 1);
+
+	_dContext->Draw(4, 0);
+}
+
+void bloom::Render(ID3D11DeviceContext* _dContext, ID3D11ShaderResourceView** _SRV, float _blur_value) const
+{
+	UINT stride = sizeof(vertex);
+	UINT offset = 0;
+
+	D3D11_VIEWPORT viewport;
+	UINT num_viewports = 1;
+	_dContext->RSGetViewports(&num_viewports, &viewport);
+	float screen_width = viewport.Width;
+	float screen_height = viewport.Height;
+
+	// 左上
+	float x0 = 0;
+	float y0 = 0;
+	// 右上
+	float x1 = screen_width;
+	float y1 = 0;
+	// 左下
+	float x2 = 0;
+	float y2 = screen_height;
+	// 右下
+	float x3 = screen_width;
+	float y3 = screen_height;
+
+	// NDC座標に書き換える
+	x0 = 2.0f * x0 / screen_width - 1.0f;
+	y0 = 1.0f - 2.0f * y0 / screen_height;
+	x1 = 2.0f * x1 / screen_width - 1.0f;
+	y1 = 1.0f - 2.0f * y1 / screen_height;
+	x2 = 2.0f * x2 / screen_width - 1.0f;
+	y2 = 1.0f - 2.0f * y2 / screen_height;
+	x3 = 2.0f * x3 / screen_width - 1.0f;
+	y3 = 1.0f - 2.0f * y3 / screen_height;
+
+
+	HRESULT hr = S_OK;
+	D3D11_MAP map = D3D11_MAP_WRITE_DISCARD;
+	D3D11_MAPPED_SUBRESOURCE mapped_buffer;
+	hr = _dContext->Map(m_buffer, 0, map, 0, &mapped_buffer);
+	_ASSERT_EXPR(SUCCEEDED(hr), hr_trace(hr));
+
+	vertex* vertices = static_cast<vertex*>(mapped_buffer.pData);
+	vertices[0].position.x = x0;
+	vertices[0].position.y = y0;
+	vertices[1].position.x = x1;
+	vertices[1].position.y = y1;
+	vertices[2].position.x = x2;
+	vertices[2].position.y = y2;
+	vertices[3].position.x = x3;
+	vertices[3].position.y = y3;
+	vertices[0].position.z = vertices[1].position.z = vertices[2].position.z = vertices[3].position.z = 0.0f;
+	vertices[0].position.w = vertices[1].position.w = vertices[2].position.w = vertices[3].position.w = 1.0f;
+
+	vertices[0].texcoord.x = 0;
+	vertices[1].texcoord.x = 1;
+	vertices[2].texcoord.x = 0;
+	vertices[3].texcoord.x = 1;
+
+	vertices[0].texcoord.y = 0;
+	vertices[1].texcoord.y = 0;
+	vertices[2].texcoord.y = 1;
+	vertices[3].texcoord.y = 1;
+
+
+	DirectX::XMFLOAT4 color = { 1,1,1,1 };
+	vertices[0].color = vertices[1].color = vertices[2].color = vertices[3].color = color;
+
 	_dContext->Unmap(m_buffer, 0);
 	cbuffer cb;
 	cb.blurValue = _blur_value;
 	cb.screenWidth = screen_width;
 	cb.screenHeight = screen_height;
+
 	_dContext->UpdateSubresource(constant_buffer, 0, nullptr, &cb, 0, 0);
 	_dContext->VSSetConstantBuffers(0, 1, &constant_buffer);
 	_dContext->PSSetConstantBuffers(0, 1, &constant_buffer);

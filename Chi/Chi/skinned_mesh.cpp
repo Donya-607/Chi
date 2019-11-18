@@ -848,7 +848,7 @@ void skinned_mesh::render(ID3D11DeviceContext* context, fbx_shader& hlsl, const 
 						{
 							animation_flame = 0;
 							it.anim.animation_tick = 0;
-							anim_fin = true;;
+							anim_fin = true;
 						}
 						//アニメーションタイマーのインクリメント
 						if (!stop_animation && stop_time <= 0)
@@ -1054,6 +1054,342 @@ void skinned_mesh::render(ID3D11DeviceContext* context, fbx_shader& hlsl, const 
 	}
 }
 
+void skinned_mesh::z_render(ID3D11DeviceContext* context, fbx_shader& hlsl, const DirectX::XMFLOAT4X4& SynthesisMatrix, const DirectX::XMFLOAT4X4& worldMatrix, const DirectX::XMFLOAT4& camPos, ID3D11PixelShader* z_PS)
+
+{
+
+	if (have_material)
+	{
+		for (auto& it : meshes)
+		{
+
+			for (auto& p : it.subsets)
+			{
+				//	定数バッファの作成
+				cbuffer cb;
+				DirectX::XMStoreFloat4x4
+				(&cb.world_view_projection,
+					DirectX::XMLoadFloat4x4(&coordinate_conversion) * DirectX::XMLoadFloat4x4(&it.global_transform) *
+					DirectX::XMLoadFloat4x4(&SynthesisMatrix)
+				);
+
+				DirectX::XMStoreFloat4x4
+				(&cb.world,
+					DirectX::XMLoadFloat4x4(&coordinate_conversion) * DirectX::XMLoadFloat4x4(&it.global_transform) *
+					DirectX::XMLoadFloat4x4(&worldMatrix)
+				);
+
+
+				//アニメーション行列の取得
+				if (!it.anim.empty())
+				{
+					//現在のフレームでの変換行列の算出
+					std::vector<bone>& skeletal = it.anim.at(animation_flame);
+					size_t number_of_bones = skeletal.size();
+					_ASSERT_EXPR(number_of_bones < MAX_BONES, L"'the number_of_bones' exceeds MAX_BONES.");
+					for (size_t i = 0; i < number_of_bones; i++)
+					{
+						DirectX::XMStoreFloat4x4(&cb.bone_transforms[i], DirectX::XMLoadFloat4x4(&skeletal.at(i).transform));
+					}
+					//TODO skinme
+
+				}
+
+
+				cb.camPos = camPos;
+				cb.ambient = p.ambient.color;
+				cb.ambient.w = p.transparent.color.w;
+				cb.diffuse = p.diffuse.color;
+				cb.specular = p.specular.color;
+				context->UpdateSubresource(constant_buffer, 0, nullptr, &cb, 0, 0);
+				context->VSSetConstantBuffers(0, 1, &constant_buffer);
+				context->PSSetConstantBuffers(0, 1, &constant_buffer);
+
+
+				// 頂点バッファのバインド
+				UINT stride = sizeof(vertex);
+				UINT offset = 0;
+				context->IASetVertexBuffers(0, 1, &it.vertex_buffer, &stride, &offset);
+
+				//	インデックスバッファのバインド
+				context->IASetIndexBuffer(it.index_buffer, DXGI_FORMAT_R32_UINT, 0);
+
+				//	プリミティブモードの設定
+				context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+
+				//	ラスタライザーの設定
+				context->RSSetState(rasterizeFillOut);
+
+				//	入力レイアウトのバインド
+				context->IASetInputLayout(hlsl.layout);
+				//	シェーダー(2種)の設定
+				context->VSSetShader(hlsl.vertexShader, nullptr, 0);
+
+				context->PSSetShader(z_PS, nullptr, 0);
+
+				//	深度テストの設定
+				context->OMSetDepthStencilState(depthStencilState, 0);
+
+				if (p.diffuse.shader_resource_view)
+				{
+					context->PSSetShaderResources(0, 1, &p.diffuse.shader_resource_view);
+					context->PSSetSamplers(0, 1, &sampleState);
+				}
+
+
+				//	プリミティブの描画
+				context->DrawIndexed(p.index_count, p.index_start, 0);
+			}
+		}
+	}
+	else
+	{
+		for (auto& it : meshes)
+		{
+			//	定数バッファの作成
+			cbuffer cb;
+			DirectX::XMStoreFloat4x4
+			(&cb.world_view_projection,
+				DirectX::XMLoadFloat4x4(&it.global_transform) *
+				DirectX::XMLoadFloat4x4(&SynthesisMatrix)
+			);
+
+			DirectX::XMStoreFloat4x4
+			(&cb.world,
+				DirectX::XMLoadFloat4x4(&it.global_transform) *
+				DirectX::XMLoadFloat4x4(&worldMatrix)
+			);
+			cb.camPos = camPos;
+			cb.ambient = { 1,1,1,1 };
+			cb.diffuse = { 1,1,1,1 };
+			cb.specular = { 0.5f,0.5f,0.5f,0.5f };
+
+			context->UpdateSubresource(constant_buffer, 0, nullptr, &cb, 0, 0);
+			context->VSSetConstantBuffers(0, 1, &constant_buffer);
+
+			// 頂点バッファのバインド
+			UINT stride = sizeof(vertex);
+			UINT offset = 0;
+			context->IASetVertexBuffers(0, 1, &it.vertex_buffer, &stride, &offset);
+
+			//	インデックスバッファのバインド
+			context->IASetIndexBuffer(it.index_buffer, DXGI_FORMAT_R32_UINT, 0);
+
+			//	プリミティブモードの設定
+			context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+			//	入力レイアウトのバインド
+			context->IASetInputLayout(hlsl.layout);
+
+			//	ラスタライザーの設定
+			context->RSSetState(rasterizeFillOut);
+
+			//	シェーダー(2種)の設定
+			context->VSSetShader(hlsl.noBoneVS, nullptr, 0);
+			context->PSSetShader(z_PS, nullptr, 0);
+
+
+			//	深度テストの設定
+			context->OMSetDepthStencilState(depthStencilState, 0);
+
+
+
+			//	プリミティブの描画
+			context->DrawIndexed(numIndices, 0, 0);
+
+		}
+	}
+}
+
+void skinned_mesh::bloom_SRVrender(ID3D11DeviceContext* context, fbx_shader& hlsl, const DirectX::XMFLOAT4X4& SynthesisMatrix, const DirectX::XMFLOAT4X4& worldMatrix, const DirectX::XMFLOAT4& camPos, line_light& _lineLight, std::vector<point_light>& _point_light, const DirectX::XMFLOAT4& materialColor, ID3D11PixelShader* bloom_PS, const DirectX::XMFLOAT4& _judge_color, ID3D11ShaderResourceView* z_SRV)
+
+{
+
+	if (have_material)
+	{
+		for (auto& it : meshes)
+		{
+
+			for (auto& p : it.subsets)
+			{
+				//	定数バッファの作成
+				cbuffer cb;
+				DirectX::XMStoreFloat4x4
+				(&cb.world_view_projection,
+					DirectX::XMLoadFloat4x4(&coordinate_conversion) * DirectX::XMLoadFloat4x4(&it.global_transform) *
+					DirectX::XMLoadFloat4x4(&SynthesisMatrix)
+				);
+
+				DirectX::XMStoreFloat4x4
+				(&cb.world,
+					DirectX::XMLoadFloat4x4(&coordinate_conversion) * DirectX::XMLoadFloat4x4(&it.global_transform) *
+					DirectX::XMLoadFloat4x4(&worldMatrix)
+				);
+
+
+				//アニメーション行列の取得
+				if (!it.anim.empty())
+				{
+					//現在のフレームでの変換行列の算出
+					std::vector<bone>& skeletal = it.anim.at(animation_flame);
+					size_t number_of_bones = skeletal.size();
+					_ASSERT_EXPR(number_of_bones < MAX_BONES, L"'the number_of_bones' exceeds MAX_BONES.");
+					for (size_t i = 0; i < number_of_bones; i++)
+					{
+						DirectX::XMStoreFloat4x4(&cb.bone_transforms[i], DirectX::XMLoadFloat4x4(&skeletal.at(i).transform));
+					}
+					//TODO skinme
+
+				}
+
+
+				cb.camPos = camPos;
+				cb.lineLight = _lineLight.getInfo();
+				int size = _point_light.size();
+				for (int i = 0; i < 5; i++)
+				{
+					if (size <= i)
+					{
+						cb.pntLight[i].pos.w = 0;
+						continue;
+					}
+					cb.pntLight[i] = _point_light[i].getInfo();
+				}
+				cb.ambient = p.ambient.color;
+				cb.ambient.w = p.transparent.color.w;
+				{
+					cb.ambient.x *= materialColor.x;
+					cb.ambient.y *= materialColor.y;
+					cb.ambient.z *= materialColor.z;
+					cb.ambient.w *= materialColor.w;
+				}
+				cb.diffuse = p.diffuse.color;
+				cb.specular = p.specular.color;
+				cb.judge_color = _judge_color;
+				cb.screenSize = { (float)pSystem->SCREEN_WIDTH,(float)pSystem->SCREEN_HEIGHT,.0f,.0f };
+				context->UpdateSubresource(constant_buffer, 0, nullptr, &cb, 0, 0);
+				context->VSSetConstantBuffers(0, 1, &constant_buffer);
+				context->PSSetConstantBuffers(0, 1, &constant_buffer);
+
+
+				// 頂点バッファのバインド
+				UINT stride = sizeof(vertex);
+				UINT offset = 0;
+				context->IASetVertexBuffers(0, 1, &it.vertex_buffer, &stride, &offset);
+
+				//	インデックスバッファのバインド
+				context->IASetIndexBuffer(it.index_buffer, DXGI_FORMAT_R32_UINT, 0);
+
+				//	プリミティブモードの設定
+				context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+
+				//	ラスタライザーの設定
+				context->RSSetState(rasterizeFillOut);
+
+				//	入力レイアウトのバインド
+				context->IASetInputLayout(hlsl.layout);
+				//	シェーダー(2種)の設定
+				context->VSSetShader(hlsl.vertexShader, nullptr, 0);
+
+				if (p.diffuse.shader_resource_view)
+				{
+					context->PSSetShader(bloom_PS, nullptr, 0);
+				}
+				else
+				{
+					context->PSSetShader(hlsl.noTexPS, nullptr, 0);
+				}
+
+				//	深度テストの設定
+				context->OMSetDepthStencilState(depthStencilState, 0);
+
+				if (p.diffuse.shader_resource_view)
+				{
+					context->PSSetShaderResources(0, 1, &p.diffuse.shader_resource_view);
+					context->PSSetSamplers(0, 1, &sampleState);
+				}
+				context->PSSetShaderResources(1, 1, &z_SRV);
+				context->PSSetSamplers(1, 1, &sampleState);
+
+
+				//	プリミティブの描画
+				context->DrawIndexed(p.index_count, p.index_start, 0);
+			}
+		}
+	}
+	else
+	{
+		for (auto& it : meshes)
+		{
+			//	定数バッファの作成
+			cbuffer cb;
+			DirectX::XMStoreFloat4x4
+			(&cb.world_view_projection,
+				DirectX::XMLoadFloat4x4(&it.global_transform) *
+				DirectX::XMLoadFloat4x4(&SynthesisMatrix)
+			);
+
+			DirectX::XMStoreFloat4x4
+			(&cb.world,
+				DirectX::XMLoadFloat4x4(&it.global_transform) *
+				DirectX::XMLoadFloat4x4(&worldMatrix)
+			);
+			cb.camPos = camPos;
+			cb.lineLight = _lineLight.getInfo();
+			int size = _point_light.size();
+			for (int i = 0; i < 5; i++)
+			{
+				if (size <= i)
+				{
+					cb.pntLight[i].pos.w = 0;
+					continue;
+				}
+				cb.pntLight[i] = _point_light[i].getInfo();
+			}
+			cb.ambient = { 1,1,1,1 };
+			cb.diffuse = { 1,1,1,1 };
+			cb.specular = { 0.5f,0.5f,0.5f,0.5f };
+			cb.judge_color = { _judge_color.x,_judge_color.y,_judge_color.z,1.0f };
+			cb.screenSize = { (float)pSystem->SCREEN_WIDTH,(float)pSystem->SCREEN_HEIGHT,.0f,.0f };
+			context->UpdateSubresource(constant_buffer, 0, nullptr, &cb, 0, 0);
+			context->VSSetConstantBuffers(0, 1, &constant_buffer);
+
+			// 頂点バッファのバインド
+			UINT stride = sizeof(vertex);
+			UINT offset = 0;
+			context->IASetVertexBuffers(0, 1, &it.vertex_buffer, &stride, &offset);
+
+			//	インデックスバッファのバインド
+			context->IASetIndexBuffer(it.index_buffer, DXGI_FORMAT_R32_UINT, 0);
+
+			//	プリミティブモードの設定
+			context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+			//	入力レイアウトのバインド
+			context->IASetInputLayout(hlsl.layout);
+
+			//	ラスタライザーの設定
+			context->RSSetState(rasterizeFillOut);
+
+			//	シェーダー(2種)の設定
+			context->VSSetShader(hlsl.noBoneVS, nullptr, 0);
+			context->PSSetShader(bloom_PS, nullptr, 0);
+
+
+			//	深度テストの設定
+			context->OMSetDepthStencilState(depthStencilState, 0);
+
+			context->PSSetShaderResources(1, 1, &z_SRV);
+			context->PSSetSamplers(1, 1, &sampleState);
+
+			//	プリミティブの描画
+			context->DrawIndexed(numIndices, 0, 0);
+
+		}
+	}
+}
 
 void skinned_mesh::render(
 	ID3D11DeviceContext* context,
@@ -1124,13 +1460,6 @@ void skinned_mesh::render(
 					cb.pntLight[i] = _point_light[i].getInfo();
 				}
 				cb.ambient = p.ambient.color;
-				{
-					// Insert by Donya.
-					cb.ambient.x *= materialColor.x;
-					cb.ambient.y *= materialColor.y;
-					cb.ambient.z *= materialColor.z;
-					cb.ambient.w *= materialColor.w;
-				}
 				cb.diffuse = p.diffuse.color;
 				cb.specular = p.specular.color;
 
@@ -1410,12 +1739,7 @@ bool skinned_mesh::calcTransformedPosBySpecifyMesh(DirectX::XMFLOAT3& _local_pos
 		{
 
 			DirectX::XMFLOAT4X4 transform = skeletal.at(_mesh->bone_indices[i]).transform;
-			DirectX::XMStoreFloat4x4
-			(
-				&transform,
-				DirectX::XMLoadFloat4x4( &transform )
-				* DirectX::XMLoadFloat4x4( &coordinate_conversion )
-			);
+			DirectX::XMStoreFloat4x4(&transform, DirectX::XMLoadFloat4x4(&transform) * DirectX::XMLoadFloat4x4(&coordinate_conversion));
 
 			float w = pos.x * transform._14 + pos.y * transform._24 + pos.z * transform._34 + pos.w * transform._44;
 
@@ -1439,6 +1763,7 @@ bool skinned_mesh::calcTransformedPosBySpecifyMesh(DirectX::XMFLOAT3& _local_pos
 		if (p->node_name != _mesh_name)
 			continue;
 		_mesh = p;
+
 		if (_mesh == nullptr)
 			return false;
 
@@ -1454,13 +1779,7 @@ bool skinned_mesh::calcTransformedPosBySpecifyMesh(DirectX::XMFLOAT3& _local_pos
 		{
 
 			DirectX::XMFLOAT4X4 transform = skeletal.at(_mesh->bone_indices[i]).transform;
-			DirectX::XMStoreFloat4x4
-			(
-				&transform,
-				DirectX::XMLoadFloat4x4( &transform )
-				* DirectX::XMLoadFloat4x4( &coordinate_conversion )
-			);
-
+			DirectX::XMStoreFloat4x4(&transform, DirectX::XMLoadFloat4x4(&transform) * DirectX::XMLoadFloat4x4(&coordinate_conversion));
 			float w = pos.x * transform._14 + pos.y * transform._24 + pos.z * transform._34 + pos.w * transform._44;
 
 			_p.x += (pos.x * transform._11 + pos.y * transform._21 + pos.z * transform._31 + pos.w * transform._41) / w * _mesh->bone_weights[i];
@@ -1499,7 +1818,6 @@ bool bone_animation::loadBinary(std::string& file_name)
 	return false;
 }
 
-#include "Donya/Useful.h"	// For convert string function.
 bool bone_animation::find_file(std::string& file_name)
 {
 	SetCurrentDirectory(L"./Data/model/binary");
@@ -1511,8 +1829,7 @@ bool bone_animation::find_file(std::string& file_name)
 		std::wstring name = data.cFileName;
 		size_t start = name.find_last_of(L"\\") + 1;
 		std::wstring _name = name.substr(start, name.size() - start);
-		// std::string dummy(_name.begin(), _name.end());
-		std::string dummy = Donya::WideToMulti( _name );
+		std::string dummy(_name.begin(), _name.end());
 		if (dummy == file_name)
 		{
 			FindClose(hnd);
@@ -1530,8 +1847,7 @@ bool bone_animation::find_file(std::string& file_name)
 			std::wstring name = data.cFileName;
 			size_t start = name.find_last_of(L"\\") + 1;
 			std::wstring _name = name.substr(start, name.size() - start);
-			// std::string dummy(_name.begin(), _name.end());
-			std::string dummy = Donya::WideToMulti( _name );
+			std::string dummy(_name.begin(), _name.end());
 			if (dummy == file_name)
 			{
 				FindClose(hnd);

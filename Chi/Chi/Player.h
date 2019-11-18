@@ -256,6 +256,8 @@ public:
 	void PhysicUpdate( const std::vector<Donya::Circle> &xzCylinderWalls );
 
 	void Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matProjection );
+	void DrawZ( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matProjection );
+	void DrawBloom( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matProjection );
 public:
 	bool IsDefeated() const;
 

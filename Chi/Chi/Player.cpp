@@ -501,6 +501,59 @@ bool Player::IsDefeated() const
 	return ( status == State::Dead && models.pDefeat->getAnimFinFlg() ) ? true : false;
 }
 
+void Player::DrawZ( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matProjection )
+{
+	Donya::Vector4x4 W = CalcWorldMatrix();
+	Donya::Vector4x4 WVP = W * matView * matProjection;
+
+	float motionSpeed = PlayerParam::Get().MotionSpeeds()->at( scast<int>( currentMotion ) );
+	switch ( status )
+	{
+	case Player::State::Idle:
+		z_render( models.pIdle.get(), HLSL, WVP, W );
+		break;
+	case Player::State::Run:
+		z_render( models.pRun.get(), HLSL, WVP, W );
+		break;
+	case Player::State::Defend:
+		z_render( models.pDefend.get(), HLSL, WVP, W );
+		break;
+	case Player::State::Attack:
+		z_render( models.pAttack.get(), HLSL, WVP, W );
+		break;
+	default: break;
+	}
+
+	shield.z_Draw( HLSL, matView, matProjection, W );
+
+}
+
+void Player::DrawBloom( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matProjection )
+{
+	Donya::Vector4x4 W = CalcWorldMatrix();
+	Donya::Vector4x4 WVP = W * matView * matProjection;
+
+	float motionSpeed = PlayerParam::Get().MotionSpeeds()->at( scast<int>( currentMotion ) );
+	switch (status)
+	{
+	case Player::State::Idle:
+		bloom_SRVrender( models.pIdle.get(), HLSL, WVP, W );
+		break;
+	case Player::State::Run:
+		bloom_SRVrender( models.pRun.get(), HLSL, WVP, W );
+		break;
+	case Player::State::Defend:
+		bloom_SRVrender( models.pDefend.get(), HLSL, WVP, W );
+		break;
+	case Player::State::Attack:
+		bloom_SRVrender( models.pAttack.get(), HLSL, WVP, W );
+		break;
+	default: break;
+	}
+
+	shield.bloom_Draw( HLSL, matView, matProjection, W );
+}
+
 static Donya::OBB MakeOBB( const Donya::AABB &AABB, const Donya::Vector3 &wsPos, const Donya::Quaternion &orientation )
 {
 	Donya::OBB OBB{};

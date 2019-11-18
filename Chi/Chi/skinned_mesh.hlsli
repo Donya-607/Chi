@@ -4,6 +4,7 @@ struct VS_OUT
 {
 	float4 position : SV_POSITION;
 	float4 posw : POSITION;
+	float4 pos : POSITION2;
 	float4 color : COLOR;
 	float4 normal : NORMAL;
 	float2 texcoord : TEXCOORD;
@@ -18,6 +19,7 @@ struct Light
 
 struct lineLight
 {
+	float4 position;
 	float4 direction;
 	float4 color;
 };
@@ -38,5 +40,7 @@ cbuffer CONSTANT_BUFFER : register(b0)
 	Light pntLight[5];
 	Material material;
 	row_major float4x4 bone_transforms[MAX_BONES];
-
+	float4 judge_color;
+	float4 screen_size;
 };
+

@@ -18,11 +18,11 @@ void sceneTitle::init()
 	cameraDistance = 1000.0f;
 
 	isStack = false;
-	setLightAmbient({ .1f,-1,0,1 }, { 1,1,1,1 });
+	setLineLight({ .0f,.0f,.0f,1.0f }, { .1f, -1, 0, 1 }, { 1,1,1,1 });
 	loadShader(shader, "./Data/shader/skinned_mesh_has_born_vs.cso", "./Data/shader/skinned_mesh_ps.cso", "./Data/shader/skinned_mesh_vs.cso", "./Data/shader/skinned_mesh_no_uv_ps.cso");
 
 	lights.direction.color = Donya::Vector4(1.0f, 1.0f, 1.0f, 1.0f);
-	getLineLight().setLineLight(lights.direction.direction, lights.direction.color);
+	getLineLight().setLineLight(lights.direction.position, lights.direction.direction, lights.direction.color);
 
 	resetPointLight();
 	for (const auto i : lights.points)
@@ -172,12 +172,12 @@ void sceneTitle::TitleUpdate()
 
 	auto IsInputed = []()->bool
 	{
-		Player::Input input = Player::Input::MakeByExternalInput( Donya::Vector4x4::Identity() );
+		Player::Input input = Player::Input::MakeByExternalInput(Donya::Vector4x4::Identity());
 
-		bool   inputed = ( !input.moveVector.IsZero() || input.doDefend || input.doAttack ) ? true : false;
+		bool   inputed = (!input.moveVector.IsZero() || input.doDefend || input.doAttack) ? true : false;
 		return inputed;
 	};
-	if ( IsInputed() )
+	if (IsInputed())
 	{
 		sceneState++;
 	}
@@ -216,7 +216,7 @@ void sceneTitle::CameraMove()
 
 		tmp = Donya::Easing::Ease(Donya::Easing::Kind::Exponential, Donya::Easing::Type::Out, static_cast<float>(moveCnt) / static_cast<float>(MAX_MOVE_CNT));
 		float posY_len = 4000.0f - 3354.0f;
-		
+
 		titlePos.y += posY_len * tmp;
 		//titlePos.y = easing::OutExp(moveCnt, MAX_MOVE_CNT, 4000.0f, 3354.0f);
 	}
@@ -249,7 +249,7 @@ void sceneTitle::TutorialStartUpdate()
 	setCamPos(camPos);
 	setTarget(camTarget);
 
-	Donya::Vector4x4 matView = Donya::Vector4x4::FromMatrix( GameLib::camera::GetViewMatrix() );
+	Donya::Vector4x4 matView = Donya::Vector4x4::FromMatrix(GameLib::camera::GetViewMatrix());
 	player.Update(Player::Input::MakeByExternalInput(matView));
 
 	std::vector<Donya::Circle> nullBodies{};
@@ -258,20 +258,20 @@ void sceneTitle::TutorialStartUpdate()
 	auto WithinStartupArea = [&]()->bool
 	{
 		return
-		(
-			player.GetPosition().z <= 11431.0f
-			/*
-			11431.0f - 100.0f / 2.0f <= player.GetPosition().z
-			&& player.GetPosition().z <= 11431.0f + 100.0f / 2.0f
+			(
+				player.GetPosition().z <= 11431.0f
+				/*
+				11431.0f - 100.0f / 2.0f <= player.GetPosition().z
+				&& player.GetPosition().z <= 11431.0f + 100.0f / 2.0f
 
-			&& -100.0f / 2.0f <= player.GetPosition().x
-			&& player.GetPosition().x <= 100.0f / 2.0f
-			*/
-		)
-		? true
-		: false;
+				&& -100.0f / 2.0f <= player.GetPosition().x
+				&& player.GetPosition().x <= 100.0f / 2.0f
+				*/
+				)
+			? true
+			: false;
 	};
-	if ( WithinStartupArea() )
+	if (WithinStartupArea())
 	{
 		catapult.StartAnim();
 		tutorialState++;
@@ -285,11 +285,11 @@ void sceneTitle::TutorialGuardUpdate()
 	setCamPos(camPos);
 	setTarget(camTarget);
 
-	Donya::Vector4x4 matView = Donya::Vector4x4::FromMatrix( GameLib::camera::GetViewMatrix() );
-	Player::Input input = Player::Input::MakeByExternalInput( matView );
+	Donya::Vector4x4 matView = Donya::Vector4x4::FromMatrix(GameLib::camera::GetViewMatrix());
+	Player::Input input = Player::Input::MakeByExternalInput(matView);
 	// input.doAttack = false;
 	input.onlyRotation = true;
-	player.Update( input );
+	player.Update(input);
 
 	std::vector<Donya::Circle> nullBodies{};
 	player.PhysicUpdate(nullBodies);
@@ -304,8 +304,8 @@ void sceneTitle::TutorialAttackUpdate()
 	setCamPos(camPos);
 	setTarget(camTarget);
 
-	Donya::Vector4x4 matView = Donya::Vector4x4::FromMatrix( GameLib::camera::GetViewMatrix() );
-	player.Update( Player::Input::MakeByExternalInput( matView ) );
+	Donya::Vector4x4 matView = Donya::Vector4x4::FromMatrix(GameLib::camera::GetViewMatrix());
+	player.Update(Player::Input::MakeByExternalInput(matView));
 
 	std::vector<Donya::Circle> nullBodies{};
 	player.PhysicUpdate(nullBodies);
@@ -416,51 +416,109 @@ void sceneTitle::CameraUpdate(const Donya::Vector3& targetPosition)
 void sceneTitle::render()
 {
 	clearWindow(0.5f, 0.5f, 0.5f, 1.0f);
-//	setString({ 0,0 }, L"sceneTitle %d : %f", 1, 20.2f);
+	//	setString({ 0,0 }, L"sceneTitle %d : %f", 1, 20.2f);
+
 
 	Donya::Vector4x4 V = Donya::Vector4x4::FromMatrix(getViewMatrix());
 	Donya::Vector4x4 P = Donya::Vector4x4::FromMatrix(getProjectionMatrix());
 
-	Donya::Vector4x4 W = Donya::Vector4x4::Identity();
-	Donya::Vector4x4 WVP = W * V * P;
-	FBXRender(pStageModel.get(), shader, WVP, W);
-
-	if (titleExist)
+	//original screen
 	{
-		Donya::Vector4x4 S = Donya::Vector4x4::MakeScaling(titleScale);
-		Donya::Vector4x4 R = Donya::Vector4x4::MakeRotationEuler(Donya::Vector3(0.0f, 0.0f, 0.0f));
-		Donya::Vector4x4 T = Donya::Vector4x4::MakeTranslation(titlePos);
-		W = S * R * T;
-		WVP = W * V * P;
-		FBXRender(pTitleModel.get(), shader, WVP, W);
-	}
+		Donya::Vector4x4 W = Donya::Vector4x4::Identity();
+		Donya::Vector4x4 WVP = W * V * P;
+		FBXRender(pStageModel.get(), shader, WVP, W);
 
-	player.Draw(shader, V, P);
-	catapult.Draw(shader, V, P);
-
-	billboardRender(&attackUIdata.pMesh, V * P, attackUIdata.pos, attackUIdata.scale, attackUIdata.angle, getCamPos(), attackUIdata.texPos, attackUIdata.texSize);
-	billboardRender(&guardUIdata.pMesh, V * P, guardUIdata.pos, guardUIdata.scale, guardUIdata.angle, getCamPos(), guardUIdata.texPos, guardUIdata.texSize);
-
-	EffectManager::GetInstance()->Render(shader);
-
-	if ( Donya::IsShowCollision() )
-	{
-		auto GenerateCube = []()->std::shared_ptr<static_mesh>
+		if (titleExist)
 		{
-			std::shared_ptr<static_mesh> tmpCube = std::make_shared<static_mesh>();
-			createCube( tmpCube.get() );
-			return tmpCube;
-		};
-		static std::shared_ptr<static_mesh> pCube = GenerateCube();
+			Donya::Vector4x4 S = Donya::Vector4x4::MakeScaling(titleScale);
+			Donya::Vector4x4 R = Donya::Vector4x4::MakeRotationEuler(Donya::Vector3(0.0f, 0.0f, 0.0f));
+			Donya::Vector4x4 T = Donya::Vector4x4::MakeTranslation(titlePos);
+			W = S * R * T;
+			WVP = W * V * P;
+			FBXRender(pTitleModel.get(), shader, WVP, W);
+		}
 
-		Donya::Vector4x4 CS = Donya::Vector4x4::MakeScaling( cubeScale ); // Half size->Whole size.
-		Donya::Vector4x4 CR = Donya::Vector4x4::MakeRotationEuler( Donya::Vector3( 0.0f, 0.0f, 0.0f ) );
-		Donya::Vector4x4 CT = Donya::Vector4x4::MakeTranslation( cubePos );
-		Donya::Vector4x4 CW = CS * CR * CT;
-		Donya::Vector4x4 CWVP = CW * V * P;
+		player.Draw(shader, V, P);
+		catapult.Draw(shader, V, P);
 
-		OBJRender( pCube.get(), CWVP, CW, Donya::Vector4( 0.0f, 0.8f, 0.3f, 0.6f ) );
+		billboardRender(&attackUIdata.pMesh, V * P, attackUIdata.pos, attackUIdata.scale, attackUIdata.angle, getCamPos(), attackUIdata.texPos, attackUIdata.texSize);
+		billboardRender(&guardUIdata.pMesh, V * P, guardUIdata.pos, guardUIdata.scale, guardUIdata.angle, getCamPos(), guardUIdata.texPos, guardUIdata.texSize);
+
+		EffectManager::GetInstance()->Render(shader);
+
+		if (Donya::IsShowCollision())
+		{
+			auto GenerateCube = []()->std::shared_ptr<static_mesh>
+			{
+				std::shared_ptr<static_mesh> tmpCube = std::make_shared<static_mesh>();
+				createCube(tmpCube.get());
+				return tmpCube;
+			};
+			static std::shared_ptr<static_mesh> pCube = GenerateCube();
+
+			Donya::Vector4x4 CS = Donya::Vector4x4::MakeScaling(cubeScale); // Half size->Whole size.
+			Donya::Vector4x4 CR = Donya::Vector4x4::MakeRotationEuler(Donya::Vector3(0.0f, 0.0f, 0.0f));
+			Donya::Vector4x4 CT = Donya::Vector4x4::MakeTranslation(cubePos);
+			Donya::Vector4x4 CW = CS * CR * CT;
+			Donya::Vector4x4 CWVP = CW * V * P;
+
+			OBJRender(pCube.get(), CWVP, CW, Donya::Vector4(0.0f, 0.8f, 0.3f, 0.6f));
+		}
 	}
+
+	//z screen : billboard‚Í‚±‚ÌŠK‘w‚É‚Í•`‰æ‚µ‚È‚¢‚Å‚­‚¾‚³‚¢
+	{
+		Donya::Vector4x4 W = Donya::Vector4x4::Identity();
+		Donya::Vector4x4 WVP = W * V * P;
+		z_render(pStageModel.get(), shader, WVP, W);
+
+		if (titleExist)
+		{
+			Donya::Vector4x4 S = Donya::Vector4x4::MakeScaling(titleScale);
+			Donya::Vector4x4 R = Donya::Vector4x4::MakeRotationEuler(Donya::Vector3(0.0f, 0.0f, 0.0f));
+			Donya::Vector4x4 T = Donya::Vector4x4::MakeTranslation(titlePos);
+			W = S * R * T;
+			WVP = W * V * P;
+			z_render(pTitleModel.get(), shader, WVP, W);
+		}
+
+		player.DrawZ(shader, V, P);
+		catapult.z_Draw(shader, V, P);
+
+		EffectManager::GetInstance()->z_Render(shader);
+
+	}
+
+	//bloom screen
+	{
+		Donya::Vector4x4 W = Donya::Vector4x4::Identity();
+		Donya::Vector4x4 WVP = W * V * P;
+		bloom_SRVrender(pStageModel.get(), shader, WVP, W);
+
+		if (titleExist)
+		{
+			Donya::Vector4x4 S = Donya::Vector4x4::MakeScaling(titleScale);
+			Donya::Vector4x4 R = Donya::Vector4x4::MakeRotationEuler(Donya::Vector3(0.0f, 0.0f, 0.0f));
+			Donya::Vector4x4 T = Donya::Vector4x4::MakeTranslation(titlePos);
+			W = S * R * T;
+			WVP = W * V * P;
+			bloom_SRVrender(pTitleModel.get(), shader, WVP, W);
+		}
+
+		player.DrawBloom(shader, V, P);
+		catapult.bloom_Draw(shader, V, P);
+
+		billboard_bloom_Render(&attackUIdata.pMesh, V * P, attackUIdata.pos, attackUIdata.scale, attackUIdata.angle, getCamPos(), attackUIdata.texPos, attackUIdata.texSize);
+		billboard_bloom_Render(&guardUIdata.pMesh, V * P, guardUIdata.pos, guardUIdata.scale, guardUIdata.angle, getCamPos(), guardUIdata.texPos, guardUIdata.texSize);
+
+		EffectManager::GetInstance()->bloom_Render(shader);
+
+	}
+
+	//
+	postEffect_Bloom(0);
+	//
+	filterScreen(1.0f);
 }
 
 void sceneTitle::uninit()
@@ -485,18 +543,18 @@ void sceneTitle::imGui()
 		pSceneManager->setNextScene(new SceneGame(), false);
 	}
 	else
-	if (ImGui::Button("Effect"))
-	{
-		pSceneManager->setNextScene(new SceneEffect, false);
-	}
-	else if (ImGui::Button("Result"))
-	{
-		pSceneManager->setNextScene(new SceneResult(60), false);
-	}
-	else if (ImGui::Button("GameOver"))
-	{
-		pSceneManager->setNextScene(new SceneGameOver, false);
-	}
+		if (ImGui::Button("Effect"))
+		{
+			pSceneManager->setNextScene(new SceneEffect, false);
+		}
+		else if (ImGui::Button("Result"))
+		{
+			pSceneManager->setNextScene(new SceneResult(60), false);
+		}
+		else if (ImGui::Button("GameOver"))
+		{
+			pSceneManager->setNextScene(new SceneGameOver, false);
+		}
 
 	ImGui::End();
 
@@ -721,7 +779,7 @@ void sceneTitle::imGui()
 		setTarget(target);
 
 		ImGui::End();
-	}
+}
 #endif
 
 #endif // USE_IMGUI

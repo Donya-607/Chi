@@ -13,6 +13,7 @@ struct PointLight
 
 struct LineLight
 {
+	DirectX::XMFLOAT4 position;
 	DirectX::XMFLOAT4 direction;
 	DirectX::XMFLOAT4 color;
 
@@ -25,13 +26,19 @@ private:
 public:
 	line_light()
 	{
+		_line_light.position = { 0,0,0,1 };
 		_line_light.direction = { 1,1,-1,1 };
 		_line_light.color = { 1,1,1,1 };
 	}
-	void setLineLight(const DirectX::XMFLOAT4& _lightDirection, const DirectX::XMFLOAT4& _lightColor)
+	void setLineLight(const DirectX::XMFLOAT4& _position, const DirectX::XMFLOAT4& _lightDirection, const DirectX::XMFLOAT4& _lightColor)
 	{
+		_line_light.position = _position;
 		_line_light.direction = _lightDirection;
 		_line_light.color = _lightColor;
+	}
+	DirectX::XMFLOAT4 getPosition()
+	{
+		return _line_light.position;
 	}
 	DirectX::XMFLOAT4 getLineLight()
 	{
