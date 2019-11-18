@@ -64,6 +64,7 @@ void postEffect_Bloom_SRV(ID3D11ShaderResourceView** _shaderResource, DirectX::X
 void postEffect_Bloom(float _blur_value, bool flg)
 {
 	GameLib::postEffect_Bloom(_blur_value, flg);
+	GameLib::clearDepth();
 }
 void setBloomRT()
 {

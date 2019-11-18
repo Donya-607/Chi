@@ -464,6 +464,8 @@ void sceneTitle::render()
 
 			OBJRender(pCube.get(), CWVP, CW, Donya::Vector4(0.0f, 0.8f, 0.3f, 0.6f));
 		}
+		GameLib::clearDepth();
+
 	}
 
 	//z screen : billboard‚Í‚±‚ÌŠK‘w‚É‚Í•`‰æ‚µ‚È‚¢‚Å‚­‚¾‚³‚¢
@@ -486,6 +488,7 @@ void sceneTitle::render()
 		catapult.z_Draw(shader, V, P);
 
 		EffectManager::GetInstance()->z_Render(shader);
+		GameLib::clearDepth();
 
 	}
 
@@ -513,11 +516,12 @@ void sceneTitle::render()
 
 		EffectManager::GetInstance()->bloom_Render(shader);
 
+		GameLib::clearDepth();
 	}
 
-	//
+	//blur’l‚ğŒã‚Å‘ã“ü
 	postEffect_Bloom(0);
-	//
+	//ƒ‚ƒmƒg[ƒ“‚É‚·‚é‚Æ‚«‚Í‘æˆêˆø”‚ğ‰º‚°‚é
 	filterScreen(1.0f);
 }
 

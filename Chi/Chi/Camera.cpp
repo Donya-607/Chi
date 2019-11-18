@@ -6,9 +6,10 @@ Camera::Camera()
 	position = DirectX::XMFLOAT3(0.0f, 300.0f, -300.0f);
 	target = DirectX::XMFLOAT3(.0f, .0f, .0f);
 	state = cameraNumber::MONITORING;
-	constexpr float fov = DirectX::XMConvertToRadians(30.0f);
-	float aspect = static_cast<float>( pSystem->SCREEN_WIDTH ) / static_cast<float>( pSystem->SCREEN_HEIGHT );
-	SetPerspectiveMatrix(fov, aspect, 0.1f, 100000.0f);
+	fov = DirectX::XMConvertToRadians(30.0f);
+	aspect = static_cast<float>( pSystem->SCREEN_WIDTH ) / static_cast<float>( pSystem->SCREEN_HEIGHT );
+	near_panel = 0.1f;
+	far_panel = 100000.0f;
 }
 
 void Camera::update()
@@ -64,13 +65,13 @@ void Camera::setPosition(DirectX::XMFLOAT3 _pos)
 
 DirectX::XMMATRIX Camera::SetOrthographicMatrix(float _w, float _h, float _zNear, float _zFar)
 {
-	projection = DirectX::XMMatrixOrthographicLH(_w, _h, _zNear, _zFar);
+	DirectX::XMMATRIX projection = DirectX::XMMatrixOrthographicLH(_w, _h, _zNear, _zFar);
 	return projection;
 }
 
 DirectX::XMMATRIX Camera::SetPerspectiveMatrix(float _fov, float _aspect, float _zNear, float _zFar)
 {
-	projection = DirectX::XMMatrixPerspectiveFovLH(_fov, _aspect, _zNear, _zFar);
+	DirectX::XMMATRIX projection = DirectX::XMMatrixPerspectiveFovLH(_fov, _aspect, _zNear, _zFar);
 	return projection;
 }
 

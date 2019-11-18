@@ -301,6 +301,7 @@ public:
 				}
 			}
 #endif // DEBUG_MODE
+			GameLib::clearDepth();
 		}
 
 		// z screen
@@ -319,6 +320,8 @@ public:
 			}
 
 			EffectManager::GetInstance()->z_Render(shader);
+
+			GameLib::clearDepth();
 		}
 
 		// bloom screen
@@ -337,6 +340,8 @@ public:
 			}
 
 			EffectManager::GetInstance()->bloom_Render(shader);
+
+			GameLib::clearDepth();
 		}
 
 		//TODO blur’l“ü‚ê‚é
