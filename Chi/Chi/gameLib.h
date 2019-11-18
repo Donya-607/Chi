@@ -401,6 +401,7 @@ namespace GameLib
 		void setTarget(const DirectX::XMFLOAT3& _target);
 		DirectX::XMFLOAT4 getPos();
 		DirectX::XMFLOAT4 getTarget();
+		void startShake(float _shake_power, float _time);
 	}
 
 	//デバック
@@ -436,6 +437,9 @@ namespace GameLib
 
 			DirectX::XMINT2 getThumbL(int _padNum);
 			DirectX::XMINT2 getThumbR(int _padNum);
+			void startViblation(int index, float timer, float motor);
+			void stopViblation(int index);
+
 
 		}
 

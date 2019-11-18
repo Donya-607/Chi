@@ -258,7 +258,7 @@ namespace GameLib
 		ImGui_ImplDX11_NewFrame();
 		ImGui_ImplWin32_NewFrame();
 		ImGui::NewFrame();
-		m.cam->update();
+		m.cam->update(m.hrTimer.time_interval());
 		input::xInput::getState();
 		input::keyboard::update();
 		float ClearColor[4] = { 0.5f, .0f, .0f, 1.0f }; //red,green,blue,alpha
@@ -271,6 +271,11 @@ namespace GameLib
 		clearRT(m.bloom_RT, { 0,0,0,0 });
 		clearRT(m.z_RT, { 0,0,0,0 });
 		clearRT(m.filter_RT, { 0,0,0,0 });
+
+		for (int index = 0; index < 4; index++)
+		{
+			m.pad[index].update(index, m.hrTimer.time_interval());
+		}
 
 		m.context->OMSetRenderTargets(1, &m.renderTargetView, m.depthStencilView);
 
@@ -1106,6 +1111,10 @@ namespace GameLib
 		{
 			return m.cam->getCamTarget();
 		}
+		void startShake(float _shake_power, float _time)
+		{
+			m.cam->startShake(_shake_power, _time);
+		}
 	}
 
 
@@ -1180,6 +1189,26 @@ namespace GameLib
 			{
 				return m.pad[_padNum].getThumbR();
 			}
+
+			void startViblation(int index, float timer, float motor)
+			{
+				if (motor < 0)motor = 0;
+				else if (motor > 100)
+					motor = 100;
+
+				WORD right = motor * 655.35f*2;
+				WORD left = motor *655.35f*2;
+				m.pad[index].startViblation(index, left, right);
+				m.pad[index].timer = timer;
+			}
+
+			void stopViblation(int index)
+			{
+				m.pad[index].startViblation(index, 0, 0);
+				m.pad[index].timer = 0;
+
+			}
+
 
 		}
 	}

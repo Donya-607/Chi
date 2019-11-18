@@ -29,9 +29,9 @@ INT WINAPI wWinMain(HINSTANCE instance, HINSTANCE prev_instance, LPWSTR cmd_line
 	(L"コンクエスト", instance, 1920, 1080, false, -1, 60.0f);
 
 	DragAcceptFiles(GameLib::getHandle(), true);
-	pSceneManager->init(new sceneTitle);
-
 	Donya::Sound::Init();
+
+	pSceneManager->init(new sceneTitle);
 
 	while (GameLib::gameLoop(true))
 	{
@@ -40,11 +40,11 @@ INT WINAPI wWinMain(HINSTANCE instance, HINSTANCE prev_instance, LPWSTR cmd_line
 
 		pSceneManager->render();
 
-		GameLib::present(0,0);
+		GameLib::present(0, 0);
 
 
 		//動画実装用だから気にしないで～
-#if 0
+#if 1
 		static OPENFILENAME ofn;
 
 		static wchar_t cfilename[MAX_PATH];
@@ -56,7 +56,7 @@ INT WINAPI wWinMain(HINSTANCE instance, HINSTANCE prev_instance, LPWSTR cmd_line
 		static IGraphBuilder* pGraphBuilder = NULL;
 		static IMediaControl* pMediaControl = NULL;
 		static IMediaEventEx* pMediaEventEx = NULL;
-
+		static IVideoWindow* pVideoWindow = NULL;
 		static OAFilterState* pFilterState = NULL;
 
 		//VMR9
@@ -97,89 +97,58 @@ INT WINAPI wWinMain(HINSTANCE instance, HINSTANCE prev_instance, LPWSTR cmd_line
 				}
 				else
 				{
-					//初期化に必須
-					//１映像ファイルにつきこの初期化を行う
-					HRESULT hr;
-					hr = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
-					_ASSERT_EXPR(SUCCEEDED(hr), hr_trace(hr));
-					hr = CoCreateInstance(CLSID_FilterGraph, NULL, CLSCTX_INPROC_SERVER, IID_IGraphBuilder, (LPVOID*)&pGraphBuilder);
-					_ASSERT_EXPR(SUCCEEDED(hr), hr_trace(hr));
+					IGraphBuilder* pGraphBuilder;
+					IMediaControl* pMediaControl;
+					IMediaEvent* pMediaEvent;
+					long eventCode;
+					IVideoWindow* pVideoWindow;
+					IMediaPosition* pMediaPosition;
 
-					hr = CoCreateInstance(CLSID_VideoMixingRenderer9, NULL, CLSCTX_INPROC_SERVER, IID_IBaseFilter, (void**)&pVmr9);// VMR9フィルタを用意
-					_ASSERT_EXPR(SUCCEEDED(hr), hr_trace(hr));
-					pGraphBuilder->AddFilter(pVmr9, L"VMR9");// VMR9フィルタをGraphに追加
+					// COMを初期化
+					CoInitialize(NULL);
 
+					CoCreateInstance(CLSID_FilterGraph,
+						NULL,
+						CLSCTX_INPROC,
+						IID_IGraphBuilder,
+						(LPVOID*)&pGraphBuilder);
 
-					//VMR9をウィンドウレスモードにする
-					hr = pVmr9->QueryInterface(IID_IVMRFilterConfig9, (void**)&pVMRCfg);
-					_ASSERT_EXPR(SUCCEEDED(hr), hr_trace(hr));
-					hr = pVMRCfg->SetRenderingMode(VMRMode_Windowless);
-					_ASSERT_EXPR(SUCCEEDED(hr), hr_trace(hr));
-					pVMRCfg->Release();
+					pGraphBuilder->QueryInterface(IID_IMediaControl,
+						(LPVOID*)&pMediaControl);
 
-					//描画ウィンドウの指定
-					hr = pVmr9->QueryInterface(IID_IVMRWindowlessControl9, (void**)&pVMRWndCont);
-					_ASSERT_EXPR(SUCCEEDED(hr), hr_trace(hr));
-					pFilterState = new long;
-					//一つの動画ファイルの読み込みに対応
-					HRESULT hResult;
-					//VMR9
-					hr = pVMRWndCont->SetVideoClippingWindow(GameLib::getHandle());
+					pGraphBuilder->QueryInterface(IID_IMediaEvent,
+						(LPVOID*)&pMediaEvent);
 
-					//再生するファイルをSourceFilterとして用意・成功した場合にpSourceが入る
-					hResult = pGraphBuilder->AddSourceFilter(cfilename, cfilename, &pSource);
-					//VMR9
-					if (hResult != S_OK)
-					{
-						MessageBox(NULL, cfilename, L"AddSourceFilter失敗", MB_OK);
-						SendMessage(GameLib::getHandle(), WM_KEYDOWN, VK_END, NULL);//失敗したので取得したポインタは解放する
+					pMediaControl->RenderFile(cfilename);
 
-					}
-					else
-					{
-						// CaptureGraphBuilder2というキャプチャ用GraphBuilderを生成する
-						hr = CoCreateInstance(CLSID_CaptureGraphBuilder2, NULL, CLSCTX_INPROC_SERVER, IID_ICaptureGraphBuilder2, (void**)&pCaptureGraphBuilder2);
-						_ASSERT_EXPR(SUCCEEDED(hr), hr_trace(hr));
+					pGraphBuilder->QueryInterface(IID_IVideoWindow,
+						(LPVOID*)&pVideoWindow);
 
-						pCaptureGraphBuilder2->SetFiltergraph(pGraphBuilder);// FilterGraphをセットする
-
-						//ビデオ接続
-						hr = pCaptureGraphBuilder2->RenderStream(NULL, NULL, pSource, 0, NULL);
-						_ASSERT_EXPR(SUCCEEDED(hr), hr_trace(hr));
-						//オーディオ接続
-						hr = pCaptureGraphBuilder2->RenderStream(0, &MEDIATYPE_Audio, pSource, 0, 0);
-						_ASSERT_EXPR(SUCCEEDED(hr), hr_trace(hr));
-						pSource->Release();//AddSourceFilterが成功した場合解放
-						pSource = NULL;
-						//VMR9
-
-						//ウィンドウの変化に適合
-						LONG W, H;
-						RECT SrcR, DestR;
-						hr = pVMRWndCont->GetNativeVideoSize(&W, &H, NULL, NULL);
-						_ASSERT_EXPR(SUCCEEDED(hr), hr_trace(hr));
-						SetRect(&SrcR, 0, 0, W, H);
-						GetClientRect(GameLib::getHandle(), &DestR);
-						hr = pVMRWndCont->SetVideoPosition(&SrcR, &DestR);
-						_ASSERT_EXPR(SUCCEEDED(hr), hr_trace(hr));
-
-						pVMRWndCont->Release();
-
-						pGraphBuilder->QueryInterface(IID_IMediaControl, (LPVOID*)&pMediaControl);
-						pGraphBuilder->QueryInterface(IID_IMediaEventEx, (LPVOID*)&pMediaEventEx);
+					pGraphBuilder->QueryInterface(IID_IMediaPosition,
+						(LPVOID*)&pMediaPosition);
 
 
+					// Full Screen 開始
+					pVideoWindow->put_FullScreenMode(OATRUE);
 
-						hr = pMediaEventEx->SetNotifyWindow((long)GameLib::getHandle(), WM_APP + 1, 0);//DirectShowでのイベントの取得を設定
-						_ASSERT_EXPR(SUCCEEDED(hr), hr_trace(hr));
-						hr = pMediaControl->Run();//映像送出開始
-						//pMediaEventEx->WaitForCompletion(-1, &eventCode);
+					pMediaControl->Run();
+
+					pMediaEvent->WaitForCompletion(-1, &eventCode);
+
+					pMediaPosition->put_CurrentPosition(0);
+					pMediaEvent->WaitForCompletion(-1, &eventCode);
+
+					pVideoWindow->Release();
+					pMediaEvent->Release();
+					pMediaControl->Release();
+					pGraphBuilder->Release();
+					CoUninitialize();
 
 
-					}
 				}
-
 			}
+
+
 		}
 
 		if (getKeyState(KEY_INPUT_9) == 1)

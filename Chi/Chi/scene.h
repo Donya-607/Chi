@@ -44,6 +44,9 @@ private:
 	std::unique_ptr<skinned_mesh> pStageModel;
 	std::unique_ptr<skinned_mesh> pTitleModel;
 
+	Sprite _texture[2];
+	ImTextureID im_texture;
+
 	struct billboard
 	{
 		static_mesh pMesh;
