@@ -250,10 +250,19 @@ private:
 	std::vector<Donya::Box>	wallCollisions;		// Stored hit-boxes belongs world space, XZ plane. This variable only assigned at Init().
 	bool					wasSucceededDefence;
 	bool					isContinuingDefence;// Prevent continuous unfold since finished the shield's remaining frame.
+
+	//insert kai
+	bool anim_flg;
 public:
 	Player();
 	~Player();
 public:
+
+	void setAnimFlg(bool flg)
+	{
+		anim_flg = flg;
+	}
+
 	void Init( int stageNumber, const Donya::Vector3 &wsInitialPos, const Donya::Vector3 &initialAnglesRadian, const std::vector<Donya::Box> &wsXZWallCollisions );
 	void Uninit();
 

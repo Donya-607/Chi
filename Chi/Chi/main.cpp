@@ -45,7 +45,7 @@ INT WINAPI wWinMain(HINSTANCE instance, HINSTANCE prev_instance, LPWSTR cmd_line
 
 		pSceneManager->render();
 
-		GameLib::present(0,0);
+		GameLib::present(0, 0);
 
 
 		//“®‰æÀ‘•—p‚¾‚©‚ç‹C‚É‚µ‚È‚¢‚Å`

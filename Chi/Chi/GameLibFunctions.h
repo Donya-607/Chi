@@ -4,6 +4,7 @@
 #include "gameLib.h"
 #include "vector.h"
 
+
 //library//
 void startUpLibrary(LPCTSTR caption, HINSTANCE instance, int width = 640, int height = 480, bool isFullscreen = false, int iconNum = -1, double frameRate = 0.0);
 void startUpLibrary(LPCTSTR caption, HINSTANCE instance, DirectX::XMINT2 screenSize = { 640,480 }, bool isFullscreen = false, int iconNum = -1, double frameRate = 0.0);
@@ -63,7 +64,8 @@ void setString(DirectX::XMINT2 _pos, const std::wstring& fmt, Args ... args)
 	GameLib::debug::drawDebug(_pos, str);
 }
 
-
+//movie
+void play_movie(wchar_t* filename, bool* loop);
 
 
 //PRIMITIVE//
@@ -211,7 +213,7 @@ void bloom_SRVrender(
 	fbx_shader& hlsl,
 	const DirectX::XMFLOAT4X4& SynthesisMatrix,
 	const DirectX::XMFLOAT4X4& worldMatrix,
-	const DirectX::XMFLOAT4& judge_color = {1.0f,1.0f,1.0f,1.0f},
+	const DirectX::XMFLOAT4& judge_color = { 1.0f,1.0f,1.0f,1.0f },
 	const DirectX::XMFLOAT4& materialColor = { 1.0f,1.0f,1.0f,1.0f }
 );
 

@@ -347,7 +347,8 @@ Knight::Knight() :
 	pos(), velocity(), extraOffset(),
 	orientation(),
 	models(),
-	doOnce( false )
+	doOnce( false ),
+	anim_flg( false )
 {
 	auto InitializeModel = []( std::shared_ptr<skinned_mesh> *ppMesh )
 	{
@@ -435,27 +436,27 @@ void Knight::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Dony
 	switch ( status )
 	{
 	case KnightAI::ActionState::WAIT:
-		FBXRender( models.pIdle.get(), HLSL, WVP, W, motionSpeed );
+		FBXRender( models.pIdle.get(), HLSL, WVP, W, motionSpeed ,anim_flg);
 		break;
 	case KnightAI::ActionState::MOVE_GET_NEAR:
-		FBXRender( models.pRunFront.get(), HLSL, WVP, W, motionSpeed );
+		FBXRender( models.pRunFront.get(), HLSL, WVP, W, motionSpeed ,anim_flg);
 		break;
 	case KnightAI::ActionState::MOVE_GET_FAR:
-		FBXRender( models.pRunBack.get(), HLSL, WVP, W, motionSpeed );
+		FBXRender( models.pRunBack.get(), HLSL, WVP, W, motionSpeed ,anim_flg);
 		break;
 	case KnightAI::ActionState::MOVE_SIDE:
 		( Donya::SignBit( moveSign ) == 1 )
-		? FBXRender( models.pRunRight.get(), HLSL, WVP, W, motionSpeed )
+		? FBXRender( models.pRunRight.get(), HLSL, WVP, W, motionSpeed ,anim_flg)
 		: FBXRender( models.pRunLeft.get(), HLSL, WVP, W, motionSpeed );
 		break;
 	case KnightAI::ActionState::MOVE_AIM_SIDE:
 		( Donya::SignBit( moveSign ) == 1 )
-		? FBXRender( models.pRunRight.get(), HLSL, WVP, W, motionSpeed )
-		: FBXRender( models.pRunLeft.get(), HLSL, WVP, W, motionSpeed );
+		? FBXRender( models.pRunRight.get(), HLSL, WVP, W, motionSpeed ,anim_flg)
+		: FBXRender( models.pRunLeft.get(), HLSL, WVP, W, motionSpeed ,anim_flg);
 		break;
 	case KnightAI::ActionState::ATTACK_EXPLOSION:
 		{
-			FBXRender( models.pAtkExpl.get(), HLSL, WVP, W, motionSpeed );
+			FBXRender( models.pAtkExpl.get(), HLSL, WVP, W, motionSpeed ,anim_flg);
 
 			float drawScale = KnightParam::Get().HitBoxExplosion().collision.radius * PARAM.explScaleDraw;
 			Donya::Vector4x4 FX_S = Donya::Vector4x4::MakeScaling( drawScale );
@@ -472,14 +473,14 @@ void Knight::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Dony
 			float drawAlpha = ( VIVID_TIME <= timer )
 			? 1.0f - ( KnightParam::Open().explHideSpeed * ( timer - VIVID_TIME ) )
 			: 1.0f;
-			FBXRender( models.pFxExpl.get(), HLSL, FX_WVP, FX_W, KnightParam::Open().motionSpeeds.back(), /* is_animation = */ true, { 1.0f, 1.0f, 1.0f, drawAlpha } );
+			FBXRender( models.pFxExpl.get(), HLSL, FX_WVP, FX_W, KnightParam::Open().motionSpeeds.back(), /* is_animation = */ anim_flg, { 1.0f, 1.0f, 1.0f, drawAlpha } );
 		}
 		break;
 	case KnightAI::ActionState::ATTACK_SWING:
-		FBXRender( models.pAtkSwing.get(), HLSL, WVP, W, motionSpeed );
+		FBXRender( models.pAtkSwing.get(), HLSL, WVP, W, motionSpeed,anim_flg );
 		break;
 	case KnightAI::ActionState::ATTACK_RAID:
-		FBXRender( models.pAtkRaid.get(), HLSL, WVP, W, motionSpeed );
+		FBXRender( models.pAtkRaid.get(), HLSL, WVP, W, motionSpeed ,anim_flg);
 		break;
 	case KnightAI::ActionState::END:
 		{
@@ -492,7 +493,7 @@ void Knight::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Dony
 				drawAlpha -= KnightParam::Open().defeatHideSpeed * timeDiff;
 				drawAlpha = std::max( 0.0f, drawAlpha );
 			}
-			FBXRender( models.pDefeat.get(), HLSL, WVP, W, motionSpeed * animeAccel, /* is_animation = */ true, { 1.0f, 1.0f, 1.0f, drawAlpha } );
+			FBXRender( models.pDefeat.get(), HLSL, WVP, W, motionSpeed * animeAccel, /* is_animation = */ anim_flg, { 1.0f, 1.0f, 1.0f, drawAlpha } );
 		}
 		break;
 	default: break;

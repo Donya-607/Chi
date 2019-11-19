@@ -490,7 +490,7 @@ void sceneTitle::render()
 	{
 		Donya::Vector4x4 W = Donya::Vector4x4::Identity();
 		Donya::Vector4x4 WVP = W * V * P;
-		FBXRender(pStageModel.get(), shader, WVP, W);
+		FBXRender(pStageModel.get(), shader, WVP, W,1,false);
 
 		if (titleExist)
 		{

@@ -258,12 +258,19 @@ private:
 	Donya::Quaternion		orientation;
 	Models					models;
 	bool					doOnce;				// Recycle between each state.
+
+	bool					anim_flg;
 public:
 	Knight();
 	~Knight();
 public:
 	void Init( int stageNo );
 	void Uninit();
+
+	void setAnimFlg(bool flg)
+	{
+		anim_flg = flg;
+	}
 
 	void Update( TargetStatus target, float elapsedTime );
 

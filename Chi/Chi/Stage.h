@@ -11,13 +11,17 @@ class Stage
 private:
 	int stageNo;	// 1-based.
 	std::unique_ptr<skinned_mesh> pModel;
+	bool anim_flg;
 public:
 	Stage();
 	~Stage();
 public:
 	void Init( int stageNo );
 	void Uninit();
-
+	void setAnimFlg(bool flg)
+	{
+		anim_flg = flg;
+	}
 	void Update();
 
 	void Draw(fbx_shader& hlsl, const Donya::Vector4x4& matView, const Donya::Vector4x4& matProjection);
