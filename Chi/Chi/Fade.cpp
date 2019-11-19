@@ -24,6 +24,8 @@ void Fade::Update()
 			alpha += 0.01f;
 			if (1.0f <= alpha)
 			{
+				GameLib::setFlameSpeed(1.0f);
+
 				alpha = 1.0f;
 				state = 1;
 				if (sceneNo == 0) pSceneManager->setNextScene(new sceneTitle(), false);
