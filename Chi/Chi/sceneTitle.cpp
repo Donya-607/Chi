@@ -595,7 +595,7 @@ void sceneTitle::render()
 
 void sceneTitle::uninit()
 {
-
+	Donya::Sound::Stop( SOUND_INDEX::TITLE );
 }
 
 void sceneTitle::imGui()
