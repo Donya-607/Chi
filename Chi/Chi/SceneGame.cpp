@@ -744,6 +744,7 @@ public:
 			{
 				Donya::Vector3 hitPosition = playerAttackBox.pos;
 				EffectManager::GetInstance()->SparkEffectSet( hitPosition );
+				Donya::Sound::Play( SOUND_INDEX::PL_HIT );
 
 				knight.ReceiveImpact();
 			}
@@ -803,6 +804,7 @@ public:
 				{
 					Donya::Vector3 hitPosition = playerAttackBox.pos;
 					EffectManager::GetInstance()->SparkEffectSet( hitPosition );
+					Donya::Sound::Play( SOUND_INDEX::PL_HIT );
 
 					golem.ReceiveImpact();
 					break;
@@ -873,6 +875,7 @@ public:
 			{
 				Donya::Vector3 hitPosition = playerAttackBox.pos;
 				EffectManager::GetInstance()->SparkEffectSet( hitPosition );
+				Donya::Sound::Play( SOUND_INDEX::PL_HIT );
 
 				rival.ReceiveImpact();
 			}
@@ -1095,10 +1098,7 @@ void SceneGame::init()
 		pImpl->Init();
 		endLoad = true;
 	});
-<<<<<<< HEAD
 
-=======
->>>>>>> origin/kai10
 	{
 		wchar_t filename[] = L"./Data/movie/Loading.wmv";
 
@@ -1191,10 +1191,7 @@ void SceneGame::render()
 	}
 
 	pImpl->Draw(!isStack);
-<<<<<<< HEAD
 
-=======
->>>>>>> origin/kai10
 	Fade::GetInstance()->Draw();
 }
 

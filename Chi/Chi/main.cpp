@@ -51,8 +51,8 @@ INT WINAPI wWinMain(HINSTANCE instance, HINSTANCE prev_instance, LPWSTR cmd_line
 	Donya::Sound::Load(PL_RUN1, "./Data/Sounds/SE/Player/Title.wav", false);
 	Donya::Sound::Load(PL_RUN2, "./Data/Sounds/SE/Player/Title.wav", false);
 	Donya::Sound::Load(PL_RUN3, "./Data/Sounds/SE/Player/Title.wav", false);
-	Donya::Sound::Load(PL_SHILED_IMPACT, "./Data/Sounds/SE/Player/Title.wav", false);
-	Donya::Sound::Load(PL_SHILED_OPEN, "./Data/Sounds/SE/Player/Title.wav", false);
+	Donya::Sound::Load(PL_SHIELD_IMPACT, "./Data/Sounds/SE/Player/Title.wav", false);
+	Donya::Sound::Load(PL_SHIELD_OPEN, "./Data/Sounds/SE/Player/Title.wav", false);
 	Donya::Sound::Load(PL_THRUST, "./Data/Sounds/SE/Player/Title.wav", false);
 	Donya::Sound::Load(PL_PROTECTED, "./Data/Sounds/SE/Player/Title.wav", false);
 

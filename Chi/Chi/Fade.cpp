@@ -1,6 +1,8 @@
 #include "Fade.h"
 #include "GameLibFunctions.h"
 
+#include "Donya/Sound.h"
+
 
 void Fade::Init(int _sceneNo)
 {
@@ -25,6 +27,11 @@ void Fade::Update()
 			if (1.0f <= alpha)
 			{
 				GameLib::setFlameSpeed(1.0f);
+
+				Donya::Sound::Stop( SOUND_INDEX::TITLE );
+				Donya::Sound::Stop( SOUND_INDEX::STAGE1 );
+				Donya::Sound::Stop( SOUND_INDEX::STAGE2 );
+				Donya::Sound::Stop( SOUND_INDEX::STAGE3 );
 
 				alpha = 1.0f;
 				state = 1;

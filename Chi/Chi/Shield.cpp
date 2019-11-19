@@ -1,6 +1,7 @@
 #include "Shield.h"
 
 #include "Donya/FilePath.h"
+#include "Donya/Sound.h"
 #include "Donya/Useful.h"	// Use ToRadian().
 
 #include "GameLibFunctions.h"
@@ -473,6 +474,8 @@ void Shield::Recover()
 	AddTimer( ShieldParam::Open().recoveryAmount );
 
 	ChangeMotion( State::React );
+
+	Donya::Sound::Play( SOUND_INDEX::PL_SHIELD_IMPACT );
 }
 
 void Shield::LoadModels()
@@ -516,6 +519,7 @@ void Shield::ApplyState( bool isUnfolding )
 	if ( IsUnfoldTiming( nowUnfolding, isUnfolding ) )
 	{
 		fluctuation -= ShieldParam::Open().consumptionAmount;
+		Donya::Sound::Play( SOUND_INDEX::PL_SHIELD_OPEN );
 		
 		ChangeMotion( State::Open );
 	}

@@ -658,6 +658,8 @@ void Player::SucceededDefence()
 void Player::ReceiveImpact()
 {
 	DefeatInit();
+
+	Donya::Sound::Play( SOUND_INDEX::PL_DEATH );
 }
 
 void Player::SetFieldRadius( float newFieldRadius )
@@ -994,6 +996,8 @@ void Player::AttackUpdate( Input input, float elapsedTime )
 	{
 		setStopAnimation( models.pAttack.get(), /* is_stop = */ false );
 		EffectManager::GetInstance()->PlayerAbsorptionEffectReSet();
+
+		Donya::Sound::Play( SOUND_INDEX::PL_THRUST );
 	}
 
 	// Easing process.
@@ -1281,7 +1285,17 @@ void Player::FXUpdate( float elapsedTime )
 		FXIntervalTimer = PlayerParam::Get().FXGenerateInterval();
 
 		EffectManager::GetInstance()->DustEffectSet( GetPosition(), stageNo );
-		// TODO : Play the running sound here.
+		
+		int SEIndex{};
+		switch ( stageNo )
+		{
+		case 0: SEIndex = PL_RUN1; break;
+		case 1: SEIndex = PL_RUN2; break;
+		case 2: SEIndex = PL_RUN3; break;
+		default: break;
+		}
+
+		Donya::Sound::Play( SEIndex );
 	}
 }
 

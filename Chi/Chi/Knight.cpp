@@ -5,6 +5,7 @@
 #include "Donya/Easing.h"
 #include "Donya/FilePath.h"
 #include "Donya/Random.h"
+#include "Donya/Sound.h"
 #include "Donya/Useful.h"		// For IsShowCollision().
 
 #include "gameLib.h"
@@ -1106,6 +1107,8 @@ void Knight::AttackExplosionInit( TargetStatus target, float elapsedTime )
 
 	Donya::Vector3 _pos = GetPos();
 	EffectManager::GetInstance()->BossAbsorptionEffectSet( Donya::Vector3(_pos.x, _pos.y + 75.0f, _pos.z ));
+
+	Donya::Sound::Play( SOUND_INDEX::BOSS2_CHARGE );
 }
 void Knight::AttackExplosionUpdate( TargetStatus target, float elapsedTime )
 {
@@ -1124,6 +1127,8 @@ void Knight::AttackExplosionUpdate( TargetStatus target, float elapsedTime )
 		setStopAnimation( models.pAtkExpl.get(), /* is_stop = */ false );
 
 		EffectManager::GetInstance()->BossAbsorptionEffectReSet();
+
+		Donya::Sound::Play( SOUND_INDEX::BOSS2_EXPROJON );
 	}
 	
 	if ( CHARGE_LENGTH < timer )
@@ -1178,6 +1183,8 @@ void Knight::AttackSwingInit( TargetStatus target, float elapsedTime )
 
 	ResetCurrentSphereFN( &KnightParam::Get().HitBoxSwing() );
 	setAnimFlame( models.pAtkSwing.get(), 0 );
+
+	Donya::Sound::Play( SOUND_INDEX::BOSS2_SWING );
 }
 void Knight::AttackSwingUpdate( TargetStatus target, float elapsedTime )
 {
@@ -1221,6 +1228,9 @@ void Knight::AttackRaidUpdate( TargetStatus target, float elapsedTime )
 	{
 		velocity = 0.0f;
 		EffectManager::GetInstance()->JumpEffectSet( GetPos() );
+		Donya::Sound::Play( SOUND_INDEX::BOSS2_JUMP );
+
+		Donya::Sound::Play( SOUND_INDEX::BOSS2_SWING );
 	}
 
 	if ( timer <= START_TIME + LANDING_TIME )

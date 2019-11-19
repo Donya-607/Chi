@@ -3,6 +3,7 @@
 #include "Donya/Easing.h"
 #include "Donya/FilePath.h"
 #include "Donya/Random.h"
+#include "Donya/Sound.h"
 #include "Donya/Useful.h"		// For IsShowCollision().
 
 #include "gameLib.h"
@@ -1431,6 +1432,8 @@ void Golem::AttackRotateInit( TargetStatus target, float elapsedTime )
 
 	ResetCurrentSphereFrames( GolemParam::Get().RotateAtkCollisions() );
 	setAnimFlame( models.pAtkRotate.get(), 0 );
+
+	Donya::Sound::Play( SOUND_INDEX::BOSS3_PUNCH );
 }
 void Golem::AttackRotateUpdate( TargetStatus target, float elapsedTime )
 {

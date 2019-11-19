@@ -1472,6 +1472,7 @@ void Rival::AttackRaidUpdate( TargetStatus target, float elapsedTime )
 	else if ( !velocity.IsZero() )
 	{
 		velocity = 0.0f;
+		Donya::Sound::Play( SOUND_INDEX::BOSS4_JUMP );
 	}
 
 	if ( timer <= START_TIME + LANDING_TIME )
@@ -1493,6 +1494,8 @@ void Rival::AttackRaidUpdate( TargetStatus target, float elapsedTime )
 		// Apply movement and reset extraOffset.
 		pos += extraOffset;
 		extraOffset = 0.0f;
+
+		Donya::Sound::Play( SOUND_INDEX::BOSS4_SLASH );
 	}
 
 	auto &hitBox = RivalParam::Get().RaidHitBox();
@@ -1539,6 +1542,8 @@ void Rival::AttackRushUpdate( TargetStatus target, float elapsedTime )
 				timer			= RivalParam::Open().rush.slashStopAnimeFrame;
 				extraStatus		= ExtraState::RUSH_RUN;
 				currentMotion	= AtkRushSlash;
+
+				Donya::Sound::Play( SOUND_INDEX::BOSS4_RUSH );
 
 				// HACK:May be set to not zero.
 				slerpFactor = 0.0f;
@@ -1593,6 +1598,8 @@ void Rival::AttackRushUpdate( TargetStatus target, float elapsedTime )
 				setStopAnimation( models.pAtkRushSlash.get(), /* is_Stop = */ false );
 
 				EffectManager::GetInstance()->AccelEffectReSet();
+
+				Donya::Sound::Play( SOUND_INDEX::BOSS4_SLASH );
 			}
 			else
 			{
