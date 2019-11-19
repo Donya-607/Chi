@@ -32,6 +32,49 @@ INT WINAPI wWinMain(HINSTANCE instance, HINSTANCE prev_instance, LPWSTR cmd_line
 
 	Donya::Sound::Init();
 
+	//BGM
+	Donya::Sound::Load(TITLE, "./Data/Sounds/BGM/Title.wav", true);
+	Donya::Sound::Load(STAGE1, "./Data/Sounds/BGM/Stage01.wav", true);
+	Donya::Sound::Load(STAGE2, "./Data/Sounds/BGM/Stage02.wav", true);
+	Donya::Sound::Load(STAGE3, "./Data/Sounds/BGM/Stage03.wav", true);
+	Donya::Sound::Load(GAMEOVER, "./Data/Sounds/BGM/GameOver.wav", false);
+	Donya::Sound::Load(GAMECLEAR, "./Data/Sounds/BGM/GameClear.wav", false);
+
+	//SE
+	Donya::Sound::Load(CATAPAULT, "./Data/Sounds/SE/Tutorial/Catapault.wav", false);
+	Donya::Sound::Load(ROCK, "./Data/Sounds/SE/Tutorial/Rock_Impact.wav", false);
+
+
+	Donya::Sound::Load(DEFEND, "./Data/Sounds/SE/Player/Title.wav", false);
+	Donya::Sound::Load(PL_DEATH, "./Data/Sounds/SE/Player/Title.wav", false);
+	Donya::Sound::Load(PL_HIT, "./Data/Sounds/SE/Player/Title.wav", false);
+	Donya::Sound::Load(PL_RUN1, "./Data/Sounds/SE/Player/Title.wav", false);
+	Donya::Sound::Load(PL_RUN2, "./Data/Sounds/SE/Player/Title.wav", false);
+	Donya::Sound::Load(PL_RUN3, "./Data/Sounds/SE/Player/Title.wav", false);
+	Donya::Sound::Load(PL_SHILED_IMPACT, "./Data/Sounds/SE/Player/Title.wav", false);
+	Donya::Sound::Load(PL_SHILED_OPEN, "./Data/Sounds/SE/Player/Title.wav", false);
+	Donya::Sound::Load(PL_THRUST, "./Data/Sounds/SE/Player/Title.wav", false);
+	Donya::Sound::Load(PL_PROTECTED, "./Data/Sounds/SE/Player/Title.wav", false);
+
+
+	Donya::Sound::Load(BOSS2_CHARGE, "./Data/Sounds/SE/Boss/Boss02/Boss02_Charge.wav", false);
+	Donya::Sound::Load(BOSS2_EXPROJON, "./Data/Sounds/SE/Boss/Boss02/Boss02_Explosion.wav", false);
+	Donya::Sound::Load(BOSS2_JUMP, "./Data/Sounds/SE/Boss/Boss02/Boss02_Jump.wav", false);
+	Donya::Sound::Load(BOSS2_RUN, "./Data/Sounds/SE/Boss/Boss02/Boss02_Run.wav", false);
+	Donya::Sound::Load(BOSS2_SWING, "./Data/Sounds/SE/Boss/Boss02/Boss02_Swing.wav", false);
+
+
+	Donya::Sound::Load(BOSS3_ATTACK, "./Data/Sounds/SE/Boss/Boss03/Boss03_Attack_Rock.wav", false);
+	Donya::Sound::Load(BOSS3_BACK, "./Data/Sounds/SE/Boss/Boss03/Boss03_BackStep.wav", false);
+	Donya::Sound::Load(BOSS3_PUNCH, "./Data/Sounds/SE/Boss/Boss03/Boss03_Punch.wav", false);
+
+	Donya::Sound::Load(BOSS4_JUMP, "./Data/Sounds/SE/Boss/Boss04/Boss04_Jump.wav", false);
+	Donya::Sound::Load(BOSS4_LINE, "./Data/Sounds/SE/Boss/Boss04/Boss04_Line.wav", false);
+	Donya::Sound::Load(BOSS4_POINT, "./Data/Sounds/SE/Boss/Boss04/Boss04_Point.wav", false);
+	Donya::Sound::Load(BOSS4_RUN, "./Data/Sounds/SE/Boss/Boss04/Boss04_Run.wav", false);
+	Donya::Sound::Load(BOSS4_RUSH, "./Data/Sounds/SE/Boss/Boss04/Boss04_Rush.wav", false);
+	Donya::Sound::Load(BOSS4_SLASH, "./Data/Sounds/SE/Boss/Boss04/Boss04_Slash.wav", false);
+
 #if DEBUG_MODE
 	pSceneManager->init(new sceneTitle);
 #else

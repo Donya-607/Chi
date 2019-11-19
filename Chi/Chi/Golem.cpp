@@ -579,25 +579,25 @@ void Golem::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya
 	switch ( status )
 	{
 	case GolemAI::ActionState::WAIT:
-		FBXRender( models.pIdle.get(), HLSL, WVP, W, motionSpeed );
+		FBXRender( models.pIdle.get(), HLSL, WVP, W, motionSpeed ,anim_flg);
 		break;
 	case GolemAI::ActionState::MOVE_GET_NEAR:
-		FBXRender( models.pIdle.get(), HLSL, WVP, W, motionSpeed );
+		FBXRender( models.pIdle.get(), HLSL, WVP, W, motionSpeed ,anim_flg);
 		break;
 	case GolemAI::ActionState::MOVE_GET_FAR:
-		FBXRender( models.pIdle.get(), HLSL, WVP, W, motionSpeed );
+		FBXRender( models.pIdle.get(), HLSL, WVP, W, motionSpeed ,anim_flg);
 		break;
 	case GolemAI::ActionState::MOVE_SIDE:
-		FBXRender( models.pIdle.get(), HLSL, WVP, W, motionSpeed );
+		FBXRender( models.pIdle.get(), HLSL, WVP, W, motionSpeed ,anim_flg);
 		break;
 	case GolemAI::ActionState::MOVE_AIM_SIDE:
-		FBXRender( models.pIdle.get(), HLSL, WVP, W, motionSpeed );
+		FBXRender( models.pIdle.get(), HLSL, WVP, W, motionSpeed ,anim_flg);
 		break;
 	case GolemAI::ActionState::ATTACK_SWING:
-		FBXRender( models.pAtkSwing.get(), HLSL, WVP, W, motionSpeed );
+		FBXRender( models.pAtkSwing.get(), HLSL, WVP, W, motionSpeed ,anim_flg);
 		break;
 	case GolemAI::ActionState::ATTACK_FAST:
-		FBXRender( models.pAtkFast.get(), HLSL, WVP, W, motionSpeed );
+		FBXRender( models.pAtkFast.get(), HLSL, WVP, W, motionSpeed ,anim_flg);
 		break;
 	case GolemAI::ActionState::ATTACK_ROTATE:
 		FBXRender( models.pAtkRotate.get(), HLSL, WVP, W, motionSpeed );
@@ -613,7 +613,7 @@ void Golem::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya
 				drawAlpha -= GolemParam::Get().DefeatHideSpeed() * timeDiff;
 				drawAlpha = std::max( 0.0f, drawAlpha );
 			}
-			FBXRender( models.pDefeat.get(), HLSL, WVP, W, motionSpeed * animeAccel, /* is_animation = */ true, { 1.0f, 1.0f, 1.0f, drawAlpha } );
+			FBXRender( models.pDefeat.get(), HLSL, WVP, W, motionSpeed * animeAccel, /* is_animation = */ anim_flg, { 1.0f, 1.0f, 1.0f, drawAlpha } );
 		}
 		break;
 	default: break;

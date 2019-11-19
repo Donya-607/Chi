@@ -135,11 +135,11 @@ public:
 		contrast_flg = false;
 		LoadParameter();
 
-		if ( !LoadSounds() )
+		/*if ( !LoadSounds() )
 		{
 			_ASSERT_EXPR( 0, L"Failed : Loading sound." );
 			exit( -1 );
-		}
+		}*/
 	#if DEBUG_MODE
 		Donya::Sound::Load( BGM_ID, "./Data/Sounds/Test/BGM.wav", true  );
 		Donya::Sound::Load( SE_ID,  "./Data/Sounds/Test/SE.wav",  false );
@@ -173,10 +173,12 @@ public:
 		Donya::OutputDebugStr( "No.1 Begin Player::Init.\n" );
 		player.Init( stageNo, Donya::Vector3::Zero(), Donya::Vector3::Zero(), std::vector<Donya::Box>(/* empty */) );
 		player.SetFieldRadius( fieldRadius );
+		player.setAnimFlg(true);
 		Donya::OutputDebugStr( "No.1 End Player::Init.\n" );
 
 		Donya::OutputDebugStr( "No.2 Begin Stage::Init.\n" );
 		stage.Init( stageNo );
+		stage.setAnimFlg(true);
 		Donya::OutputDebugStr( "No.2 End Stage::Init.\n" );
 
 		Donya::OutputDebugStr( "No.3 Begin Boss::Init.\n" );
@@ -184,9 +186,9 @@ public:
 		switch ( stageNo )
 		{
 			
-		case KnightNo:	knight.Init( stageNo );		knight.SetFieldRadius( fieldRadius );		cameraTarget = knight.GetPos();	break;
-		case GolemNo:	golem.Init( stageNo );		golem.SetFieldRadius( fieldRadius );		cameraTarget = golem.GetPos();	break;
-		case RivalNo:	rival.Init( stageNo );		rival.SetFieldRadius( fieldRadius );		cameraTarget = rival.GetPos();	break;
+		case KnightNo:	knight.Init(stageNo);	 knight.setAnimFlg(true);	knight.SetFieldRadius(fieldRadius);		cameraTarget = knight.GetPos();	break;
+		case GolemNo:	golem.Init(stageNo);	golem.setAnimFlg(true);	golem.SetFieldRadius(fieldRadius);		cameraTarget = golem.GetPos();	break;
+		case RivalNo:	rival.Init(stageNo);	rival.setAnimFlg(true);	rival.SetFieldRadius(fieldRadius);		cameraTarget = rival.GetPos();	break;
 		default:		Donya::OutputDebugStr( "Error : The boss does not initialize !\n" );	break;
 		}
 		Donya::OutputDebugStr( "No.3 End Boss::Init.\n" );
@@ -254,11 +256,15 @@ public:
 		}
 	}
 
-	void Draw()
+	void Draw(bool anim_flg)
 	{
 		clearWindow( 0.5f, 0.5f, 0.5f, 1.0f );
 		setBlendMode_ALPHA( 1.0f );
-
+		stage.setAnimFlg(anim_flg);
+		player.setAnimFlg(anim_flg);
+		knight.setAnimFlg(anim_flg);
+		golem.setAnimFlg(anim_flg);
+		rival.setAnimFlg(anim_flg);
 		Donya::Vector4x4 V = Donya::Vector4x4::FromMatrix( getViewMatrix() );
 		Donya::Vector4x4 P = Donya::Vector4x4::FromMatrix( getProjectionMatrix() );
 
@@ -470,18 +476,6 @@ public:
 		stage.Update();
 
 		Player::Input  playerInput = Player::Input::MakeByExternalInput( Donya::Vector4x4::FromMatrix( GameLib::camera::GetViewMatrix() ) );
-//<<<<<<< HEAD
-//		// If the movement is nothing, set the player's direction to boss.
-//		if ( playerInput.moveVector.IsZero() )
-//		{
-//			playerInput.moveVector = GetBossPosition() - player.GetPosition();
-//			playerInput.moveVector.Normalized();
-//			playerInput.onlyRotation = true;
-//		}
-//		player.Update( playerInput, elapsedTime );
-//
-//		BossUpdate( elapsedTime );
-//=======
 		player.Update( playerInput, elapsedTime );
 
 		BossUpdate( elapsedTime );
@@ -495,29 +489,6 @@ public:
 
 		if ( IsLastStage( stageNo ) )
 		{
-//<<<<<<< HEAD
-//			if ( IsLastStage( stageNo ) )
-//			{
-//				SetStageNo( 0 );
-//
-//				ResetEffects();
-//
-//				if ( !Fade::GetInstance()->GetExist() )
-//				{
-//					Fade::GetInstance()->Init( 3 );
-//				}
-//			}
-//			else
-//			{
-//				SetStageNo( stageNo + 1 );
-//
-//				ResetEffects();
-//
-//				if ( !Fade::GetInstance()->GetExist() )
-//				{
-//					Fade::GetInstance()->Init( 1 );
-//				}
-//=======
 			SetStageNo( 0 );
 
 			ResetEffects();
@@ -532,7 +503,7 @@ public:
 			SetStageNo( stageNo + 1 );
 
 			ResetEffects();
-
+			
 			if ( !Fade::GetInstance()->GetExist() )
 			{
 				Fade::GetInstance()->Init( 1 );
@@ -1169,7 +1140,10 @@ void SceneGame::update()
 		{
 			loading_mutex.unlock();
 		}
-		loading_thread->join();
+		if (loading_thread->joinable())
+		{
+			loading_thread->join();
+		}
 		loadFinish = true;
 	}
 
@@ -1187,7 +1161,7 @@ void SceneGame::render()
 		return;
 	}
 
-	pImpl->Draw();
+	pImpl->Draw(!isStack);
 	Fade::GetInstance()->Draw();
 }
 

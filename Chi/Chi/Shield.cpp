@@ -224,7 +224,7 @@ void Shield::Update( float elapsedTime, bool isUnfolding, const Donya::Vector3 &
 	Elapse();
 }
 
-void Shield::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matProjection, const Donya::Vector4x4 &matParent )
+void Shield::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya::Vector4x4 &matProjection, const Donya::Vector4x4 &matParent ,bool flg)
 {
 	if ( status == State::NotExist ) { return; }
 	// else
@@ -253,13 +253,13 @@ void Shield::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Dony
 	switch ( status )
 	{
 	case State::Open:
-		FBXRender( models.pOpen.get(), HLSL, WVP, W, motionSpeed );
+		FBXRender( models.pOpen.get(), HLSL, WVP, W, motionSpeed ,flg);
 		break;
 	case State::Idle:
-		FBXRender( models.pIdle.get(), HLSL, WVP, W, motionSpeed );
+		FBXRender( models.pIdle.get(), HLSL, WVP, W, motionSpeed ,flg);
 		break;
 	case State::React:
-		FBXRender( models.pReact.get(), HLSL, WVP, W, motionSpeed );
+		FBXRender( models.pReact.get(), HLSL, WVP, W, motionSpeed ,flg);
 		break;
 	default: break;
 	}

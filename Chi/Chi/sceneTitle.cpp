@@ -13,7 +13,7 @@
 
 void sceneTitle::init()
 {
-//	Donya::Sound::Load('BGM', "./Data/SOunds/BGM/Stage02.wav", true);
+	Donya::Sound::Load('BGM', "./Data/SOunds/BGM/Stage02.wav", true);
 	setCamPos(camPos);
 	setTarget(camTarget);
 	cameraDistance = 1000.0f;
@@ -42,7 +42,6 @@ void sceneTitle::init()
 	loading_thread = std::make_unique<std::thread>([&]() //&‚Í–³–¼ŠÖ”, Ÿ‚ªŠÖ”‚Ìˆø”, {}‚Ì’†‚ªŠÖ”‚Ì’†g
 	{
 		std::lock_guard<std::mutex> lock(loading_mutex);
-
 
 		loadFBX(pStageModel.get(), GetModelPath(ModelAttribute::TutorialStage));
 		loadFBX(pTitleModel.get(), "./Data/model/TestMove.fbx");
@@ -125,6 +124,7 @@ void sceneTitle::init()
 		constexpr int STAGE_NO = 0;
 		player.Init( STAGE_NO, Donya::Vector3(0.0f, 2222.5f, 14000.0f), Donya::Vector3(0.0f, 0.0f * 0.01745f, 0.0f), wallHitBox_vector);
 		player.SetFieldRadius(9999999.0f);
+		player.setAnimFlg(true);
 
 		catapult.Init(Donya::Vector3(0.0f, 2208.0f, 4981.0f), Donya::Vector3(1.0f, 1.0f, 1.0f), Donya::Vector3(0.0f, 0.0f, 0.0f));
 
@@ -513,7 +513,7 @@ void sceneTitle::render()
 	{
 		Donya::Vector4x4 W = Donya::Vector4x4::Identity();
 		Donya::Vector4x4 WVP = W * V * P;
-		FBXRender(pStageModel.get(), shader, WVP, W);
+		FBXRender(pStageModel.get(), shader, WVP, W, 1, false);
 
 		/*if (titleExist)
 		{
@@ -532,6 +532,13 @@ void sceneTitle::render()
 		{
 			billboardRender(&attackUIdata.pMesh, V * P, attackUIdata.pos, attackUIdata.scale, attackUIdata.angle, getCamPos());
 			billboardRender(&guardUIdata.pMesh, V * P, guardUIdata.pos, guardUIdata.scale, guardUIdata.angle, getCamPos());
+		}
+		else if (sceneState == SceneState::TITLE)
+		{
+			setBlendMode_ALPHA(0.75f);
+			spriteRenderRect(&logo, logoPos, logoTexPos, logoTexSize);
+			spriteRenderRect(&logo, Donya::Vector2(1920.0f / 2.0f - 588.0f / 2.0f, 1080.0f - 180.0f), Donya::Vector2(0.0f, 632.0f), Donya::Vector2(588.0f, 122.0f));
+			setBlendMode_ALPHA(1.0f);
 		}
 
 		EffectManager::GetInstance()->Render(shader);
@@ -554,69 +561,8 @@ void sceneTitle::render()
 
 		//	OBJRender(pCube.get(), CWVP, CW, Donya::Vector4(0.0f, 0.8f, 0.3f, 0.6f));
 		//}
-
-		//GameLib::clearDepth();
-
-		if (sceneState == SceneState::TITLE)
-		{
-			setBlendMode_ALPHA(0.75f);
-			spriteRenderRect(&logo, logoPos, logoTexPos, logoTexSize);
-			spriteRenderRect(&logo, Donya::Vector2(1920.0f / 2.0f - 588.0f / 2.0f, 1080.0f - 180.0f), Donya::Vector2(0.0f, 632.0f), Donya::Vector2(588.0f, 122.0f));
-			setBlendMode_ALPHA(1.0f);
-		}
+		GameLib::clearDepth();
 	}
-
-	////z screen : billboard‚Í‚±‚ÌŠK‘w‚É‚Í•`‰æ‚µ‚È‚¢‚Å‚­‚¾‚³‚¢
-	//{
-	//	Donya::Vector4x4 W = Donya::Vector4x4::Identity();
-	//	Donya::Vector4x4 WVP = W * V * P;
-	//	z_render(pStageModel.get(), shader, WVP, W);
-
-	//	if (titleExist)
-	//	{
-	//		Donya::Vector4x4 S = Donya::Vector4x4::MakeScaling(titleScale);
-	//		Donya::Vector4x4 R = Donya::Vector4x4::MakeRotationEuler(Donya::Vector3(0.0f, 0.0f, 0.0f));
-	//		Donya::Vector4x4 T = Donya::Vector4x4::MakeTranslation(titlePos);
-	//		W = S * R * T;
-	//		WVP = W * V * P;
-	//		z_render(pTitleModel.get(), shader, WVP, W);
-	//	}
-
-	//	player.DrawZ(shader, V, P);
-	//	catapult.z_Draw(shader, V, P);
-
-	//	EffectManager::GetInstance()->z_Render(shader);
-	//	GameLib::clearDepth();
-
-	//}
-
-	////bloom screen
-	//{
-	//	Donya::Vector4x4 W = Donya::Vector4x4::Identity();
-	//	Donya::Vector4x4 WVP = W * V * P;
-	//	bloom_SRVrender(pStageModel.get(), shader, WVP, W);
-
-	//	if (titleExist)
-	//	{
-	//		Donya::Vector4x4 S = Donya::Vector4x4::MakeScaling(titleScale);
-	//		Donya::Vector4x4 R = Donya::Vector4x4::MakeRotationEuler(Donya::Vector3(0.0f, 0.0f, 0.0f));
-	//		Donya::Vector4x4 T = Donya::Vector4x4::MakeTranslation(titlePos);
-	//		W = S * R * T;
-	//		WVP = W * V * P;
-	//		bloom_SRVrender(pTitleModel.get(), shader, WVP, W);
-	//	}
-
-	//	player.DrawBloom(shader, V, P);
-	//	catapult.bloom_Draw(shader, V, P);
-
-	//	billboard_bloom_Render(&attackUIdata.pMesh, V * P, attackUIdata.pos, attackUIdata.scale, attackUIdata.angle, getCamPos());
-	//	billboard_bloom_Render(&guardUIdata.pMesh, V * P, guardUIdata.pos, guardUIdata.scale, guardUIdata.angle, getCamPos());
-
-	//	EffectManager::GetInstance()->bloom_Render(shader);
-
-	//	GameLib::clearDepth();
-	//}
-
 
 	origin_SRV = (void*)GameLib::getOriginalScreen();
 
@@ -624,7 +570,6 @@ void sceneTitle::render()
 	postEffect_Bloom(0, false);
 	//ƒ‚ƒmƒg[ƒ“‚É‚·‚é‚Æ‚«‚Í‘æˆêˆø”‚ğ‰º‚°‚é
 	filterScreen(1.0f);
-
 
 	Fade::GetInstance()->Draw();
 

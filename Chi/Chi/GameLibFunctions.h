@@ -4,6 +4,51 @@
 #include "gameLib.h"
 #include "vector.h"
 
+enum SOUND_INDEX
+{
+	//BGM//
+
+	TITLE = 0,
+	STAGE1,
+	STAGE2,
+	STAGE3,
+	GAMEOVER,
+	GAMECLEAR,
+
+	//SE//
+	CATAPAULT,
+	ROCK,
+
+	DEFEND,
+	PL_DEATH,
+	PL_HIT,
+	PL_RUN1,
+	PL_RUN2,
+	PL_RUN3,
+	PL_SHILED_IMPACT,
+	PL_SHILED_OPEN,
+	PL_THRUST,
+	PL_PROTECTED,
+
+	BOSS2_CHARGE,
+	BOSS2_EXPROJON,
+	BOSS2_JUMP,
+	BOSS2_RUN,
+	BOSS2_SWING,
+
+	BOSS3_ATTACK,
+	BOSS3_BACK,
+	BOSS3_PUNCH,
+
+	BOSS4_JUMP,
+	BOSS4_LINE,
+	BOSS4_POINT,
+	BOSS4_RUN,
+	BOSS4_RUSH,
+	BOSS4_SLASH,
+};
+
+
 
 //library//
 void startUpLibrary(LPCTSTR caption, HINSTANCE instance, int width = 640, int height = 480, bool isFullscreen = false, int iconNum = -1, double frameRate = 0.0);

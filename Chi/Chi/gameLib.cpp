@@ -1282,6 +1282,7 @@ namespace GameLib
 				{
 					motor = 100.0f;
 				}
+
 				WORD right = static_cast<WORD>(motor * 655.35f * 2.0f);
 				WORD left = static_cast<WORD>(motor * 655.35f * 2.0f);
 
