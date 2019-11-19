@@ -240,12 +240,7 @@ public:
 		}
 
 	#endif // DEBUG_MODE
-		if (pressedButtons(0, START) == 1)
-		{
-			pSceneManager->setNextScene(new scenePose, true);
-			return;
-		}
-
+		
 		float deltaTime = GameLib::getDeltaTime();
 
 		switch ( status )
@@ -453,6 +448,14 @@ public:
 			if ( contrast <= 0 )
 			{
 				contrast = 0;
+			}
+		}
+		else
+		{
+			if ( pressedButtons( 0, START ) == 1 )
+			{
+				pSceneManager->setNextScene( new scenePose, true );
+				return;
 			}
 		}
 
