@@ -21,7 +21,8 @@ void scenePose::init()
 	flg[3] = false;
 	cursol = 0;
 	accelerator = { 0.1f, 0.05f };
-	
+	cnt[0] = 0;
+	cnt[1] = 0;
 }
 
 void scenePose::update()
@@ -92,7 +93,7 @@ void scenePose::update()
 			flg[3] = true;
 		}
 #endif
-		if (getKeyState(KEY_INPUT_UP) == 1)
+		/*if (getKeyState(KEY_INPUT_UP) == 1)
 		{
 			cursol--;
 			if (cursol < 0)
@@ -103,6 +104,39 @@ void scenePose::update()
 			cursol++;
 			if (cursol > 2)
 				cursol = 0;
+		}*/
+
+		using namespace GameLib::input;
+		constexpr int   PAD_NO = 0;
+		constexpr float STICK_RANGE_MAX = 32768.0f;
+		const auto leftStick = xInput::getThumbL(PAD_NO);
+		if (0 < leftStick.y || xInput::pressedButtons(0, XboxPad_Button::DPAD_UP))
+		{
+			if (cnt[0] == 0)
+			{
+				cursol--;
+				if (cursol < 0)
+					cursol = 2;
+			}
+			cnt[0]++;
+		}
+		else
+		{
+			cnt[0] = 0;
+		}
+		if (leftStick.y < 0 || xInput::pressedButtons(0, XboxPad_Button::DPAD_DOWN))
+		{
+			if (cnt[1] == 0)
+			{
+				cursol++;
+				if (cursol > 2)
+					cursol = 0;
+			}
+			cnt[1]++;
+		}
+		else
+		{
+			cnt[1] = 0;
 		}
 
 		if (pressedButtons(0,A) == 1)

@@ -248,6 +248,7 @@ private:
 	DirectX::XMFLOAT2 accelerator;
 	int cursol;
 	bool flg[4];
+	int cnt[2]{};
 
 public:
 	scenePose() {}
