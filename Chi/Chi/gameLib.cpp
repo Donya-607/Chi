@@ -948,11 +948,7 @@ namespace GameLib
 
 		void createBillboard(static_mesh* _mesh, const wchar_t* _textureName, const DirectX::XMFLOAT2& texpos, const DirectX::XMFLOAT2& texsize)
 		{
-<<<<<<< HEAD
-			_mesh->createBillboard(m.device, _textureName,texpos,texsize);
-=======
 			_mesh->createBillboard(m.device, _textureName, texpos, texsize);
->>>>>>> origin/donya2
 		}
 
 		void loadMesh(static_mesh* _mesh, const wchar_t* objName)
@@ -1278,30 +1274,17 @@ namespace GameLib
 
 			void startViblation(int index, float timer, float motor)
 			{
-<<<<<<< HEAD
 				if ( motor < 0 )
 				{
 					motor = 0;
 				}
 				else if ( motor > 100.0f )
-=======
-				if (motor < 0)
-				{
-					motor = 0;
-				}
-				else if (motor > 100.0f)
->>>>>>> origin/donya2
 				{
 					motor = 100.0f;
 				}
-
-<<<<<<< HEAD
 				WORD right = static_cast<WORD>( motor * 655.35f * 2.0f );
 				WORD left  = static_cast<WORD>( motor * 655.35f * 2.0f );
-=======
-				WORD right = static_cast<WORD>(motor * 655.35f * 2.0f);
-				WORD left = static_cast<WORD>(motor * 655.35f * 2.0f);
->>>>>>> origin/donya2
+
 				m.pad[index].startViblation(index, left, right);
 				m.pad[index].timer = timer;
 			}

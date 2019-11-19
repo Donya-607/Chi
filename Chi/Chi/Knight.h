@@ -260,6 +260,7 @@ private:
 	bool					doOnce;				// Recycle between each state.
 
 	bool					anim_flg;
+
 public:
 	Knight();
 	~Knight();

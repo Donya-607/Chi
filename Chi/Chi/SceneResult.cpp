@@ -7,7 +7,7 @@
 #include "Donya/UseImGui.h"
 #include "Donya/FilePath.h"
 #include "Donya/Keyboard.h"
-
+#include "Donya/Sound.h"
 
 SceneResult::SceneResult() :
 	rankingScore(), rankingRender(), yourScore(), yourScoreRender(),
@@ -414,6 +414,8 @@ void SceneResult::init()
 	toTitle.pos = Donya::Vector2(1920.0f - 434.0f - 50.0f, 1080.0f - 114.0f - 100.0f);
 	toTitle.texPos = Donya::Vector2(434.0f, 113.0f);
 	toTitle.texSize = Donya::Vector2(434.0f, 114.0f);
+
+	Donya::Sound::Play(GAMECLEAR);
 }
 
 void SceneResult::update()

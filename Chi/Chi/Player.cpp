@@ -426,9 +426,6 @@ void Player::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Dony
 	case Player::State::Dead:
 		FBXRender( models.pDefeat.get(), HLSL, WVP, W, motionSpeed ,anim_flg);
 		break;
-	case Player::State::Dead:
-		FBXRender( models.pDefeat.get(), HLSL, WVP, W, motionSpeed );
-		break;
 	default: break;
 	}
 
@@ -968,7 +965,8 @@ void Player::AttackInit( Input input )
 	pOBBF->currentFrame = 0;
 	setAnimFlame( models.pAttack.get(), 0 );
 
-	EffectManager::GetInstance()->PlayerAbsorptionEffectSet( GetPosition() );
+	Donya::Vector3 _pos = GetPosition();
+	EffectManager::GetInstance()->PlayerAbsorptionEffectSet(Donya::Vector3(_pos.x, _pos.y + 50.0f, _pos.z));
 }
 void Player::AttackUpdate( Input input, float elapsedTime )
 {

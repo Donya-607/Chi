@@ -370,6 +370,7 @@ void skinned_mesh::setInfo(ID3D11Device* _device, const std::string& _fbxFileNam
 		saveBinary(json_name);
 
 	}
+	if (meshes.empty()) { _ASSERT_EXPR(0, L"メッシュが存在しません！"); }
 
 	for (auto& p : meshes)
 	{
@@ -777,7 +778,11 @@ bool skinned_mesh::createBuffer(int index_mesh, ID3D11Device* device, vertex* ve
 	constantBuffer_desc.StructureByteStride = 0;
 
 	hr = device->CreateBuffer(&constantBuffer_desc, nullptr, &constant_buffer);
-	if (FAILED(hr))return false;
+	if (FAILED(hr))
+	{
+		_ASSERT_EXPR(0, L"コンスタントバッファ作成に失敗しました");
+		return false;
+	}
 
 	return true;
 }

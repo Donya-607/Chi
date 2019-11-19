@@ -35,7 +35,7 @@ private:
 	Donya::Vector3 camTarget = { 0.0f, 2590.0f, 0.0f };
 	float cameraDistance;
 
-	Donya::Vector3 camTitlePos = { 0.0f, 2226.0f, 14446.0f };
+	Donya::Vector3 camTitlePos = { 0.0f, 2239.0f, 14678.0f };
 	Donya::Vector3 camTitleTarget = { 0.0f, 5294.0f, 0.0f };
 	fbx_shader shader;
 	Lights	lights;
@@ -100,6 +100,16 @@ private:
 	static const int MAX_RETRUN_TITLE_CNT = 120;
 	int returnTitleCnt;
 
+	Sprite loadingTex;
+	Sprite logo;
+
+	Donya::Vector2 logoPos;
+	Donya::Vector2 logoTexPos;
+	Donya::Vector2 logoTexSize;
+
+	int cnt;
+	int animFrame;
+	
 
 #if 0
 	struct model

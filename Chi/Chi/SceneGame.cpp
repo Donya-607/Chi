@@ -135,11 +135,11 @@ public:
 		contrast_flg = false;
 		LoadParameter();
 
-		if ( !LoadSounds() )
+		/*if ( !LoadSounds() )
 		{
 			_ASSERT_EXPR( 0, L"Failed : Loading sound." );
 			exit( -1 );
-		}
+		}*/
 	#if DEBUG_MODE
 		Donya::Sound::Load( BGM_ID, "./Data/Sounds/Test/BGM.wav", true  );
 		Donya::Sound::Load( SE_ID,  "./Data/Sounds/Test/SE.wav",  false );
@@ -260,13 +260,19 @@ public:
 	{
 		clearWindow( 0.5f, 0.5f, 0.5f, 1.0f );
 		setBlendMode_ALPHA( 1.0f );
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/kai10
 		stage.setAnimFlg(anim_flg);
 		player.setAnimFlg(anim_flg);
 		knight.setAnimFlg(anim_flg);
 		golem.setAnimFlg(anim_flg);
 		rival.setAnimFlg(anim_flg);
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/kai10
 		Donya::Vector4x4 V = Donya::Vector4x4::FromMatrix( getViewMatrix() );
 		Donya::Vector4x4 P = Donya::Vector4x4::FromMatrix( getProjectionMatrix() );
 
@@ -508,7 +514,7 @@ public:
 			SetStageNo( stageNo + 1 );
 
 			ResetEffects();
-
+			
 			if ( !Fade::GetInstance()->GetExist() )
 			{
 				Fade::GetInstance()->Init( 1 );
@@ -1095,12 +1101,34 @@ void SceneGame::init()
 		pImpl->Init();
 		endLoad = true;
 	});
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/kai10
 	{
 		wchar_t filename[] = L"./Data/movie/Loading.wmv";
 
 		play_movie(filename, &endLoad);
 		// Play BGM here.
+	}
+	switch (pImpl->stageNo)
+	{
+	case 0:
+
+		Donya::Sound::Play(STAGE1);
+			break;
+
+	case 1:
+
+		Donya::Sound::Play(STAGE2);
+		break;
+	case 2:
+
+		Donya::Sound::Play(STAGE3);
+		break;
+
+	default:
+		break;
 	}
 	bool dummy = true;
 	wchar_t filename1[] = L"./Data/movie/MOV_Boss02.wmv";
@@ -1147,7 +1175,10 @@ void SceneGame::update()
 		{
 			loading_mutex.unlock();
 		}
-		loading_thread->join();
+		if (loading_thread->joinable())
+		{
+			loading_thread->join();
+		}
 		loadFinish = true;
 	}
 
@@ -1166,7 +1197,10 @@ void SceneGame::render()
 	}
 
 	pImpl->Draw(!isStack);
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/kai10
 	Fade::GetInstance()->Draw();
 }
 

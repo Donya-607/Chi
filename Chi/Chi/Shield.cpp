@@ -599,7 +599,8 @@ void Shield::DetectEndAnimation( const Donya::Vector3 &wsParentPosition )
 
 		if ( wasOpen )
 		{
-			EffectManager::GetInstance()->ShieldEffectSet( wsParentPosition );
+			Donya::Vector3 _pos = wsParentPosition;
+			EffectManager::GetInstance()->ShieldEffectSet(Donya::Vector3(_pos.x, _pos.y + 50.0f, _pos.z));
 		}
 	}
 }

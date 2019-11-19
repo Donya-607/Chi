@@ -128,9 +128,13 @@ void scenePose::update()
 
 		case 1:
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 			GameTimer::GetInstance()->Init();
 >>>>>>> origin/donya2
+=======
+			GameTimer::GetInstance()->Init();
+>>>>>>> origin/kai10
 			pSceneManager->setNextScene(new SceneGame, false);
 			break;
 
