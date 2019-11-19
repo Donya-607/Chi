@@ -1326,6 +1326,10 @@ void Player::UseImGui()
 			ImGui::Text( "ShieldRecast : %f",		shieldsRecastTime );
 			ImGui::Text( "ShieldSucceeded : %d",	wasSucceededDefence ? 1 : 0 );
 			ImGui::Text( "FieldRadius : %f",		fieldRadius );
+
+			const auto &HITBOX = PlayerParam::Get().HitBoxBody();
+			ImGui::Text( "Collision.Exist : %d", HITBOX.exist ? 1 : 0 );
+			ImGui::Text( "Collision.Enable : %d", HITBOX.enable ? 1 : 0 );
 			ImGui::Text( "" );
 
 			const std::string vec3Info{ "[X:%5.3f][Y:%5.3f][Z:%5.3f]" };

@@ -774,6 +774,8 @@ public:
 					}
 					if ( !wasHitToShield && Donya::OBB::IsHitSphere( playerBodyBox, it ) )
 					{
+						contrast_flg = true;
+
 						player.ReceiveImpact();
 					}
 
@@ -791,6 +793,8 @@ public:
 			bool bodyCollided = ( shieldCollided ) ? false : golem.IsCollideAttackHitBoxes( playerBodyBox, /* disableCollidingHitBoxes = */ false );
 			if ( bodyCollided )
 			{
+				contrast_flg = true;
+
 				player.ReceiveImpact();
 			}
 		}
@@ -833,6 +837,8 @@ public:
 			bool bodyCollided = ( shieldCollided ) ? false : rival.IsCollideAttackHitBoxes( playerBodyBox, /* disableCollidingHitBoxes = */ false );
 			if ( bodyCollided )
 			{
+				contrast_flg = true;
+
 				player.ReceiveImpact();
 			}
 
@@ -852,6 +858,8 @@ public:
 					}
 					if ( !wasHitToShield && Donya::OBB::IsHitSphere( playerBodyBox, it ) )
 					{
+						contrast_flg = true;
+
 						player.ReceiveImpact();
 					}
 
