@@ -964,7 +964,8 @@ void Player::AttackInit( Input input )
 	pOBBF->currentFrame = 0;
 	setAnimFlame( models.pAttack.get(), 0 );
 
-	EffectManager::GetInstance()->PlayerAbsorptionEffectSet( GetPosition() );
+	Donya::Vector3 _pos = GetPosition();
+	EffectManager::GetInstance()->PlayerAbsorptionEffectSet(Donya::Vector3(_pos.x, _pos.y + 50.0f, _pos.z));
 }
 void Player::AttackUpdate( Input input, float elapsedTime )
 {

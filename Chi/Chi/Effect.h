@@ -268,18 +268,21 @@ public:
 	void SetEnable(int num, bool _enable = false)
 	{
 		if (MAX_SIZE <= num) return;
+		if (hitSphere.empty()) return;
 
 		hitSphere[num].enable = _enable;
 	}
 	void SetExist(int num, bool _exist = false)
 	{
 		if (MAX_SIZE <= num) return;
+		if (hitSphere.empty()) return;
 
 		hitSphere[num].exist = _exist;
 	}
 	void SetDataExist(int num, bool _exist)
 	{
 		if (MAX_SIZE <= num) return;
+		if (!data[num].GetExist()) return;
 
 		data[num].SetExist(_exist);
 	}
@@ -397,6 +400,14 @@ public:
 	void Update();
 	void Render(fbx_shader& HLSL);
 	void bloom_Render(fbx_shader& HLSL);
+
+	void AllReSet()
+	{
+		for (int i = 0; i < MAX_SIZE; i++)
+		{
+			dustParticle[i].SetEmitting();
+		}
+	}
 };
 
 class SparkEffect
@@ -420,6 +431,14 @@ public:
 	void Update();
 	void Render(fbx_shader& HLSL);
 	void bloom_Render(fbx_shader& HLSL);
+
+	void AllReSet()
+	{
+		for (int i = 0; i < MAX_SIZE; i++)
+		{
+			sparkParticle[i].SetEmitting();
+		}
+	}
 };
 
 class JumpEffect
@@ -440,6 +459,12 @@ public:
 	void Update();
 	void Render(fbx_shader& HLSL);
 	void bloom_Render(fbx_shader& HLSL);
+
+	void AllReSet()
+	{
+		eruqtionParticle.ReSet();
+		dustParticle.SetEmitting();
+	}
 };
 
 class BossAttackMomentEffect
@@ -485,7 +510,7 @@ public:
 			Donya::Vector3 vec = playerPos - bossPos;
 			vec.Normalize();
 
-			data.SetPos(Donya::Vector4(bossPos.x + vec.x * len, bossPos.y + 50.0f, bossPos.z + vec.z * len, 1.0f));
+			data.SetPos(Donya::Vector4(bossPos.x + vec.x * len, bossPos.y + 75.0f, bossPos.z + vec.z * len, 1.0f));
 			data.SetAlpha(1.0f - (static_cast<float>(cnt) / static_cast<float>(aliveFrameMAX)));
 			cnt++;
 		}
@@ -567,6 +592,16 @@ public:
 			}
 		}
 	}
+	void AllReSet()
+	{
+		for (int i = 0; i < MAX_SIZE; i++)
+		{
+			if (!shieldParticle[i].GetEmitting())
+			{
+				shieldParticle[i].ReSet();
+			}
+		}
+	}
 	void Update()
 	{
 		for (int i = 0; i < MAX_SIZE; i++)
@@ -629,6 +664,22 @@ public:
 	void z_Render(fbx_shader& HLSL);
 	void bloom_Render(fbx_shader& HLSL);
 
+	void AllReSet()
+	{
+		eruptionEffectManager.AllReSetExist();
+		eruptionEffectManager.AllReSetCollision();
+		longAttackEffectManager.AllReSetExist();
+		longAttackEffectManager.AllReSetCollision();
+		dustEffect.AllReSet();
+		sparkEffect.AllReSet();
+		playerAbsorptionParticle.ReSet();
+		bossAbsorptionParticle.ReSet();
+		jumpEffect.AllReSet();
+		accelParticle.ReSet();
+		shieldEffect.AllReSet();
+		disappearanceParticle.ReSet();
+	}
+
 	//// effectType : エフェクト番号(EffectType参照), pos : 出現位置, startTime : 関数がコールされてから動き始める時間
 	//void Set(EffectType effectType, Donya::Vector3 pos, int startTime = 0);
 	//void Set(EffectType effectType, Donya::Vector3 pos, int stageNum, int startTime);
@@ -672,6 +723,10 @@ public:
 	void BossAbsorptionEffectReSet()
 	{
 		bossAbsorptionParticle.ReSet();
+	}
+	bool GetBossAbsorptionEffectEnd()
+	{
+		return bossAbsorptionParticle.GetEnd();
 	}
 
 	// プレイヤー攻撃時のエフェクトとセット (Donya::Vector3 pos : 座標, Donya::Vector3 dir : 放出方向)

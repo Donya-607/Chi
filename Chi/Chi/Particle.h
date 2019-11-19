@@ -145,7 +145,6 @@ public:
 	void bloom_Draw();
 	void ImGuiDataInit();
 	void ImGui();
-
 	// 放出位置の設定関数
 //	void SetOriginPos(DirectX::XMFLOAT3 _originPos) { originPos = _originPos; }
 
@@ -198,6 +197,8 @@ public:
 	void bloom_Draw();
 	void ImGuiDataInit();
 	void ImGui();
+
+	bool GetEnd() { return end; }
 
 	// 放出位置の設定関数
 //	void SetOriginPos(DirectX::XMFLOAT3 _originPos) { originPos = _originPos; }
@@ -282,6 +283,7 @@ public:
 	void ImGui();
 
 	bool GetEmitting() { return emitting; }
+	void SetEmitting() { emitting = false; }
 
 	// 放出位置の設定関数
 //	void SetOriginPos(DirectX::XMFLOAT3 _originPos) { originPos = _originPos; }
@@ -365,6 +367,7 @@ public:
 	void ImGuiDataInit();
 	void ImGui();
 	bool GetEmitting() { return emitting; }
+	void SetEmitting() { emitting = false; }
 
 	// 放出位置の設定関数
 //	void SetOriginPos(DirectX::XMFLOAT3 _originPos) { originPos = _originPos; }
@@ -775,6 +778,10 @@ public:
 
 public:
 	void Set(DirectX::XMFLOAT3 _pos);
+	void ReSet()
+	{
+		emitting = false;
+	}
 	void Emit();
 	void Draw();
 	void bloom_Draw();
@@ -860,6 +867,10 @@ public:
 
 public:
 	void Set(DirectX::XMFLOAT3 _pos);
+	void ReSet()
+	{
+		emitting = false;
+	}
 	void Emit();
 	void Draw();
 	void bloom_Draw();

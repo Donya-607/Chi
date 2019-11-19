@@ -13,10 +13,15 @@
 
 void sceneTitle::init()
 {
-	Donya::Sound::Load('BGM', "./Data/SOunds/BGM/Stage02.wav", true);
+//	Donya::Sound::Load('BGM', "./Data/SOunds/BGM/Stage02.wav", true);
 	setCamPos(camPos);
 	setTarget(camTarget);
 	cameraDistance = 1000.0f;
+
+	spriteLoad(&loadingTex, L"./Data/Images/UI/Loading_Two.png");
+	spriteLoad(&logo, L"./Data/Images/UI/Title.png");
+	cnt = 0;
+	animFrame = 0;
 
 	isStack = false;
 	setLineLight({ .0f,.0f,.0f,1.0f }, { .1f, -1, 0, 1 }, { 1,1,1,1 });
@@ -31,9 +36,13 @@ void sceneTitle::init()
 		setPointLight(i);
 	}
 
+	logoPos = Donya::Vector2(280.0f, 0.0f);
+	logoTexPos = Donya::Vector2(0.0f, 0.0f);
+	logoTexSize = Donya::Vector2(1268.0f, 570.0f);
 	loading_thread = std::make_unique<std::thread>([&]() //&は無名関数, 次が関数の引数, {}の中が関数の中身
 	{
 		std::lock_guard<std::mutex> lock(loading_mutex);
+
 
 		loadFBX(pStageModel.get(), GetModelPath(ModelAttribute::TutorialStage));
 		loadFBX(pTitleModel.get(), "./Data/model/TestMove.fbx");
@@ -149,6 +158,15 @@ void sceneTitle::update()
 
 	if (is_now_loading())
 	{
+		if (cnt % 100 == 0 && cnt != 0)
+		{
+			animFrame++;
+			if (3 <= animFrame)
+			{
+				animFrame = 0;
+			}
+		}
+		cnt++;
 		return; //ロードが完了していなかったら即return
 	}
 	if (loading_thread && loading_thread->joinable())
@@ -208,10 +226,7 @@ void sceneTitle::update()
 
 void sceneTitle::TitleUpdate()
 {
-	setCamPos(camTitlePos);
-	setTarget(camTitleTarget);
-
-	auto IsInputed = []()->bool
+	/*auto IsInputed = []()->bool
 	{
 		Player::Input input = Player::Input::MakeByExternalInput(Donya::Vector4x4::Identity());
 
@@ -219,6 +234,13 @@ void sceneTitle::TitleUpdate()
 		return inputed;
 	};
 	if (IsInputed())
+	{
+		sceneState++;
+	}*/
+
+	setCamPos(camTitlePos);
+	setTarget(camTitleTarget);
+	if (Donya::Keyboard::Trigger('A') || GameLib::input::xInput::pressedButtons(0, XboxPad_Button::A))
 	{
 		sceneState++;
 	}
@@ -480,6 +502,7 @@ void sceneTitle::render()
 	{
 		//ロード中
 		Fade::GetInstance()->Draw();
+		spriteRenderRect(&loadingTex, Donya::Vector2(0.0f, 0.0f), Donya::Vector2(0.0f, 1080.0f * animFrame), Donya::Vector2(1920.0f, 1080.0f));
 		return;
 	}
 
@@ -492,7 +515,7 @@ void sceneTitle::render()
 		Donya::Vector4x4 WVP = W * V * P;
 		FBXRender(pStageModel.get(), shader, WVP, W);
 
-		if (titleExist)
+		/*if (titleExist)
 		{
 			Donya::Vector4x4 S = Donya::Vector4x4::MakeScaling(titleScale);
 			Donya::Vector4x4 R = Donya::Vector4x4::MakeRotationEuler(Donya::Vector3(0.0f, 0.0f, 0.0f));
@@ -500,7 +523,7 @@ void sceneTitle::render()
 			W = S * R * T;
 			WVP = W * V * P;
 			FBXRender(pTitleModel.get(), shader, WVP, W);
-		}
+		}*/
 
 		player.Draw(shader, V, P);
 		catapult.Draw(shader, V, P);
@@ -531,8 +554,16 @@ void sceneTitle::render()
 
 		//	OBJRender(pCube.get(), CWVP, CW, Donya::Vector4(0.0f, 0.8f, 0.3f, 0.6f));
 		//}
-		GameLib::clearDepth();
 
+		//GameLib::clearDepth();
+
+		if (sceneState == SceneState::TITLE)
+		{
+			setBlendMode_ALPHA(0.75f);
+			spriteRenderRect(&logo, logoPos, logoTexPos, logoTexSize);
+			spriteRenderRect(&logo, Donya::Vector2(1920.0f / 2.0f - 588.0f / 2.0f, 1080.0f - 180.0f), Donya::Vector2(0.0f, 632.0f), Donya::Vector2(588.0f, 122.0f));
+			setBlendMode_ALPHA(1.0f);
+		}
 	}
 
 	////z screen : billboardはこの階層には描画しないでください
@@ -593,6 +624,7 @@ void sceneTitle::render()
 	postEffect_Bloom(0, false);
 	//モノトーンにするときは第一引数を下げる
 	filterScreen(1.0f);
+
 
 	Fade::GetInstance()->Draw();
 
@@ -694,6 +726,12 @@ void sceneTitle::imGui()
 	ImGui::DragFloat3("Title scale", &titleScale.x);
 	ImGui::DragFloat3("cube pos", &cubePos.x);
 	ImGui::DragFloat3("cube scale", &cubeScale.x);
+	ImGui::End();
+
+	ImGui::Begin("Logo Para");
+	ImGui::DragFloat2("logo pos", &logoPos.x);
+	ImGui::DragFloat2("logo tex pos", &logoTexPos.x);
+	ImGui::DragFloat2("logo tex size", &logoTexSize.x);
 	ImGui::End();
 
 	ImGui::Begin("Player");

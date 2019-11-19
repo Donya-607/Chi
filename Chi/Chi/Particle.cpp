@@ -347,7 +347,7 @@ void AbsorptionParticle::Set(int type, DirectX::XMFLOAT3 _pos)
 		else if (type == 1) // boss2
 		{
 			data[i].Init(DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f), DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f), DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f),
-				DirectX::XMFLOAT2(7.5f, 7.5f), 1, false);
+				DirectX::XMFLOAT2(30.0f, 30.0f), 1, false);
 		}
 
 #if 0
@@ -359,7 +359,14 @@ void AbsorptionParticle::Set(int type, DirectX::XMFLOAT3 _pos)
 		_dir.x = (-100 + rand() % 200) / 100.0f;
 		_dir.y = (-100 + rand() % 200) / 100.0f;
 		_dir.z = (-100 + rand() % 200) / 100.0f;
-		data[i].SetPos(DirectX::XMFLOAT4(_pos.x + imguiData.radius * _dir.x, _pos.y + imguiData.radius * _dir.y, _pos.z + imguiData.radius * _dir.z, 1.0f));
+		if (type == 0) // player
+		{
+			data[i].SetPos(DirectX::XMFLOAT4(_pos.x + imguiData.radius * _dir.x, _pos.y + imguiData.radius * _dir.y, _pos.z + imguiData.radius * _dir.z, 1.0f));
+		}
+		else if (type == 1) // boss2
+		{
+			data[i].SetPos(DirectX::XMFLOAT4(_pos.x + (imguiData.radius * 3.0f) * _dir.x, _pos.y + (imguiData.radius * 3.0f) * _dir.y, _pos.z + (imguiData.radius * 3.0f) * _dir.z, 1.0f));
+		}
 #endif
 		originPos[i] = data[i].GetPos();
 		DirectX::XMFLOAT3 vec;

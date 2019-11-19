@@ -103,17 +103,17 @@ namespace easing
 	float InSine(float t, float totaltime, float max, float min)
 	{
 		max -= min;
-		return -max * cos(t*ToRadian(90) / totaltime) + max + min;
+		return -max * cosf(t*ToRadian(90.0f) / totaltime) + max + min;
 	}
 	float OutSine(float t, float totaltime, float max, float min)
 	{
 		max -= min;
-		return max * sin(t*ToRadian(90) / totaltime) + min;
+		return max * sinf(t*ToRadian(90.0f) / totaltime) + min;
 	}
 	float InOutSine(float t, float totaltime, float max, float min)
 	{
 		max -= min;
-		return -max / 2 * (cos(t*DirectX::XM_PI / totaltime) - 1) + min;
+		return -max / 2 * (cosf(t*DirectX::XM_PI / totaltime) - 1) + min;
 	}
 	float InExp(float t, float totaltime, float max, float min)
 	{
@@ -144,22 +144,22 @@ namespace easing
 	{
 		max -= min;
 		t /= totaltime;
-		return -max * (sqrt(1 - t * t) - 1) + min;
+		return -max * (sqrtf(1 - t * t) - 1) + min;
 	}
 	float OutCirc(float t, float totaltime, float max, float min)
 	{
 		max -= min;
 		t = t / totaltime - 1;
-		return max * sqrt(1 - t * t) + min;
+		return max * sqrtf(1 - t * t) + min;
 	}
 	float InOutCirc(float t, float totaltime, float max, float min)
 	{
 		max -= min;
 		t /= totaltime;
 		if (t / 2 < 1)
-			return -max / 2 * (sqrt(1 - t * t) - 1) + min;
+			return -max / 2 * (sqrtf(1 - t * t) - 1) + min;
 		t -= 2;
-		return max / 2 * (sqrt(1 - t * t) + 1) + min;
+		return max / 2 * (sqrtf(1 - t * t) + 1) + min;
 	}
 	float InBack(float t, float totaltime, float max, float min, float s)
 	{

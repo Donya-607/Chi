@@ -55,7 +55,7 @@ std::string GetModelPath( ModelAttribute modelAttribute )
 	case ModelAttribute::Stage01:
 		return "./Data/model/Stage/MDL_Stage01.fbx";						// break;
 	case ModelAttribute::Stage02:
-		return "./Data/model/Stage/MDL_Stage01.fbx";						// break;
+		return "./Data/model/Stage/MDL_Stage02.fbx";						// break;
 	case ModelAttribute::Stage03:
 		return "./Data/model/Stage/MDL_Stage03.fbx";						// break;
 	case ModelAttribute::TutorialStage:

@@ -124,6 +124,66 @@ void setBlendMode_SCREEN(const float alpha)
 }
 
 
+void play_movie(wchar_t* filename, bool* loop)
+{
+
+	//“®‰æ—p
+	IGraphBuilder* pGraphBuilder = NULL;
+	IMediaControl* pMediaControl = NULL;
+	IMediaEvent* pMediaEvent = NULL;
+	long eventCode = 0;
+	IVideoWindow* pVideoWindow = NULL;
+	IMediaPosition* pMediaPosition = NULL;
+
+	CoInitialize(NULL);
+
+	CoCreateInstance(CLSID_FilterGraph,
+		NULL,
+		CLSCTX_INPROC,
+		IID_IGraphBuilder,
+		(LPVOID*)&pGraphBuilder);
+
+	pGraphBuilder->QueryInterface(IID_IMediaControl,
+		(LPVOID*)&pMediaControl);
+
+	pGraphBuilder->QueryInterface(IID_IMediaEvent,
+		(LPVOID*)&pMediaEvent);
+
+	pMediaControl->RenderFile(filename);
+
+	pGraphBuilder->QueryInterface(IID_IVideoWindow,
+		(LPVOID*)&pVideoWindow);
+	pGraphBuilder->QueryInterface(IID_IMediaPosition,
+		(LPVOID*)&pMediaPosition);
+	// Full Screen ŠJŽn
+	pVideoWindow->put_FullScreenMode(OATRUE);
+	pMediaControl->Run();
+
+	pMediaEvent->WaitForCompletion(-1, &eventCode);
+
+	while (1)
+	{
+		bool loop_flg = *loop;
+		if (loop_flg)
+			break;
+		pMediaPosition->put_CurrentPosition(0);
+		pMediaEvent->WaitForCompletion(-1, &eventCode);
+	}
+
+
+	pVideoWindow->Release();
+	pMediaEvent->Release();
+	pMediaControl->Release();
+	pGraphBuilder->Release();
+	pMediaPosition->Release();
+	pMediaPosition = NULL;
+	pVideoWindow = NULL;
+	pMediaEvent = NULL;
+	pMediaControl = NULL;
+	pGraphBuilder = NULL;
+	CoUninitialize();
+}
+
 //PRIMITIVE//
 void drawRect(const float x, const float y, const float w, const float h, const float cx, const float cy, const float angle, const float r, const float g, const float b)
 {
@@ -532,7 +592,7 @@ void createPlane(static_mesh* _plane, u_int _vertical, u_int _side)
 
 void createBillboard(static_mesh* _mesh, const wchar_t* _textureName, const DirectX::XMFLOAT2& texpos, const DirectX::XMFLOAT2& texsize)
 {
-	GameLib::staticMesh::createBillboard(_mesh, _textureName,texpos,texsize);
+	GameLib::staticMesh::createBillboard(_mesh, _textureName, texpos, texsize);
 }
 
 void loadOBJ(static_mesh* staticMesh, const wchar_t* objName)

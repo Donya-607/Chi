@@ -65,6 +65,8 @@ public:
 	int				stageNo;
 	float			fieldRadius;
 	float			cameraLeaveDistance;	// Leave from player.
+	float			contrast;
+	bool			contrast_flg;
 	Donya::Vector3	cameraPos;				// The Y will be serialize.
 	Donya::Vector3	cameraFocusOffset;
 	Lights			lights;
@@ -89,7 +91,9 @@ public:
 		stage(),
 		knight(), golem(), rival(),
 		lights(),
-		shader()
+		shader(),
+		contrast(1.0f),
+		contrast_flg(false)
 	{}
 	~Impl() = default;
 private:
@@ -127,6 +131,8 @@ private:
 public:
 	void Init()
 	{
+		contrast = 1.0f;
+		contrast_flg = false;
 		LoadParameter();
 
 		if ( !LoadSounds() )
@@ -196,6 +202,7 @@ public:
 	}
 	void Uninit()
 	{
+
 		stage.Uninit();
 		player.Uninit();
 
@@ -231,6 +238,11 @@ public:
 		}
 
 	#endif // DEBUG_MODE
+		if (pressedButtons(0, START) == 1)
+		{
+			pSceneManager->setNextScene(new scenePose, true);
+			return;
+		}
 
 		float deltaTime = GameLib::getDeltaTime();
 
@@ -350,7 +362,7 @@ public:
 		postEffect_Bloom(0, false);
 
 		//TODO GameOverŽž‚Í‰æ–Ê‚ðƒ‚ƒmƒg[ƒ“‚É‚·‚é‚Ì‚Å‘æˆêˆø”‚Ì’l‚ð¬‚³‚­‚·‚é
-		filterScreen(1.0f);
+		filterScreen(contrast);
 	}
 
 public:
@@ -399,6 +411,8 @@ public:
 
 	void BattleUpdate( float elapsedTime )
 	{
+		GameTimer::GetInstance()->Update( stageNo );
+
 		stage.Update();
 
 		Player::Input  playerInput = Player::Input::MakeByExternalInput( Donya::Vector4x4::FromMatrix( GameLib::camera::GetViewMatrix() ) );
@@ -406,7 +420,7 @@ public:
 		if ( playerInput.moveVector.IsZero() )
 		{
 			playerInput.moveVector = GetBossPosition() - player.GetPosition();
-			playerInput.moveVector.Normalized();
+			playerInput.moveVector.Normalize();
 			playerInput.onlyRotation = true;
 		}
 		player.Update( playerInput, elapsedTime );
@@ -423,19 +437,28 @@ public:
 
 		ProcessCollision( elapsedTime );
 
+		if (contrast_flg)
+		{
+			if (contrast>0)
+				contrast -= 0.01f;
+			if (contrast <= 0)
+				contrast = 0;
+		}
+
 		if ( IsBossDefeated() )
 		{
+			GameLib::setFlameSpeed(0.5f);
 			status = State::Win;
 		}
 		else // TODO : Prevent the competition between the boss's defeat and player's defeat.
 		if ( player.IsDefeated() && !Fade::GetInstance()->GetExist() )
 		{
+			GameLib::setFlameSpeed(0.5f);
+			//TODO constrate
 			SetStageNo( 0 );
 
 			ResetEffects();
 			GameTimer::GetInstance()->Init();
-
-			//pSceneManager->setNextScene( new SceneGameOver, false );
 
 			Fade::GetInstance()->Init(2);
 		}
@@ -443,52 +466,76 @@ public:
 
 	void WinUpdate( float elapsedTime )
 	{
+
 		stage.Update();
 
 		Player::Input  playerInput = Player::Input::MakeByExternalInput( Donya::Vector4x4::FromMatrix( GameLib::camera::GetViewMatrix() ) );
-		// If the movement is nothing, set the player's direction to boss.
-		if ( playerInput.moveVector.IsZero() )
-		{
-			playerInput.moveVector = GetBossPosition() - player.GetPosition();
-			playerInput.moveVector.Normalized();
-			playerInput.onlyRotation = true;
-		}
+//<<<<<<< HEAD
+//		// If the movement is nothing, set the player's direction to boss.
+//		if ( playerInput.moveVector.IsZero() )
+//		{
+//			playerInput.moveVector = GetBossPosition() - player.GetPosition();
+//			playerInput.moveVector.Normalized();
+//			playerInput.onlyRotation = true;
+//		}
+//		player.Update( playerInput, elapsedTime );
+//
+//		BossUpdate( elapsedTime );
+//=======
 		player.Update( playerInput, elapsedTime );
 
 		BossUpdate( elapsedTime );
+
+		std::vector<Donya::Circle> emptyCircles{};
+		player.PhysicUpdate( emptyCircles );
 
 		CameraUpdate( GetCameraTargetPos() );
 
 		EffectManager::GetInstance()->Update();
 
-		bool shouldChangeScene{};
-	#if DEBUG_MODE
-		shouldChangeScene = true;
-	#endif // DEBUG_MODE
-
-		if ( shouldChangeScene )
+		if ( IsLastStage( stageNo ) )
 		{
-			if ( IsLastStage( stageNo ) )
+//<<<<<<< HEAD
+//			if ( IsLastStage( stageNo ) )
+//			{
+//				SetStageNo( 0 );
+//
+//				ResetEffects();
+//
+//				if ( !Fade::GetInstance()->GetExist() )
+//				{
+//					Fade::GetInstance()->Init( 3 );
+//				}
+//			}
+//			else
+//			{
+//				SetStageNo( stageNo + 1 );
+//
+//				ResetEffects();
+//
+//				if ( !Fade::GetInstance()->GetExist() )
+//				{
+//					Fade::GetInstance()->Init( 1 );
+//				}
+//=======
+			SetStageNo( 0 );
+
+			ResetEffects();
+
+			if ( !Fade::GetInstance()->GetExist() )
 			{
-				SetStageNo( 0 );
-
-				ResetEffects();
-
-				if ( !Fade::GetInstance()->GetExist() )
-				{
-					Fade::GetInstance()->Init( 3 );
-				}
+				Fade::GetInstance()->Init( 3 );
 			}
-			else
+		}
+		else
+		{
+			SetStageNo( stageNo + 1 );
+
+			ResetEffects();
+
+			if ( !Fade::GetInstance()->GetExist() )
 			{
-				SetStageNo( stageNo + 1 );
-
-				ResetEffects();
-
-				if ( !Fade::GetInstance()->GetExist() )
-				{
-					Fade::GetInstance()->Init( 1 );
-				}
+				Fade::GetInstance()->Init( 1 );
 			}
 		}
 	}
@@ -710,6 +757,7 @@ public:
 			bool bodyCollided = ( shieldCollided ) ? false : knight.IsCollideAttackHitBoxes( playerBodyBox, /* disableCollidingHitBoxes = */ false );
 			if ( bodyCollided )
 			{
+				contrast_flg = true;
 				player.ReceiveImpact();
 			}
 		}
@@ -1071,9 +1119,39 @@ void SceneGame::init()
 		pImpl->Init();
 		endLoad = true;
 	});
+	{
+		wchar_t filename[] = L"./Data/movie/Loading.wmv";
+
+		play_movie(filename, &endLoad);
+	}
+	bool dummy = true;
+	wchar_t filename1[] = L"./Data/movie/MOV_Boss02.wmv";
+	wchar_t filename2[] = L"./Data/movie/MOV_Boss03.wmv";
+	wchar_t filename3[] = L"./Data/movie/MOV_Boss04.wmv";
+	switch (pImpl->stageNo)
+	{
+	case 0:
+
+		play_movie(filename1, &dummy);
+		break;
+
+	case 1:
+
+		play_movie(filename2, &dummy);
+		break;
+	case 2:
+
+		play_movie(filename3, &dummy);
+		break;
+
+	default:
+		break;
+	}
 }
 void SceneGame::uninit()
 {
+	GameLib::setFlameSpeed(1.0f);
+
 	pImpl->Uninit();
 }
 

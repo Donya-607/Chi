@@ -139,6 +139,10 @@
     <ClInclude Include="Donya\Timer.h" />
     <ClInclude Include="filter.h" />
     <ClInclude Include="Fade.h" />
+<<<<<<< HEAD
+=======
+    <ClInclude Include="easing.h" />
+>>>>>>> origin/donya2
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp">
@@ -244,6 +248,10 @@
     <ClCompile Include="Donya\Timer.cpp" />
     <ClCompile Include="filter.cpp" />
     <ClCompile Include="Fade.cpp" />
+<<<<<<< HEAD
+=======
+    <ClCompile Include="easing.cpp" />
+>>>>>>> origin/donya2
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="geometric_phong_ps.hlsl">

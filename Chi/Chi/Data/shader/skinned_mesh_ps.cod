@@ -93,7 +93,7 @@ dcl_temps 12
 //   v5.x <- pin.texcoord.x; v5.y <- pin.texcoord.y; 
 //   o0.x <- <main return value>.x; o0.y <- <main return value>.y; o0.z <- <main return value>.z; o0.w <- <main return value>.w
 //
-#line 74 "D:\Develop\Chi\Chi\Chi\Chi\skinned_mesh_ps.hlsl"
+#line 74 "C:\Users\2180082.MAETEL\Desktop\チE"
 mov r0.xyz, v4.xyzx  // r0.x <- N.x; r0.y <- N.y; r0.z <- N.z
 
 #line 75

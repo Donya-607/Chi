@@ -27,6 +27,7 @@ void Sprite::RoadSprite(ID3D11Device* _device, const wchar_t* _fileName)
 	hr = _device->CreateBuffer(&i_buffer, &i_subresouce, &m_buffer);
 	_ASSERT_EXPR(SUCCEEDED(hr), hr_trace(hr));
 
+	m_input = nullptr;
 	_ASSERT_EXPR(!m_input, L"'input_layout' must be uncreated.");
 	D3D11_INPUT_ELEMENT_DESC input_element_desc[] =
 	{
