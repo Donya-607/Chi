@@ -3,7 +3,7 @@
 #include "GameLibFunctions.h"
 #include "XinputPad.h"
 #include "gameLib.h"
-
+#include "Donya/Sound.h"
 
 void SceneGameOver::init()  
 {
@@ -20,7 +20,7 @@ void SceneGameOver::init()
 	toTitle.pos = Donya::Vector2(743.0f, 748.0f);
 	toTitle.texPos = Donya::Vector2(434.0f, 113.0f);
 	toTitle.texSize = Donya::Vector2(434.0f, 114.0f);
-
+	Donya::Sound::Play(GAMEOVER);
 	state = 0;
 }
 void SceneGameOver::update()

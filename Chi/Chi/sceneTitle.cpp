@@ -146,9 +146,9 @@ void sceneTitle::init()
 		spriteLoad(&_texture[1], L"./Data/Images/Pause/PauseFlame.png");
 
 		im_texture = (void*)_texture[1].getSRV();
-		Donya::Sound::Play('BGM');
 	});
 	
+	Donya::Sound::Play(TITLE);
 	origin_SRV = (void*)GameLib::getOriginalScreen();
 }
 

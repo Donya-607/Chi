@@ -1095,6 +1095,25 @@ void SceneGame::init()
 
 		play_movie(filename, &endLoad);
 	}
+	switch (pImpl->stageNo)
+	{
+	case 0:
+
+		Donya::Sound::Play(STAGE1);
+			break;
+
+	case 1:
+
+		Donya::Sound::Play(STAGE2);
+		break;
+	case 2:
+
+		Donya::Sound::Play(STAGE3);
+		break;
+
+	default:
+		break;
+	}
 	bool dummy = true;
 	wchar_t filename1[] = L"./Data/movie/MOV_Boss02.wmv";
 	wchar_t filename2[] = L"./Data/movie/MOV_Boss03.wmv";
