@@ -1,5 +1,6 @@
 #include "Effect.h"
 #include "GameLibFunctions.h"
+#include "Donya/Sound.h"
 #include "Donya/Useful.h"		// Use IsShowCollision().
 #include "Player.h"
 
@@ -284,6 +285,8 @@ void EruptionEffect::Update()
 					{
 						hitSphere[i].exist = true;
 						eruqtionParticle[i].Set(hitSphere[i].pos);
+
+						Donya::Sound::Play( SOUND_INDEX::BOSS3_ATTACK );
 					}
 					if (getAnimFlame(pModel[i].get()) == 213)
 					{
@@ -593,6 +596,7 @@ void LongAttackEffect::Update()
 				if (getAnimFlame(pModel[i].get()) == 62)
 				{
 					hitSphere[i].exist = true;
+					Donya::Sound::Play( SOUND_INDEX::BOSS4_LINE );
 				}
 				if (getAnimFlame(pModel[i].get()) == 79)
 				{

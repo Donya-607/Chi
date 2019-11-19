@@ -248,7 +248,7 @@ Player::Input Player::Input::MakeByExternalInput( Donya::Vector4x4 viewMat )
 		return GameLib::input::xInput::getState();
 	};
 #if !DEBUG_MODE
-	if ( 0 < ConnectedControllerCount() )
+	// if ( 0 < ConnectedControllerCount() )
 #endif // !DEBUG_MODE
 	{
 		// XINPUT_GAMEPAD : https://docs.microsoft.com/ja-jp/windows/win32/api/xinput/ns-xinput-xinput_gamepad
