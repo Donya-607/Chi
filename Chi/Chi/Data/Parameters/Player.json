@@ -47,8 +47,8 @@
         },
         "hitBoxLance": {
             "cereal_class_version": 0,
-            "enableFrameStart": 0.699999988079071,
-            "enableFrameLast": 1.399999976158142,
+            "enableFrameStart": 1.2999999523162842,
+            "enableFrameLast": 1.600000023841858,
             "OBB": {
                 "cereal_class_version": 0,
                 "pos": {
@@ -74,10 +74,10 @@
         "lanceMeshName": "MDL_Spear",
         "shieldsRecastFrame": 30.0,
         "frameStopAnime": 0.05000000074505806,
-        "frameStopTiming": 0.10000000149011612,
-        "advanceStartFrame": 0.20000000298023225,
-        "advanceFinFrame": 1.2000000476837159,
-        "returnFinFrame": 1.9500000476837159,
+        "frameStopTiming": 0.20000000298023225,
+        "advanceStartFrame": 0.30000001192092898,
+        "advanceFinFrame": 1.7000000476837159,
+        "returnFinFrame": 2.049999952316284,
         "advanceEaseKind": 7,
         "advanceEaseType": 1,
         "returnEaseKind": 0,

@@ -12,7 +12,7 @@
         "m.explSlerpFactor": 0.5,
         "m.swingMoveSpeed": 540.0,
         "m.swingSlerpFactor": 0.4000000059604645,
-        "m.raidMoveSpeed": 900.0,
+        "m.raidMoveSpeed": 1300.0,
         "m.raidSlerpFactor": 0.05000000074505806,
         "m.initPos": {
             "cereal_class_version": 0,
@@ -39,8 +39,8 @@
             "cereal_class_version": 0,
             "sphereF": {
                 "cereal_class_version": 0,
-                "enableFrameStart": 0.5799999833106995,
-                "enableFrameLast": 0.9200000166893005,
+                "enableFrameStart": 0.5,
+                "enableFrameLast": 0.9800000190734863,
                 "collision": {
                     "pos": {
                         "x": 0.0,
@@ -48,7 +48,7 @@
                         "z": -60.0
                     },
                     "radius": 140.0,
-                    "exist": true
+                    "exist": false
                 }
             },
             "meshName": "MDL_Ax"
@@ -77,14 +77,14 @@
         "m.explReviveColFrame": 0.17000000178813935,
         "m.hitBoxExpl": {
             "enableFrameStart": 0.029999999329447748,
-            "enableFrameLast": 4.0,
+            "enableFrameLast": 3.0,
             "collision": {
                 "pos": {
                     "x": 0.0,
                     "y": 0.0,
                     "z": 0.0
                 },
-                "radius": 0.0,
+                "radius": 1200.0,
                 "exist": false
             }
         },
@@ -106,7 +106,7 @@
             2.0,
             1.0,
             1.5,
-            1.5,
+            2.0,
             1.0
         ]
     }

@@ -2,16 +2,16 @@
     "RivalAI": {
         "cereal_class_version": 1,
         "wholeFrame": {
-            "value0": 3.0,
-            "value1": 3.0,
-            "value2": 3.0,
-            "value3": 3.0
+            "value0": 2.3299999237060549,
+            "value1": 2.799999952316284,
+            "value2": 2.0,
+            "value3": 2.0
         },
         "coolTimeFrame": {
-            "value0": 1.0,
-            "value1": 1.0,
-            "value2": 1.0,
-            "value3": 1.0
+            "value0": 0.6700000166893005,
+            "value1": 0.0,
+            "value2": 0.800000011920929,
+            "value3": 0.800000011920929
         },
         "pAttackChoosers": {
             "value0": {
@@ -72,7 +72,7 @@
                             {
                                 "distance": 0.699999988079071,
                                 "action": {
-                                    "waitNo": 2,
+                                    "waitNo": 1,
                                     "nextAttackNo": 2
                                 }
                             },
@@ -103,8 +103,8 @@
                             {
                                 "distance": 0.5,
                                 "action": {
-                                    "waitNo": 2,
-                                    "nextAttackNo": 1
+                                    "waitNo": 1,
+                                    "nextAttackNo": 2
                                 }
                             },
                             {
@@ -117,7 +117,7 @@
                             {
                                 "distance": 1.0,
                                 "action": {
-                                    "waitNo": 3,
+                                    "waitNo": 4,
                                     "nextAttackNo": 1
                                 }
                             }
@@ -134,12 +134,12 @@
                             {
                                 "distance": 0.10000000149011612,
                                 "action": {
-                                    "waitNo": 2,
+                                    "waitNo": 3,
                                     "nextAttackNo": 0
                                 }
                             },
                             {
-                                "distance": 0.5,
+                                "distance": 0.30000001192092898,
                                 "action": {
                                     "waitNo": 3,
                                     "nextAttackNo": 0
@@ -149,7 +149,7 @@
                                 "distance": 0.699999988079071,
                                 "action": {
                                     "waitNo": 1,
-                                    "nextAttackNo": 0
+                                    "nextAttackNo": 2
                                 }
                             },
                             {
@@ -172,15 +172,24 @@
             }
         },
         "initStorage": {
-            "waitNo": 0,
-            "nextAttackNo": 0
+            "waitNo": 2,
+            "nextAttackNo": 1
         },
-        "initCoolTime": 2.5,
+        "initCoolTime": 1.5,
         "gapIntervals": [
+            5,
+            2,
+            3,
             4,
             2,
             4,
-            2
+            3,
+            2,
+            3,
+            4,
+            2,
+            4,
+            3
         ]
     }
 }

@@ -10,7 +10,7 @@
             "cereal_class_version": 0,
             "x": 0.0,
             "y": 0.0,
-            "z": 800.0
+            "z": 366.0
         },
         "m.drawOffset": {
             "x": 0.0,
@@ -34,12 +34,12 @@
         "m.move": {
             "cereal_class_version": 0,
             "moveSpeed": 900.0,
-            "slerpFactor": 0.10000000149011612
+            "slerpFactor": 0.20000000298023225
         },
         "m.barrage": {
             "cereal_class_version": 1,
-            "moveSpeed": 120.0,
-            "slerpFactor": 0.20000000298023225,
+            "moveSpeed": 300.0,
+            "slerpFactor": 0.6000000238418579,
             "collideMeshName": "MDL_BlackSword",
             "collisions": [
                 {
@@ -89,25 +89,25 @@
                     "cereal_class_version": 0,
                     "start": 0.33000001311302187,
                     "last": 0.6700000166893005,
-                    "speed": 400.0
+                    "speed": 300.0
                 },
                 {
                     "start": 0.8299999833106995,
                     "last": 1.1699999570846558,
-                    "speed": 400.0
+                    "speed": 300.0
                 },
                 {
                     "start": 1.5,
                     "last": 1.8300000429153443,
-                    "speed": 400.0
+                    "speed": 300.0
                 }
             ]
         },
         "m.line": {
             "cereal_class_version": 1,
             "moveSpeed": 0.0,
-            "slerpFactor": 0.20000000298023225,
-            "generateFrame": 0.017000000923871995
+            "slerpFactor": 0.5,
+            "generateFrame": 0.0010000000474974514
         },
         "m.raid": {
             "cereal_class_version": 1,
@@ -115,14 +115,14 @@
             "slerpFactor": 1.0,
             "easingKind": 7,
             "easingType": 1,
-            "jumpStartFrame": 0.699999988079071,
-            "jumpLastFrame": 1.7999999523162842,
-            "jumpDistance": 600.0,
+            "jumpStartFrame": 0.5,
+            "jumpLastFrame": 1500.0,
+            "jumpDistance": 2500.0,
             "hitBox": {
                 "cereal_class_version": 0,
                 "sphereF": {
-                    "enableFrameStart": 0.6700000166893005,
-                    "enableFrameLast": 1.0,
+                    "enableFrameStart": 0.8999999761581421,
+                    "enableFrameLast": 1.2999999523162842,
                     "collision": {
                         "pos": {
                             "x": 0.0,
@@ -139,7 +139,7 @@
         "m.rush": {
             "cereal_class_version": 1,
             "moveSpeed": 0.0,
-            "slerpFactor": 0.20000000298023225,
+            "slerpFactor": 0.30000001192092898,
             "waitLength": 1.0,
             "rushSpeed": 3000.0,
             "slashStopAnimeFrame": 0.13300000131130219,
@@ -153,15 +153,15 @@
                 "exist": true
             },
             "hitBox": {
-                "enableFrameStart": 0.33000001311302187,
+                "enableFrameStart": 0.2199999988079071,
                 "enableFrameLast": 0.6700000166893005,
                 "collision": {
                     "pos": {
                         "x": 0.0,
                         "y": 64.0,
-                        "z": 96.0
+                        "z": 80.0
                     },
-                    "radius": 45.0,
+                    "radius": 55.0,
                     "exist": false
                 }
             }
@@ -170,10 +170,10 @@
             "cereal_class_version": 0,
             "moveSpeed": 0.0,
             "slerpFactor": 0.0,
-            "breakFrame": 1.0,
+            "breakFrame": 1.7999999523162842,
             "leaveEasingKind": 7,
             "leaveEasingType": 1,
-            "leaveWholeFrame": 1.0,
+            "leaveWholeFrame": 1.7999999523162842,
             "leaveMoveFrame": 1.0,
             "leaveDistance": 640.0
         },
@@ -191,7 +191,7 @@
             1.5,
             1.5,
             1.5,
-            1.5,
+            2.0,
             1.5,
             1.2999999523162842,
             2.5

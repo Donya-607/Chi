@@ -476,6 +476,7 @@ void Shield::Recover()
 	ChangeMotion( State::React );
 
 	Donya::Sound::Play( SOUND_INDEX::PL_SHIELD_IMPACT );
+	startViblation( 0, 0.4f, 50.0f );
 }
 
 void Shield::LoadModels()

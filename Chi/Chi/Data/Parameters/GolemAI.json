@@ -2,14 +2,14 @@
     "GolemAI": {
         "cereal_class_version": 5,
         "wholeFrame": {
-            "value0": 3.0,
-            "value1": 3.0,
-            "value2": 3.0
+            "value0": 3.799999952316284,
+            "value1": 2.700000047683716,
+            "value2": 8.0
         },
         "coolTimeFrame": {
-            "value0": 1.0,
+            "value0": 0.17000000178813935,
             "value1": 1.0,
-            "value2": 1.0
+            "value2": 0.5
         },
         "pAttackChoosers": {
             "value0": {
@@ -22,7 +22,7 @@
                         "data": [
                             {
                                 "cereal_class_version": 0,
-                                "distance": 0.3499999940395355,
+                                "distance": 0.20000000298023225,
                                 "action": {
                                     "cereal_class_version": 0,
                                     "waitNo": 4,
@@ -30,7 +30,14 @@
                                 }
                             },
                             {
-                                "distance": 0.800000011920929,
+                                "distance": 0.5,
+                                "action": {
+                                    "waitNo": 1,
+                                    "nextAttackNo": 1
+                                }
+                            },
+                            {
+                                "distance": 0.699999988079071,
                                 "action": {
                                     "waitNo": 4,
                                     "nextAttackNo": 0
@@ -39,7 +46,7 @@
                             {
                                 "distance": 1.0,
                                 "action": {
-                                    "waitNo": 4,
+                                    "waitNo": 1,
                                     "nextAttackNo": 0
                                 }
                             }
@@ -56,15 +63,15 @@
                             {
                                 "distance": 0.30000001192092898,
                                 "action": {
-                                    "waitNo": 4,
+                                    "waitNo": 1,
                                     "nextAttackNo": 1
                                 }
                             },
                             {
-                                "distance": 0.75,
+                                "distance": 0.6499999761581421,
                                 "action": {
                                     "waitNo": 4,
-                                    "nextAttackNo": 1
+                                    "nextAttackNo": 0
                                 }
                             },
                             {
@@ -114,9 +121,13 @@
             "waitNo": 2,
             "nextAttackNo": 0
         },
-        "initCoolTime": 2.5,
+        "initCoolTime": 1.2999999523162842,
         "gapIntervals": [
+            7,
+            4,
+            2,
             3,
+            2,
             4,
             2,
             3,

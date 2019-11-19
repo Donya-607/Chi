@@ -156,7 +156,7 @@
         "targetDistNear": 0.20000000298023225,
         "targetDistFar": 0.44999998807907107,
         "moveMoveSpeed": 600.0,
-        "attackFastMoveSpeed": 360.0,
+        "attackFastMoveSpeed": 600.0,
         "idleSlerpFactor": 0.30000001192092898,
         "moveSlerpFactor": 0.15000000596046449,
         "attackFastSlerpFactor": 0.15399999916553498,
@@ -171,7 +171,7 @@
                     "pos": {
                         "x": 0.0,
                         "y": 80.0,
-                        "z": 250.0
+                        "z": 300.0
                     },
                     "radius": 180.0,
                     "exist": false
@@ -184,7 +184,7 @@
                     "pos": {
                         "x": 0.0,
                         "y": 80.0,
-                        "z": 250.0
+                        "z": 300.0
                     },
                     "radius": 180.0,
                     "exist": false
@@ -197,7 +197,7 @@
                     "pos": {
                         "x": 0.0,
                         "y": 80.0,
-                        "z": 250.0
+                        "z": 300.0
                     },
                     "radius": 180.0,
                     "exist": false
@@ -210,7 +210,7 @@
                     "pos": {
                         "x": 0.0,
                         "y": 80.0,
-                        "z": 250.0
+                        "z": 300.0
                     },
                     "radius": 180.0,
                     "exist": false
@@ -219,13 +219,13 @@
         ],
         "rotLeaveEaseKind": 8,
         "rotLeaveEaseType": 1,
-        "rotLeaveStartFrame": 1.1699999570846558,
-        "rotLeaveWholeFrame": 1.0,
-        "rotLeaveDistance": 11.100000381469727,
-        "swingStopFrame": 2.1700000762939455,
+        "rotLeaveStartFrame": 1.2000000476837159,
+        "rotLeaveWholeFrame": 2.0,
+        "rotLeaveDistance": 200.0,
+        "swingStopFrame": 2.0999999046325685,
         "swingStopLength": 1.0,
         "defeatMotionLength": 6.0,
-        "defeatHideSpeed": 0.10000000149011612,
+        "defeatHideSpeed": 0.0010000000474974514,
         "motionSpeeds": [
             1.5,
             1.5,
