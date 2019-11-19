@@ -308,18 +308,12 @@ public:
 	void Uninit();
 
 	void Update( TargetStatus target, float elapsedTime );
-<<<<<<< HEAD
 
-=======
->>>>>>> origin/kai10
 	void setAnimFlg(bool flg)
 	{
 		anim_flg = flg;
 	}
-<<<<<<< HEAD
 
-=======
->>>>>>> origin/kai10
 	void Draw(fbx_shader& HLSL, const Donya::Vector4x4& matView, const Donya::Vector4x4& matProjection, float animationAcceleration = 1.0f);
 	void z_Draw(fbx_shader& HLSL, const Donya::Vector4x4& matView, const Donya::Vector4x4& matProjection, float animationAcceleration = 1.0f);
 	void bloom_Draw(fbx_shader& HLSL, const Donya::Vector4x4& matView, const Donya::Vector4x4& matProjection, float animationAcceleration = 1.0f);

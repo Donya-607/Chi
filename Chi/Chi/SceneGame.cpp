@@ -260,19 +260,13 @@ public:
 	{
 		clearWindow( 0.5f, 0.5f, 0.5f, 1.0f );
 		setBlendMode_ALPHA( 1.0f );
-<<<<<<< HEAD
 
-=======
->>>>>>> origin/kai10
 		stage.setAnimFlg(anim_flg);
 		player.setAnimFlg(anim_flg);
 		knight.setAnimFlg(anim_flg);
 		golem.setAnimFlg(anim_flg);
 		rival.setAnimFlg(anim_flg);
-<<<<<<< HEAD
 
-=======
->>>>>>> origin/kai10
 		Donya::Vector4x4 V = Donya::Vector4x4::FromMatrix( getViewMatrix() );
 		Donya::Vector4x4 P = Donya::Vector4x4::FromMatrix( getProjectionMatrix() );
 

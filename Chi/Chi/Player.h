@@ -257,18 +257,12 @@ public:
 	Player();
 	~Player();
 public:
-<<<<<<< HEAD
 
-=======
->>>>>>> origin/kai10
 	void setAnimFlg(bool flg)
 	{
 		anim_flg = flg;
 	}
-<<<<<<< HEAD
 
-=======
->>>>>>> origin/kai10
 	void Init( int stageNumber, const Donya::Vector3 &wsInitialPos, const Donya::Vector3 &initialAnglesRadian, const std::vector<Donya::Box> &wsXZWallCollisions );
 	void Uninit();
 
