@@ -411,24 +411,24 @@ void Player::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Dony
 	switch ( status )
 	{
 	case Player::State::Idle:
-		FBXRender( models.pIdle.get(), HLSL, WVP, W, motionSpeed );
+		FBXRender( models.pIdle.get(), HLSL, WVP, W, motionSpeed ,anim_flg);
 		break;
 	case Player::State::Run:
-		FBXRender( models.pRun.get(), HLSL,WVP, W, motionSpeed );
+		FBXRender( models.pRun.get(), HLSL,WVP, W, motionSpeed ,anim_flg);
 		break;
 	case Player::State::Defend:
-		FBXRender( models.pDefend.get(), HLSL,WVP, W, motionSpeed );
+		FBXRender( models.pDefend.get(), HLSL,WVP, W, motionSpeed ,anim_flg);
 		break;
 	case Player::State::Attack:
-		FBXRender( models.pAttack.get(), HLSL, WVP, W, motionSpeed );
+		FBXRender( models.pAttack.get(), HLSL, WVP, W, motionSpeed ,anim_flg);
 		break;
 	case Player::State::Dead:
-		FBXRender( models.pDefeat.get(), HLSL, WVP, W, motionSpeed );
+		FBXRender( models.pDefeat.get(), HLSL, WVP, W, motionSpeed ,anim_flg);
 		break;
 	default: break;
 	}
 
-	shield.Draw( HLSL, matView, matProjection, W );
+	shield.Draw( HLSL, matView, matProjection, W ,anim_flg);
 
 	// For debug, helpers of drawing primitive. and drawing collisions.
 #if DEBUG_MODE

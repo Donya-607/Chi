@@ -564,19 +564,19 @@ void Rival::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya
 		switch ( extraStatus )
 		{
 		case ExtraState::RUSH_WAIT:
-			FBXRender( models.pAtkRushWait.get(), HLSL, WVP, W, motionSpeed );
+			FBXRender( models.pAtkRushWait.get(), HLSL, WVP, W, motionSpeed ,anim_flg);
 			break;
 		case ExtraState::RUSH_RUN:
-			FBXRender( models.pAtkRushSlash.get(), HLSL, WVP, W, motionSpeed );
+			FBXRender( models.pAtkRushSlash.get(), HLSL, WVP, W, motionSpeed ,anim_flg);
 			break;
 		case ExtraState::RUSH_SLASH:
-			FBXRender( models.pAtkRushSlash.get(), HLSL, WVP, W, motionSpeed );
+			FBXRender( models.pAtkRushSlash.get(), HLSL, WVP, W, motionSpeed ,anim_flg);
 			break;
 		case ExtraState::BREAK:
-			FBXRender( models.pBreak.get(), HLSL, WVP, W, motionSpeed );
+			FBXRender( models.pBreak.get(), HLSL, WVP, W, motionSpeed ,anim_flg);
 			break;
 		case ExtraState::LEAVE:
-			FBXRender( models.pLeave.get(), HLSL, WVP, W, motionSpeed );
+			FBXRender( models.pLeave.get(), HLSL, WVP, W, motionSpeed ,anim_flg);
 			break;
 		case ExtraState::DEFEAT:
 			{
@@ -587,9 +587,9 @@ void Rival::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya
 				if ( 0 < timeDiff )
 				{
 					drawAlpha -= RivalParam::Open().defeat.hideSpeed * timeDiff;
-					drawAlpha =  std::max( 0.0f, drawAlpha );
+					drawAlpha =  std::max( 0.0f, drawAlpha);
 				}
-				FBXRender( models.pDefeat.get(), HLSL, WVP, W, motionSpeed * animeAccel, /* is_animation = */ true, { 1.0f, 1.0f, 1.0f, drawAlpha } );
+				FBXRender( models.pDefeat.get(), HLSL, WVP, W, motionSpeed * animeAccel, /* is_animation = */ anim_flg, { 1.0f, 1.0f, 1.0f, drawAlpha });
 			}
 			break;
 		default: break;
@@ -600,32 +600,32 @@ void Rival::Draw( fbx_shader &HLSL, const Donya::Vector4x4 &matView, const Donya
 		switch ( status )
 		{
 		case RivalAI::ActionState::WAIT:
-			FBXRender( models.pIdle.get(), HLSL, WVP, W, motionSpeed );
+			FBXRender( models.pIdle.get(), HLSL, WVP, W, motionSpeed ,anim_flg);
 			break;
 		case RivalAI::ActionState::MOVE_GET_NEAR:
-			FBXRender( models.pRunFront.get(), HLSL, WVP, W, motionSpeed );
+			FBXRender( models.pRunFront.get(), HLSL, WVP, W, motionSpeed ,anim_flg);
 			break;
 		case RivalAI::ActionState::MOVE_GET_FAR:
-			FBXRender( models.pLeave.get(), HLSL, WVP, W, motionSpeed );
+			FBXRender( models.pLeave.get(), HLSL, WVP, W, motionSpeed ,anim_flg);
 			break;
 		case RivalAI::ActionState::MOVE_SIDE:
 			( Donya::SignBit( moveSign ) == 1 )
-			? FBXRender( models.pRunRight.get(), HLSL, WVP, W, motionSpeed )
-			: FBXRender( models.pRunLeft.get(), HLSL, WVP, W, motionSpeed );
+			? FBXRender( models.pRunRight.get(), HLSL, WVP, W, motionSpeed ,anim_flg)
+			: FBXRender( models.pRunLeft.get(), HLSL, WVP, W, motionSpeed ,anim_flg);
 			break;
 		case RivalAI::ActionState::MOVE_AIM_SIDE:
 			( Donya::SignBit( moveSign ) == 1 )
-			? FBXRender( models.pRunRight.get(), HLSL, WVP, W, motionSpeed )
-			: FBXRender( models.pRunLeft.get(), HLSL, WVP, W, motionSpeed );
+			? FBXRender( models.pRunRight.get(), HLSL, WVP, W, motionSpeed ,anim_flg)
+			: FBXRender( models.pRunLeft.get(), HLSL, WVP, W, motionSpeed ,anim_flg);
 			break;
 		case RivalAI::ActionState::ATTACK_BARRAGE:
-			FBXRender( models.pAtkBarrage.get(), HLSL, WVP, W, motionSpeed );
+			FBXRender( models.pAtkBarrage.get(), HLSL, WVP, W, motionSpeed ,anim_flg);
 			break;
 		case RivalAI::ActionState::ATTACK_LINE:
-			FBXRender( models.pAtkLine.get(), HLSL, WVP, W, motionSpeed );
+			FBXRender( models.pAtkLine.get(), HLSL, WVP, W, motionSpeed ,anim_flg);
 			break;
 		case RivalAI::ActionState::ATTACK_RAID:
-			FBXRender( models.pAtkRaid.get(), HLSL, WVP, W, motionSpeed );
+			FBXRender( models.pAtkRaid.get(), HLSL, WVP, W, motionSpeed ,anim_flg);
 			break;
 		default: break;
 		}

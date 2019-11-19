@@ -32,7 +32,7 @@ void Stage::Draw( fbx_shader& hlsl,const Donya::Vector4x4 &matView, const Donya:
 
 	// HACK : Should serialize this.
 	constexpr float ANIMATION_SPEED = 0.5f;
-	FBXRender( pModel.get(),hlsl, WVP, W, ANIMATION_SPEED );
+	FBXRender( pModel.get(),hlsl, WVP, W, ANIMATION_SPEED ,anim_flg);
 }
 
 void Stage::z_Draw(fbx_shader& hlsl, const Donya::Vector4x4& matView, const Donya::Vector4x4& matProjection)

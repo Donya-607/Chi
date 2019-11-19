@@ -173,10 +173,12 @@ public:
 		Donya::OutputDebugStr( "No.1 Begin Player::Init.\n" );
 		player.Init( stageNo, Donya::Vector3::Zero(), Donya::Vector3::Zero(), std::vector<Donya::Box>(/* empty */) );
 		player.SetFieldRadius( fieldRadius );
+		player.setAnimFlg(true);
 		Donya::OutputDebugStr( "No.1 End Player::Init.\n" );
 
 		Donya::OutputDebugStr( "No.2 Begin Stage::Init.\n" );
 		stage.Init( stageNo );
+		stage.setAnimFlg(true);
 		Donya::OutputDebugStr( "No.2 End Stage::Init.\n" );
 
 		Donya::OutputDebugStr( "No.3 Begin Boss::Init.\n" );
@@ -184,9 +186,9 @@ public:
 		switch ( stageNo )
 		{
 			
-		case KnightNo:	knight.Init( stageNo );		knight.SetFieldRadius( fieldRadius );		cameraTarget = knight.GetPos();	break;
-		case GolemNo:	golem.Init( stageNo );		golem.SetFieldRadius( fieldRadius );		cameraTarget = golem.GetPos();	break;
-		case RivalNo:	rival.Init( stageNo );		rival.SetFieldRadius( fieldRadius );		cameraTarget = rival.GetPos();	break;
+		case KnightNo:	knight.Init(stageNo);	 knight.setAnimFlg(true);	knight.SetFieldRadius(fieldRadius);		cameraTarget = knight.GetPos();	break;
+		case GolemNo:	golem.Init(stageNo);	golem.setAnimFlg(true);	golem.SetFieldRadius(fieldRadius);		cameraTarget = golem.GetPos();	break;
+		case RivalNo:	rival.Init(stageNo);	rival.setAnimFlg(true);	rival.SetFieldRadius(fieldRadius);		cameraTarget = rival.GetPos();	break;
 		default:		Donya::OutputDebugStr( "Error : The boss does not initialize !\n" );	break;
 		}
 		Donya::OutputDebugStr( "No.3 End Boss::Init.\n" );
@@ -254,11 +256,15 @@ public:
 		}
 	}
 
-	void Draw()
+	void Draw(bool anim_flg)
 	{
 		clearWindow( 0.5f, 0.5f, 0.5f, 1.0f );
 		setBlendMode_ALPHA( 1.0f );
-
+		stage.setAnimFlg(anim_flg);
+		player.setAnimFlg(anim_flg);
+		knight.setAnimFlg(anim_flg);
+		golem.setAnimFlg(anim_flg);
+		rival.setAnimFlg(anim_flg);
 		Donya::Vector4x4 V = Donya::Vector4x4::FromMatrix( getViewMatrix() );
 		Donya::Vector4x4 P = Donya::Vector4x4::FromMatrix( getProjectionMatrix() );
 
@@ -1151,7 +1157,7 @@ void SceneGame::render()
 		return;
 	}
 
-	pImpl->Draw();
+	pImpl->Draw(!isStack);
 	Fade::GetInstance()->Draw();
 }
 
