@@ -1103,7 +1103,8 @@ void Knight::AttackExplosionInit( TargetStatus target, float elapsedTime )
 	setStopAnimation( models.pAtkExpl.get(), /* is_stop = */ true );
 	setAnimFlame( models.pAtkExpl.get(), 0 );
 
-	EffectManager::GetInstance()->BossAbsorptionEffectSet( GetPos() );
+	Donya::Vector3 _pos = GetPos();
+	EffectManager::GetInstance()->BossAbsorptionEffectSet( Donya::Vector3(_pos.x, _pos.y + 75.0f, _pos.z ));
 }
 void Knight::AttackExplosionUpdate( TargetStatus target, float elapsedTime )
 {
@@ -1267,6 +1268,7 @@ void Knight::DefeatInit()
 	velocity			= 0.0f;
 	slerpFactor			= 0.0f;
 	currentMotion		= Defeat;
+	EffectManager::GetInstance()->BossAbsorptionEffectReSet();
 }
 void Knight::DefeatUpdate( float elapsedTime )
 {
