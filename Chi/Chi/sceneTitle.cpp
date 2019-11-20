@@ -240,7 +240,7 @@ void sceneTitle::TitleUpdate()
 
 	setCamPos(camTitlePos);
 	setTarget(camTitleTarget);
-	if (Donya::Keyboard::Trigger('A') || GameLib::input::xInput::pressedButtons(0, XboxPad_Button::A))
+	if (Donya::Keyboard::Trigger('A') || GameLib::input::xInput::pressedButtons(0, XboxPad_Button::A) == 1)
 	{
 		sceneState++;
 	}

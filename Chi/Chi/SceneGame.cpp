@@ -81,6 +81,8 @@ public:
 	std::vector<Donya::Box> wallCollisions{};
 
 #endif // DEBUG_MODE
+
+	bool nowLoaded{};
 public:
 	Impl() :
 		status( State::Battle ),
@@ -131,6 +133,8 @@ private:
 public:
 	void Init()
 	{
+		nowLoaded = true;
+
 		contrast = 1.0f;
 		contrast_flg = false;
 		LoadParameter();
@@ -204,6 +208,9 @@ public:
 	}
 	void Uninit()
 	{
+		Donya::Sound::Stop( SOUND_INDEX::STAGE1 );
+		Donya::Sound::Stop( SOUND_INDEX::STAGE2 );
+		Donya::Sound::Stop( SOUND_INDEX::STAGE3 );
 
 		stage.Uninit();
 		player.Uninit();
@@ -1185,6 +1192,13 @@ void SceneGame::update()
 			loading_thread->join();
 		}
 		loadFinish = true;
+
+		if ( pImpl->nowLoaded )
+		{
+			pImpl->nowLoaded = false; // except elapsedTime.
+			return;
+		}
+		// else
 	}
 
 	pImpl->Update();

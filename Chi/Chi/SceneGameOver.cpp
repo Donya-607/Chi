@@ -4,6 +4,7 @@
 #include "XinputPad.h"
 #include "gameLib.h"
 #include "Donya/Sound.h"
+#include "Donya/UseImGui.h"
 
 void SceneGameOver::init()  
 {
@@ -72,6 +73,8 @@ void SceneGameOver::uninit()
 }
 void SceneGameOver::imGui()
 {
+#if USE_IMGUI
+
 #ifdef DEBUG_MODE
 	ImGui::SetNextWindowSize(ImVec2(500.0f, getWindowSize().y / 2.0f), ImGuiSetCond_Once);
 	ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiSetCond_Once);
@@ -115,4 +118,5 @@ void SceneGameOver::imGui()
 
 	ImGui::End();
 #endif
+#endif // USE_IMGUI
 }

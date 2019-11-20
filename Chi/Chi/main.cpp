@@ -26,7 +26,11 @@ INT WINAPI wWinMain(HINSTANCE instance, HINSTANCE prev_instance, LPWSTR cmd_line
 #endif
 
 	startUpLibrary
-	(L"コンクエスト", instance, 1920, 1080, true, -1, 60.0f);
+	#if DEBUG_MODE
+	( L"Just one Lancer", instance, 1920, 1080, false, -1, 60.0f );
+	#else
+	( L"Just one Lancer", instance, 1920, 1080, true, -1, 60.0f );
+	#endif // DEBUG_MODE
 
 	DragAcceptFiles(GameLib::getHandle(), true);
 

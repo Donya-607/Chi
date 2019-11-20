@@ -51,13 +51,13 @@ void sceneManager::setNextScene(baseScene * _nextScene, bool stack)
 
 void sceneManager::changeScene()
 {
-	activeScene.back()->uninit();
 	if (!isStack)
 	{
 		if (!activeScene.empty())
 		{
 			for (auto& p : activeScene)
 			{
+				p->uninit();
 				delete p;
 			}
 			activeScene.clear();

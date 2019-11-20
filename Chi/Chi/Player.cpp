@@ -1266,7 +1266,7 @@ void Player::ShieldUpdate( float elapsedTime )
 }
 bool Player::CanUnfoldShield() const
 {
-	return ( shield.CanUnfold() && ZeroEqual( shieldsRecastTime ) && !isContinuingDefence ) ? true : false;
+	return ( shield.CanUnfold()/* && ZeroEqual( shieldsRecastTime )*/ && !isContinuingDefence ) ? true : false;
 }
 
 void Player::FXUpdate( float elapsedTime )

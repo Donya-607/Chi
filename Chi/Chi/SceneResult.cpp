@@ -32,7 +32,7 @@ SceneResult::SceneResult() :
 	spriteLoad(&text, L"./Data/Images/UI/ResultFont.png");
 	spriteLoad(&result, L"./Data/Images/UI/ResultParts.png");
 	spriteLoad(&ranking, L"./Data/Images/UI/Ranking.png");
-	spriteLoad(&testBack, L"./Data/Images/UI/リザルト参考.png");
+	// spriteLoad(&testBack, L"./Data/Images/UI/リザルト参考.png");
 
 	state = 0;
 	cnt = 0;
@@ -603,7 +603,7 @@ void SceneResult::render()
 
 	setBlendMode_NONE(1.0f);
 
-	spriteRenderRect(&testBack, Donya::Vector2(0.0f,0.0f), Donya::Vector2(0.0f, 0.0f), Donya::Vector2(1920.0f, 1080.0f));
+	// spriteRenderRect(&testBack, Donya::Vector2(0.0f,0.0f), Donya::Vector2(0.0f, 0.0f), Donya::Vector2(1920.0f, 1080.0f));
 	spriteRenderRect(&back, backData.pos, backData.texPos, backData.texSize);
 	spriteRenderRect(&text, textData.pos, textData.texPos, textData.texSize);
 
